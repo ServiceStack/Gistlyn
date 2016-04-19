@@ -1,0 +1,84 @@
+﻿<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta http-equiv="Cache-Control" content="no-store" />
+		<meta http-equiv="Pragma" content="no-cache" />
+		<meta http-equiv="Expires" content="-1" />
+		<title>Rosling</title>
+		<!-- Bootstrap -->
+		<link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+		<!-- Offsets -->
+		<link href="css/offset.css" rel="stylesheet">
+	</head>
+	<body>
+		<script type="text/javascript" src="js/SStack.js"></script>
+		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+		<script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
+		<!-- Include all compiled plugins (below), or include individual files as needed -->
+		<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="js/rosling.js"></script>
+
+		<div class="container theme_showcase">
+
+			<!-- Main jumbotron for a primary marketing message or call to action -->
+			<div class="pageheader">
+				<h2>Gist execution via Roslyn</h2>
+			</div>			
+			<div class="row">
+				<div class="form-group">
+					<label class="col-md-2 control-label">Gist ID (Hash Code)</label>
+					<div class="col-md-6">
+						<input id="gistId" class="form-control" type="text" placeholder="Enter gist hash code">
+					</div>
+					<div class="col-md-2">
+						<button id="load" type="button" class="btn btn-primary">Load</button>
+					</div>
+				</div>
+			</div>
+			<div class="row voffset3" style="display: none">
+				<div class="form-group">
+					<label id="filename" class="col-md-2 control-label"></label>
+					<div class="col-md-6">
+						<textarea id="gisttext" class="form-control" rows="10" required="required"></textarea>
+					</div>
+					<div class="col-md-2">
+						<button id="run" type="button" class="btn btn-primary">Run</button>
+					</div>
+                </div>
+            </div>
+			<div id="gistresult" style="display: none;">
+				<div class="row voffset3" style="display: none">
+					<div class="col-md-10">
+						<table id="variables" class="table table-striped">
+							<thead>
+								<tr><th>Name</th><th>Value</th><th>Type</th></tr>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="row voffset3" style="display: none">
+					<div class="col-md-10">
+						<table id="errors" class="table table-striped">
+							<thead>
+								<tr><th>Errors</th></tr>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			$(document).ready(function(){
+			    gateway = new servicestack.ClientGateway('/ServiceStack/');
+				bind();
+			});
+		</script>
+	</body>
+</html>
