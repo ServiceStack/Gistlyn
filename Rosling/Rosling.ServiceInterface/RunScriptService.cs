@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using ServiceStack;
 using Rosling.ServiceModel;
 using Rosling.SnippetEngine;
-
+using Rosling.Common.Objects;
 
 namespace Rosling.ServiceInterface
 {
@@ -15,9 +15,15 @@ namespace Rosling.ServiceInterface
         public object Any(RunScript request)
         {
             ScriptRunner runner = new ScriptRunner();
+            ScriptExecutionResult result = new ScriptExecutionResult();
 
-            var result = runner.Execute(request.Code).Result;
-            
+            try 
+            {
+                result = runner.Execute (request.Code).Result;
+            } catch (Exception e) 
+            {
+                result.Exception = e;
+            }
 
             return new RunScriptResponse {
                 Result = result

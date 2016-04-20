@@ -18,6 +18,8 @@
 		<script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
 		<!-- Include all compiled plugins (below), or include individual files as needed -->
 		<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+		<!-- Handlebars -->
+        <script src="bower_components/handlebars/handlebars.min.js"></script>
 		<script type="text/javascript" src="js/rosling.js"></script>
 
 		<div class="container theme_showcase">
@@ -37,43 +39,56 @@
 					</div>
 				</div>
 			</div>
-			<div class="row voffset3" style="display: none">
-				<div class="form-group">
-					<label id="filename" class="col-md-2 control-label"></label>
-					<div class="col-md-6">
-						<textarea id="gisttext" class="form-control" rows="10" required="required"></textarea>
-					</div>
-					<div class="col-md-2">
-						<button id="run" type="button" class="btn btn-primary">Run</button>
-					</div>
-                </div>
-            </div>
-			<div id="gistresult" style="display: none;">
-				<div class="row voffset3" style="display: none">
-					<div class="col-md-10">
-						<table id="variables" class="table table-striped">
-							<thead>
-								<tr><th>Name</th><th>Value</th><th>Type</th></tr>
-							</thead>
-							<tbody>
-							</tbody>
-						</table>
-					</div>
-				</div>
-				<div class="row voffset3" style="display: none">
-					<div class="col-md-10">
-						<table id="errors" class="table table-striped">
-							<thead>
-								<tr><th>Errors</th></tr>
-							</thead>
-							<tbody>
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
-
+            <script id="gists-template" type="text/x-handlebars-template">
+			{{#each files}}
+                <div class="role-execblock">
+                    <div class="row voffset3">
+                        <div class="form-group">
+                            <label class="col-md-2 control-label role-filename">{{this.filename}}</label>
+                            <div class="col-md-6">
+                                <textarea class="form-control role-gisttext" rows="10" required="required">{{this.content}}</textarea>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-primary role-run">Run</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="role-gistresult" style="display: none;">
+                        <div class="row voffset3" style="display: none">
+                            <div class="col-md-10">
+                                <table class="table table-striped role-variables">
+                                    <thead>
+                                        <tr><th>Name</th><th>Value</th><th>Type</th></tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row voffset3" style="display: none">
+                            <div class="col-md-10">
+                                <table class="table table-striped role-errors">
+                                    <thead>
+                                        <tr><th>Errors</th></tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row voffset3" style="display: none">
+                            <div class="col-md-6 col-md-offset-2">
+                                <div class="alert alert-danger" role="alert">
+                                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                                    <span class="role-exception"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    			</div>
+            {{/each}}
+			</script>
+			<div id="gistlist"></div>
 		<script>
 			$(document).ready(function(){
 			    gateway = new servicestack.ClientGateway('/ServiceStack/');

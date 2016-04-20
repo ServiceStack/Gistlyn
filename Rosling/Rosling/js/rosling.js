@@ -1,7 +1,11 @@
 ﻿function bind()
 {
 	$("#load").click(getGist);
-	$("#run").click(runGist);
+
+    $("#gistlist").on("click", "button.role-run", function(e){
+        runGist($(e.target).closest("div.role-execblock"));
+        //console.log($("textarea", $(e.target).closest("div.row")).val());
+    });
 }
 
 function getGist()
@@ -12,26 +16,21 @@ function getGist()
 		url: "https://api.github.com/gists/" + gistId,
 		success: function(response) {
 			//var filename="gistfile1.txt";
-			for (var filename in response.files) {
-				$("#filename").text(filename);
-				var content = response.files[filename].content;
-				$("#gisttext").val(content);
-				$("#filename").closest("div.row").show();
-				$("#gistresult").hide();
-				break;
-			}
+            $("#gistlist").empty();
+            var template = Handlebars.compile( $("#gists-template").html() );
+            $("#gistlist").append( template(response) );
 		},
 		datatype: "jsonp"
 	});
 }
 
-function runGist()
+function runGist($block)
 {
-    var content = $("#gisttext").val();
+    var content = $("textarea", $block).val();
 	gateway.postToService({RunScript : {code : content}},
 		function(response) {
-			$("#gistresult").show();
-			$("#variables tbody").empty();
+			$("div.role-gistresult", $block).show();
+			$("table.role-variables tbody", $block).empty();
 			var hasVars = response.Result.Variables && response.Result.Variables.length > 0;
 			if (hasVars) {
 				$.each(response.Result.Variables, function(idx, variable) {
@@ -40,21 +39,27 @@ function runGist()
 					var value = $("<td>").text(variable.Value);
 					var type = $("<td>").text(variable.Type);
 					el.append(name).append(value).append(type);
-					$("#variables tbody").append(el);
+					$("table.role-variables tbody", $block).append(el);
 				});
 			}
 
-			$("#errors tbody").empty();
+			$("table.role-errors tbody", $block).empty();
 			var hasErrors = response.Result.Errors && response.Result.Errors.length > 0;
 			if (hasErrors) {
 				$.each(response.Result.Errors, function(idx, error) {
 					var el = $("<tr></tr>").append(error.Info);
-					$("#errors tbody").append(el);
+					$("table.role-errors tbody", $block).append(el);
 				});
 			}
 
-			$("#variables").closest("div.row").toggle(hasVars);
-			$("#errors").closest("div.row").toggle(hasErrors);
+            var hasException = !!response.Result.Exception;
+            if (hasException) {
+                $("span.role-exception").text(response.Result.Exception);
+            }
+
+			$("table.role-variables tbody", $block).closest("div.row").toggle(hasVars);
+			$("table.role-errors tbody", $block).closest("div.row").toggle(hasErrors);
+            $("span.role-exception", $block).closest("div.row").toggle(hasException);
 
 			console.log(response);
 		},

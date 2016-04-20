@@ -22,10 +22,15 @@ namespace Rosling.SnippetEngine
 
                 foreach (var variable in state.Variables)
                     result.Variables.Add(new VariableInfo() { Name = variable.Name, Value = variable.Value.ToString(), Type = variable.Type.ToString() });
-            } catch (CompilationErrorException e)
+            }
+            catch (CompilationErrorException e)
             {
                 foreach (var err in e.Diagnostics)
                     result.Errors.Add(new ErrorInfo() { Info = err.ToString() });
+            }
+            catch (Exception e)
+            {
+                result.Exception = e;
             }
 
             return result;

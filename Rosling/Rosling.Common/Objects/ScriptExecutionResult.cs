@@ -11,5 +11,7 @@ namespace Rosling.Common.Objects
         public List<VariableInfo> Variables { get; set; }
 
         public List<ErrorInfo> Errors { get; set; }
+
+        public Exception Exception { get; set; }
     }
 }
