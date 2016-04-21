@@ -18,6 +18,7 @@ function getGist()
 		url: "https://api.github.com/gists/" + gistId,
 		success: function(response) {
             //clear run multiple
+            $("#multirunBlock").hide();
             $("#multirunBlock table.role-variables tbody").empty();
             $("#multirunBlock table.role-errors tbody").empty();
             $("#multirunBlock span.role-exception").hide();
@@ -99,6 +100,7 @@ function runMultiple()
     gateway.postToService({RunMultipleScripts : {mainCode : mainCode, scripts: sources}},
         function(response) {
             scriptExecResponse($("#multirunBlock"), response);
+            $("#multirunBlock").show();
         },
         function(error) { alert(error); }
     );
