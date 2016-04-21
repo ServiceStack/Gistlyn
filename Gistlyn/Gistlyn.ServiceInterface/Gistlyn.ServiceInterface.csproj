@@ -7,8 +7,8 @@
     <ProjectGuid>{801A0F89-D5F6-49A6-BCEA-6624388C98A4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Rosling.ServiceInterface</RootNamespace>
-    <AssemblyName>Rosling.ServiceInterface</AssemblyName>
+    <RootNamespace>Gistlyn.ServiceInterface</RootNamespace>
+    <AssemblyName>Gistlyn.ServiceInterface</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -81,15 +81,15 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Rosling.Common\Gistlyn.Common.csproj">
+    <ProjectReference Include="..\Gistlyn.Common\Gistlyn.Common.csproj">
       <Project>{3f9f0e17-a17b-4dff-85bb-881d5174eacb}</Project>
       <Name>Gistlyn.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SnippetEngine\Gistlyn.SnippetEngine.csproj">
+    <ProjectReference Include="..\Gistlyn.SnippetEngine\Gistlyn.SnippetEngine.csproj">
       <Project>{3d312af7-f080-424d-8b30-999b7191e97c}</Project>
       <Name>Gistlyn.SnippetEngine</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Rosling.ServiceModel\Gistlyn.ServiceModel.csproj">
+    <ProjectReference Include="..\Gistlyn.ServiceModel\Gistlyn.ServiceModel.csproj">
       <Project>{53E82AC1-DD1D-4C66-B55F-F9F4ACFB2F40}</Project>
       <Name>Gistlyn.ServiceModel</Name>
     </ProjectReference>

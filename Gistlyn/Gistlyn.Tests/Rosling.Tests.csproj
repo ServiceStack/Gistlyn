@@ -6,8 +6,8 @@
     <ProjectGuid>{D22B5797-9F2A-4BA7-9636-6EFCE62EBE00}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Rosling.Tests</RootNamespace>
-    <AssemblyName>Rosling.Tests</AssemblyName>
+    <RootNamespace>Gistlyn.Tests</RootNamespace>
+    <AssemblyName>Gistlyn.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -68,11 +68,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Rosling.ServiceInterface\Rosling.ServiceInterface.csproj">
+    <ProjectReference Include="..\Gistlyn.ServiceInterface\Gistlyn.ServiceInterface.csproj">
       <Project>{801a0f89-d5f6-49a6-bcea-6624388c98a4}</Project>
       <Name>Rosling.ServiceInterface</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Rosling.ServiceModel\Rosling.ServiceModel.csproj">
+    <ProjectReference Include="..\Gistlyn.ServiceModel\Gistlyn.ServiceModel.csproj">
       <Project>{53E82AC1-DD1D-4C66-B55F-F9F4ACFB2F40}</Project>
       <Name>Rosling.ServiceModel</Name>
     </ProjectReference>
