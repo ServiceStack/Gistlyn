@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using ServiceStack;
-using Rosling.ServiceModel;
+using Gistlyn.ServiceModel;
 
-namespace Rosling.ServiceInterface
+namespace Gistlyn.ServiceInterface
 {
     public class MyServices : Service
     {

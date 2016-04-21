@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Rosling.Common.Objects;
+using Gistlyn.Common.Objects;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Scripting;
 
-namespace Rosling.SnippetEngine
+namespace Gistlyn.SnippetEngine
 {
     public class ScriptRunner
     {

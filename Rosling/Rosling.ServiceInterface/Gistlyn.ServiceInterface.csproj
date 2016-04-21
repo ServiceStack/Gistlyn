@@ -81,17 +81,17 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Rosling.Common\Rosling.Common.csproj">
+    <ProjectReference Include="..\Rosling.Common\Gistlyn.Common.csproj">
       <Project>{3f9f0e17-a17b-4dff-85bb-881d5174eacb}</Project>
-      <Name>Rosling.Common</Name>
+      <Name>Gistlyn.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SnippetEngine\Roslng.SnippetEngine.csproj">
+    <ProjectReference Include="..\SnippetEngine\Gistlyn.SnippetEngine.csproj">
       <Project>{3d312af7-f080-424d-8b30-999b7191e97c}</Project>
-      <Name>Roslng.SnippetEngine</Name>
+      <Name>Gistlyn.SnippetEngine</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Rosling.ServiceModel\Rosling.ServiceModel.csproj">
+    <ProjectReference Include="..\Rosling.ServiceModel\Gistlyn.ServiceModel.csproj">
       <Project>{53E82AC1-DD1D-4C66-B55F-F9F4ACFB2F40}</Project>
-      <Name>Rosling.ServiceModel</Name>
+      <Name>Gistlyn.ServiceModel</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -102,4 +102,14 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ProjectExtensions>
+    <MonoDevelop>
+      <Properties>
+        <Policies>
+          <TextStylePolicy EolMarker="Windows" inheritsSet="VisualStudio" inheritsScope="text/plain" scope="text/x-csharp" />
+          <CSharpFormattingPolicy IndentSwitchSection="True" NewLinesForBracesInProperties="True" NewLinesForBracesInAccessors="True" NewLinesForBracesInAnonymousMethods="True" NewLinesForBracesInControlBlocks="True" NewLinesForBracesInAnonymousTypes="True" NewLinesForBracesInObjectCollectionArrayInitializers="True" NewLinesForBracesInLambdaExpressionBody="True" NewLineForElse="True" NewLineForCatch="True" NewLineForFinally="True" NewLineForMembersInObjectInit="True" NewLineForMembersInAnonymousTypes="True" NewLineForClausesInQuery="True" SpacingAfterMethodDeclarationName="False" SpaceAfterMethodCallName="False" SpaceBeforeOpenSquareBracket="False" inheritsSet="Mono" inheritsScope="text/x-csharp" scope="text/x-csharp" />
+        </Policies>
+      </Properties>
+    </MonoDevelop>
+  </ProjectExtensions>
 </Project>

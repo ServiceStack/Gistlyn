@@ -1,8 +1,8 @@
 ﻿using Funq;
 using ServiceStack;
-using Rosling.ServiceInterface;
+using Gistlyn.ServiceInterface;
 
-namespace Rosling
+namespace Gistlyn
 {
     public class AppHost : AppHostBase
     {
@@ -11,7 +11,7 @@ namespace Rosling
         /// Base constructor requires a name and assembly to locate web service classes. 
         /// </summary>
         public AppHost()
-            : base("Rosling", typeof(MyServices).Assembly)
+            : base("Gistlyn", typeof(MyServices).Assembly)
         {
 
         }

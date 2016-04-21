@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ServiceStack;
-using Rosling.ServiceModel;
-using Rosling.SnippetEngine;
-using Rosling.Common.Objects;
+using Gistlyn.ServiceModel;
+using Gistlyn.SnippetEngine;
+using Gistlyn.Common.Objects;
 
-namespace Rosling.ServiceInterface
+namespace Gistlyn.ServiceInterface
 {
     public class RunScriptService : Service
     {

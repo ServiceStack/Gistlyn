@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rosling.Common.Objects
+namespace Gistlyn.Common.Objects
 {
     public class VariableInfo
     {

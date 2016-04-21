@@ -3,17 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rosling", "Rosling\Rosling\Rosling.csproj", "{4389B305-B381-4B50-B1A8-BBB5259A0524}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gistlyn", "Rosling\Rosling\Gistlyn.csproj", "{4389B305-B381-4B50-B1A8-BBB5259A0524}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rosling.ServiceModel", "Rosling\Rosling.ServiceModel\Rosling.ServiceModel.csproj", "{53E82AC1-DD1D-4C66-B55F-F9F4ACFB2F40}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gistlyn.ServiceModel", "Rosling\Rosling.ServiceModel\Gistlyn.ServiceModel.csproj", "{53E82AC1-DD1D-4C66-B55F-F9F4ACFB2F40}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rosling.ServiceInterface", "Rosling\Rosling.ServiceInterface\Rosling.ServiceInterface.csproj", "{801A0F89-D5F6-49A6-BCEA-6624388C98A4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gistlyn.ServiceInterface", "Rosling\Rosling.ServiceInterface\Gistlyn.ServiceInterface.csproj", "{801A0F89-D5F6-49A6-BCEA-6624388C98A4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rosling.Tests", "Rosling\Rosling.Tests\Rosling.Tests.csproj", "{D22B5797-9F2A-4BA7-9636-6EFCE62EBE00}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Roslng.SnippetEngine", "Rosling\SnippetEngine\Roslng.SnippetEngine.csproj", "{3D312AF7-F080-424D-8B30-999B7191E97C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gistlyn.SnippetEngine", "Rosling\SnippetEngine\Gistlyn.SnippetEngine.csproj", "{3D312AF7-F080-424D-8B30-999B7191E97C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rosling.Common", "Rosling\Rosling.Common\Rosling.Common.csproj", "{3F9F0E17-A17B-4DFF-85BB-881D5174EACB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gistlyn.Common", "Rosling\Rosling.Common\Gistlyn.Common.csproj", "{3F9F0E17-A17B-4DFF-85BB-881D5174EACB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

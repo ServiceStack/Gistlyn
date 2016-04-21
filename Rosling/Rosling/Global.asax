@@ -1,1 +1,1 @@
-﻿<%@ Application Codebehind="Global.asax.cs" Inherits="Rosling.Global" Language="C#" %>
+﻿<%@ Application Codebehind="Global.asax.cs" Inherits="Gistlyn.Global" Language="C#" %>

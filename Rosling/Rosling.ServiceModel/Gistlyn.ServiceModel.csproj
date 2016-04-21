@@ -56,9 +56,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Rosling.Common\Rosling.Common.csproj">
+    <ProjectReference Include="..\Rosling.Common\Gistlyn.Common.csproj">
       <Project>{3f9f0e17-a17b-4dff-85bb-881d5174eacb}</Project>
-      <Name>Rosling.Common</Name>
+      <Name>Gistlyn.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

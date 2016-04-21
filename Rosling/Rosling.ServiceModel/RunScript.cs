@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ServiceStack;
-using Rosling.Common.Objects;
+using Gistlyn.Common.Objects;
 
-namespace Rosling.ServiceModel
+namespace Gistlyn.ServiceModel
 {
     public class RunScript : IReturn<RunScriptResponse>
     {

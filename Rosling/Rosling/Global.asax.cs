@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Rosling
+namespace Gistlyn
 {
     public class Global : System.Web.HttpApplication
     {

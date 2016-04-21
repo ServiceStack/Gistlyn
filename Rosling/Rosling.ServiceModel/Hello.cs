@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using ServiceStack;
 
-namespace Rosling.ServiceModel
+namespace Gistlyn.ServiceModel
 {
     [Route("/hello/{Name}")]
     public class Hello : IReturn<HelloResponse>
