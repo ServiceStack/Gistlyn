@@ -12,13 +12,13 @@ namespace Gistlyn.SnippetEngine
 {
     public class ScriptRunner
     {
-        public async Task<ScriptExecutionResult> Execute(string script)
+        private async Task<ScriptExecutionResult> Execute(string script, ScriptOptions opt)
         {
             ScriptExecutionResult result = new ScriptExecutionResult() { Variables = new List<VariableInfo>(), Errors = new List<ErrorInfo>() };
 
             try
             {
-                var state = await CSharpScript.RunAsync<int>(script);
+                var state = await CSharpScript.RunAsync<int>(script, opt);
 
                 foreach (var variable in state.Variables)
                     result.Variables.Add(new VariableInfo() { Name = variable.Name, Value = variable.Value.ToString(), Type = variable.Type.ToString() });
@@ -34,6 +34,29 @@ namespace Gistlyn.SnippetEngine
             }
 
             return result;
+        }
+
+        public Task<ScriptExecutionResult> Execute(string script)
+        {
+            return Execute(script, ScriptOptions.Default);
+        }
+
+        public Task<ScriptExecutionResult> Execute(string mainScript, List<string> scripts)
+        {
+            GistSourceResolver resolver = new GistSourceResolver(scripts);
+
+            ScriptOptions opt = ScriptOptions.Default.WithSourceResolver(resolver);
+
+            StringBuilder builder = new StringBuilder();
+
+            foreach (var key in resolver.Scripts.Keys)
+            {
+                builder.AppendFormat("#load \"{0}\"\n\r", key);
+            }
+
+            builder.Append(mainScript);
+
+            return Execute(builder.ToString(), opt);
         }
     }
 }

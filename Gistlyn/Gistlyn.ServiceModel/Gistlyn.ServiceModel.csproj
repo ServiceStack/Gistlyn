@@ -7,8 +7,8 @@
     <ProjectGuid>{53E82AC1-DD1D-4C66-B55F-F9F4ACFB2F40}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Rosling.ServiceModel</RootNamespace>
-    <AssemblyName>Rosling.ServiceModel</AssemblyName>
+    <RootNamespace>Gistlyn.ServiceModel</RootNamespace>
+    <AssemblyName>Gistlyn.ServiceModel</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -48,6 +48,7 @@
     <Compile Include="Hello.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RunScript.cs" />
+    <Compile Include="RunMultipleScripts.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Types\" />

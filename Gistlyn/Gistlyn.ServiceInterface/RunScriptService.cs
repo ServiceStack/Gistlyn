@@ -29,5 +29,26 @@ namespace Gistlyn.ServiceInterface
                 Result = result
             };
         }
+
+        public object Any(RunMultipleScripts request)
+        {
+            ScriptRunner runner = new ScriptRunner();
+            ScriptExecutionResult result = new ScriptExecutionResult();
+
+            try
+            {
+                result = runner.Execute(request.MainCode, request.Scripts).Result;
+            }
+            catch (Exception e)
+            {
+                result.Exception = e;
+            }
+
+            return new RunScriptResponse
+            {
+                Result = result
+            };
+        }
+
     }
 }

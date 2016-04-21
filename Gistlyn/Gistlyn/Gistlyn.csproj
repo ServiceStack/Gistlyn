@@ -105,6 +105,18 @@
       <Project>{53E82AC1-DD1D-4C66-B55F-F9F4ACFB2F40}</Project>
       <Name>Gistlyn.ServiceModel</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Gistlyn.ServiceInterface\Gistlyn.ServiceInterface.csproj">
+      <Project>{801A0F89-D5F6-49A6-BCEA-6624388C98A4}</Project>
+      <Name>Gistlyn.ServiceInterface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Gistlyn.Common\Gistlyn.Common.csproj">
+      <Project>{3F9F0E17-A17B-4DFF-85BB-881D5174EACB}</Project>
+      <Name>Gistlyn.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Gistlyn.SnippetEngine\Gistlyn.SnippetEngine.csproj">
+      <Project>{3D312AF7-F080-424D-8B30-999B7191E97C}</Project>
+      <Name>Gistlyn.SnippetEngine</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
