@@ -167,6 +167,8 @@
     <Content Include="bower_components\bootstrap3-dialog\dist\js\bootstrap-dialog.js" />
     <Content Include="bower_components\bootstrap3-dialog\dist\js\bootstrap-dialog.min.js" />
     <Content Include="bower_components\bootstrap3-dialog\dist\less\bootstrap-dialog.less" />
+    <Content Include="bower_components\bootstrap3-typeahead\bootstrap3-typeahead.js" />
+    <Content Include="bower_components\bootstrap3-typeahead\bootstrap3-typeahead.min.js" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />

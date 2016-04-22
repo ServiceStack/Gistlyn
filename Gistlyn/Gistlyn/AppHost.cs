@@ -1,6 +1,8 @@
 ﻿using Funq;
 using ServiceStack;
 using Gistlyn.ServiceInterface;
+using ServiceStack.Configuration;
+using Gistlyn.Common.Objects;
 
 namespace Gistlyn
 {
@@ -26,6 +28,10 @@ namespace Gistlyn
             //Config examples
             //this.Plugins.Add(new PostmanFeature());
             //this.Plugins.Add(new CorsFeature());
+
+            container.Register<IAppSettings>(new AppSettings());
+
+            container.Register<WebHostConfig>(new WebHostConfig(container.Resolve<IAppSettings>()));
         }
     }
 }

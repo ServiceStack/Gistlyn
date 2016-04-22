@@ -11,7 +11,7 @@
 		<link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
         <!-- Bootstrap Dialog -->
         <link href="bower_components/bootstrap3-dialog/dist/css/bootstrap-dialog.min.css" rel="stylesheet" type="text/css" />
-		<!-- Offsets -->
+        <!-- Offsets -->
 		<link href="css/offset.css" rel="stylesheet">
 	</head>
 	<body>
@@ -22,6 +22,8 @@
 		<script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
         <!-- Bootstrap Dialog -->
         <script type="text/javascript" src="bower_components/bootstrap3-dialog/dist/js/bootstrap-dialog.min.js"></script>
+		<!-- Bootstrap Typeahed -->
+        <script type="text/javascript" src="bower_components/bootstrap3-typeahead/bootstrap3-typeahead.min.js"></script>
 		<!-- Handlebars -->
         <script src="bower_components/handlebars/handlebars.min.js"></script>
 		<!-- Gistlyn scripts -->
@@ -45,6 +47,19 @@
 					</div>
 				</div>
 			</div>
+            <div class="row voffset3">
+                <div class="form-group required">
+                   <label class="col-md-2 control-label">Nuget Packages</label>
+                   <div class="col-md-6">
+                        <div>
+                            <input class="form-control" placeholder="Search Nuget Packages" autocomplete="off" type="text" id="packages" data-provide="typeahead"> 
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <button id="install" type="button" class="btn btn-primary" style="display:none">Install Package</button>
+                    </div>
+                </div>
+            </div>
             <div id="multirunBlock">
                 <div class="role-gistresult" style="display: none;">
                     <div class="row voffset3" style="display: none">

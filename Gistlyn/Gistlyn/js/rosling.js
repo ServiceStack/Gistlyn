@@ -23,6 +23,27 @@ function bind()
         runGist($(e.target).closest("div.role-execblock"));
         //console.log($("textarea", $(e.target).closest("div.row")).val());
     });
+
+    $("#packages").typeahead({
+        minLength: 0,
+        delay: 800,
+        showHintOnFocus: false,
+        displayText: function(val) { return val.Id + " [" + val.Ver + "]"; },
+        items: "all",
+        source: function(query, callback) {
+            $("#install").hide();
+            gateway.getFromService(
+                {SearchNugetPackage: {Search : query}},
+                function(response){callback(response);},
+                showError
+            );
+        },
+        afterSelect: function(value) {
+            $("#install").show();
+        }
+    });
+
+    $("#install").click(installPackage);
 }
 
 function getGist()
@@ -119,5 +140,16 @@ function runMultiple()
         },
         showError
     );
+}
 
+function installPackage()
+{
+    var package = $("#packages").typeahead("getActive");
+
+    gateway.postToService({InstallNugetPackage: { PackageId: package.Id, Version: package.Version, Ver: package.Ver}},
+        function(response) {
+            alert("installed");
+        },
+        showError
+    );
 }

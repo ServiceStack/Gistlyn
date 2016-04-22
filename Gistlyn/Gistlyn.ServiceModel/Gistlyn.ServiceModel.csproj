@@ -49,6 +49,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RunScript.cs" />
     <Compile Include="RunMultipleScripts.cs" />
+    <Compile Include="SearchNugetPackage.cs" />
+    <Compile Include="InstallNugetPackage.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Types\" />
