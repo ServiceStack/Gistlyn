@@ -1,4 +1,19 @@
-﻿function bind()
+﻿﻿function showError(status)
+{
+    BootstrapDialog.show({
+        type: BootstrapDialog.TYPE_DANGER,
+        title: "Error",
+        message: status.responseStatus.message,
+        buttons: [{
+            label: 'Close',
+            action: function(dialog) {
+                dialog.close();
+            }
+        }]
+    });
+}
+
+function bind()
 {
 	$("#load").click(getGist);
 
@@ -40,7 +55,7 @@ function runGist($block)
 		function(response) {
             scriptExecResponse($block, response);
 		},
-		function(error) { alert(error); }
+        showError
 	);
 }
 
@@ -85,7 +100,7 @@ function runMultiple()
     var main = $.grep($("#gistlist .role-filename"), function(val){ return $(val).text().toUpperCase() == "MAIN.CS" });
 
     if (main.length != 1) {
-        alert("There must be at file 'Main.cs' and it must be only one");
+        showError({responseStatus : {message: "There must be at file 'Main.cs' and it must be only one"}});
     }
 
     var mainCode = $("textarea", $(main[0]).closest("div.row")).val();
@@ -102,7 +117,7 @@ function runMultiple()
             scriptExecResponse($("#multirunBlock"), response);
             $("#multirunBlock").show();
         },
-        function(error) { alert(error); }
+        showError
     );
 
 }

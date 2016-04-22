@@ -162,6 +162,11 @@
     <Content Include="bower_components\handlebars\handlebars.runtime.amd.min.js" />
     <Content Include="bower_components\handlebars\handlebars.runtime.js" />
     <Content Include="bower_components\handlebars\handlebars.runtime.min.js" />
+    <Content Include="bower_components\bootstrap3-dialog\dist\css\bootstrap-dialog.css" />
+    <Content Include="bower_components\bootstrap3-dialog\dist\css\bootstrap-dialog.min.css" />
+    <Content Include="bower_components\bootstrap3-dialog\dist\js\bootstrap-dialog.js" />
+    <Content Include="bower_components\bootstrap3-dialog\dist\js\bootstrap-dialog.min.js" />
+    <Content Include="bower_components\bootstrap3-dialog\dist\less\bootstrap-dialog.less" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
