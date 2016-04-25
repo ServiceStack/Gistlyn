@@ -3,6 +3,8 @@ using ServiceStack;
 using Gistlyn.ServiceInterface;
 using ServiceStack.Configuration;
 using Gistlyn.Common.Objects;
+using Gistlyn.Common.Interfaces;
+using Gistlyn.DataContext;
 
 namespace Gistlyn
 {
@@ -32,6 +34,8 @@ namespace Gistlyn
             container.Register<IAppSettings>(new AppSettings());
 
             container.Register<WebHostConfig>(new WebHostConfig(container.Resolve<IAppSettings>()));
+
+            container.Register<IDataContext>(new GistlynDataContext());
         }
     }
 }

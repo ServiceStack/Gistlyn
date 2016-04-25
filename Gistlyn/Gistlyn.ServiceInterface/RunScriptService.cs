@@ -7,6 +7,7 @@ using ServiceStack;
 using Gistlyn.ServiceModel;
 using Gistlyn.SnippetEngine;
 using Gistlyn.Common.Objects;
+using ServiceStack.Text;
 
 namespace Gistlyn.ServiceInterface
 {
@@ -37,7 +38,7 @@ namespace Gistlyn.ServiceInterface
 
             try
             {
-                result = runner.Execute(request.MainCode, request.Scripts).Result;
+                result = runner.Execute(request.MainCode, request.Scripts, request.References).Result;
             }
             catch (Exception e)
             {

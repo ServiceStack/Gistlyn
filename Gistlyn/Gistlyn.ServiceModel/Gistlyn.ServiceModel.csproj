@@ -51,6 +51,7 @@
     <Compile Include="RunMultipleScripts.cs" />
     <Compile Include="SearchNugetPackage.cs" />
     <Compile Include="InstallNugetPackage.cs" />
+    <Compile Include="AddPackageAsReference.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Types\" />

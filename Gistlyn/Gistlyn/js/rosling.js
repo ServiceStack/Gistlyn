@@ -126,6 +126,7 @@ function runMultiple()
 
     var mainCode = $("textarea", $(main[0]).closest("div.row")).val();
     var sources = [];
+    var references = [];
 
     $.each($("#gistlist .role-execblock"), function(idx, val) {
         if ($(".role-filename", $(val)).text().toUpperCase() != "MAIN.CS") {
@@ -133,7 +134,9 @@ function runMultiple()
         }
     });
 
-    gateway.postToService({RunMultipleScripts : {mainCode : mainCode, scripts: sources}},
+    references.push("packages/ServiceStack.Text.4.0.56/lib/net40/ServiceStack.Text.dll");
+
+    gateway.postToService({RunMultipleScripts : {mainCode : mainCode, scripts: sources, references: references}},
         function(response) {
             scriptExecResponse($("#multirunBlock"), response);
             $("#multirunBlock").show();

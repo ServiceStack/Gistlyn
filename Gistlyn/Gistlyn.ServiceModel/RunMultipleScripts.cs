@@ -10,6 +10,8 @@ namespace Gistlyn.ServiceModel
         public string MainCode { get; set; }
 
         public List<string> Scripts { get; set; }
+
+        public List<string> References { get; set; }
     }
 
     public class RunMultipleScriptResponse

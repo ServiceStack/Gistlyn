@@ -41,11 +41,13 @@ namespace Gistlyn.SnippetEngine
             return Execute(script, ScriptOptions.Default);
         }
 
-        public Task<ScriptExecutionResult> Execute(string mainScript, List<string> scripts)
+        public Task<ScriptExecutionResult> Execute(string mainScript, List<string> scripts, List<string> references)
         {
             GistSourceResolver resolver = new GistSourceResolver(scripts);
 
             ScriptOptions opt = ScriptOptions.Default.WithSourceResolver(resolver);
+            if (references != null && references.Count >0)
+                opt.WithReferences(references);
 
             StringBuilder builder = new StringBuilder();
 
