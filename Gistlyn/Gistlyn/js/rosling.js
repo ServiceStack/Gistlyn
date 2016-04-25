@@ -33,8 +33,8 @@ function bind()
         source: function(query, callback) {
             $("#install").hide();
             gateway.getFromService(
-                {SearchNugetPackage: {Search : query}},
-                function(response){callback(response);},
+                {SearchNugetPackages: {Search : query}},
+                function(response){callback(response.Packages);},
                 showError
             );
         },
@@ -43,7 +43,29 @@ function bind()
         }
     });
 
+    $("#installedPackages").typeahead({
+        minLength: 0,
+        delay: 200,
+        showHintOnFocus: false,
+        displayText: function(val) { return val.Id + " [" + val.Ver + "]"; },
+        items: "all",
+        source: function(query, callback) {
+            $("#addReference").hide();
+            gateway.getFromService(
+                {SearchInstalledPackages: {Search : query}},
+                function(response){callback(response.Packages);},
+                showError
+            );
+        },
+        afterSelect: function(value) {
+            $("#addReference").show();
+        }
+    });
+
+
     $("#install").click(installPackage);
+
+    $("#addReference").click(addReference);
 }
 
 function getGist()
@@ -152,6 +174,18 @@ function installPackage()
     gateway.postToService({InstallNugetPackage: { PackageId: package.Id, Version: package.Version, Ver: package.Ver}},
         function(response) {
             alert("installed");
+        },
+        showError
+    );
+}
+
+function addReference()
+{
+    var package = $("#packages").typeahead("getActive");
+
+    gateway.postToService({AddPackageAsReference: { PackageId: package.Id, Version: package.Version, Ver: package.Ver}},
+        function(response) {
+            console.log(response);
         },
         showError
     );

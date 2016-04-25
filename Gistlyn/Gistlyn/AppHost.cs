@@ -5,6 +5,8 @@ using ServiceStack.Configuration;
 using Gistlyn.Common.Objects;
 using Gistlyn.Common.Interfaces;
 using Gistlyn.DataContext;
+using ServiceStack.Data;
+using ServiceStack.OrmLite;
 
 namespace Gistlyn
 {
@@ -33,9 +35,17 @@ namespace Gistlyn
 
             container.Register<IAppSettings>(new AppSettings());
 
-            container.Register<WebHostConfig>(new WebHostConfig(container.Resolve<IAppSettings>()));
+            var config = new WebHostConfig(container.Resolve<IAppSettings>());
 
-            container.Register<IDataContext>(new GistlynDataContext());
+            container.Register<WebHostConfig>(config);
+
+            IDbConnectionFactory dbFactory = new OrmLiteConnectionFactory(
+                config.ConnectionString,
+                SqliteDialect.Provider);
+
+            dbFactory.Open();
+
+            container.Register<IDataContext>(new GistlynDataContext(dbFactory));
         }
     }
 }

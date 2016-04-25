@@ -15,7 +15,7 @@ namespace Gistlyn.ServiceInterface
 
         public IDataContext DataContext { get; set; }
 
-        public object Any(SearchNugetPackage request)
+        public object Any(SearchNugetPackages request)
         {
             IPackageRepository repo = PackageRepositoryFactory.Default.CreateRepository("https://packages.nuget.org/api/v2");
 
@@ -27,7 +27,10 @@ namespace Gistlyn.ServiceInterface
                                                   .Select(p => new NugetPackageInfo() { Id = p.Id, Version = p.Version.Version, Ver = p.Version.Version.ToString()})
                                                   .ToList();
 
-            return packageInfos;
+            return new SearchNugetPackagesResponse()
+            {
+                Packages = packageInfos
+            };
         }
 
         public object Any(InstallNugetPackage request)
@@ -70,6 +73,15 @@ namespace Gistlyn.ServiceInterface
             };
         }
 
+        public object Any(SearchInstalledPackages request)
+        {
+            List<NugetPackageInfo> packages = DataContext.SearchPackages(request.Search, null);
+
+            return new SearchInstalledPackagesResponse()
+            {
+                Packages = packages
+            };
         }
+    }
 }
 

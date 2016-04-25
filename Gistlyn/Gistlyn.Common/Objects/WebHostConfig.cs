@@ -7,6 +7,8 @@ namespace Gistlyn.Common.Objects
     {
         public string NugetPackagesDirectory { get; set; }
 
+        public string ConnectionString { get; set; }
+
         public WebHostConfig()
         {
         }
@@ -14,6 +16,7 @@ namespace Gistlyn.Common.Objects
         public WebHostConfig(IAppSettings appConfig)
         {
             NugetPackagesDirectory = appConfig.GetString("NugetPackagesDirectory");
+            ConnectionString = appConfig.GetString("ConnectionString");
         }
     }
 }

@@ -5,16 +5,16 @@ using ServiceStack;
 
 namespace Gistlyn.ServiceModel
 {
-    public class SearchNugetPackage : IReturn<SearchNugetPackageResponse>
+    public class SearchNugetPackages : IReturn<SearchNugetPackagesResponse>
     {
         public string Search { get; set; }
 
         public bool AllowPrereleaseVersion { get; set; }
     }
 
-    public class SearchNugetPackageResponse
+    public class SearchNugetPackagesResponse
     {
-        List<NugetPackageInfo> Packages { get; set; }
+        public List<NugetPackageInfo> Packages { get; set; }
     }
 }
 
