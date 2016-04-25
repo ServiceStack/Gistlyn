@@ -22,7 +22,7 @@ namespace Gistlyn.DataContext
         {
             using (var db = dbFactory.Open())
             {
-                if (db.CreateTableIfNotExists<NugetPackageInfo>())
+                if (db.TableExists(typeof(NugetPackageInfo).Name) || db.CreateTableIfNotExists<NugetPackageInfo>())
                 {
                     db.Insert(package);
                 }
@@ -49,7 +49,11 @@ namespace Gistlyn.DataContext
 
             using (var db = dbFactory.Open())
             {
-                packages = db.Select<NugetPackageInfo>(p => p.Id.Contains(packageId));
+                var q = !String.IsNullOrEmpty(packageId)
+                               ? db.From<NugetPackageInfo>().Where(p => p.Id.Contains(packageId)).OrderBy(p => p.Id)
+                               : db.From<NugetPackageInfo>().OrderBy(p => p.Id);
+
+                packages = db.Select<NugetPackageInfo>(q);
             }
 
             return packages;

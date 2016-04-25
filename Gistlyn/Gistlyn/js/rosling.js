@@ -181,9 +181,9 @@ function installPackage()
 
 function addReference()
 {
-    var package = $("#packages").typeahead("getActive");
+    var package = $("#installedPackages").typeahead("getActive");
 
-    gateway.postToService({AddPackageAsReference: { PackageId: package.Id, Version: package.Version, Ver: package.Ver}},
+    gateway.postToService({AddPackageAsReference: { PackageId: package.Id, Version: package.Ver}},
         function(response) {
             console.log(response);
         },
