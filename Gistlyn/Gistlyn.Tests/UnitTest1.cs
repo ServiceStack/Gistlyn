@@ -1,11 +1,11 @@
 ﻿using System;
 using NUnit.Framework;
-using Rosling.ServiceInterface;
-using Rosling.ServiceModel;
+using Gistlyn.ServiceInterface;
+using Gistlyn.ServiceModel;
 using ServiceStack.Testing;
 using ServiceStack;
 
-namespace Rosling.Tests
+namespace Gistlyn.Tests
 {
     [TestFixture]
     public class UnitTests
