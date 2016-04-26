@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gistlyn.SnippetEngine", "Gi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gistlyn.Common", "Gistlyn\Gistlyn.Common\Gistlyn.Common.csproj", "{3F9F0E17-A17B-4DFF-85BB-881D5174EACB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gistlyn.DataContext", "Gistlyn.DataContext\Gistlyn.DataContext.csproj", "{4DABAD65-4B94-4FD4-B8A9-9D0C1265CDB6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gistlyn.DataContext", "Gistlyn\Gistlyn.DataContext\Gistlyn.DataContext.csproj", "{4DABAD65-4B94-4FD4-B8A9-9D0C1265CDB6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

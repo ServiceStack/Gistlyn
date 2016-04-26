@@ -30,24 +30,24 @@
     <Compile Include="DataContext.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Gistlyn\Gistlyn.Common\Gistlyn.Common.csproj">
+    <ProjectReference Include="..\..\Gistlyn\Gistlyn.Common\Gistlyn.Common.csproj">
       <Project>{3F9F0E17-A17B-4DFF-85BB-881D5174EACB}</Project>
       <Name>Gistlyn.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="ServiceStack.Interfaces">
-      <HintPath>..\packages\ServiceStack.Interfaces.4.0.56\lib\portable-wp80+sl5+net40+win8+wpa81+monotouch+monoandroid+xamarin.ios10\ServiceStack.Interfaces.dll</HintPath>
+      <HintPath>..\..\packages\ServiceStack.Interfaces.4.0.56\lib\portable-wp80+sl5+net40+win8+wpa81+monotouch+monoandroid+xamarin.ios10\ServiceStack.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Text">
-      <HintPath>..\packages\ServiceStack.Text.4.0.56\lib\net40\ServiceStack.Text.dll</HintPath>
+      <HintPath>..\..\packages\ServiceStack.Text.4.0.56\lib\net40\ServiceStack.Text.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Common">
-      <HintPath>..\packages\ServiceStack.Common.4.0.56\lib\net40\ServiceStack.Common.dll</HintPath>
+      <HintPath>..\..\packages\ServiceStack.Common.4.0.56\lib\net40\ServiceStack.Common.dll</HintPath>
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="ServiceStack.OrmLite">
-      <HintPath>..\packages\ServiceStack.OrmLite.4.0.56\lib\net45\ServiceStack.OrmLite.dll</HintPath>
+      <HintPath>..\..\packages\ServiceStack.OrmLite.4.0.56\lib\net45\ServiceStack.OrmLite.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
