@@ -8,11 +8,14 @@ using Gistlyn.ServiceModel;
 using Gistlyn.SnippetEngine;
 using Gistlyn.Common.Objects;
 using ServiceStack.Text;
+using System.IO;
 
 namespace Gistlyn.ServiceInterface
 {
     public class RunScriptService : Service
     {
+        public WebHostConfig Config { get; set; }
+
         public object Any(RunScript request)
         {
             ScriptRunner runner = new ScriptRunner();
@@ -36,9 +39,20 @@ namespace Gistlyn.ServiceInterface
             ScriptRunner runner = new ScriptRunner();
             ScriptExecutionResult result = new ScriptExecutionResult();
 
+            request.References = request.References ?? new List<AssemblyReference>();
+                
+            foreach (AssemblyReference reference in request.References)
+            {
+                if (!Path.IsPathRooted(reference.Path))
+                {
+                    var rootPath = System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath;
+                    reference.Path = Path.Combine(rootPath, Config.NugetPackagesDirectory, reference.Path);
+                }
+            }
+
             try
             {
-                result = runner.Execute(request.MainCode, request.Scripts, request.References).Result;
+                result = runner.Execute(request.MainCode, request.Scripts, request.References.Select(r=>r.Path).ToList()).Result;
             }
             catch (Exception e)
             {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Gistlyn.Common.Objects;
 using NuGet;
@@ -16,7 +17,13 @@ namespace Gistlyn.ServiceInterface
             info.Version = package.Version.Version;
             info.Ver = package.Version.Version.ToString();
 
-            info.Assemblies = package.AssemblyReferences.Select(a => new AssemblyReference(){ Name = a.Name, Path = a.Path }).ToList();
+            info.Assemblies = package.AssemblyReferences
+                .Select(a => new AssemblyReference()
+                { 
+                    Name = a.Name, 
+                    Path = Path.Combine(info.Id + "." + package.Version.ToNormalizedString(), a.Path) 
+                })
+                .ToList();
 
             return info;
         }

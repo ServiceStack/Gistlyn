@@ -34,18 +34,23 @@
 			<!-- Main jumbotron for a primary marketing message or call to action -->
 			<div class="pageheader">
 				<h2>Gist execution via Roslyn</h2>
-			</div>			
+			</div>
 			<div class="row">
 				<div class="form-group">
 					<label class="col-md-2 control-label">Gist ID (Hash Code)</label>
 					<div class="col-md-6">
-						<input id="gistId" class="form-control" type="text" placeholder="Enter gist hash code" value="cce30aa237ca7f3b51a97f0fa84b37e0">
+						<input id="gistId" class="form-control" type="text" placeholder="Enter gist hash code" value="6831799881c92434f80e141c8a2699eb">
 					</div>
 					<div class="col-md-4">
 						<button id="load" type="button" class="btn btn-primary">Load</button>
                         <button id="multirun" type="button" class="btn btn-primary" style="display:none">Run Multiple</button>
 					</div>
 				</div>
+			</div>
+            <div class="row voffset3">
+                <p class="col-md-offset-2 col-md-6">
+                    To add Assembly Reference select the package from installed packages and click `Add Package As Reference`. If you don't find the package in installed packages, then select the package from nuget, install it and then add the package from installed packages.    
+                </p>
 			</div>
             <div class="row voffset3">
                 <div class="form-group required">
@@ -61,7 +66,7 @@
                 </div>
             </div>
             <div class="row voffset3">
-                <div class="form-group required">
+                <div class="form-group">
                    <label class="col-md-2 control-label">Installed Packages</label>
                    <div class="col-md-6">
                         <div>
@@ -73,6 +78,22 @@
                     </div>
                 </div>
             </div>
+            <div class="row voffset3">
+				<div id="assemblyReferences">
+				</div>
+			</div>
+            <script id="references-template" type="text/x-handlebars-template">
+            <div class="form-group">
+                <label class="col-md-2 control-label">Referenced Assemblies</label>
+                <div class="col-md-10">
+                    <ul>
+                        {{#each references}}
+                    		<li>{{this.Name}}</li>
+                        {{/each}}
+                    </ul>
+				</div>
+			</div>
+            </script>
             <div id="multirunBlock">
                 <div class="role-gistresult" style="display: none;">
                     <div class="row voffset3" style="display: none">

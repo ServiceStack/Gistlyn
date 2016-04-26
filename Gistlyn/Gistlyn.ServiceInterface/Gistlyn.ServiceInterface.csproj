@@ -69,6 +69,7 @@
     <Reference Include="ServiceStack.Server">
       <HintPath>..\..\packages\ServiceStack.Server.4.0.56\lib\net45\ServiceStack.Server.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MyServices.cs" />

@@ -148,15 +148,13 @@ function runMultiple()
 
     var mainCode = $("textarea", $(main[0]).closest("div.row")).val();
     var sources = [];
-    var references = [];
+    var references = $("#assemblyReferences").data("references");
 
     $.each($("#gistlist .role-execblock"), function(idx, val) {
         if ($(".role-filename", $(val)).text().toUpperCase() != "MAIN.CS") {
             sources.push($("textarea",$(val)).val());
         }
     });
-
-    references.push("packages/ServiceStack.Text.4.0.56/lib/net40/ServiceStack.Text.dll");
 
     gateway.postToService({RunMultipleScripts : {mainCode : mainCode, scripts: sources, references: references}},
         function(response) {
@@ -185,7 +183,20 @@ function addReference()
 
     gateway.postToService({AddPackageAsReference: { PackageId: package.Id, Version: package.Ver}},
         function(response) {
-            console.log(response);
+            var references = $("#assemblyReferences").data("references");
+            if (!references) references = [];
+
+            $.each(response.Assemblies, function(idx,val){
+                //todo: only if not exists
+                if ($.grep(references, function(val2) { return val2.Name == val.Name}).length == 0)
+                    references.push(val);
+            });
+            $("#assemblyReferences").data("references", references);
+
+            $("#assemblyReferences").empty();
+            var template = Handlebars.compile( $("#references-template").html() );
+            console.log(template({ references: references }));
+            $("#assemblyReferences").append( template({ references: references }) );
         },
         showError
     );

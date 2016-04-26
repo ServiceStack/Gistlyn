@@ -47,7 +47,7 @@ namespace Gistlyn.SnippetEngine
 
             ScriptOptions opt = ScriptOptions.Default.WithSourceResolver(resolver);
             if (references != null && references.Count >0)
-                opt.WithReferences(references);
+                opt = opt.WithReferences(references);
 
             StringBuilder builder = new StringBuilder();
 
