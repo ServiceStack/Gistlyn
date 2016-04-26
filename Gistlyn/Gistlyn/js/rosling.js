@@ -193,10 +193,10 @@ function addReference()
             });
             $("#assemblyReferences").data("references", references);
 
-            $("#assemblyReferences").empty();
+            $("#assemblyReferences ul").empty();
             var template = Handlebars.compile( $("#references-template").html() );
             console.log(template({ references: references }));
-            $("#assemblyReferences").append( template({ references: references }) );
+            $("#assemblyReferences ul").append( template({ references: references }) );
         },
         showError
     );

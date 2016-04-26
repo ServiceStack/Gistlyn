@@ -43,7 +43,7 @@
 					</div>
 					<div class="col-md-4">
 						<button id="load" type="button" class="btn btn-primary">Load</button>
-                        <button id="multirun" type="button" class="btn btn-primary" style="display:none">Run Multiple</button>
+                        <button id="multirun" type="button" class="btn btn-primary" style="display:none">Run</button>
 					</div>
 				</div>
 			</div>
@@ -80,19 +80,19 @@
             </div>
             <div class="row voffset3">
 				<div id="assemblyReferences">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">Referenced Assemblies</label>
+                        <div class="col-md-10">
+                            <ul>
+                            </ul>
+                        </div>
+                    </div>
 				</div>
 			</div>
             <script id="references-template" type="text/x-handlebars-template">
-            <div class="form-group">
-                <label class="col-md-2 control-label">Referenced Assemblies</label>
-                <div class="col-md-10">
-                    <ul>
-                        {{#each references}}
-                    		<li>{{this.Name}}</li>
-                        {{/each}}
-                    </ul>
-				</div>
-			</div>
+                {{#each references}}
+            		<li>{{this.Name}}</li>
+                {{/each}}
             </script>
             <div id="multirunBlock">
                 <div class="role-gistresult" style="display: none;">
@@ -138,7 +138,7 @@
                                 <textarea class="form-control role-gisttext" rows="10" required="required">{{this.content}}</textarea>
                             </div>
                             <div class="col-md-2">
-                                <button type="button" class="btn btn-primary role-run">Run</button>
+                                <button type="button" class="btn btn-primary role-run hide">Run</button>
                             </div>
                         </div>
                     </div>
