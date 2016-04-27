@@ -77,6 +77,7 @@
     <Compile Include="RunScriptService.cs" />
     <Compile Include="NugetService.cs" />
     <Compile Include="NugetHelper.cs" />
+    <Compile Include="FrameworkTargetableAssembly.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

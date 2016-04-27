@@ -67,6 +67,9 @@ namespace Gistlyn.ServiceInterface
 
             //distinct by name
             request.References = request.References.GroupBy(a => a.Name).Select(g => g.First()).ToList();
+            List<AssemblyReference> addedReferences = request.References
+                                                             .Select(r => new AssemblyReference().PopulateWith(r))
+                                                             .ToList();
 
             foreach (AssemblyReference reference in request.References)
             {
@@ -86,9 +89,10 @@ namespace Gistlyn.ServiceInterface
                 result.Exception = e;
             }
 
-            return new RunScriptResponse
+            return new RunMultipleScriptResponse
             {
-                Result = result
+                Result = result,
+                References = addedReferences
             };
         }
 

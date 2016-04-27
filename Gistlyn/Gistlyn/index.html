@@ -47,6 +47,7 @@
 					</div>
 				</div>
 			</div>
+			<div class="hide">
             <div class="row voffset3">
                 <p class="col-md-offset-2 col-md-6">
                     To add Assembly Reference select the package from installed packages and click `Add Package As Reference`. If you don't find the package in installed packages, then select the package from nuget, install it and then add the package from installed packages.    
@@ -78,6 +79,7 @@
                     </div>
                 </div>
             </div>
+			</div>
             <div class="row voffset3">
 				<div id="assemblyReferences">
                     <div class="form-group">
@@ -91,7 +93,7 @@
 			</div>
             <script id="references-template" type="text/x-handlebars-template">
                 {{#each references}}
-            		<li>{{this.Name}}</li>
+            		<li>{{this.Name}} [{{this.Path}}]</li>
                 {{/each}}
             </script>
             <div id="multirunBlock">

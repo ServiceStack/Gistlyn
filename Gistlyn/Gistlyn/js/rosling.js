@@ -157,7 +157,8 @@ function runMultiple()
     var packages = packagesConfig.length > 0 ? $("textarea", $(packagesConfig[0]).closest("div.row")).val() : null;
 
     $.each($("#gistlist .role-execblock"), function(idx, val) {
-        if ($(".role-filename", $(val)).text().toUpperCase() != "MAIN.CS") {
+        var filename = $(".role-filename", $(val)).text().toUpperCase();
+        if (filename != "MAIN.CS" && filename != "PACKAGES.CONFIG" ) {
             sources.push($("textarea",$(val)).val());
         }
     });
@@ -166,6 +167,11 @@ function runMultiple()
         function(response) {
             scriptExecResponse($("#multirunBlock"), response);
             $("#multirunBlock").show();
+
+            $("#assemblyReferences ul").empty();
+            var template = Handlebars.compile( $("#references-template").html() );
+            console.log(template({ references: response.References }));
+            $("#assemblyReferences ul").append( template({ references: response.References }) );
         },
         showError
     );
@@ -193,7 +199,6 @@ function addReference()
             if (!references) references = [];
 
             $.each(response.Assemblies, function(idx,val){
-                //todo: only if not exists
                 if ($.grep(references, function(val2) { return val2.Name == val.Name}).length == 0)
                     references.push(val);
             });

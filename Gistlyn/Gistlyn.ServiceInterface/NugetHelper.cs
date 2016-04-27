@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using Gistlyn.Common.Interfaces;
 using Gistlyn.Common.Objects;
 using NuGet;
@@ -65,7 +66,21 @@ namespace Gistlyn.ServiceInterface
 
             foreach (var package in packages)
             {
-                assemblies.AddRange(package.Assemblies);
+                List<FrameworkTargetableAssembly> ftAssemblies = new List<FrameworkTargetableAssembly>();
+                foreach (var asm in package.Assemblies)
+                {
+                    FrameworkTargetableAssembly ft = new FrameworkTargetableAssembly(asm);
+                    ftAssemblies.Add(ft);
+                }
+
+                IEnumerable<FrameworkTargetableAssembly> compatibleLibs;
+                FrameworkName projectFramework = VersionUtility.ParseFrameworkName("net45");
+                VersionUtility.TryGetCompatibleItems<FrameworkTargetableAssembly>(projectFramework, ftAssemblies, out compatibleLibs);
+
+                var bestCompatible = compatibleLibs.FirstOrDefault();
+
+                if (bestCompatible != null)
+                    assemblies.Add(bestCompatible.Assembly);
             }
 
             assemblies = assemblies.GroupBy(a => a.Name).Select(g => g.First()).ToList();
