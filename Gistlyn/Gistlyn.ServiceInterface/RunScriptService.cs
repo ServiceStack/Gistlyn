@@ -9,12 +9,16 @@ using Gistlyn.SnippetEngine;
 using Gistlyn.Common.Objects;
 using ServiceStack.Text;
 using System.IO;
+using XmlSerializer = System.Xml.Serialization.XmlSerializer;
+using Gistlyn.Common.Interfaces;
 
 namespace Gistlyn.ServiceInterface
 {
     public class RunScriptService : Service
     {
         public WebHostConfig Config { get; set; }
+
+        public IDataContext DataContext { get; set; }
 
         public object Any(RunScript request)
         {
@@ -40,7 +44,30 @@ namespace Gistlyn.ServiceInterface
             ScriptExecutionResult result = new ScriptExecutionResult();
 
             request.References = request.References ?? new List<AssemblyReference>();
-                
+
+            if (!String.IsNullOrEmpty(request.Packages))
+            {
+                PackageCollection packages = null;
+
+                XmlSerializer serializer = new XmlSerializer(typeof(PackageCollection));
+
+                byte[] arr = request.Packages.ToAsciiBytes();
+
+                using (MemoryStream ms = new MemoryStream(arr))
+                {
+                    packages = (PackageCollection)serializer.Deserialize(ms);
+                }
+
+                foreach (NugetPackageInfo package in packages.Packages)
+                {
+                    //istall it
+                    request.References.AddRange(NugetHelper.RestorePackage(DataContext, Config.NugetPackagesDirectory, package.Id, package.Ver));
+                }
+            }
+
+            //distinct by name
+            request.References = request.References.GroupBy(a => a.Name).Select(g => g.First()).ToList();
+
             foreach (AssemblyReference reference in request.References)
             {
                 if (!Path.IsPathRooted(reference.Path))

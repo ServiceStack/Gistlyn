@@ -60,6 +60,7 @@
     <Compile Include="Objects\WebHostConfig.cs" />
     <Compile Include="Objects\AssemblyReference.cs" />
     <Compile Include="Interfaces\IDataContext.cs" />
+    <Compile Include="Objects\PackageCollection.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Interfaces\" />

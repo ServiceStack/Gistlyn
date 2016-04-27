@@ -35,41 +35,16 @@ namespace Gistlyn.ServiceInterface
 
         public object Any(InstallNugetPackage request)
         {
-            //Connect to the official package repository
-            IPackageRepository repo = PackageRepositoryFactory.Default.CreateRepository("https://packages.nuget.org/api/v2");
-
-            //Initialize the package manager
-            string path = Config.NugetPackagesDirectory;
-            PackageManager packageManager = new PackageManager(repo, path);
-
-            packageManager.PackageInstalled += new EventHandler<PackageOperationEventArgs>(delegate (object sender, PackageOperationEventArgs e)
-            {
-                var info = e.Package.GetPackageInfo();
-
-                DataContext.SavePackage(info);
-            });
-                
-
-            //Download and unzip the package
-            packageManager.InstallPackage(request.PackageId, SemanticVersion.Parse(request.Ver)); //new SemanticVersion(request.Version)
+            NugetHelper.InstallPackage(DataContext, Config.NugetPackagesDirectory, request.PackageId, request.Ver);
 
             return new InstallNugetPackageResponse();
         }
 
         public object Any(AddPackageAsReference request)
         {
-            List<NugetPackageInfo> packages = DataContext.GetPackageAndDependencies(request.PackageId, request.Version);
-
-            List<AssemblyReference> assemblies = new List<AssemblyReference>();
-
-            foreach (var package in packages)
-            {
-                assemblies.AddRange(package.Assemblies);
-            }
-
             return new AddPackageAsReferenceResponse()
             {
-                Assemblies = assemblies.GroupBy(a => a.Name).Select(g => g.First()).ToList()
+                Assemblies = NugetHelper.RestorePackage(DataContext, Config.NugetPackagesDirectory, request.PackageId, request.Version)
             };
         }
 

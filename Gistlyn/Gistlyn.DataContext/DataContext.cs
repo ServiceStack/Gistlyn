@@ -35,9 +35,12 @@ namespace Gistlyn.DataContext
 
             using (var db = dbFactory.Open())
             {
-                var q = db.From<NugetPackageInfo>().Where(p => p.Id == packageId && p.Ver == version);
+                if (db.TableExists(typeof(NugetPackageInfo).Name))
+                {
+                    var q = db.From<NugetPackageInfo>().Where(p => p.Id == packageId && p.Ver == version);
 
-                packages = db.Select<NugetPackageInfo>(q);
+                    packages = db.Select<NugetPackageInfo>(q);
+                }
             }
 
             return packages;

@@ -141,14 +141,20 @@ function runMultiple()
 {
     var filenames = $("#gistlist .role-filename").text();
     var main = $.grep($("#gistlist .role-filename"), function(val){ return $(val).text().toUpperCase() == "MAIN.CS" });
+    var packagesConfig = $.grep($("#gistlist .role-filename"), function(val){ return $(val).text().toUpperCase() == "PACKAGES.CONFIG" });
 
     if (main.length != 1) {
         showError({responseStatus : {message: "There must be at file 'Main.cs' and it must be only one"}});
     }
 
+    if (packagesConfig.length > 1) {
+        showError({responseStatus : {message: "There must be only one file 'packages.config'"}});
+    }
+
     var mainCode = $("textarea", $(main[0]).closest("div.row")).val();
     var sources = [];
     var references = $("#assemblyReferences").data("references");
+    var packages = packagesConfig.length > 0 ? $("textarea", $(packagesConfig[0]).closest("div.row")).val() : null;
 
     $.each($("#gistlist .role-execblock"), function(idx, val) {
         if ($(".role-filename", $(val)).text().toUpperCase() != "MAIN.CS") {
@@ -156,7 +162,7 @@ function runMultiple()
         }
     });
 
-    gateway.postToService({RunMultipleScripts : {mainCode : mainCode, scripts: sources, references: references}},
+    gateway.postToService({RunMultipleScripts : {mainCode : mainCode, scripts: sources, references: references, packages: packages}},
         function(response) {
             scriptExecResponse($("#multirunBlock"), response);
             $("#multirunBlock").show();
