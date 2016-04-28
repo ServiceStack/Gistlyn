@@ -135,7 +135,7 @@ function scriptExecResponse($block, response)
     }
     $("span.role-exception", $block).closest("div.row").toggle(hasException);
 
-    $("textarea.role-console", $block).val(response.Console);
+    $("textarea.role-console", $block).val(response.Result.Console);
 }
 
 function runMultiple()
