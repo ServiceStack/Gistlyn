@@ -80,20 +80,35 @@ namespace Gistlyn.ServiceInterface
                 }
             }
 
-            try
-            {
-                result = runner.Execute(request.MainCode, request.Scripts, request.References.Select(r=>r.Path).ToList()).Result;
-            }
-            catch (Exception e)
-            {
-                result.Exception = e;
-            }
 
-            return new RunMultipleScriptResponse
+            using (MemoryStream ms = new MemoryStream())
             {
-                Result = result,
-                References = addedReferences
-            };
+                TextWriter tmp = Console.Out;
+                using (StreamWriter sw = new StreamWriter(ms))
+                {
+                    Console.SetOut(sw);
+
+                    try
+                    {
+                        result = runner.Execute(request.MainCode, request.Scripts, request.References.Select(r => r.Path).ToList()).Result;
+                    }
+                    catch (Exception e)
+                    {
+                        result.Exception = e;
+                    }
+
+                    sw.Close();
+                    Console.SetOut(tmp);
+
+                    result.Console = System.Text.Encoding.UTF8.GetString(ms.ToArray());
+
+                    return new RunMultipleScriptResponse
+                    {
+                        Result = result,
+                        References = addedReferences,
+                    };
+                }
+            }
         }
 
     }

@@ -117,6 +117,7 @@ function scriptExecResponse($block, response)
             $("table.role-variables tbody", $block).append(el);
         });
     }
+    $("table.role-variables tbody", $block).closest("div.row").toggle(hasVars);
 
     $("table.role-errors tbody", $block).empty();
     var hasErrors = response.Result.Errors && response.Result.Errors.length > 0;
@@ -126,15 +127,15 @@ function scriptExecResponse($block, response)
             $("table.role-errors tbody", $block).append(el);
         });
     }
+    $("table.role-errors tbody", $block).closest("div.row").toggle(hasErrors);
 
     var hasException = !!response.Result.Exception;
     if (hasException) {
         $("span.role-exception").text(response.Result.Exception);
     }
-
-    $("table.role-variables tbody", $block).closest("div.row").toggle(hasVars);
-    $("table.role-errors tbody", $block).closest("div.row").toggle(hasErrors);
     $("span.role-exception", $block).closest("div.row").toggle(hasException);
+
+    $("textarea.role-console", $block).val(response.Console);
 }
 
 function runMultiple()
@@ -165,6 +166,7 @@ function runMultiple()
 
     gateway.postToService({RunMultipleScripts : {mainCode : mainCode, scripts: sources, references: references, packages: packages}},
         function(response) {
+            $("consoleOut").val(response.Console);
             scriptExecResponse($("#multirunBlock"), response);
             $("#multirunBlock").show();
 

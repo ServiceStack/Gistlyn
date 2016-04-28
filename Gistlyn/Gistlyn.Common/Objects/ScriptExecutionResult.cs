@@ -13,5 +13,7 @@ namespace Gistlyn.Common.Objects
         public List<ErrorInfo> Errors { get; set; }
 
         public Exception Exception { get; set; }
+
+        public string Console { get; set; }
     }
 }
