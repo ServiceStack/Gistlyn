@@ -3,7 +3,7 @@
     BootstrapDialog.show({
         type: BootstrapDialog.TYPE_DANGER,
         title: "Error",
-        message: status.responseStatus.message,
+        message: status.ResponseStatus.Message,
         buttons: [{
             label: 'Close',
             action: function(dialog) {
@@ -166,7 +166,6 @@ function runMultiple()
 
     gateway.postToService({RunMultipleScripts : {mainCode : mainCode, scripts: sources, references: references, packages: packages}},
         function(response) {
-            $("consoleOut").val(response.Console);
             scriptExecResponse($("#multirunBlock"), response);
             $("#multirunBlock").show();
 
