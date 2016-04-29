@@ -79,7 +79,7 @@ function getGist()
             $("#multirunBlock").hide();
             $("#multirunBlock table.role-variables tbody").empty();
             $("#multirunBlock table.role-errors tbody").empty();
-            $("#multirunBlock span.role-exception").hide();
+            $("#multirunBlock span.role-exception").closest("div.row").hide();
             //show "multirun" button
             $("#multirun").toggle(Object.keys(response.files).length > 1);
 
