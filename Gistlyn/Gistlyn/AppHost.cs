@@ -7,6 +7,11 @@ using Gistlyn.Common.Interfaces;
 using Gistlyn.DataContext;
 using ServiceStack.Data;
 using ServiceStack.OrmLite;
+using ServiceStack.NativeTypes;
+using Gistlyn.ServiceModel;
+using ServiceStack.Caching;
+using Gistlyn.ServiceInterfaces.Auth;
+using ServiceStack.Auth;
 
 namespace Gistlyn
 {
@@ -29,6 +34,13 @@ namespace Gistlyn
         /// <param name="container"></param>
         public override void Configure(Container container)
         {
+            container.Register<ICacheClient> (new MemoryCacheClient ());
+
+            //session and authentication
+            container.Register<ICacheClient> (new MemoryCacheClient ());
+            Plugins.Add (new SessionFeature ());
+            container.Register<UserSession> (new UserSession (container.Resolve<ICacheClient> ()));
+
             //Config examples
             //this.Plugins.Add(new PostmanFeature());
             //this.Plugins.Add(new CorsFeature());
@@ -46,6 +58,39 @@ namespace Gistlyn
             dbFactory.Open();
 
             container.Register<IDataContext>(new GistlynDataContext(dbFactory));
+
+            //Define the Auth modes you support and where to store it
+            ConfigureAuthAndRegistrationServices (container);
         }
+
+        private void ConfigureAuthAndRegistrationServices (Funq.Container container)
+        {
+            //Enable and register existing services you want this host to make use of.
+            var userSession = new CustomUserSession ();
+
+            //Register all Authentication methods you want to enable for this web app.
+            Plugins.Add (new AuthFeature (
+                () => userSession,
+                new IAuthProvider [] {
+                new EmptyAuthProvider(container.Resolve<UserSession>())
+            }, null));
+
+            //Provide service for new users to register so they can login with supplied credentials.
+            //RegistrationFeature.Init(this);
+
+            //override the default registration validation
+            //container.RegisterAs<CustomRegistrationValidator, IValidator<Registration>>();
+
+            //Store User Data 
+            container.Register<IUserAuthRepository> (c =>
+                 new InMemoryAuthRepository ());
+
+            //var authRepo = (OrmLiteAuthRepository)container.Resolve<IUserAuthRepository>();
+            //authRepo.DropAndReCreateTables(); //Drop and re-create all Auth and registration tables
+            //authRepo.CreateMissingTables(); //Create only the missing tables
+
+            return;
+        }
+
     }
 }

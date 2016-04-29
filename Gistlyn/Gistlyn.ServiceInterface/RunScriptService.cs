@@ -11,6 +11,7 @@ using ServiceStack.Text;
 using System.IO;
 using XmlSerializer = System.Xml.Serialization.XmlSerializer;
 using Gistlyn.Common.Interfaces;
+using Gistlyn.ServiceInterfaces.Auth;
 
 namespace Gistlyn.ServiceInterface
 {
@@ -19,6 +20,8 @@ namespace Gistlyn.ServiceInterface
         public WebHostConfig Config { get; set; }
 
         public IDataContext DataContext { get; set; }
+
+        public UserSession Session { get; set; }
 
         public object Any(RunScript request)
         {
@@ -90,7 +93,9 @@ namespace Gistlyn.ServiceInterface
 
                     try
                     {
-                        result = runner.Execute(request.MainCode, request.Scripts, request.References.Select(r => r.Path).ToList()).Result;
+                        var task = runner.Execute(request.MainCode, request.Scripts, request.References.Select(r => r.Path).ToList());
+                        Session.SetScriptTask(task);
+                        result = task.Result;
                     }
                     catch (Exception e)
                     {

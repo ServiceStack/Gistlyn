@@ -78,6 +78,9 @@
     <Compile Include="NugetService.cs" />
     <Compile Include="NugetHelper.cs" />
     <Compile Include="FrameworkTargetableAssembly.cs" />
+    <Compile Include="Auth\UserSession.cs" />
+    <Compile Include="Auth\CustomUserSession.cs" />
+    <Compile Include="Auth\EmptyAuthProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -95,6 +98,9 @@
       <Project>{53E82AC1-DD1D-4C66-B55F-F9F4ACFB2F40}</Project>
       <Name>Gistlyn.ServiceModel</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Auth\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
