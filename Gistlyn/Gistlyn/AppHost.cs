@@ -7,8 +7,6 @@ using Gistlyn.Common.Interfaces;
 using Gistlyn.DataContext;
 using ServiceStack.Data;
 using ServiceStack.OrmLite;
-using ServiceStack.NativeTypes;
-using Gistlyn.ServiceModel;
 using ServiceStack.Caching;
 using Gistlyn.ServiceInterfaces.Auth;
 using ServiceStack.Auth;
