@@ -1,4 +1,5 @@
-﻿﻿function showError(status)
+﻿//common functions
+﻿function showError(status)
 {
     BootstrapDialog.show({
         type: BootstrapDialog.TYPE_DANGER,
@@ -11,6 +12,32 @@
             }
         }]
     });
+}
+
+function getParameterByName(name) {
+    var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+function isParameterInQuery(name) {
+    var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match;
+}
+
+function getQueryHash() {
+    return window.location.hash == "#" ? "" : window.location.hash;
+}
+
+//gistlyn-based functions
+
+function init()
+{
+    var gistHash = getParameterByName("gist");
+
+    if (gistHash) {
+        $("#gistId").val(gistHash);
+        getGist();
+    }
 }
 
 function bind()

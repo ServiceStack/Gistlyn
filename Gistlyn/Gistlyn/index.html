@@ -39,7 +39,7 @@
 				<div class="form-group">
 					<label class="col-md-2 control-label">Gist ID (Hash Code)</label>
 					<div class="col-md-6">
-						<input id="gistId" class="form-control" type="text" placeholder="Enter gist hash code" value="6831799881c92434f80e141c8a2699eb">
+						<input id="gistId" class="form-control" type="text" placeholder="Enter gist hash code" value="">
 					</div>
 					<div class="col-md-4">
 						<button id="load" type="button" class="btn btn-primary">Load</button>
@@ -200,6 +200,7 @@
 		<script>
 			$(document).ready(function(){
 			    gateway = new servicestack.ClientGateway('/ServiceStack/');
+			    init();
 				bind();
 			});
 		</script>
