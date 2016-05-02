@@ -81,6 +81,8 @@
     <Compile Include="Auth\UserSession.cs" />
     <Compile Include="Auth\CustomUserSession.cs" />
     <Compile Include="Auth\EmptyAuthProvider.cs" />
+    <Compile Include="ConsoleWriter.cs" />
+    <Compile Include="DomainWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

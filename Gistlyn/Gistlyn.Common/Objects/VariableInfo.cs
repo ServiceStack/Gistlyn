@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Gistlyn.Common.Objects
 {
+    [Serializable]
     public class VariableInfo
     {
         public string Name { get; set; }

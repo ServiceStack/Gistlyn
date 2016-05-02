@@ -12,6 +12,7 @@ using System.IO;
 using XmlSerializer = System.Xml.Serialization.XmlSerializer;
 using Gistlyn.Common.Interfaces;
 using Gistlyn.ServiceInterfaces.Auth;
+using System.Security.Policy;
 
 namespace Gistlyn.ServiceInterface
 {
@@ -22,6 +23,8 @@ namespace Gistlyn.ServiceInterface
         public IDataContext DataContext { get; set; }
 
         public UserSession Session { get; set; }
+
+        public IServerEvents ServerEvents { get; set; }
 
         public object Any(RunScript request)
         {
@@ -83,7 +86,29 @@ namespace Gistlyn.ServiceInterface
                 }
             }
 
+            Evidence evidence = new Evidence(AppDomain.CurrentDomain.Evidence);
+            AppDomainSetup setup = new AppDomainSetup();
+            setup.PrivateBinPath = Path.Combine(Environment.CurrentDirectory, "bin");
+            setup.ApplicationBase = Environment.CurrentDirectory;
 
+            AppDomain domain = AppDomain.CreateDomain(Guid.NewGuid().ToString(), evidence, setup);
+
+            var asm = typeof(DomainWrapper).Assembly.FullName;
+            var type = typeof(DomainWrapper).FullName;
+
+            var wrapper = (DomainWrapper)domain.CreateInstanceAndUnwrap(asm, type);
+
+            result = wrapper.Run(request.MainCode, request.Scripts, request.References.Select(r => r.Path).ToList());
+
+            AppDomain.Unload(domain);
+
+            return new RunMultipleScriptResponse
+            {
+                Result = result,
+                References = addedReferences,
+            };
+
+            /*
             using (MemoryStream ms = new MemoryStream())
             {
                 TextWriter tmp = Console.Out;
@@ -96,6 +121,7 @@ namespace Gistlyn.ServiceInterface
                         var task = runner.Execute(request.MainCode, request.Scripts, request.References.Select(r => r.Path).ToList());
                         Session.SetScriptTask(task);
                         result = task.Result;
+                        ServerEvents.NotifySession(Session.GetSessionId(), result);
                     }
                     catch (Exception e)
                     {
@@ -114,6 +140,7 @@ namespace Gistlyn.ServiceInterface
                     };
                 }
             }
+            */
         }
 
     }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Gistlyn.Common.Objects
 {
+    [Serializable]
     public class ScriptExecutionResult
     {
         public List<VariableInfo> Variables { get; set; }

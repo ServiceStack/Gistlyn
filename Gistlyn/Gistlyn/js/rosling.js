@@ -38,6 +38,47 @@ function init()
         $("#gistId").val(gistHash);
         getGist();
     }
+
+    var source = new EventSource('/servicestack/event-stream?channels=@channels&t=' + new Date().getTime()); //disable cache
+    source.addEventListener('error', function (e) {
+        console.log(e);
+        //addEntry({ msg: "ERROR!", cls: "error" });
+    }, false);
+
+    $(source).handleServerEvents({
+        handlers: {
+            onConnect: function (u) {
+                console.log(u);
+                activeSub = u;
+            },
+            onHeartbeat: function (msg, e) { if (console) console.log("onHeartbeat", msg, e); },
+            onJoin: refreshUsers,
+            onLeave: refreshUsers,
+            chat: function (m, e) {
+                addEntry({ id: m.id, userId: m.fromUserId, userName: m.fromName, msg: m.message, cls: m.private ? ' private' : '', channel: m.channel || e.channel });
+            },
+            HelloResponse: function(m, e) {
+                console.log(m);
+            },
+            stopListening: function () { $.ss.eventSource.close(); }
+        },
+        receivers: {
+            tv: {
+                watch: function (id) {
+                    console.log("watch id=",id);
+                },
+                off: function () {
+                    console.log("off");
+                }
+            }
+        }
+    });
+
+}
+
+function refreshUsers()
+{
+    console.log("refresh users");
 }
 
 function bind()
@@ -108,7 +149,7 @@ function getGist()
             $("#multirunBlock table.role-errors tbody").empty();
             $("#multirunBlock span.role-exception").closest("div.row").hide();
             //show "multirun" button
-            $("#multirun").toggle(Object.keys(response.files).length > 1);
+            $("#multirun").toggle(Object.keys(response.files).length > 0);
 
             $("#gistlist").empty();
             var template = Handlebars.compile( $("#gists-template").html() );

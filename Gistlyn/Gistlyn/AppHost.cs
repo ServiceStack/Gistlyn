@@ -10,6 +10,10 @@ using ServiceStack.OrmLite;
 using ServiceStack.Caching;
 using Gistlyn.ServiceInterfaces.Auth;
 using ServiceStack.Auth;
+using System.Collections.Generic;
+using System.Net;
+using System.Linq;
+using System;
 
 namespace Gistlyn
 {
@@ -32,7 +36,29 @@ namespace Gistlyn
         /// <param name="container"></param>
         public override void Configure(Container container)
         {
-            container.Register<ICacheClient> (new MemoryCacheClient ());
+            Plugins.Add(new ServerEventsFeature()
+            {
+                HeartbeatInterval = TimeSpan.FromSeconds(30),
+                OnConnect = (IEventSubscription arg1, Dictionary<string, string> arg2) =>
+                {
+                    Console.WriteLine("OnConnect");
+                },
+                OnCreated = (IEventSubscription arg1, ServiceStack.Web.IRequest arg2) =>
+                {
+                    Console.WriteLine("OnCreated");
+                },
+                OnSubscribe = (IEventSubscription obj) => 
+                { 
+                    Console.WriteLine("OnSubscribe");
+                },
+                OnUnsubscribe = (IEventSubscription obj) => 
+                {
+                    Console.WriteLine("OnUnsubscribe");
+                }
+            });
+            //this.CustomErrorHttpHandlers.Remove(HttpStatusCode.Forbidden);
+
+            //container.RegisterAutoWiredAs<MemoryChatHistory, IChatHistory>();
 
             //session and authentication
             container.Register<ICacheClient> (new MemoryCacheClient ());
@@ -89,6 +115,5 @@ namespace Gistlyn
 
             return;
         }
-
     }
 }

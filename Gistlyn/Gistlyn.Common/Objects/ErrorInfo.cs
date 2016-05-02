@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Gistlyn.Common.Objects
 {
+    [Serializable]
     public class ErrorInfo
     {
         public string Info { get; set; }

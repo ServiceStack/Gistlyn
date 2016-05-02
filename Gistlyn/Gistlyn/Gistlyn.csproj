@@ -32,6 +32,11 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <EnvironmentVariables>
+      <EnvironmentVariables>
+        <Variable name="MONO_PATH" value="." />
+      </EnvironmentVariables>
+    </EnvironmentVariables>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -170,6 +175,7 @@
     <Content Include="bower_components\bootstrap3-typeahead\bootstrap3-typeahead.js" />
     <Content Include="bower_components\bootstrap3-typeahead\bootstrap3-typeahead.min.js" />
     <None Include="sqlite3.dll" />
+    <Content Include="js\ss-utils.js" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />

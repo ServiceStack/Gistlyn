@@ -17,6 +17,12 @@ namespace Gistlyn.ServiceInterfaces.Auth
             this.cache = cache;
         }
 
+        public string GetSessionId()
+        {
+            var keyParts =  SessionFeature.GetSessionKey().Split(':');
+            return keyParts[keyParts.Length - 1];
+        }
+
         public void SetGistHash(string hash)
         {
             var session = SessionFeature.GetOrCreateSession<CustomUserSession>(cache);

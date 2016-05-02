@@ -61,6 +61,7 @@
     <Compile Include="Objects\AssemblyReference.cs" />
     <Compile Include="Interfaces\IDataContext.cs" />
     <Compile Include="Objects\PackageCollection.cs" />
+    <Compile Include="Objects\ConsoleMessage.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Interfaces\" />
