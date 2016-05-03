@@ -60,6 +60,14 @@ function init()
             HelloResponse: function(m, e) {
                 console.log(m);
             },
+            ConsoleMessage: function(m, e) {
+                console.log("console out", m);
+                $("#multirunBlock").show();
+                $("#multirunBlock .role-gistresult").show();
+                var consoleOut = $("#multirunBlock textarea.role-console");
+                $(consoleOut).show();
+                $(consoleOut).val(consoleOut.val() + m.Message);
+            },
             stopListening: function () { $.ss.eventSource.close(); }
         },
         receivers: {
@@ -203,7 +211,7 @@ function scriptExecResponse($block, response)
     }
     $("span.role-exception", $block).closest("div.row").toggle(hasException);
 
-    $("textarea.role-console", $block).val(response.Result.Console);
+    //$("textarea.role-console", $block).val(response.Result.Console);
 }
 
 function runMultiple()
@@ -231,6 +239,10 @@ function runMultiple()
             sources.push($("textarea",$(val)).val());
         }
     });
+
+    var empty = {Result : { Variables: [], Errors: [], Console: ""}};
+    scriptExecResponse($("#multirunBlock"), empty);
+    $("#multirunBlock textarea.role-console").val(empty.Result.Console)
 
     gateway.postToService({RunMultipleScripts : {mainCode : mainCode, scripts: sources, references: references, packages: packages}},
         function(response) {

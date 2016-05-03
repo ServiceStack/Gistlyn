@@ -1,12 +1,22 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
+using Gistlyn.Common.Objects;
+using Gistlyn.ServiceInterfaces.Auth;
+using ServiceStack;
 
 namespace Gistlyn.ServiceInterface
 {
     public class ConsoleWriter : TextWriter
     {
-        string result;
+        ConsoleWriterProxy proxy;
+        string cache = String.Empty;
+
+        public ConsoleWriter(ConsoleWriterProxy proxy)
+        {
+            this.proxy = proxy;
+        }
+
 
         public override Encoding Encoding
         {
@@ -18,19 +28,16 @@ namespace Gistlyn.ServiceInterface
 
         public override void Write(char value)
         {
-            result += value;
+            cache += value;
         }
 
         public override void WriteLine(string value)
         {
-            base.WriteLine(AppDomain.CurrentDomain.FriendlyName);
             base.WriteLine(value);
-        }
-
-        public string GetResult()
-        {
-            return result;
+            proxy.SendMessage(cache);
+            cache = String.Empty;
         }
     }
 }
+
 

@@ -97,8 +97,9 @@ namespace Gistlyn.ServiceInterface
             var type = typeof(DomainWrapper).FullName;
 
             var wrapper = (DomainWrapper)domain.CreateInstanceAndUnwrap(asm, type);
+            var writerProxy = new ConsoleWriterProxy(Session, ServerEvents);
 
-            result = wrapper.Run(request.MainCode, request.Scripts, request.References.Select(r => r.Path).ToList());
+            result = wrapper.Run(request.MainCode, request.Scripts, request.References.Select(r => r.Path).ToList(), writerProxy);
 
             AppDomain.Unload(domain);
 
