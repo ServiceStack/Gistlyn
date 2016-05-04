@@ -142,6 +142,10 @@ function bind()
     $("#install").click(installPackage);
 
     $("#addReference").click(addReference);
+
+    $("#multirunBlock button.role-getvariables").click(getVariables);
+
+    $("#multirunBlock").on("click", "button.role-getVariableJson", getVariableJson);
 }
 
 function getGist()
@@ -186,10 +190,11 @@ function scriptExecResponse($block, response)
     if (hasVars) {
         $.each(response.Result.Variables, function(idx, variable) {
             var el = $("<tr></tr>");
-            var name = $("<td>").text(variable.Name);
-            var value = $("<td>").text(variable.Value);
-            var type = $("<td>").text(variable.Type);
-            el.append(name).append(value).append(type);
+            var name = $('<td class="role-name"></td>').text(variable.Name);
+            var value = $('<td class="role-value"></td>').text(variable.Value);
+            var type = $('<td class="role-type"></td>').text(variable.Type);
+            var btnJson = $('<td><button class="btn btn-primary role-getVariableJson">Get Json</button></td>');
+            el.append(name).append(value).append(type).append(btnJson);
             $("table.role-variables tbody", $block).append(el);
         });
     }
@@ -242,7 +247,10 @@ function runMultiple()
 
     var empty = {Result : { Variables: [], Errors: [], Console: ""}};
     scriptExecResponse($("#multirunBlock"), empty);
-    $("#multirunBlock textarea.role-console").val(empty.Result.Console)
+    $("#multirunBlock textarea.role-console").val(empty.Result.Console);
+
+    $("#multirunBlock").show();
+    $("#multirunBlock .role-gistresult").show();
 
     gateway.postToService({RunMultipleScripts : {mainCode : mainCode, scripts: sources, references: references, packages: packages}},
         function(response) {
@@ -292,4 +300,43 @@ function addReference()
         },
         showError
     );
+}
+
+function getVariables()
+{
+    gateway.getFromService("GetScriptVariables",
+        function(response) {
+            if (response.Status == "PrepareToRun" || response.Status == "Running")
+                $("#multirunBlock span.role-runningState").text("Script is running can't get variables");
+            else 
+                $("#multirunBlock span.role-runningState").text("");
+
+            scriptExecResponse($("#multirunBlock"), { Result: { Variables: response.Variables, Errors: {}, Exceptions: {}}});
+        },
+        showError
+   );
+}
+
+function getVariableJson(e)
+{
+    var $that = $(this);
+    var name = $("td.role-name", $that.closest("tr")).text();
+
+    gateway.getFromService({GetScriptVariableJson : {VariableName: name}},
+        function(response) {
+            if (response.Status == "PrepareToRun" || response.Status == "Running")
+                $("#multirunBlock span.role-runningState").text("Script is running. Can't get variable json representation");
+            else 
+                $("#multirunBlock span.role-runningState").text("");
+
+            console.log(response);
+
+            if (response.Json) {
+                var td = $('<td colspan="4"></td>').text(response.Json);
+                var tr = $("<tr></tr>").append(td);
+                $that.closest("tr").after(tr);
+            }
+        },
+        showError
+   );
 }

@@ -64,7 +64,7 @@ namespace Gistlyn.SnippetEngine
             {
                 var variable = state.Result.Variables.FirstOrDefault(v => v.Name == name);
                 JsConfig.MaxDepth = 10;
-                json.Json = variable != null && variable.Value != null ? variable.ToJson() : String.Empty;
+                json.Json = variable != null && variable.Value != null ? variable.Value.ToJson() : String.Empty;
             }
 
             return json;
