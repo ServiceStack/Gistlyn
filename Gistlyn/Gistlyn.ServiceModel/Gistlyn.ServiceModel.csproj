@@ -52,6 +52,7 @@
     <Compile Include="InstallNugetPackage.cs" />
     <Compile Include="AddPackageAsReference.cs" />
     <Compile Include="SearchInstalledPackages.cs" />
+    <Compile Include="GetScriptVariables.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Types\" />

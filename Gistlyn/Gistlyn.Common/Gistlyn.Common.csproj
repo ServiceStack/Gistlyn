@@ -62,6 +62,9 @@
     <Compile Include="Interfaces\IDataContext.cs" />
     <Compile Include="Objects\PackageCollection.cs" />
     <Compile Include="Objects\ConsoleMessage.cs" />
+    <Compile Include="Objects\ScriptStatus.cs" />
+    <Compile Include="Objects\ScriptStateVariables.cs" />
+    <Compile Include="Objects\ScriptVariableJson.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Interfaces\" />

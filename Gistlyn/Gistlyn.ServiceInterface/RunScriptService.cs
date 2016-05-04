@@ -26,6 +26,22 @@ namespace Gistlyn.ServiceInterface
 
         public IServerEvents ServerEvents { get; set; }
 
+
+        public object Any(GetScriptVariables request)
+        {
+            ScriptStateVariables variables;
+
+            var session = Session.GetCustomSession();
+
+            var wrapper = session.DomainWrapper;
+
+            variables = wrapper != null
+                ? wrapper.GetVariables(request.VariableName)
+                : new ScriptStateVariables() { Status = ScriptStatus.Unknown };
+
+            return variables;
+        }
+
         public object Any(RunScript request)
         {
             ScriptRunner runner = new ScriptRunner();

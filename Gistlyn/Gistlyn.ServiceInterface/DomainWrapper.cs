@@ -11,6 +11,16 @@ namespace Gistlyn.ServiceInterface
     {
         ScriptRunner runner = new ScriptRunner();
 
+        public ScriptVariableJson GetVariableJson(string name)
+        {
+            return runner.GetVariableJson(name);
+        }
+
+        public ScriptStateVariables GetVariables(string parentVariable)
+        {
+            return runner.GetVariables(parentVariable);
+        }
+
         public ScriptExecutionResult Run(string mainScript, List<string> scripts, List<string> references, ConsoleWriterProxy writerProxy)
         {
             ScriptExecutionResult result = new ScriptExecutionResult();
