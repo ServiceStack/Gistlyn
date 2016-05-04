@@ -6,6 +6,8 @@ using ServiceStack;
 using ServiceStack.Auth;
 using System.Threading.Tasks;
 using Gistlyn.Common.Objects;
+using System;
+using Gistlyn.ServiceInterface;
 
 namespace Gistlyn.ServiceInterfaces.Auth
 {
@@ -23,6 +25,10 @@ namespace Gistlyn.ServiceInterfaces.Auth
         public string GistHash { get; set; }
 
         public Task<ScriptExecutionResult> ScriptTask { get; set; }
+
+        public DomainWrapper DomainWrapper { get; set; }
+       
+        public AppDomain ScriptDomain { get; set; }
 
         public CustomUserSession()
         {

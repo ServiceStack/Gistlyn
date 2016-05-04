@@ -88,8 +88,8 @@ namespace Gistlyn.ServiceInterface
 
             Evidence evidence = new Evidence(AppDomain.CurrentDomain.Evidence);
             AppDomainSetup setup = new AppDomainSetup();
-            setup.PrivateBinPath = Path.Combine(Environment.CurrentDirectory, "bin");
-            setup.ApplicationBase = Environment.CurrentDirectory;
+            setup.PrivateBinPath = Path.Combine(System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath, "bin");
+            setup.ApplicationBase = System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath;
 
             AppDomain domain = AppDomain.CreateDomain(Guid.NewGuid().ToString(), evidence, setup);
 
@@ -97,11 +97,15 @@ namespace Gistlyn.ServiceInterface
             var type = typeof(DomainWrapper).FullName;
 
             var wrapper = (DomainWrapper)domain.CreateInstanceAndUnwrap(asm, type);
+            //var wrapper = new DomainWrapper();
             var writerProxy = new ConsoleWriterProxy(Session, ServerEvents);
 
-            result = wrapper.Run(request.MainCode, request.Scripts, request.References.Select(r => r.Path).ToList(), writerProxy);
+            result = wrapper.RunAsync(request.MainCode, request.Scripts, request.References.Select(r => r.Path).ToList(), writerProxy);
 
-            AppDomain.Unload(domain);
+            Session.SetScriptTask(domain, wrapper);
+
+            //Unload appdomain only in synchroneous version
+            //AppDomain.Unload(domain);
 
             return new RunMultipleScriptResponse
             {

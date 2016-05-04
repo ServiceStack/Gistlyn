@@ -5,6 +5,8 @@ using ServiceStack.Auth;
 using ServiceStack.Web;
 using System.Threading.Tasks;
 using Gistlyn.Common.Objects;
+using System;
+using Gistlyn.ServiceInterface;
 
 namespace Gistlyn.ServiceInterfaces.Auth
 {
@@ -31,11 +33,12 @@ namespace Gistlyn.ServiceInterfaces.Auth
             cache.Set<CustomUserSession>(key, session);
         }
 
-        public void SetScriptTask(Task<ScriptExecutionResult> task)
+        public void SetScriptTask(AppDomain scriptAppDomain, DomainWrapper wrapper)
         {
             var session = SessionFeature.GetOrCreateSession<CustomUserSession>(cache);
             string key = SessionFeature.GetSessionKey();
-            session.ScriptTask = task;
+            session.DomainWrapper = wrapper;
+            session.ScriptDomain = scriptAppDomain;
             cache.Set<CustomUserSession>(key, session);
         }
 

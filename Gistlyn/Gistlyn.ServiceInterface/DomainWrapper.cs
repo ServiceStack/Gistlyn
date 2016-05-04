@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Gistlyn.Common.Objects;
 using Gistlyn.SnippetEngine;
 
@@ -8,9 +9,10 @@ namespace Gistlyn.ServiceInterface
 {
     public class DomainWrapper : MarshalByRefObject
     {
+        ScriptRunner runner = new ScriptRunner();
+
         public ScriptExecutionResult Run(string mainScript, List<string> scripts, List<string> references, ConsoleWriterProxy writerProxy)
         {
-            ScriptRunner runner = new ScriptRunner();
             ScriptExecutionResult result = new ScriptExecutionResult();
 
             TextWriter tmp = Console.Out;
@@ -34,9 +36,24 @@ namespace Gistlyn.ServiceInterface
             }
 
             return result;
-
         }
 
+        public ScriptExecutionResult RunAsync(string mainScript, List<string> scripts, List<string> references, ConsoleWriterProxy writerProxy)
+        {
+            TextWriter tmp = Console.Out;
+            ConsoleWriter writer = new ConsoleWriter(writerProxy);
+            Console.SetOut(writer);
+
+            ScriptExecutionResult result = runner.ExecuteAsync(mainScript, scripts, references);
+
+            /*task.ContinueWith((_) =>
+            {
+                Console.SetOut(tmp);
+                writer.Close();
+            });*/
+
+            return result;
+        }
     }
 }
 

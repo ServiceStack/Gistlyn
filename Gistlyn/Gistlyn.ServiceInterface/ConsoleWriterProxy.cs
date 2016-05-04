@@ -9,17 +9,19 @@ namespace Gistlyn.ServiceInterface
     {
         IServerEvents serverEvents;
         UserSession session;
+        string sessionId;
 
         public ConsoleWriterProxy(UserSession session, IServerEvents serverEvents)
         {
             this.session = session;
+            this.sessionId = session.GetSessionId();
             this.serverEvents = serverEvents;
         }
 
         public void SendMessage(string message)
         {
             var consoleMessage = new ConsoleMessage { Message = message };
-            serverEvents.NotifySession(session.GetSessionId(), consoleMessage, "@channels");
+            serverEvents.NotifySession(sessionId, consoleMessage, "@channels");
         }
 
     }
