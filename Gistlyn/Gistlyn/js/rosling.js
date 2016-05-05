@@ -332,9 +332,14 @@ function getVariableJson(e)
             console.log(response);
 
             if (response.Json) {
-                var td = $('<td colspan="4"></td>').text(response.Json);
-                var tr = $("<tr></tr>").append(td);
-                $that.closest("tr").after(tr);
+                var $next=$that.closest("tr").next();
+                if ($next.hasClass("role-json")) {
+                    $("td", $next).text(response.Json);
+                } else {
+                    var td = $('<td colspan="4"></td>').text(response.Json);
+                    var tr = $('<tr class="role-json"></tr>').append(td);
+                    $that.closest("tr").after(tr);
+                }
             }
         },
         showError
