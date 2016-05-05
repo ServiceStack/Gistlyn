@@ -115,17 +115,17 @@ namespace Gistlyn.SnippetEngine
             script = builder.ToString();
         }
 
-        public ScriptExecutionResult ExecuteAsync(string mainScript, List<string> scripts, List<string> references)
+        public ScriptExecutionResult ExecuteAsync(string mainScript, List<string> scripts, List<string> references, CancellationToken cancellationToken = default(CancellationToken))
         {
             string script;
             ScriptOptions opt;
 
             PrepareScript(mainScript, scripts, references, out script, out opt);
 
-            return ExecuteAsync(script, opt); 
+            return ExecuteAsync(script, opt, cancellationToken);
         }
 
-        public ScriptExecutionResult ExecuteAsync(string script, ScriptOptions opt)
+        public ScriptExecutionResult ExecuteAsync(string script, ScriptOptions opt, CancellationToken cancellationToken = default(CancellationToken))
         {
             ScriptExecutionResult result = new ScriptExecutionResult() { Variables = new List<VariableInfo>(), Errors = new List<ErrorInfo>() };
 
@@ -137,7 +137,7 @@ namespace Gistlyn.SnippetEngine
                 try
                 {
                     status = ScriptStatus.PrepareToRun;
-                    state = CSharpScript.RunAsync<int>(script, opt);
+                    state = CSharpScript.RunAsync<int>(script, opt, null, null, cancellationToken);
                     status = GetScriptStateStatus();
                 }
                 catch (CompilationErrorException e)

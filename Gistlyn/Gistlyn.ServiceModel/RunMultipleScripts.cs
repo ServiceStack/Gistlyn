@@ -7,6 +7,8 @@ namespace Gistlyn.ServiceModel
 {
     public class RunMultipleScripts : IReturn<RunMultipleScriptResponse>
     {
+        public string GistHash { get; set; }
+
         public string MainCode { get; set; }
 
         public List<string> Scripts { get; set; }

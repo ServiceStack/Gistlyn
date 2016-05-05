@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Gistlyn.Common.Objects;
 using Gistlyn.SnippetEngine;
@@ -10,6 +11,26 @@ namespace Gistlyn.ServiceInterface
     public class DomainWrapper : MarshalByRefObject
     {
         ScriptRunner runner = new ScriptRunner();
+        string mainScript;
+        List<string> scripts;
+        List<string> references;
+        CancellationTokenSource tokenSource;
+
+        public string GistHash { get; set; }
+
+        public string MainScript { get { return mainScript; } }
+
+        public List<string> Scripts { get { return scripts; } }
+
+        public List<string> References { get { return references; } }
+
+        public void Cancel()
+        {
+            if (tokenSource != null)
+            {
+                tokenSource.Cancel();
+            }
+        }
 
         public ScriptVariableJson GetVariableJson(string name)
         {
@@ -23,6 +44,10 @@ namespace Gistlyn.ServiceInterface
 
         public ScriptExecutionResult Run(string mainScript, List<string> scripts, List<string> references, ConsoleWriterProxy writerProxy)
         {
+            this.mainScript = mainScript;
+            this.scripts = scripts;
+            this.references = references;
+
             ScriptExecutionResult result = new ScriptExecutionResult();
 
             TextWriter tmp = Console.Out;
@@ -50,11 +75,16 @@ namespace Gistlyn.ServiceInterface
 
         public ScriptExecutionResult RunAsync(string mainScript, List<string> scripts, List<string> references, ConsoleWriterProxy writerProxy)
         {
+            this.mainScript = mainScript;
+            this.scripts = scripts;
+            this.references = references;
+
             TextWriter tmp = Console.Out;
             ConsoleWriter writer = new ConsoleWriter(writerProxy);
             Console.SetOut(writer);
 
-            ScriptExecutionResult result = runner.ExecuteAsync(mainScript, scripts, references);
+            tokenSource = new CancellationTokenSource();
+            ScriptExecutionResult result = runner.ExecuteAsync(mainScript, scripts, references, tokenSource.Token);
 
             /*task.ContinueWith((_) =>
             {

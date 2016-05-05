@@ -155,6 +155,7 @@ function getGist()
 	$.get({
 		url: "https://api.github.com/gists/" + gistId,
 		success: function(response) {
+            $("#gistId").data("gistHash", gistId);
             //clear run multiple
             $("#multirunBlock").hide();
             $("#multirunBlock table.role-variables tbody").empty();
@@ -233,6 +234,7 @@ function runMultiple()
         showError({responseStatus : {message: "There must be only one file 'packages.config'"}});
     }
 
+    var gistHash = $("#gistId").data("gist");
     var mainCode = $("textarea", $(main[0]).closest("div.row")).val();
     var sources = [];
     var references = $("#assemblyReferences").data("references");
@@ -252,7 +254,7 @@ function runMultiple()
     $("#multirunBlock").show();
     $("#multirunBlock .role-gistresult").show();
 
-    gateway.postToService({RunMultipleScripts : {mainCode : mainCode, scripts: sources, references: references, packages: packages}},
+    gateway.postToService({RunMultipleScripts : {gistHash: gistHash, mainCode : mainCode, scripts: sources, references: references, packages: packages}},
         function(response) {
             scriptExecResponse($("#multirunBlock"), response);
             $("#multirunBlock").show();
