@@ -29,13 +29,16 @@ namespace Gistlyn.ServiceInterface
         public override void Write(char value)
         {
             cache += value;
+            if (cache.Length >= 32 || value == '\n')
+            {
+                proxy.SendMessage(cache);
+                cache = String.Empty;
+            }
         }
 
         public override void WriteLine(string value)
         {
             base.WriteLine(value);
-            proxy.SendMessage(cache);
-            cache = String.Empty;
         }
     }
 }
