@@ -28,8 +28,13 @@ namespace Gistlyn.ServiceInterface
         {
             if (tokenSource != null)
             {
-                tokenSource.Cancel();
+                tokenSource.Cancel(true);
             }
+        }
+
+        public ScriptStatus GetScriptStatus()
+        {
+            return runner.GetScriptStatus();
         }
 
         public ScriptVariableJson GetVariableJson(string name)

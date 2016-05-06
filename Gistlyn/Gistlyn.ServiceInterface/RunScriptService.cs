@@ -64,7 +64,7 @@ namespace Gistlyn.ServiceInterface
             try 
             {
                 result = runner.Execute (request.Code).Result;
-            } catch (Exception e) 
+            } catch (Exception e)
             {
                 result.Exception = e;
             }
@@ -74,9 +74,37 @@ namespace Gistlyn.ServiceInterface
             };
         }
 
+        public object Any(CancelScript request)
+        {
+            var result = new ScriptExecutionResult() { Status = ScriptStatus.Unknown };
+
+            var sess = Session.GetCustomSession();
+
+            if (sess.ScriptDomain != null)
+            {
+                AppDomain domain = sess.ScriptDomain;
+                Session.SetScriptTask(null, null);
+                AppDomain.Unload(domain);
+                result.Status = ScriptStatus.Cancelled;
+            }
+
+            ////cancellation token does not work in mono
+            ////leave this alternative way when cancellation token will be implemented
+            //if (sess.DomainWrapper != null && sess.DomainWrapper.GistHash == null)
+            //{
+            //    sess.DomainWrapper.Cancel();
+            //    result.Status = sess.DomainWrapper.GetScriptStatus();
+            //}
+
+            return new CancelScriptResponse()
+            {
+                Result = result
+            };
+        }
+
+
         public object Any(RunMultipleScripts request)
         {
-            ScriptRunner runner = new ScriptRunner();
             ScriptExecutionResult result = new ScriptExecutionResult();
 
             request.References = request.References ?? new List<AssemblyReference>();

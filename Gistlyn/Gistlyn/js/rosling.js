@@ -39,6 +39,9 @@ function init()
         getGist();
     }
 
+    $("#multirun").removeAttr("disabled");
+    $("#cancel").hide();
+
     var source = new EventSource('/servicestack/event-stream?channels=@channels&t=' + new Date().getTime()); //disable cache
     source.addEventListener('error', function (e) {
         console.log(e);
@@ -94,6 +97,8 @@ function bind()
 	$("#load").click(getGist);
 
     $("#multirun").click(runMultiple);
+
+    $("#cancel").click(cancelScript);
 
     $("#gistlist").on("click", "button.role-run", function(e){
         runGist($(e.target).closest("div.role-execblock"));
@@ -253,6 +258,8 @@ function runMultiple()
 
     $("#multirunBlock").show();
     $("#multirunBlock .role-gistresult").show();
+    $("#multirun").attr("disabled", "disabled");
+    $("#cancel").show();
 
     gateway.postToService({RunMultipleScripts : {gistHash: gistHash, mainCode : mainCode, scripts: sources, references: references, packages: packages}},
         function(response) {
@@ -264,8 +271,25 @@ function runMultiple()
             console.log(template({ references: response.References }));
             $("#assemblyReferences ul").append( template({ references: response.References }) );
         },
+        function(e) {
+            $("#multirun").removeAttr("disabled");
+            showError(e);
+        }
+    );
+}
+
+function cancelScript()
+{
+    var gistHash = $("#gistId").data("gist");
+
+    gateway.postToService({CancelScript : {gistHash: gistHash}},
+        function(response) {
+            $("#multirun").removeAttr("disabled");
+            $("#cancel").hide();
+        },
         showError
     );
+
 }
 
 function installPackage()
