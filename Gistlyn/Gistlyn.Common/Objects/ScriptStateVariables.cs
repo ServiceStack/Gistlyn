@@ -8,7 +8,7 @@ namespace Gistlyn.Common.Objects
     {
         public ScriptStatus Status { get; set; }
 
-        public string ParentVariable { get; set; }
+        public VariableInfo ParentVariable { get; set; }
 
         public List<VariableInfo> Variables { get; set; }
     }

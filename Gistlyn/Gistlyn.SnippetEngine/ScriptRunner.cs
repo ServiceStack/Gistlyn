@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -70,26 +71,110 @@ namespace Gistlyn.SnippetEngine
             return json;
         }
 
+        private void ParseVariable(string expr)
+        {
+            string[] parts = expr.Split('.');
+
+        }
+
         public ScriptStateVariables GetVariables(string parentVariable)
         {
-            ScriptStateVariables variables = new ScriptStateVariables() 
-            { 
+            ScriptStateVariables variables = new ScriptStateVariables()
+            {
                 Status = GetScriptStatus(),
-                ParentVariable = parentVariable,
+                ParentVariable = new VariableInfo() { Name = parentVariable },
                 Variables = new List<VariableInfo>() 
             };
 
             if (variables.Status == ScriptStatus.Completed)
             {
-                //TODO: if parent variable is not null search into it via reflection
-                //if (!String.IsNullOrEmpty(parentVariable)) {}
+                if (!String.IsNullOrEmpty(parentVariable))
+                {
+                    string[] parts = parentVariable.Split('.');
 
-                foreach (var variable in state.Result.Variables)
-                    variables.Variables.Add(new VariableInfo() { 
-                    Name = variable.Name, 
-                    Value = variable.Value != null ?  variable.Value.ToString() : null,
-                    Type = variable.Type.ToString() 
-                });
+                    //TODO: handle indexer
+                    object curVar = state.Result.Variables.FirstOrDefault(v => v.Name == parts[0]);
+
+                    if (curVar == null)
+                        return variables;
+
+                    curVar = ((ScriptVariable)curVar).Value;
+
+                    for (int i = 0; i < parts.Length; i++)
+                    {
+                        string part = parts[i];
+                        //check if indexer
+                        int firstIdx = part.IndexOf('[');
+                        int lastIdx = part.LastIndexOf(']');
+                        if (firstIdx != -1 && lastIdx != -1 && firstIdx < lastIdx)
+                        {
+                            int index;
+
+                            //TODO: expression error
+                            if (!Int32.TryParse(part.Substring(firstIdx, lastIdx), out index))
+                                return variables;
+
+                            //TODO: index out of range
+                            Type t = curVar.GetType();
+                            //search indexer
+                            PropertyInfo[] props = t.GetProperties().Where(p => p.GetIndexParameters().Length > 0).ToArray();
+
+                            //we have indexer
+                            if (props != null && props.Length > 0)
+                            {
+                                curVar = props[0].GetValue(curVar, new object[] { index });
+                            }
+                        }
+                        else if (firstIdx == -1 && lastIdx == -1)
+                        {
+                            if (i > 0)
+                            {
+                                Type t = curVar.GetType();
+                                PropertyInfo prop = t.GetProperty(part);
+
+                                if (prop == null)
+                                {
+                                    //TODO: message about not found
+                                    return variables;
+                                }
+                                curVar = prop.GetValue(curVar);
+                            }
+                        }
+                        else
+                        {
+                            //TODO: message about wrong expression
+                            return variables;
+                        }
+                    }
+
+                    variables.ParentVariable.Type = curVar != null ? curVar.GetType().ToString() : null;
+                    variables.ParentVariable.Value = curVar != null ? curVar.ToString(): null;
+
+
+                    PropertyInfo[] finalProps = curVar.GetType().GetProperties(BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
+                    foreach (var prop in finalProps)
+                    {
+                        object val = prop.GetValue(curVar, null);
+                        var info = new VariableInfo()
+                        {
+                            Name = prop.Name,
+                            Value = val != null ? val.ToString() : null,
+                            Type = val.GetType().ToString()
+                        };
+                        variables.Variables.Add(info);
+                    }
+                }
+                else 
+                {
+                    foreach (var variable in state.Result.Variables)
+                        variables.Variables.Add(new VariableInfo()
+                        {
+                            Name = variable.Name,
+                            Value = variable.Value != null ? variable.Value.ToString() : null,
+                            Type = variable.Type.ToString()
+                        });
+                }
             }
 
             return variables;
