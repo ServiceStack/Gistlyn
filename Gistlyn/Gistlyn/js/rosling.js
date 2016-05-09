@@ -4,7 +4,7 @@
     BootstrapDialog.show({
         type: BootstrapDialog.TYPE_DANGER,
         title: "Error",
-        message: status.ResponseStatus.Message,
+        message: status.responseStatus.message,
         buttons: [{
             label: 'Close',
             action: function(dialog) {
@@ -60,7 +60,7 @@ function init()
             chat: function (m, e) {
                 addEntry({ id: m.id, userId: m.fromUserId, userName: m.fromName, msg: m.message, cls: m.private ? ' private' : '', channel: m.channel || e.channel });
             },
-            HelloResponse: function(m, e) {
+            helloResponse: function(m, e) {
                 console.log(m);
             },
             ConsoleMessage: function(m, e) {
@@ -69,7 +69,7 @@ function init()
                 $("#multirunBlock .role-gistresult").show();
                 var consoleOut = $("#multirunBlock textarea.role-console");
                 $(consoleOut).show();
-                $(consoleOut).val(consoleOut.val() + m.Message);
+                $(consoleOut).val(consoleOut.val() + m.message);
             },
             stopListening: function () { $.ss.eventSource.close(); }
         },
@@ -114,8 +114,8 @@ function bind()
         source: function(query, callback) {
             $("#install").hide();
             gateway.getFromService(
-                {SearchNugetPackages: {Search : query}},
-                function(response){callback(response.Packages);},
+                {SearchNugetPackages: {search : query}},
+                function(response){callback(response.packages);},
                 showError
             );
         },
@@ -133,8 +133,8 @@ function bind()
         source: function(query, callback) {
             $("#addReference").hide();
             gateway.getFromService(
-                {SearchInstalledPackages: {Search : query}},
-                function(response){callback(response.Packages);},
+                {SearchInstalledPackages: {search : query}},
+                function(response){callback(response.packages);},
                 showError
             );
         },
@@ -192,13 +192,13 @@ function scriptExecResponse($block, response)
 {
     $("div.role-gistresult", $block).show();
     $("table.role-variables tbody", $block).empty();
-    var hasVars = response.Result.Variables && response.Result.Variables.length > 0;
+    var hasVars = response.result.variables && response.result.variables.length > 0;
     if (hasVars) {
-        $.each(response.Result.Variables, function(idx, variable) {
+        $.each(response.result.variables, function(idx, variable) {
             var el = $("<tr></tr>");
-            var name = $('<td class="role-name"></td>').text(variable.Name);
-            var value = $('<td class="role-value"></td>').text(variable.Value);
-            var type = $('<td class="role-type"></td>').text(variable.Type);
+            var name = $('<td class="role-name"></td>').text(variable.name);
+            var value = $('<td class="role-value"></td>').text(variable.value);
+            var type = $('<td class="role-type"></td>').text(variable.type);
             var btnJson = $('<td><button class="btn btn-primary role-getVariableJson">Get Json</button></td>');
             el.append(name).append(value).append(type).append(btnJson);
             $("table.role-variables tbody", $block).append(el);
@@ -207,18 +207,18 @@ function scriptExecResponse($block, response)
     $("table.role-variables tbody", $block).closest("div.row").toggle(hasVars);
 
     $("table.role-errors tbody", $block).empty();
-    var hasErrors = response.Result.Errors && response.Result.Errors.length > 0;
+    var hasErrors = response.result.errors && response.result.errors.length > 0;
     if (hasErrors) {
-        $.each(response.Result.Errors, function(idx, error) {
-            var el = $("<tr></tr>").append(error.Info);
+        $.each(response.result.errors, function(idx, error) {
+            var el = $("<tr></tr>").append(error.info);
             $("table.role-errors tbody", $block).append(el);
         });
     }
     $("table.role-errors tbody", $block).closest("div.row").toggle(hasErrors);
 
-    var hasException = !!response.Result.Exception;
+    var hasException = !!response.result.exception;
     if (hasException) {
-        $("span.role-exception").text(response.Result.Exception);
+        $("span.role-exception").text(response.result.exception);
     }
     $("span.role-exception", $block).closest("div.row").toggle(hasException);
 
@@ -252,9 +252,9 @@ function runMultiple()
         }
     });
 
-    var empty = {Result : { Variables: [], Errors: [], Console: ""}};
+    var empty = {result : { variables: [], errors: [], console: ""}};
     scriptExecResponse($("#multirunBlock"), empty);
-    $("#multirunBlock textarea.role-console").val(empty.Result.Console);
+    $("#multirunBlock textarea.role-console").val(empty.result.console);
 
     $("#multirunBlock").show();
     $("#multirunBlock .role-gistresult").show();
@@ -268,8 +268,8 @@ function runMultiple()
 
             $("#assemblyReferences ul").empty();
             var template = Handlebars.compile( $("#references-template").html() );
-            console.log(template({ references: response.References }));
-            $("#assemblyReferences ul").append( template({ references: response.References }) );
+            console.log(template({ references: response.references }));
+            $("#assemblyReferences ul").append( template({ references: response.references }) );
         },
         function(e) {
             $("#multirun").removeAttr("disabled");
@@ -296,7 +296,7 @@ function installPackage()
 {
     var package = $("#packages").typeahead("getActive");
 
-    gateway.postToService({InstallNugetPackage: { PackageId: package.Id, Version: package.Version, Ver: package.Ver}},
+    gateway.postToService({InstallNugetPackage: { packageId: package.id, version: package.version, ver: package.ver}},
         function(response) {
             alert("installed");
         },
@@ -308,13 +308,13 @@ function addReference()
 {
     var package = $("#installedPackages").typeahead("getActive");
 
-    gateway.postToService({AddPackageAsReference: { PackageId: package.Id, Version: package.Ver}},
+    gateway.postToService({AddPackageAsReference: { packageId: package.id, version: package.ver}},
         function(response) {
             var references = $("#assemblyReferences").data("references");
             if (!references) references = [];
 
-            $.each(response.Assemblies, function(idx,val){
-                if ($.grep(references, function(val2) { return val2.Name == val.Name}).length == 0)
+            $.each(response.assemblies, function(idx,val){
+                if ($.grep(references, function(val2) { return val2.name == val.name}).length == 0)
                     references.push(val);
             });
             $("#assemblyReferences").data("references", references);
@@ -337,7 +337,7 @@ function getVariables()
             else 
                 $("#multirunBlock span.role-runningState").text("");
 
-            scriptExecResponse($("#multirunBlock"), { Result: { Variables: response.Variables, Errors: {}, Exceptions: {}}});
+            scriptExecResponse($("#multirunBlock"), { result: { variables: response.variables, errors: {}, exceptions: {}}});
         },
         showError
    );
@@ -348,21 +348,21 @@ function getVariableJson(e)
     var $that = $(this);
     var name = $("td.role-name", $that.closest("tr")).text();
 
-    gateway.getFromService({GetScriptVariableJson : {VariableName: name}},
+    gateway.getFromService({GetScriptVariableJson : {variableName: name}},
         function(response) {
-            if (response.Status == "PrepareToRun" || response.Status == "Running")
+            if (response.status == "PrepareToRun" || response.status == "Running")
                 $("#multirunBlock span.role-runningState").text("Script is running. Can't get variable json representation");
             else 
                 $("#multirunBlock span.role-runningState").text("");
 
             console.log(response);
 
-            if (response.Json) {
+            if (response.json) {
                 var $next=$that.closest("tr").next();
                 if ($next.hasClass("role-json")) {
-                    $("td", $next).text(response.Json);
+                    $("td", $next).text(response.json);
                 } else {
-                    var td = $('<td colspan="4"></td>').text(response.Json);
+                    var td = $('<td colspan="4"></td>').text(response.json);
                     var tr = $('<tr class="role-json"></tr>').append(td);
                     $that.closest("tr").after(tr);
                 }

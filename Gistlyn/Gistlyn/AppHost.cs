@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Linq;
 using System;
+using ServiceStack.Text;
 
 namespace Gistlyn
 {
@@ -36,6 +37,8 @@ namespace Gistlyn
         /// <param name="container"></param>
         public override void Configure(Container container)
         {
+            JsConfig.EmitCamelCaseNames = true;
+
             Plugins.Add(new ServerEventsFeature()
             {
                 HeartbeatInterval = TimeSpan.FromSeconds(30),
