@@ -151,6 +151,8 @@ function bind()
     $("#multirunBlock button.role-getvariables").click(getVariables);
 
     $("#multirunBlock").on("click", "button.role-getVariableJson", getVariableJson);
+
+    $("#multirunBlock").on("click", "button.role-inspectVariable", inspectVariable);
 }
 
 function getGist()
@@ -200,7 +202,8 @@ function scriptExecResponse($block, response)
             var value = $('<td class="role-value"></td>').text(variable.value);
             var type = $('<td class="role-type"></td>').text(variable.type);
             var btnJson = $('<td><button class="btn btn-primary role-getVariableJson">Get Json</button></td>');
-            el.append(name).append(value).append(type).append(btnJson);
+            var btnInspect = variable.isBrowseable ? $('<td><button class="btn btn-primary role-inspectVariable">Inspect</button></td>') : $('<td></td>');
+            el.append(name).append(value).append(type).append(btnInspect).append(btnJson);
             $("table.role-variables tbody", $block).append(el);
         });
     }
@@ -347,8 +350,9 @@ function getVariableJson(e)
 {
     var $that = $(this);
     var name = $("td.role-name", $that.closest("tr")).text();
+    var gistHash = $("#gistId").data("gist");
 
-    gateway.getFromService({GetScriptVariableJson : {variableName: name}},
+    gateway.getFromService({GetScriptVariableJson : {gistHash: gistHash, variableName: name}},
         function(response) {
             if (response.status == "PrepareToRun" || response.status == "Running")
                 $("#multirunBlock span.role-runningState").text("Script is running. Can't get variable json representation");
@@ -370,4 +374,23 @@ function getVariableJson(e)
         },
         showError
    );
+}
+
+function inspectVariable(e)
+{
+    var $that = $(this);
+    var name = $("td.role-name", $that.closest("tr")).text();
+    var gistHash = $("#gistId").data("gist");
+
+    gateway.getFromService({GetScriptVariables: { gistHash: gistHash, variableName: name }},
+        function(response) {
+            if (response.Status == "PrepareToRun" || response.Status == "Running")
+                $("#multirunBlock span.role-runningState").text("Script is running can't get variables");
+            else 
+                $("#multirunBlock span.role-runningState").text("");
+
+            scriptExecResponse($("#multirunBlock"), { result: { parentVariable: response.parentVariable, variables: response.variables, errors: {}, exceptions: {}}});
+        },
+        showError
+    );
 }

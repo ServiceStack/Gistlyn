@@ -77,6 +77,13 @@ namespace Gistlyn.SnippetEngine
 
         }
 
+        private bool IsObjectBrowseable(object obj)
+        {
+            var type = obj.GetType();
+
+            return !type.IsPrimitive && type != typeof(string);
+        }
+
         public ScriptStateVariables GetVariables(string parentVariable)
         {
             ScriptStateVariables variables = new ScriptStateVariables()
@@ -160,7 +167,8 @@ namespace Gistlyn.SnippetEngine
                         {
                             Name = prop.Name,
                             Value = val != null ? val.ToString() : null,
-                            Type = val.GetType().ToString()
+                            Type = val.GetType().ToString(),
+                            IsBrowseable = IsObjectBrowseable(val)
                         };
                         variables.Variables.Add(info);
                     }
@@ -172,7 +180,8 @@ namespace Gistlyn.SnippetEngine
                         {
                             Name = variable.Name,
                             Value = variable.Value != null ? variable.Value.ToString() : null,
-                            Type = variable.Type.ToString()
+                            Type = variable.Type.ToString(),
+                            IsBrowseable = IsObjectBrowseable(variable.Value)
                         });
                 }
             }
