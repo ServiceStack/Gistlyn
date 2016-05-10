@@ -71,14 +71,11 @@ namespace Gistlyn.SnippetEngine
             return json;
         }
 
-        private void ParseVariable(string expr)
-        {
-            string[] parts = expr.Split('.');
-
-        }
-
         private bool IsObjectBrowseable(object obj)
         {
+            if (obj == null)
+                return false;
+            
             var type = obj.GetType();
 
             return !type.IsPrimitive && type != typeof(string);
@@ -158,7 +155,9 @@ namespace Gistlyn.SnippetEngine
                     variables.ParentVariable.Value = curVar != null ? curVar.ToString(): null;
 
 
-                    PropertyInfo[] finalProps = curVar.GetType().GetProperties(BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                    PropertyInfo[] finalProps = curVar != null
+                        ? curVar.GetType().GetProperties(BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+                        : new PropertyInfo[] { };
 
                     foreach (var prop in finalProps)
                     {
@@ -167,7 +166,7 @@ namespace Gistlyn.SnippetEngine
                         {
                             Name = prop.Name,
                             Value = val != null ? val.ToString() : null,
-                            Type = val.GetType().ToString(),
+                            Type = val != null ? val.GetType().ToString() : prop.PropertyType.ToString(),
                             IsBrowseable = IsObjectBrowseable(val)
                         };
                         variables.Variables.Add(info);
