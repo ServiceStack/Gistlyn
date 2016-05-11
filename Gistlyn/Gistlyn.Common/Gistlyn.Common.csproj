@@ -65,6 +65,7 @@
     <Compile Include="Objects\ScriptStatus.cs" />
     <Compile Include="Objects\ScriptStateVariables.cs" />
     <Compile Include="Objects\ScriptVariableJson.cs" />
+    <Compile Include="Interfaces\INotifier.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Interfaces\" />

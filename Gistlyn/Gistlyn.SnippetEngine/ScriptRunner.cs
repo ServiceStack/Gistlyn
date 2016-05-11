@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Gistlyn.Common.Interfaces;
 using Gistlyn.Common.Objects;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -208,17 +209,17 @@ namespace Gistlyn.SnippetEngine
             script = builder.ToString();
         }
 
-        public ScriptExecutionResult ExecuteAsync(string mainScript, List<string> scripts, List<string> references, CancellationToken cancellationToken = default(CancellationToken))
+        public ScriptExecutionResult ExecuteAsync(string mainScript, List<string> scripts, List<string> references, INotifier notifier, CancellationToken cancellationToken = default(CancellationToken))
         {
             string script;
             ScriptOptions opt;
 
             PrepareScript(mainScript, scripts, references, out script, out opt);
 
-            return ExecuteAsync(script, opt, cancellationToken);
+            return ExecuteAsync(script, opt, notifier, cancellationToken);
         }
 
-        public ScriptExecutionResult ExecuteAsync(string script, ScriptOptions opt, CancellationToken cancellationToken = default(CancellationToken))
+        public ScriptExecutionResult ExecuteAsync(string script, ScriptOptions opt, INotifier notifier, CancellationToken cancellationToken = default(CancellationToken))
         {
             ScriptExecutionResult result = new ScriptExecutionResult() { Variables = new List<VariableInfo>(), Errors = new List<ErrorInfo>() };
 
@@ -238,13 +239,14 @@ namespace Gistlyn.SnippetEngine
                     status = ScriptStatus.CompiledWithErrors;
                     foreach (var err in e.Diagnostics)
                         result.Errors.Add(new ErrorInfo() { Info = err.ToString() });
-                    //TODO: notify about error
+
+                    notifier.SendScriptExecutionResults(result);
                 }
                 catch (Exception e)
                 {
                     status = ScriptStatus.ThrowedException;
                     result.Exception = e;
-                    //TODO: notify about exception
+                    notifier.SendScriptExecutionResults(result);
                 }
             });//.Start();
 

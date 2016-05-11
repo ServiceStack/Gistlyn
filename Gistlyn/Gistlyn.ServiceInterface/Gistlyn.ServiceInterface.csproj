@@ -83,7 +83,7 @@
     <Compile Include="Auth\EmptyAuthProvider.cs" />
     <Compile Include="ConsoleWriter.cs" />
     <Compile Include="DomainWrapper.cs" />
-    <Compile Include="ConsoleWriterProxy.cs" />
+    <Compile Include="NotifierProxy.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

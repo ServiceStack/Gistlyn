@@ -47,7 +47,7 @@ namespace Gistlyn.ServiceInterface
             return runner.GetVariables(parentVariable);
         }
 
-        public ScriptExecutionResult Run(string mainScript, List<string> scripts, List<string> references, ConsoleWriterProxy writerProxy)
+        public ScriptExecutionResult Run(string mainScript, List<string> scripts, List<string> references, NotifierProxy writerProxy)
         {
             this.mainScript = mainScript;
             this.scripts = scripts;
@@ -78,7 +78,7 @@ namespace Gistlyn.ServiceInterface
             return result;
         }
 
-        public ScriptExecutionResult RunAsync(string mainScript, List<string> scripts, List<string> references, ConsoleWriterProxy writerProxy)
+        public ScriptExecutionResult RunAsync(string mainScript, List<string> scripts, List<string> references, NotifierProxy writerProxy)
         {
             this.mainScript = mainScript;
             this.scripts = scripts;
@@ -89,7 +89,7 @@ namespace Gistlyn.ServiceInterface
             Console.SetOut(writer);
 
             tokenSource = new CancellationTokenSource();
-            ScriptExecutionResult result = runner.ExecuteAsync(mainScript, scripts, references, tokenSource.Token);
+            ScriptExecutionResult result = runner.ExecuteAsync(mainScript, scripts, references, writerProxy, tokenSource.Token);
 
             /*task.ContinueWith((_) =>
             {

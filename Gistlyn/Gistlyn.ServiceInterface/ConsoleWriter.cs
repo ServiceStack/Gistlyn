@@ -9,10 +9,10 @@ namespace Gistlyn.ServiceInterface
 {
     public class ConsoleWriter : TextWriter
     {
-        ConsoleWriterProxy proxy;
+        NotifierProxy proxy;
         string cache = String.Empty;
 
-        public ConsoleWriter(ConsoleWriterProxy proxy)
+        public ConsoleWriter(NotifierProxy proxy)
         {
             this.proxy = proxy;
         }
@@ -31,7 +31,7 @@ namespace Gistlyn.ServiceInterface
             cache += value;
             if (cache.Length >= 32 || value == '\n')
             {
-                proxy.SendMessage(cache);
+                proxy.SendConsoleMessage(cache);
                 cache = String.Empty;
             }
         }

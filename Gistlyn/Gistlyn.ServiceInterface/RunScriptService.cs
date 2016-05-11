@@ -157,7 +157,7 @@ namespace Gistlyn.ServiceInterface
             var wrapper = (DomainWrapper)domain.CreateInstanceAndUnwrap(asm, type);
             wrapper.GistHash = request.GistHash;
             //var wrapper = new DomainWrapper();
-            var writerProxy = new ConsoleWriterProxy(Session, ServerEvents);
+            var writerProxy = new NotifierProxy(Session, ServerEvents);
 
             result = wrapper.RunAsync(request.MainCode, request.Scripts, request.References.Select(r => r.Path).ToList(), writerProxy);
 
