@@ -11,23 +11,25 @@ namespace Gistlyn.ServiceInterface
         IServerEvents serverEvents;
         UserSession session;
         string sessionId;
+        string gistHash;
 
-        public NotifierProxy(UserSession session, IServerEvents serverEvents)
+        public NotifierProxy(UserSession session, IServerEvents serverEvents, string gistHash)
         {
             this.session = session;
             this.sessionId = session.GetSessionId();
             this.serverEvents = serverEvents;
+            this.gistHash = gistHash;
         }
 
         public void SendConsoleMessage(string message)
         {
             var consoleMessage = new ConsoleMessage { Message = message };
-            serverEvents.NotifySession(sessionId, consoleMessage, "@channels");
+            serverEvents.NotifySession(sessionId, consoleMessage, gistHash);
         }
 
         public void SendScriptExecutionResults(ScriptExecutionResult result)
         {
-            serverEvents.NotifySession(sessionId, result, "@channels");
+            serverEvents.NotifySession(sessionId, result, gistHash);
         }
 
     }

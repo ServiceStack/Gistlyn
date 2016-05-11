@@ -71,6 +71,20 @@ function init()
                 $(consoleOut).show();
                 $(consoleOut).val(consoleOut.val() + m.message);
             },
+            ScriptExecutionResult: function(m, e) {
+                $("#scriptStatus").text(m.status);
+                scriptExecResponse($("#multirunBlock"), {result : m});
+                switch(m.status) {
+                    case "Completed":
+                    case "Cancelled":
+                    case "CompiledWithErrors":
+                    case "ThrowedException":
+                        $("#multirun").removeAttr("disabled");
+                        $("#cancel").hide();
+                        break;
+                }
+
+            },
             stopListening: function () { $.ss.eventSource.close(); }
         },
         receivers: {

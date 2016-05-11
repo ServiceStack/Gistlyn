@@ -223,20 +223,26 @@ namespace Gistlyn.SnippetEngine
         {
             ScriptExecutionResult result = new ScriptExecutionResult() { Variables = new List<VariableInfo>(), Errors = new List<ErrorInfo>() };
 
-            status = ScriptStatus.Unknown;
+            status = ScriptStatus.PrepareToRun;
 
             //new Thread(() =>
             ThreadPool.QueueUserWorkItem(_ =>
             {
                 try
                 {
-                    status = ScriptStatus.PrepareToRun;
                     state = CSharpScript.RunAsync<int>(script, opt, null, null, cancellationToken);
                     status = GetScriptStateStatus();
+                    result.Status = status;
+                    if (state.Exception != null && state.Exception.InnerExceptions.Count > 0)
+                    {
+                        result.Exception = state.Exception.InnerExceptions[0];
+                    }
+                    notifier.SendScriptExecutionResults(result);
                 }
                 catch (CompilationErrorException e)
                 {
                     status = ScriptStatus.CompiledWithErrors;
+                    result.Status = status;
                     foreach (var err in e.Diagnostics)
                         result.Errors.Add(new ErrorInfo() { Info = err.ToString() });
 
@@ -251,6 +257,7 @@ namespace Gistlyn.SnippetEngine
             });//.Start();
 
             result.Status = status;
+            notifier.SendScriptExecutionResults(result);
 
             return result;
         }
