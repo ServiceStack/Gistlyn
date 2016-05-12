@@ -30,9 +30,9 @@ namespace Gistlyn.ServiceInterface
         {
             ScriptVariableJson variable;
 
-            var session = Session.GetCustomSession();
+            var runner = Session.GetScriptRunnerInfo(request.GistHash);
 
-            var wrapper = session.DomainWrapper;
+            var wrapper = runner != null ? runner.DomainWrapper : null;
 
             variable = wrapper != null
                 ? wrapper.GetVariableJson(request.VariableName)
@@ -45,9 +45,9 @@ namespace Gistlyn.ServiceInterface
         {
             ScriptStateVariables variables;
 
-            var session = Session.GetCustomSession();
+            var runner = Session.GetScriptRunnerInfo(request.GistHash);
 
-            var wrapper = session.DomainWrapper;
+            var wrapper = runner != null ? runner.DomainWrapper : null;
 
             variables = wrapper != null
                 ? wrapper.GetVariables(request.VariableName)
@@ -78,12 +78,13 @@ namespace Gistlyn.ServiceInterface
         {
             var result = new ScriptExecutionResult() { Status = ScriptStatus.Unknown };
 
-            var sess = Session.GetCustomSession();
+            var runner = Session.GetScriptRunnerInfo(request.GistHash);
 
-            if (sess.ScriptDomain != null)
+            if (runner != null && runner.ScriptDomain != null)
             {
-                AppDomain domain = sess.ScriptDomain;
-                Session.SetScriptTask(null, null);
+                AppDomain domain = runner.ScriptDomain;
+                runner.ScriptDomain = null;
+                Session.SetScriptRunnerInfo(runner.GistHash, null, null);
                 AppDomain.Unload(domain);
                 result.Status = ScriptStatus.Cancelled;
             }
@@ -105,6 +106,9 @@ namespace Gistlyn.ServiceInterface
 
         public object Any(RunMultipleScripts request)
         {
+            if (request.GistHash == null)
+                throw new ArgumentException("GistHash");
+
             ScriptExecutionResult result = new ScriptExecutionResult();
 
             request.References = request.References ?? new List<AssemblyReference>();
@@ -161,7 +165,7 @@ namespace Gistlyn.ServiceInterface
 
             result = wrapper.RunAsync(request.MainCode, request.Scripts, request.References.Select(r => r.Path).ToList(), writerProxy);
 
-            Session.SetScriptTask(domain, wrapper);
+            Session.SetScriptRunnerInfo(request.GistHash, domain, wrapper);
 
             //Unload appdomain only in synchroneous version
             //AppDomain.Unload(domain);

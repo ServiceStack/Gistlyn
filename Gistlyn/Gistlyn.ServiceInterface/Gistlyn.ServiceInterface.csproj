@@ -7,8 +7,8 @@
     <ProjectGuid>{801A0F89-D5F6-49A6-BCEA-6624388C98A4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Gistlyn.ServiceInterface</RootNamespace>
-    <AssemblyName>Gistlyn.ServiceInterface</AssemblyName>
+    <RootNamespace>Gistlyn.ServiceInterfaces</RootNamespace>
+    <AssemblyName>Gistlyn.ServiceInterfaces</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -84,6 +84,7 @@
     <Compile Include="ConsoleWriter.cs" />
     <Compile Include="DomainWrapper.cs" />
     <Compile Include="NotifierProxy.cs" />
+    <Compile Include="Auth\ScriptRunnerInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

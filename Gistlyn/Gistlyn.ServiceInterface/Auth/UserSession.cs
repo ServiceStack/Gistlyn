@@ -25,21 +25,40 @@ namespace Gistlyn.ServiceInterfaces.Auth
             return keyParts[keyParts.Length - 1];
         }
 
-        public void SetGistHash(string hash)
+        //public void SetGistHash(string hash)
+        //{
+        //    var session = SessionFeature.GetOrCreateSession<CustomUserSession>(cache);
+        //    string key = SessionFeature.GetSessionKey();
+        //    session.GistHash = hash;
+        //    cache.Set<CustomUserSession>(key, session);
+        //}
+
+        public void SetScriptRunnerInfo(string gistHash, AppDomain scriptAppDomain, DomainWrapper wrapper)
         {
             var session = SessionFeature.GetOrCreateSession<CustomUserSession>(cache);
             string key = SessionFeature.GetSessionKey();
-            session.GistHash = hash;
+            ScriptRunnerInfo info = new ScriptRunnerInfo() { GistHash = gistHash, ScriptDomain = scriptAppDomain, DomainWrapper = wrapper };
+
+            lock (session.lockObj)
+            {
+                if (session.Scripts.ContainsKey(gistHash))
+                    session.Scripts[gistHash] = info;
+                else
+                    session.Scripts.Add(gistHash, info);
+                    
+            }
             cache.Set<CustomUserSession>(key, session);
         }
 
-        public void SetScriptTask(AppDomain scriptAppDomain, DomainWrapper wrapper)
+        public ScriptRunnerInfo GetScriptRunnerInfo(string gistHash)
         {
             var session = SessionFeature.GetOrCreateSession<CustomUserSession>(cache);
             string key = SessionFeature.GetSessionKey();
-            session.DomainWrapper = wrapper;
-            session.ScriptDomain = scriptAppDomain;
-            cache.Set<CustomUserSession>(key, session);
+
+            lock (session.lockObj)
+            {
+                return session.Scripts.ContainsKey(gistHash) ? session.Scripts[gistHash] : null;
+            }
         }
 
         public void LogoutUser()

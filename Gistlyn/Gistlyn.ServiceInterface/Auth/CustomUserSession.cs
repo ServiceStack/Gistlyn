@@ -20,15 +20,9 @@ namespace Gistlyn.ServiceInterfaces.Auth
     {
         private static ILog log = LogManager.GetLogger(typeof(CustomUserSession));
 
-        public bool IsRunning { get; set; }
+        public object lockObj = new object();
 
-        public string GistHash { get; set; }
-
-        public Task<ScriptExecutionResult> ScriptTask { get; set; }
-
-        public DomainWrapper DomainWrapper { get; set; }
-       
-        public AppDomain ScriptDomain { get; set; }
+        public Dictionary<string, ScriptRunnerInfo> Scripts = new Dictionary<string, ScriptRunnerInfo>();
 
         public CustomUserSession()
         {

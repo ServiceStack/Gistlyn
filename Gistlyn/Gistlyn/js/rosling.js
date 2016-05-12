@@ -41,8 +41,11 @@ function init()
 
     $("#multirun").removeAttr("disabled");
     $("#cancel").hide();
+}
 
-    var source = new EventSource('/servicestack/event-stream?channels=@channels&t=' + new Date().getTime()); //disable cache
+function subscribeServerEvents(channel)
+{
+    var source = new EventSource('/servicestack/event-stream?channels=' + channel + '&t=' + new Date().getTime()); //disable cache
     source.addEventListener('error', function (e) {
         console.log(e);
         //addEntry({ msg: "ERROR!", cls: "error" });
@@ -98,7 +101,6 @@ function init()
             }
         }
     });
-
 }
 
 function refreshUsers()
@@ -177,6 +179,8 @@ function getGist()
 		url: "https://api.github.com/gists/" + gistId,
 		success: function(response) {
             $("#gistId").data("gistHash", gistId);
+            subscribeServerEvents(gistId);
+
             //clear run multiple
             $("#multirunBlock").hide();
             $("#multirunBlock table.role-variables tbody").empty();
@@ -267,7 +271,7 @@ function runMultiple()
         showError({responseStatus : {message: "There must be only one file 'packages.config'"}});
     }
 
-    var gistHash = $("#gistId").data("gist");
+    var gistHash = $("#gistId").data("gistHash");
     var mainCode = $("textarea", $(main[0]).closest("div.row")).val();
     var sources = [];
     var references = $("#assemblyReferences").data("references");
@@ -308,7 +312,7 @@ function runMultiple()
 
 function cancelScript()
 {
-    var gistHash = $("#gistId").data("gist");
+    var gistHash = $("#gistId").data("gistHash");
 
     gateway.postToService({CancelScript : {gistHash: gistHash}},
         function(response) {
@@ -358,7 +362,7 @@ function addReference()
 
 function getVariables()
 {
-    var gistHash = $("#gistId").data("gist");
+    var gistHash = $("#gistId").data("gistHash");
     var parent = $("#multirunBlock .role-parentVariable").data("prev");
 
     gateway.getFromService({GetScriptVariables : {gistHash: gistHash, variableName: parent}},
@@ -378,7 +382,7 @@ function getVariableJson(e)
 {
     var $that = $(this);
     var name = $("td.role-name", $that.closest("tr")).text();
-    var gistHash = $("#gistId").data("gist");
+    var gistHash = $("#gistId").data("gistHash");
 
     gateway.getFromService({GetScriptVariableJson : {gistHash: gistHash, variableName: name}},
         function(response) {
@@ -409,7 +413,7 @@ function inspectVariable(e)
     var $that = $(this);
     var parentName = $("#multirunBlock .role-parentVariable").text();
     var name = $("td.role-name", $that.closest("tr")).text();
-    var gistHash = $("#gistId").data("gist");
+    var gistHash = $("#gistId").data("gistHash");
     var variableName = parentName ? parentName + '.' + name : name;
 
     gateway.getFromService({GetScriptVariables: { gistHash: gistHash, variableName: variableName }},
