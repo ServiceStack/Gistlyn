@@ -9,7 +9,8 @@ namespace Gistlyn.Common.Objects
         Completed,
         Cancelled,
         CompiledWithErrors,
-        ThrowedException
+        ThrowedException,
+        AnotherScriptExecuting
     }
 }
 

@@ -16,6 +16,8 @@ namespace Gistlyn.ServiceModel
         public List<AssemblyReference> References { get; set; }
 
         public string Packages { get; set; }
+
+        public bool ForceRun { get; set; }
     }
 
     public class RunMultipleScriptResponse

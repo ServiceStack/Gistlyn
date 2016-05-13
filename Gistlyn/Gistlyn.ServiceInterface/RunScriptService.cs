@@ -56,6 +56,18 @@ namespace Gistlyn.ServiceInterface
             return variables;
         }
 
+        public object Any(GetScriptStatus request)
+        {
+            var runner = Session.GetScriptRunnerInfo(request.GistHash);
+
+            var wrapper = runner != null ? runner.DomainWrapper : null;
+
+            return new ScriptStatusResponse()
+            {
+                Status = wrapper != null ? wrapper.GetScriptStatus() : ScriptStatus.Unknown
+            };
+        }
+
         public object Any(RunScript request)
         {
             ScriptRunner runner = new ScriptRunner();
@@ -110,6 +122,27 @@ namespace Gistlyn.ServiceInterface
                 throw new ArgumentException("GistHash");
 
             ScriptExecutionResult result = new ScriptExecutionResult();
+
+            var runnerInfo = Session.GetScriptRunnerInfo(request.GistHash);
+            //stop script if run
+            if (runnerInfo != null && runnerInfo.ScriptDomain != null)
+            {
+                var scriptStatus = runnerInfo.DomainWrapper.GetScriptStatus();
+
+                if (request.ForceRun ||  (scriptStatus != ScriptStatus.PrepareToRun && scriptStatus != ScriptStatus.Running))
+                {
+                    AppDomain.Unload(runnerInfo.ScriptDomain);
+                }
+                else 
+                {
+                    result.Status = ScriptStatus.AnotherScriptExecuting;
+                    return new RunMultipleScriptResponse
+                    {
+                        Result = result
+                    };
+                }
+            }
+
 
             request.References = request.References ?? new List<AssemblyReference>();
 

@@ -284,6 +284,36 @@ function runMultiple()
         }
     });
 
+    gateway.getFromService({GetScriptStatus : {gistHash: gistHash}},
+        function(response) {
+            if (response.status != "PrepareToRun" && response.status != "Running") {
+                runMultipleInternal(gistHash, mainCode, sources, references, packages, true);
+            } else {
+                BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_DANGER,
+                    title: "Switching environment",
+                    message: "The script is running. Do you want to stop it and run again?",
+                    buttons: [ {
+                        label: 'OK',
+                        action: function(dialog) {
+                                dialog.close();
+                                runMultipleInternal(gistHash, mainCode, sources, references, packages, true);
+                            }
+                        }, {
+                        label: 'Cancel',
+                        action: function(dialog) {
+                            dialog.close();
+                        }
+                    }]
+                });
+            }
+        },
+        showError
+    );
+}
+
+function runMultipleInternal(gistHash, mainCode, sources, references, packages, forceRun)
+{
     var empty = {result : { variables: [], errors: [], console: ""}};
     scriptExecResponse($("#multirunBlock"), empty);
     $("#multirunBlock textarea.role-console").val(empty.result.console);
@@ -293,7 +323,7 @@ function runMultiple()
     $("#multirun").attr("disabled", "disabled");
     $("#cancel").show();
 
-    gateway.postToService({RunMultipleScripts : {gistHash: gistHash, mainCode : mainCode, scripts: sources, references: references, packages: packages}},
+    gateway.postToService({RunMultipleScripts : {gistHash: gistHash, mainCode : mainCode, scripts: sources, references: references, packages: packages, forceRun: forceRun}},
         function(response) {
             scriptExecResponse($("#multirunBlock"), response);
             $("#multirunBlock").show();
