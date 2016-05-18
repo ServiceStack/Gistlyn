@@ -300,5 +300,39 @@ namespace Gistlyn.SnippetEngine
 
             return Execute(script, opt);
         }
+
+        public async Task<ScriptExecutionResult> EvaluateExpression(string expr)
+        {
+            ScriptExecutionResult scriptResult = new ScriptExecutionResult(){ Variables = new List<VariableInfo>(), Errors = new List<ErrorInfo>() };
+            scriptResult.Status = GetScriptStatus();
+
+
+            try
+            {
+                VariableInfo info = new VariableInfo() { Name = String.Empty };
+
+                var stateResult = await state.Result.ContinueWithAsync(expr);
+
+                if (stateResult.ReturnValue != null)
+                {
+                    info.Type = stateResult.ReturnValue.GetType().ToString();
+                    info.Value = stateResult.ReturnValue.ToString();
+                }
+                scriptResult.Variables.Add(info);
+            }
+            catch (CompilationErrorException e)
+            {
+                scriptResult.Status = ScriptStatus.CompiledWithErrors;
+                foreach (var err in e.Diagnostics)
+                    scriptResult.Errors.Add(new ErrorInfo() { Info = err.ToString() });
+            }
+            catch (Exception e)
+            {
+                scriptResult.Status = ScriptStatus.ThrowedException;
+                scriptResult.Exception = e;
+            }
+
+            return scriptResult;
+        }
     }
 }

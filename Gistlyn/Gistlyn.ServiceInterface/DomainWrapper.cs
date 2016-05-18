@@ -32,6 +32,13 @@ namespace Gistlyn.ServiceInterface
             }
         }
 
+        public ScriptExecutionResult EvaluateExpression(string expr)
+        {
+            ScriptExecutionResult result = runner.EvaluateExpression(expr).Result;
+
+            return result;
+        }
+
         public ScriptStatus GetScriptStatus()
         {
             return runner.GetScriptStatus();

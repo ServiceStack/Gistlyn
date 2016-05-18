@@ -41,6 +41,21 @@ namespace Gistlyn.ServiceInterface
             return variable;
         }
 
+        public object Any(EvaluateExpression request)
+        {
+            ScriptExecutionResult result;
+
+            var runner = Session.GetScriptRunnerInfo(request.GistHash);
+
+            var wrapper = runner != null ? runner.DomainWrapper : null;
+
+            result = wrapper != null
+                ? wrapper.EvaluateExpression(request.Expression)
+                : new ScriptExecutionResult() { Status = ScriptStatus.Unknown };
+
+            return result;
+        }
+
         public object Any(GetScriptVariables request)
         {
             ScriptStateVariables variables;

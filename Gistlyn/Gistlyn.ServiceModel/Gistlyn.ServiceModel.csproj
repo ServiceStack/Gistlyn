@@ -56,6 +56,7 @@
     <Compile Include="GetScriptVariableJson.cs" />
     <Compile Include="CancelScript.cs" />
     <Compile Include="GetScriptStatus.cs" />
+    <Compile Include="EvaluateExpression.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Types\" />
