@@ -306,30 +306,32 @@ namespace Gistlyn.SnippetEngine
             ScriptExecutionResult scriptResult = new ScriptExecutionResult(){ Variables = new List<VariableInfo>(), Errors = new List<ErrorInfo>() };
             scriptResult.Status = GetScriptStatus();
 
-
-            try
+            if (scriptResult.Status == ScriptStatus.Completed)
             {
-                VariableInfo info = new VariableInfo() { Name = String.Empty };
-
-                var stateResult = await state.Result.ContinueWithAsync(expr);
-
-                if (stateResult.ReturnValue != null)
+                try
                 {
-                    info.Type = stateResult.ReturnValue.GetType().ToString();
-                    info.Value = stateResult.ReturnValue.ToString();
+                    VariableInfo info = new VariableInfo() { Name = String.Empty };
+
+                    var stateResult = await state.Result.ContinueWithAsync(expr);
+
+                    if (stateResult.ReturnValue != null)
+                    {
+                        info.Type = stateResult.ReturnValue.GetType().ToString();
+                        info.Value = stateResult.ReturnValue.ToString();
+                    }
+                    scriptResult.Variables.Add(info);
                 }
-                scriptResult.Variables.Add(info);
-            }
-            catch (CompilationErrorException e)
-            {
-                scriptResult.Status = ScriptStatus.CompiledWithErrors;
-                foreach (var err in e.Diagnostics)
-                    scriptResult.Errors.Add(new ErrorInfo() { Info = err.ToString() });
-            }
-            catch (Exception e)
-            {
-                scriptResult.Status = ScriptStatus.ThrowedException;
+                catch (CompilationErrorException e)
+                {
+                    scriptResult.Status = ScriptStatus.CompiledWithErrors;
+                    foreach (var err in e.Diagnostics)
+                        scriptResult.Errors.Add(new ErrorInfo() { Info = err.ToString() });
+                }
+                catch (Exception e)
+                {
+                    scriptResult.Status = ScriptStatus.ThrowedException;
                 scriptResult.Exception = e;
+                }
             }
 
             return scriptResult;
