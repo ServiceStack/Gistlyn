@@ -388,6 +388,7 @@ function cancelScript()
         function(response) {
             $("#multirun").removeAttr("disabled");
             $("#cancel").hide();
+            $("#scriptStatus").text(response.result.status);
         },
         showError
     );
