@@ -210,6 +210,39 @@ function runGist($block)
 	);
 }
 
+function evaluateExpressionResponse($block, response)
+{
+    $("table.role-expressionVariables tbody", $block).empty();
+
+    var hasVars = response.result.variables && response.result.variables.length > 0;
+    if (hasVars) {
+        $.each(response.result.variables, function(idx, variable) {
+            var el = $("<tr></tr>");
+            var value = $('<td class="role-value"></td>').text(variable.value);
+            var type = $('<td class="role-type"></td>').text(variable.type);
+            el.append(value).append(type);
+            $("table.role-expressionVariables tbody", $block).append(el);
+        });
+    }
+    $("table.role-expressionVariables tbody", $block).closest("div.row").toggle(hasVars);
+
+    $("table.role-expressionErrors tbody", $block).empty();
+    var hasErrors = response.result.errors && response.result.errors.length > 0;
+    if (hasErrors) {
+        $.each(response.result.errors, function(idx, error) {
+            var el = $("<tr></tr>").append(error.info);
+            $("table.role-expressionErrors tbody", $block).append(el);
+        });
+    }
+    $("table.role-expressionErrors tbody", $block).closest("div.row").toggle(hasErrors);
+
+    var hasException = !!response.result.exception;
+    if (hasException) {
+        $("span.role-expressionException").text(response.result.exception);
+    }
+    $("span.role-expressionException", $block).closest("div.row").toggle(hasException);
+}
+
 function scriptExecResponse($block, response)
 {
     $("div.role-gistresult", $block).show();
@@ -474,7 +507,7 @@ function evaluateExpression(e)
             else 
                 $("#multirunBlock span.role-evaluateRunningState").text("");
 
-            //scriptExecResponse($("#multirunBlock"), { result: { parentVariable: response.parentVariable, variables: response.variables, errors: {}, exceptions: {}}});
+            evaluateExpressionResponse($("#multirunBlock"), { result: { parentVariable: response.parentVariable, variables: response.variables, errors: response.errors, exceptions: response.exceptions}});
         },
         showError
     );
