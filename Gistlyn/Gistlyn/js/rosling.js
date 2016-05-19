@@ -258,6 +258,8 @@ function scriptExecResponse($block, response)
         $(".role-parentVariable", $block).text("");
     }
 
+    var parent = $(".role-parentVariable", $block).text();
+
     var hasVars = response.result.variables && response.result.variables.length > 0;
     if (hasVars) {
         $.each(response.result.variables, function(idx, variable) {
@@ -265,7 +267,7 @@ function scriptExecResponse($block, response)
             var name = $('<td class="role-name"></td>').text(variable.name);
             var value = $('<td class="role-value"></td>').text(variable.value);
             var type = $('<td class="role-type"></td>').text(variable.type);
-            var btnJson = $('<td><button class="btn btn-primary role-getVariableJson">Get Json</button></td>');
+            var btnJson = parent ? $('<td></td>') : $('<td><button class="btn btn-primary role-getVariableJson">Get Json</button></td>');
             var btnInspect = variable.isBrowseable ? $('<td><button class="btn btn-primary role-inspectVariable">Inspect</button></td>') : $('<td></td>');
             el.append(name).append(value).append(type).append(btnInspect).append(btnJson);
             $("table.role-variables tbody", $block).append(el);
@@ -447,9 +449,10 @@ function getVariableJson(e)
 {
     var $that = $(this);
     var name = $("td.role-name", $that.closest("tr")).text();
+    var parent = $("#multirunBlock .role-parentVariable").text();
     var gistHash = $("#gistId").data("gistHash");
 
-    gateway.getFromService({GetScriptVariableJson : {gistHash: gistHash, variableName: name}},
+    gateway.getFromService({GetScriptVariableJson : {gistHash: gistHash, variableName: (parent ? (parent + "." + name) : name)}},
         function(response) {
             if (response.status == "PrepareToRun" || response.status == "Running")
                 $("#multirunBlock span.role-runningState").text("Script is running. Can't get variable json representation");
