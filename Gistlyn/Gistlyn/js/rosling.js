@@ -180,8 +180,11 @@ function getGist()
 	$.get({
 		url: "https://api.github.com/gists/" + gistId,
 		success: function(response) {
+            var oldGist = $("#gistId").data("gistHash");
             $("#gistId").data("gistHash", gistId);
-            subscribeServerEvents(gistId);
+            if (oldGist != gistId) {
+                subscribeServerEvents(gistId);
+            }
 
             //clear run multiple
             $("#multirunBlock").hide();
