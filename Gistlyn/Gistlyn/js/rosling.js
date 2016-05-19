@@ -169,6 +169,8 @@ function bind()
     $("#multirunBlock").on("click", "button.role-getVariableJson", getVariableJson);
 
     $("#multirunBlock").on("click", "button.role-inspectVariable", inspectVariable);
+
+    $("#multirunBlock").on("click", "button.role-evaluate", evaluateExpression);
 }
 
 function getGist()
@@ -457,4 +459,24 @@ function inspectVariable(e)
         },
         showError
     );
+}
+
+function evaluateExpression(e)
+{
+    var $that = $(this);
+    var gistHash = $("#gistId").data("gistHash");
+    var expr = $("input.role-expression", $that.closest("div.row")).val();
+
+    gateway.getFromService({EvaluateExpression: { gistHash: gistHash, expression: expr }},
+        function(response) {
+            if (response.status == "PrepareToRun" || response.status == "Running")
+                $("#multirunBlock span.role-evaluateRunningState").text("Script is running can't evaluate expression");
+            else 
+                $("#multirunBlock span.role-evaluateRunningState").text("");
+
+            //scriptExecResponse($("#multirunBlock"), { result: { parentVariable: response.parentVariable, variables: response.variables, errors: {}, exceptions: {}}});
+        },
+        showError
+    );
+
 }
