@@ -42,6 +42,7 @@ namespace Gistlyn
             Plugins.Add(new ServerEventsFeature()
             {
                 HeartbeatInterval = TimeSpan.FromSeconds(30),
+                IdleTimeout = TimeSpan.FromSeconds(60),
                 OnConnect = (IEventSubscription arg1, Dictionary<string, string> arg2) =>
                 {
                     Console.WriteLine("OnConnect");
