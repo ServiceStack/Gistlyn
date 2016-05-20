@@ -94,11 +94,11 @@ namespace Gistlyn
         private void ConfigureAuthAndRegistrationServices (Funq.Container container)
         {
             //Enable and register existing services you want this host to make use of.
-            var userSession = new CustomUserSession ();
+            //var userSession = new CustomUserSession ();
 
             //Register all Authentication methods you want to enable for this web app.
             Plugins.Add (new AuthFeature (
-                () => userSession,
+                () => new CustomUserSession(),
                 new IAuthProvider [] {
                 new EmptyAuthProvider(container.Resolve<UserSession>())
             }, null));
