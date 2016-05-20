@@ -24,6 +24,11 @@ namespace Gistlyn.ServiceInterface
 
         public List<string> References { get { return references; } }
 
+        public override object InitializeLifetimeService()
+        {
+            return null;
+        }
+
         public void Cancel()
         {
             if (tokenSource != null)

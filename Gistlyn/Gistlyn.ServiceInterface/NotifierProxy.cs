@@ -21,6 +21,11 @@ namespace Gistlyn.ServiceInterface
             this.gistHash = gistHash;
         }
 
+        public override object InitializeLifetimeService()
+        {
+            return null;
+        }
+
         public void SendConsoleMessage(string message)
         {
             var consoleMessage = new ConsoleMessage { Message = message };
