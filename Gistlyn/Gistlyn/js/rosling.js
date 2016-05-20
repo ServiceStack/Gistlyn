@@ -514,7 +514,7 @@ function evaluateExpression(e)
             else 
                 $("#multirunBlock span.role-evaluateRunningState").text("");
 
-            evaluateExpressionResponse($("#multirunBlock"), { result: { parentVariable: response.parentVariable, variables: response.variables, errors: response.errors, exceptions: response.exceptions}});
+            evaluateExpressionResponse($("#multirunBlock"), { result: { parentVariable: response.parentVariable, variables: response.variables, errors: response.errors, exception: response.exception}});
         },
         showError
     );
