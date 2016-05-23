@@ -12,6 +12,7 @@ namespace Gistlyn.ServiceInterface
         UserSession session;
         string sessionId;
         string gistHash;
+        const string channel = "gist";
 
         public NotifierProxy(UserSession session, IServerEvents serverEvents, string gistHash)
         {
@@ -29,12 +30,12 @@ namespace Gistlyn.ServiceInterface
         public void SendConsoleMessage(string message)
         {
             var consoleMessage = new ConsoleMessage { Message = message };
-            serverEvents.NotifySession(sessionId, consoleMessage, gistHash);
+            serverEvents.NotifySubscription(gistHash, consoleMessage, "gist");
         }
 
         public void SendScriptExecutionResults(ScriptExecutionResult result)
         {
-            serverEvents.NotifySession(sessionId, result, gistHash);
+            serverEvents.NotifySubscription(gistHash, result, "gist");
         }
 
     }

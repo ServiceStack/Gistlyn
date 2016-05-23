@@ -1,4 +1,6 @@
-﻿//common functions
+﻿var activeSub;
+
+//common functions
 ﻿function showError(status)
 {
     BootstrapDialog.show({
@@ -32,6 +34,8 @@ function getQueryHash() {
 
 function init()
 {
+    subscribeServerEvents("gist");
+
     var gistHash = getParameterByName("gist");
 
     if (gistHash) {
@@ -54,7 +58,7 @@ function subscribeServerEvents(channel)
     $(source).handleServerEvents({
         handlers: {
             onConnect: function (u) {
-                console.log(u);
+                console.log("subscription", u);
                 activeSub = u;
             },
             onHeartbeat: function (msg, e) { if (console) console.log("onHeartbeat", msg, e); },
@@ -182,9 +186,6 @@ function getGist()
 		success: function(response) {
             var oldGist = $("#gistId").data("gistHash");
             $("#gistId").data("gistHash", gistId);
-            if (oldGist != gistId) {
-                subscribeServerEvents(gistId);
-            }
 
             //clear run multiple
             $("#multirunBlock").hide();
@@ -311,7 +312,7 @@ function runMultiple()
         showError({responseStatus : {message: "There must be only one file 'packages.config'"}});
     }
 
-    var gistHash = $("#gistId").data("gistHash");
+    var gistHash = activeSub.id;
     var mainCode = $("textarea", $(main[0]).closest("div.row")).val();
     var sources = [];
     var references = $("#assemblyReferences").data("references");
@@ -382,7 +383,7 @@ function runMultipleInternal(gistHash, mainCode, sources, references, packages, 
 
 function cancelScript()
 {
-    var gistHash = $("#gistId").data("gistHash");
+    var gistHash = activeSub.id;
 
     gateway.postToService({CancelScript : {gistHash: gistHash}},
         function(response) {
@@ -433,7 +434,7 @@ function addReference()
 
 function getVariables()
 {
-    var gistHash = $("#gistId").data("gistHash");
+    var gistHash = activeSub.id;
     var parent = $("#multirunBlock .role-parentVariable").data("prev");
 
     gateway.getFromService({GetScriptVariables : {gistHash: gistHash, variableName: parent}},
@@ -454,7 +455,7 @@ function getVariableJson(e)
     var $that = $(this);
     var name = $("td.role-name", $that.closest("tr")).text();
     var parent = $("#multirunBlock .role-parentVariable").text();
-    var gistHash = $("#gistId").data("gistHash");
+    var gistHash = activeSub.id;
 
     gateway.getFromService({GetScriptVariableJson : {gistHash: gistHash, variableName: (parent ? (parent + "." + name) : name)}},
         function(response) {
@@ -485,7 +486,7 @@ function inspectVariable(e)
     var $that = $(this);
     var parentName = $("#multirunBlock .role-parentVariable").text();
     var name = $("td.role-name", $that.closest("tr")).text();
-    var gistHash = $("#gistId").data("gistHash");
+    var gistHash = activeSub.id;
     var variableName = parentName ? parentName + '.' + name : name;
 
     gateway.getFromService({GetScriptVariables: { gistHash: gistHash, variableName: variableName }},
@@ -504,7 +505,7 @@ function inspectVariable(e)
 function evaluateExpression(e)
 {
     var $that = $(this);
-    var gistHash = $("#gistId").data("gistHash");
+    var gistHash = activeSub.id;
     var expr = $("input.role-expression", $that.closest("div.row")).val();
 
     gateway.getFromService({EvaluateExpression: { gistHash: gistHash, expression: expr }},
