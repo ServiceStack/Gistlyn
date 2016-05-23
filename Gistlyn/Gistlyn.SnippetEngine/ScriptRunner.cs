@@ -20,6 +20,14 @@ namespace Gistlyn.SnippetEngine
         Task<ScriptState<int>> state;
         ScriptStatus status;
 
+        enum GetVariableResult
+        {
+            Success,
+            WrongExpression,
+            NullReferenceException,
+            IndexOutOfRangeException
+        }
+
         private ScriptStatus GetScriptStateStatus()
         {
             if (state != null)
@@ -64,9 +72,11 @@ namespace Gistlyn.SnippetEngine
 
             if (json.Status == ScriptStatus.Completed)
             {
-                var variable = state.Result.Variables.FirstOrDefault(v => v.Name == name);
+                GetVariableResult varResult;
+                var variable = GetVariableByName(name, out varResult);
+
                 JsConfig.MaxDepth = 10;
-                json.Json = variable != null && variable.Value != null ? variable.Value.ToJson() : String.Empty;
+                json.Json = variable != null ? variable.ToJson() : String.Empty;
             }
 
             return json;
@@ -82,6 +92,80 @@ namespace Gistlyn.SnippetEngine
             return !type.IsPrimitive && type != typeof(string);
         }
 
+        private object GetVariableByName(string parentVariable, out GetVariableResult error)
+        {
+            if (String.IsNullOrEmpty(parentVariable))
+            {
+                throw new ArgumentException("parentVariable");
+            }
+
+            string[] parts = parentVariable.Split('.');
+
+            //TODO: handle indexer
+            object curVar = state.Result.Variables.FirstOrDefault(v => v.Name == parts[0]);
+
+            if (curVar == null)
+            {
+                error = GetVariableResult.WrongExpression;
+                return null;
+            }
+
+            curVar = ((ScriptVariable)curVar).Value;
+
+            for (int i = 0; i < parts.Length; i++)
+            {
+                string part = parts[i];
+                //check if indexer
+                int firstIdx = part.IndexOf('[');
+                int lastIdx = part.LastIndexOf(']');
+                if (firstIdx != -1 && lastIdx != -1 && firstIdx < lastIdx)
+                {
+                    int index;
+
+                    //TODO: expression error
+                    if (!Int32.TryParse(part.Substring(firstIdx, lastIdx), out index))
+                    {
+                        error = GetVariableResult.WrongExpression;
+                        return null;
+                    }
+
+                    //TODO: index out of range
+                    Type t = curVar.GetType();
+                    //search indexer
+                    PropertyInfo[] props = t.GetProperties().Where(p => p.GetIndexParameters().Length > 0).ToArray();
+
+                    //we have indexer
+                    if (props != null && props.Length > 0)
+                    {
+                        curVar = props[0].GetValue(curVar, new object[] { index });
+                    }
+                }
+                else if (firstIdx == -1 && lastIdx == -1)
+                {
+                    if (i > 0)
+                    {
+                        Type t = curVar.GetType();
+                        PropertyInfo prop = t.GetProperty(part);
+
+                        if (prop == null)
+                        {
+                            error = GetVariableResult.WrongExpression;
+                            return null;
+                        }
+                        curVar = prop.GetValue(curVar);
+                    }
+                }
+                else
+                {
+                    error = GetVariableResult.WrongExpression;
+                    return null;
+                }
+            }
+
+            error = GetVariableResult.Success;
+            return curVar;
+        }
+
         public ScriptStateVariables GetVariables(string parentVariable)
         {
             ScriptStateVariables variables = new ScriptStateVariables()
@@ -95,66 +179,11 @@ namespace Gistlyn.SnippetEngine
             {
                 if (!String.IsNullOrEmpty(parentVariable))
                 {
-                    string[] parts = parentVariable.Split('.');
-
-                    //TODO: handle indexer
-                    object curVar = state.Result.Variables.FirstOrDefault(v => v.Name == parts[0]);
-
-                    if (curVar == null)
-                        return variables;
-
-                    curVar = ((ScriptVariable)curVar).Value;
-
-                    for (int i = 0; i < parts.Length; i++)
-                    {
-                        string part = parts[i];
-                        //check if indexer
-                        int firstIdx = part.IndexOf('[');
-                        int lastIdx = part.LastIndexOf(']');
-                        if (firstIdx != -1 && lastIdx != -1 && firstIdx < lastIdx)
-                        {
-                            int index;
-
-                            //TODO: expression error
-                            if (!Int32.TryParse(part.Substring(firstIdx, lastIdx), out index))
-                                return variables;
-
-                            //TODO: index out of range
-                            Type t = curVar.GetType();
-                            //search indexer
-                            PropertyInfo[] props = t.GetProperties().Where(p => p.GetIndexParameters().Length > 0).ToArray();
-
-                            //we have indexer
-                            if (props != null && props.Length > 0)
-                            {
-                                curVar = props[0].GetValue(curVar, new object[] { index });
-                            }
-                        }
-                        else if (firstIdx == -1 && lastIdx == -1)
-                        {
-                            if (i > 0)
-                            {
-                                Type t = curVar.GetType();
-                                PropertyInfo prop = t.GetProperty(part);
-
-                                if (prop == null)
-                                {
-                                    //TODO: message about not found
-                                    return variables;
-                                }
-                                curVar = prop.GetValue(curVar);
-                            }
-                        }
-                        else
-                        {
-                            //TODO: message about wrong expression
-                            return variables;
-                        }
-                    }
+                    GetVariableResult varResult;
+                    object curVar = GetVariableByName(parentVariable, out varResult);
 
                     variables.ParentVariable.Type = curVar != null ? curVar.GetType().ToString() : null;
                     variables.ParentVariable.Value = curVar != null ? curVar.ToString(): null;
-
 
                     PropertyInfo[] finalProps = curVar != null
                         ? curVar.GetType().GetProperties(BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)

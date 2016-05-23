@@ -270,7 +270,7 @@ function scriptExecResponse($block, response)
             var name = $('<td class="role-name"></td>').text(variable.name);
             var value = $('<td class="role-value"></td>').text(variable.value);
             var type = $('<td class="role-type"></td>').text(variable.type);
-            var btnJson = parent ? $('<td></td>') : $('<td><button class="btn btn-primary role-getVariableJson">Get Json</button></td>');
+            var btnJson = $('<td><button class="btn btn-primary role-getVariableJson">Get Json</button></td>');
             var btnInspect = variable.isBrowseable ? $('<td><button class="btn btn-primary role-inspectVariable">Inspect</button></td>') : $('<td></td>');
             el.append(name).append(value).append(type).append(btnInspect).append(btnJson);
             $("table.role-variables tbody", $block).append(el);
