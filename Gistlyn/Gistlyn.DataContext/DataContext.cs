@@ -62,6 +62,34 @@ namespace Gistlyn.DataContext
             return packages;
         }
 
+        public string GetMemoizedResult(string codeHash)
+        {
+            List<MemoizedResult> results = null;
+
+            using (var db = dbFactory.Open())
+            {
+                if (db.TableExists(typeof(MemoizedResult).Name))
+                {
+                    var q = db.From<MemoizedResult>().Where(r => r.CodeHash == codeHash);
+                    results = db.Select<MemoizedResult>(q);
+                }
+            }
+
+            return results != null && results.Count > 0 ? results[0].Result : null;
+        }
+
+        public void AddMemoizedResult(MemoizedResult result)
+        {
+            using (var db = dbFactory.Open())
+            {
+                if (db.TableExists(typeof(MemoizedResult).Name) || db.CreateTableIfNotExists<MemoizedResult>())
+                {
+                    db.Insert(result);
+                }
+            }
+        }
+
+
     }
 }
 

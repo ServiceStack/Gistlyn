@@ -9,6 +9,8 @@ namespace Gistlyn.Common.Interfaces
         void SavePackage(NugetPackageInfo package);
         List<NugetPackageInfo> GetPackageAndDependencies(string packageId, string version);
         List<NugetPackageInfo> SearchPackages(string packageId, string version);
+        void AddMemoizedResult(MemoizedResult result);
+        string GetMemoizedResult(string codeHash);
     }
 }
 
