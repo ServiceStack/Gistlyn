@@ -305,7 +305,7 @@ function runMultiple()
     var packagesConfig = $.grep($("#gistlist .role-filename"), function(val){ return $(val).text().toUpperCase() == "PACKAGES.CONFIG" });
 
     if (main.length != 1) {
-        showError({responseStatus : {message: "There must be at file 'Main.cs' and it must be only one"}});
+        showError({responseStatus : {message: "There must be file 'Main.cs' and it must be only one"}});
     }
 
     if (packagesConfig.length > 1) {

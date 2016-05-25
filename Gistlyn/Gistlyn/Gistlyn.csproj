@@ -176,6 +176,8 @@
     <Content Include="bower_components\bootstrap3-typeahead\bootstrap3-typeahead.min.js" />
     <None Include="sqlite3.dll" />
     <Content Include="js\ss-utils.js" />
+    <Content Include="js\gistlyn.js" />
+    <Content Include="sampleinclude.html" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />

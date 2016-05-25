@@ -57,6 +57,7 @@
     <Compile Include="CancelScript.cs" />
     <Compile Include="GetScriptStatus.cs" />
     <Compile Include="EvaluateExpression.cs" />
+    <Compile Include="GetIncludeScript.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Types\" />
