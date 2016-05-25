@@ -9,7 +9,7 @@ function getGist(gistId, scriptId, onSuccess)
             var scripts = [];
             var packages;
 
-            $.each(response, function(idx, file) { 
+            $.each(response.files, function(idx, file) { 
                 if (file.filename.toUpperCase() == "MAIN.CS") {
                     main = file.content;
                 } else if (file.filename.toUpperCase() == "PACKAGES.CONFIG") {
@@ -17,9 +17,9 @@ function getGist(gistId, scriptId, onSuccess)
                 } else {
                     scripts.push(content);
                 }
-            }
+            });
 
-            onSuccess({scriptId: scriptId, gistHash: gistId, mainCode : main, scripts: scripts, packages: packages});
+            onSuccess({scriptId: scriptId, gistHash: gistId, mainCode: main, scripts: scripts, packages: packages});
         },
         datatype: "jsonp"
     });
