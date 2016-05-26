@@ -85,7 +85,7 @@
     <Compile Include="DomainWrapper.cs" />
     <Compile Include="NotifierProxy.cs" />
     <Compile Include="Auth\ScriptRunnerInfo.cs" />
-    <Compile Include="ScriptService.cs" />
+    <Compile Include="IncludeJsScriptService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

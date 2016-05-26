@@ -16,7 +16,7 @@ function getGist(gistId, scriptId, onSuccess)
                 } else if (file.filename.toUpperCase() == "PACKAGES.CONFIG") {
                     packages = file.content;
                 } else {
-                    scripts.push(content);
+                    scripts.push(file.content);
                 }
             });
 
@@ -32,6 +32,35 @@ function onGistResponse(response)
     $("#main_" + response.scriptId).val(response.mainCode);
 
     gistScripts["script_" + response.scriptId] = response;
+
+    $("#run_" + response.scriptId).removeAttr("disabled");
+    $("#cancel_"  + response.scriptId).hide();
+    $("#status_" + response.scriptId).text("");
+}
+
+function changeScriptStatus(scriptId, status)
+{
+    switch(status) {
+        case "Unknown":
+            $("#run_" + scriptId).removeAttr("disabled");
+            $("#cancel_"  + scriptId).hide();
+            $("#status_" + scriptId).text("");
+            break;
+        case "Completed":
+        case "Cancelled":
+        case "CompiledWithErrors":
+        case "ThrowedException":
+            $("#run_" + scriptId).removeAttr("disabled");
+            $("#cancel_"  + scriptId).hide();
+            $("#status_" + scriptId).text(status);
+            break;
+       case "PrepareToRun":
+       case "Running":
+            $("#run_" + scriptId).attr("disabled", "disabled");
+            $("#cancel_"  + scriptId).show();
+            $("#status_" + scriptId).text("Running");
+            break;
+    }
 }
 
 function runScript(scriptId)
@@ -43,14 +72,12 @@ function runScript(scriptId)
 
     gateway.postToService({RunMultipleScripts : {gistHash: scriptInfo.gistHash, mainCode : scriptInfo.mainCode, scripts: scriptInfo.scripts, packages: scriptInfo.packages, forceRun: true}},
         function(response) {
-            //TODO: disable run, enable cancel
+            changeScriptStatus(scriptId, response.result.status);
         },
         function(e) {
-            //disable canlel, enable run
-            //showError(e);
+            changeScriptStatus(scriptId, "ThrowedException");
         }
     );
-
 }
 
 function cancelScript(scriptId)
@@ -59,11 +86,11 @@ function cancelScript(scriptId)
 
     gateway.postToService({CancelScript : {gistHash: gistHash}},
         function(response) {
-            //$("#multirun").removeAttr("disabled");
-            //$("#cancel").hide();
-            //$("#scriptStatus").text(response.result.status);
+            changeScriptStatus(scriptId, response.result);
         },
-        showError
+        function(e) {
+            console.log("cancellation error", e)
+        }
     );
 }
 

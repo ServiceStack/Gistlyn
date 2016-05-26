@@ -5,7 +5,7 @@ using ServiceStack;
 
 namespace Gistlyn.ServiceInterfaces
 {
-    public class ScriptService : Service
+    public class IncludeJsScriptService : Service
     {
 
         [AddHeader(ContentType = "text/javascript")]
@@ -41,9 +41,12 @@ $(""#cancel_{0}"").click(function() {{ cancelScript(scriptId); }});
                     </div> \
                     <div class=""row""> \
                         <div class=""form-group""> \
-                            <div class=""col-md-6""> \
+                            <div class=""col-md-5""> \
 								<button id=""run_{0}"" type=""button"" class=""btn btn-primary role-run"">Run</button> \
 		                        <button id=""cancel_{0}"" type=""button"" class=""btn btn-primary role-cancel"" style=""display:none"">Cancel</button> \
+                            </div> \
+                            <div class=""col-md-1""> \
+                                <span id=""status_{0}"" class=""role-status""></span> \
                             </div> \
                         </div> \
                     </div> \
