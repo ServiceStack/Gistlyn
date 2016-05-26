@@ -58,6 +58,7 @@
     <Compile Include="GetScriptStatus.cs" />
     <Compile Include="EvaluateExpression.cs" />
     <Compile Include="GetIncludeScript.cs" />
+    <Compile Include="RunJsIncludedScripts.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Types\" />

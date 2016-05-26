@@ -13,6 +13,7 @@ using XmlSerializer = System.Xml.Serialization.XmlSerializer;
 using Gistlyn.Common.Interfaces;
 using Gistlyn.ServiceInterfaces.Auth;
 using System.Security.Policy;
+using System.Security.Cryptography;
 
 namespace Gistlyn.ServiceInterface
 {
@@ -25,6 +26,8 @@ namespace Gistlyn.ServiceInterface
         public UserSession Session { get; set; }
 
         public IServerEvents ServerEvents { get; set; }
+
+        public MemoizedResultsContainer MemoizedResults { get; set; }
 
         public object Any(GetScriptVariableJson request)
         {
@@ -224,40 +227,116 @@ namespace Gistlyn.ServiceInterface
                 References = addedReferences,
             };
 
-            /*
-            using (MemoryStream ms = new MemoryStream())
-            {
-                TextWriter tmp = Console.Out;
-                using (StreamWriter sw = new StreamWriter(ms))
-                {
-                    Console.SetOut(sw);
-
-                    try
-                    {
-                        var task = runner.Execute(request.MainCode, request.Scripts, request.References.Select(r => r.Path).ToList());
-                        Session.SetScriptTask(task);
-                        result = task.Result;
-                        ServerEvents.NotifySession(Session.GetSessionId(), result);
-                    }
-                    catch (Exception e)
-                    {
-                        result.Exception = e;
-                    }
-
-                    sw.Close();
-                    Console.SetOut(tmp);
-
-                    result.Console = System.Text.Encoding.UTF8.GetString(ms.ToArray());
-
-                    return new RunMultipleScriptResponse
-                    {
-                        Result = result,
-                        References = addedReferences,
-                    };
-                }
-            }
-            */
         }
 
+        private string GetSourceCodeHash(RunJsIncludedScripts request)
+        {
+            string hash;
+            string code = (request.MainCode ?? String.Empty)
+                + (request.Packages ?? String.Empty) + String.Concat(request.Scripts);
+            
+            using (MD5 md5 = MD5.Create())
+            {
+                byte[] retVal = md5.ComputeHash(Encoding.Unicode.GetBytes(code));
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < retVal.Length; i++)
+                {
+                    sb.Append(retVal[i].ToString("x2"));
+                }
+                hash = sb.ToString();
+            }
+
+            return hash;
+        }
+
+        public object Any(RunJsIncludedScripts request)
+        {
+            if (request.GistHash == null)
+                throw new ArgumentException("GistHash");
+
+            JsIncludedScriptExecutionResult result = new JsIncludedScriptExecutionResult();
+            string codeHash = GetSourceCodeHash(request);
+
+
+            if (!request.NoCache)
+            {
+                MemoizedResult mr = MemoizedResults.Get(codeHash);
+                if (mr != null)
+                {
+                    result.LastVariableJson = mr.Result;
+                    return new RunJsIncludedScriptsResponse() { Result = result };
+                }
+            }
+
+            //TODO: move to get packages function
+            request.References = request.References ?? new List<AssemblyReference>();
+
+            if (!String.IsNullOrEmpty(request.Packages))
+            {
+                PackageCollection packages = null;
+
+                XmlSerializer serializer = new XmlSerializer(typeof(PackageCollection));
+
+                byte[] arr = request.Packages.ToAsciiBytes();
+
+                using (MemoryStream ms = new MemoryStream(arr))
+                {
+                    packages = (PackageCollection)serializer.Deserialize(ms);
+                }
+
+                foreach (NugetPackageInfo package in packages.Packages)
+                {
+                    //istall it
+                    request.References.AddRange(NugetHelper.RestorePackage(DataContext, Config.NugetPackagesDirectory, package.Id, package.Ver));
+                }
+            }
+
+            request.References = request.References.GroupBy(a => a.Name).Select(g => g.First()).ToList();
+            List<AssemblyReference> addedReferences = request.References
+                                                             .Select(r => new AssemblyReference().PopulateWith(r))
+                                                             .ToList();
+
+            foreach (AssemblyReference reference in request.References)
+            {
+                if (!Path.IsPathRooted(reference.Path))
+                {
+                    var rootPath = System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath;
+                    reference.Path = Path.Combine(rootPath, Config.NugetPackagesDirectory, reference.Path);
+                }
+            }
+
+            //Create domain and run script
+            Evidence evidence = new Evidence(AppDomain.CurrentDomain.Evidence);
+            AppDomainSetup setup = new AppDomainSetup();
+            setup.PrivateBinPath = Path.Combine(System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath, "bin");
+            setup.ApplicationBase = System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath;
+
+            AppDomain domain = AppDomain.CreateDomain(Guid.NewGuid().ToString(), evidence, setup);
+
+            var asm = typeof(DomainWrapper).Assembly.FullName;
+            var type = typeof(DomainWrapper).FullName;
+
+            var wrapper = (DomainWrapper)domain.CreateInstanceAndUnwrap(asm, type);
+            wrapper.GistHash = request.GistHash;
+            //var wrapper = new DomainWrapper();
+            var writerProxy = new NotifierProxy(Session, ServerEvents, request.GistHash);
+
+            ScriptExecutionResult sr = wrapper.RunAsync(request.MainCode, request.Scripts, request.References.Select(r => r.Path).ToList(), writerProxy);
+
+            //get json of last variable
+            if (sr.Variables != null && sr.Variables.Count > 0)
+                result.LastVariableJson = wrapper.GetVariableJson(sr.Variables[sr.Variables.Count - 1].Name);
+
+            MemoizedResults.AddOrUpdate(new MemoizedResult() { CodeHash = codeHash, Result = result.LastVariableJson});
+
+            //Unload appdomain only in synchroneous version
+            //AppDomain.Unload(domain);
+
+            return new RunJsIncludedScriptsResponse
+            {
+                Result = result,
+                References = addedReferences,
+            };
+        }
     }
 }

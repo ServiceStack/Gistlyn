@@ -67,6 +67,8 @@
     <Compile Include="Objects\ScriptVariableJson.cs" />
     <Compile Include="Interfaces\INotifier.cs" />
     <Compile Include="Objects\MemoizedResult.cs" />
+    <Compile Include="Objects\MemoizedResultsContainer.cs" />
+    <Compile Include="Objects\JsIncludedScriptExecutionResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Interfaces\" />

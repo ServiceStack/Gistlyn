@@ -6,6 +6,8 @@ namespace Gistlyn.Common.Objects
     {
         public ScriptStatus Status { get; set; }
 
+        public string Name { get; set; }
+
         public string Json { get; set; }
     }
 }

@@ -62,7 +62,7 @@ namespace Gistlyn.DataContext
             return packages;
         }
 
-        public string GetMemoizedResult(string codeHash)
+        public MemoizedResult GetMemoizedResult(string codeHash)
         {
             List<MemoizedResult> results = null;
 
@@ -75,7 +75,7 @@ namespace Gistlyn.DataContext
                 }
             }
 
-            return results != null && results.Count > 0 ? results[0].Result : null;
+            return results != null && results.Count > 0 ? results[0] : null;
         }
 
         public void AddMemoizedResult(MemoizedResult result)

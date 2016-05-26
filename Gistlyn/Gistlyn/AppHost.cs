@@ -42,7 +42,7 @@ namespace Gistlyn
             Plugins.Add(new ServerEventsFeature()
             {
                 HeartbeatInterval = TimeSpan.FromSeconds(30),
-                IdleTimeout = TimeSpan.FromSeconds(60),
+                IdleTimeout = TimeSpan.FromSeconds(100),
                 OnConnect = (IEventSubscription arg1, Dictionary<string, string> arg2) =>
                 {
                     Console.WriteLine("OnConnect");
@@ -63,6 +63,8 @@ namespace Gistlyn
             //this.CustomErrorHttpHandlers.Remove(HttpStatusCode.Forbidden);
 
             //container.RegisterAutoWiredAs<MemoryChatHistory, IChatHistory>();
+
+            container.Register<MemoizedResultsContainer>(new MemoizedResultsContainer());
 
             //session and authentication
             container.Register<ICacheClient> (new MemoryCacheClient ());
