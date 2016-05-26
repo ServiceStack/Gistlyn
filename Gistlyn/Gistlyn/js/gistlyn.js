@@ -1,4 +1,5 @@
-﻿var gistScripts;
+﻿var gateway = new servicestack.ClientGateway('/servicestack/');
+var gistScripts = {};
 
 function getGist(gistId, scriptId, onSuccess)
 {
@@ -30,11 +31,13 @@ function onGistResponse(response)
     //TODO: change to getElementById
     $("#main_" + response.scriptId).val(response.mainCode);
 
-    gistScripts["script_" + scriptId] = response;
+    gistScripts["script_" + response.scriptId] = response;
 }
 
 function runScript(scriptId)
 {
+    console.log("run");
+
     var mainCode = $("#main_" + scriptId).val();
     var scriptInfo = gistScripts["script_" + scriptId];
 

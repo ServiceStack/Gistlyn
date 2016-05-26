@@ -21,31 +21,38 @@ var gist = ""{1}"";
 var noCache = {2};
 
 getGist(gist, scriptId, onGistResponse);
+
+$(""#run_{0}"").click(function() {{ runScript(scriptId); }});
+
+$(""#cancel_{0}"").click(function() {{ cancelScript(scriptId); }});
            
 }}
-
-init_{0}();", scriptId, request.Gist, request.NoCache.ToJson());
+", scriptId, request.Gist, request.NoCache.ToJson());
 
             builder.AppendFormat(@"document.write(' \
             <div class=""row""> \
                 <div class=""form-group""> \
-                    <div class=""row voffset3""> \
+                    <div class=""row""> \
                         <div class=""form-group""> \
                             <div class=""col-md-6""> \
                                 <textarea id=""main_{0}"" class=""form-control role-gisttext"" rows=""10"" required=""required""></textarea> \
                             </div> \
-                                <button id=""run_{0}"" type=""button"" class=""btn btn-primary role-run hide"">Run</button> \
-		                        <button id=""cancel_{0}"" type=""button"" class=""btn btn-primary"" style=""display:none"">Cancel</button> \
-                            </div> \
                         </div> \
                     </div> \
-                    <div class=""col-md-4""> \
-                        <button id=""multirun"" type=""button"" class=""btn btn-primary"" style=""display:none"">Run</button> \
+                    <div class=""row""> \
+                        <div class=""form-group""> \
+                            <div class=""col-md-6""> \
+								<button id=""run_{0}"" type=""button"" class=""btn btn-primary role-run"">Run</button> \
+		                        <button id=""cancel_{0}"" type=""button"" class=""btn btn-primary role-cancel"" style=""display:none"">Cancel</button> \
+                            </div> \
+                        </div> \
                     </div> \
                 </div> \
             </div> \
 ');
 ", scriptId);
+
+            builder.AppendFormat("init_{0}();", scriptId);
             
             return builder.ToString();
         }
