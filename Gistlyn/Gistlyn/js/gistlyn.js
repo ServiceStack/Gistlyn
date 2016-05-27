@@ -63,6 +63,27 @@ function changeScriptStatus(scriptId, status)
     }
 }
 
+function setScriptResult(scriptId, response)
+{
+    var id = "#results_" + scriptId;
+    $(id).empty();
+
+    var hasErrors = response.result.errors && response.result.errors.length > 0;
+    if (hasErrors) {
+        $.each(response.result.errors, function(idx, error) {
+            $(id).append(error.info + "<br />");
+        });
+    }
+
+    if (response.result.exception) {
+        $(id).text(response.result.exception);
+    }
+
+    if (response.result.lastVariableJson) {
+        $(id).text(response.result.lastVariableJson.name + "=" + response.result.lastVariableJson.json); 
+    }
+} 
+
 function runScript(scriptId, noCache)
 {
     console.log("run");
@@ -73,6 +94,7 @@ function runScript(scriptId, noCache)
     gateway.postToService({RunJsIncludedScripts : {scriptId: scriptId, gistHash: scriptInfo.gistHash, mainCode : scriptInfo.mainCode, scripts: scriptInfo.scripts, packages: scriptInfo.packages, noCache: noCache}},
         function(response) {
             changeScriptStatus(scriptId, response.result.status);
+            setScriptResult(scriptId, response);
         },
         function(e) {
             changeScriptStatus(scriptId, "ThrowedException");
