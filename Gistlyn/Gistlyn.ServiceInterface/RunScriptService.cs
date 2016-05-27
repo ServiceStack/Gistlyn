@@ -291,7 +291,11 @@ namespace Gistlyn.ServiceInterface
             //var wrapper = new DomainWrapper();
             var writerProxy = new NotifierProxy(Session, ServerEvents, request.GistHash);
 
-            ScriptExecutionResult sr = wrapper.RunAsync(request.MainCode, request.Scripts, addedReferences.Select(r => r.Path).ToList(), writerProxy);
+            Session.SetScriptRunnerInfo(request.ScriptId, domain, wrapper);
+            ScriptExecutionResult sr = wrapper.Run(request.MainCode, request.Scripts, addedReferences.Select(r => r.Path).ToList(), writerProxy);
+
+            result.Exception = sr.Exception;
+            result.Errors = sr.Errors;
 
             //get json of last variable
             if (sr.Variables != null && sr.Variables.Count > 0)

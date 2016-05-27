@@ -22,7 +22,7 @@ var noCache = {2};
 
 getGist(gist, scriptId, onGistResponse);
 
-$(""#run_{0}"").click(function() {{ runScript(scriptId); }});
+$(""#run_{0}"").click(function() {{ runScript(scriptId, noCache); }});
 
 $(""#cancel_{0}"").click(function() {{ cancelScript(scriptId); }});
            

@@ -63,14 +63,14 @@ function changeScriptStatus(scriptId, status)
     }
 }
 
-function runScript(scriptId)
+function runScript(scriptId, noCache)
 {
     console.log("run");
 
     var mainCode = $("#main_" + scriptId).val();
     var scriptInfo = gistScripts["script_" + scriptId];
 
-    gateway.postToService({RunJsIncludedScripts : {gistHash: scriptInfo.gistHash, mainCode : scriptInfo.mainCode, scripts: scriptInfo.scripts, packages: scriptInfo.packages, forceRun: true}},
+    gateway.postToService({RunJsIncludedScripts : {scriptId: scriptId, gistHash: scriptInfo.gistHash, mainCode : scriptInfo.mainCode, scripts: scriptInfo.scripts, packages: scriptInfo.packages, noCache: noCache}},
         function(response) {
             changeScriptStatus(scriptId, response.result.status);
         },
