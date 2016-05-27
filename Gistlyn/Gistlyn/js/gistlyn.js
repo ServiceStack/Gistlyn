@@ -70,7 +70,7 @@ function runScript(scriptId)
     var mainCode = $("#main_" + scriptId).val();
     var scriptInfo = gistScripts["script_" + scriptId];
 
-    gateway.postToService({RunMultipleScripts : {gistHash: scriptInfo.gistHash, mainCode : scriptInfo.mainCode, scripts: scriptInfo.scripts, packages: scriptInfo.packages, forceRun: true}},
+    gateway.postToService({RunJsIncludedScripts : {gistHash: scriptInfo.gistHash, mainCode : scriptInfo.mainCode, scripts: scriptInfo.scripts, packages: scriptInfo.packages, forceRun: true}},
         function(response) {
             changeScriptStatus(scriptId, response.result.status);
         },

@@ -133,6 +133,47 @@ namespace Gistlyn.ServiceInterface
             };
         }
 
+        private List<AssemblyReference> AddReferencesFromPackages(List<AssemblyReference> references, string packages)
+        {
+            List<AssemblyReference> tmpReferences = references ?? new List<AssemblyReference>();
+
+            if (!String.IsNullOrEmpty(packages))
+            {
+                PackageCollection tmpPackages = null;
+
+                XmlSerializer serializer = new XmlSerializer(typeof(PackageCollection));
+
+                byte[] arr = packages.ToAsciiBytes();
+
+                using (MemoryStream ms = new MemoryStream(arr))
+                {
+                    tmpPackages = (PackageCollection)serializer.Deserialize(ms);
+                }
+
+                foreach (NugetPackageInfo package in tmpPackages.Packages)
+                {
+                    //istall it
+                    tmpReferences.AddRange(NugetHelper.RestorePackage(DataContext, Config.NugetPackagesDirectory, package.Id, package.Ver));
+                }
+            }
+
+            //distinct by name
+            tmpReferences = tmpReferences.GroupBy(a => a.Name).Select(g => g.First()).ToList();
+            List<AssemblyReference> addedReferences = tmpReferences
+                                                             .Select(r => new AssemblyReference().PopulateWith(r))
+                                                             .ToList();
+
+            foreach (AssemblyReference reference in tmpReferences)
+            {
+                if (!Path.IsPathRooted(reference.Path))
+                {
+                    var rootPath = System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath;
+                    reference.Path = Path.Combine(rootPath, Config.NugetPackagesDirectory, reference.Path);
+                }
+            }
+
+            return addedReferences;
+        }
 
         public object Any(RunMultipleScripts request)
         {
@@ -162,42 +203,7 @@ namespace Gistlyn.ServiceInterface
             }
 
 
-            request.References = request.References ?? new List<AssemblyReference>();
-
-            if (!String.IsNullOrEmpty(request.Packages))
-            {
-                PackageCollection packages = null;
-
-                XmlSerializer serializer = new XmlSerializer(typeof(PackageCollection));
-
-                byte[] arr = request.Packages.ToAsciiBytes();
-
-                using (MemoryStream ms = new MemoryStream(arr))
-                {
-                    packages = (PackageCollection)serializer.Deserialize(ms);
-                }
-
-                foreach (NugetPackageInfo package in packages.Packages)
-                {
-                    //istall it
-                    request.References.AddRange(NugetHelper.RestorePackage(DataContext, Config.NugetPackagesDirectory, package.Id, package.Ver));
-                }
-            }
-
-            //distinct by name
-            request.References = request.References.GroupBy(a => a.Name).Select(g => g.First()).ToList();
-            List<AssemblyReference> addedReferences = request.References
-                                                             .Select(r => new AssemblyReference().PopulateWith(r))
-                                                             .ToList();
-
-            foreach (AssemblyReference reference in request.References)
-            {
-                if (!Path.IsPathRooted(reference.Path))
-                {
-                    var rootPath = System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath;
-                    reference.Path = Path.Combine(rootPath, Config.NugetPackagesDirectory, reference.Path);
-                }
-            }
+            List<AssemblyReference> addedReferences = AddReferencesFromPackages(request.References, request.Packages);
 
             Evidence evidence = new Evidence(AppDomain.CurrentDomain.Evidence);
             AppDomainSetup setup = new AppDomainSetup();
@@ -214,7 +220,7 @@ namespace Gistlyn.ServiceInterface
             //var wrapper = new DomainWrapper();
             var writerProxy = new NotifierProxy(Session, ServerEvents, request.GistHash);
 
-            result = wrapper.RunAsync(request.MainCode, request.Scripts, request.References.Select(r => r.Path).ToList(), writerProxy);
+            result = wrapper.RunAsync(request.MainCode, request.Scripts, addedReferences.Select(r => r.Path).ToList(), writerProxy);
 
             Session.SetScriptRunnerInfo(request.GistHash, domain, wrapper);
 
@@ -224,9 +230,8 @@ namespace Gistlyn.ServiceInterface
             return new RunMultipleScriptResponse
             {
                 Result = result,
-                References = addedReferences,
+                References = addedReferences
             };
-
         }
 
         private string GetSourceCodeHash(RunJsIncludedScripts request)
@@ -268,42 +273,7 @@ namespace Gistlyn.ServiceInterface
                 }
             }
 
-            //TODO: move to get packages function
-            request.References = request.References ?? new List<AssemblyReference>();
-
-            if (!String.IsNullOrEmpty(request.Packages))
-            {
-                PackageCollection packages = null;
-
-                XmlSerializer serializer = new XmlSerializer(typeof(PackageCollection));
-
-                byte[] arr = request.Packages.ToAsciiBytes();
-
-                using (MemoryStream ms = new MemoryStream(arr))
-                {
-                    packages = (PackageCollection)serializer.Deserialize(ms);
-                }
-
-                foreach (NugetPackageInfo package in packages.Packages)
-                {
-                    //istall it
-                    request.References.AddRange(NugetHelper.RestorePackage(DataContext, Config.NugetPackagesDirectory, package.Id, package.Ver));
-                }
-            }
-
-            request.References = request.References.GroupBy(a => a.Name).Select(g => g.First()).ToList();
-            List<AssemblyReference> addedReferences = request.References
-                                                             .Select(r => new AssemblyReference().PopulateWith(r))
-                                                             .ToList();
-
-            foreach (AssemblyReference reference in request.References)
-            {
-                if (!Path.IsPathRooted(reference.Path))
-                {
-                    var rootPath = System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath;
-                    reference.Path = Path.Combine(rootPath, Config.NugetPackagesDirectory, reference.Path);
-                }
-            }
+            List<AssemblyReference> addedReferences = AddReferencesFromPackages(request.References, request.Packages);
 
             //Create domain and run script
             Evidence evidence = new Evidence(AppDomain.CurrentDomain.Evidence);
@@ -321,7 +291,7 @@ namespace Gistlyn.ServiceInterface
             //var wrapper = new DomainWrapper();
             var writerProxy = new NotifierProxy(Session, ServerEvents, request.GistHash);
 
-            ScriptExecutionResult sr = wrapper.RunAsync(request.MainCode, request.Scripts, request.References.Select(r => r.Path).ToList(), writerProxy);
+            ScriptExecutionResult sr = wrapper.RunAsync(request.MainCode, request.Scripts, addedReferences.Select(r => r.Path).ToList(), writerProxy);
 
             //get json of last variable
             if (sr.Variables != null && sr.Variables.Count > 0)
@@ -335,7 +305,7 @@ namespace Gistlyn.ServiceInterface
             return new RunJsIncludedScriptsResponse
             {
                 Result = result,
-                References = addedReferences,
+                References = addedReferences
             };
         }
     }
