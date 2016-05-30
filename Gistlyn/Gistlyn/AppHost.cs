@@ -73,7 +73,7 @@ namespace Gistlyn
 
             //Config examples
             //this.Plugins.Add(new PostmanFeature());
-            //this.Plugins.Add(new CorsFeature());
+            this.Plugins.Add(new CorsFeature());
 
             container.Register<IAppSettings>(new AppSettings());
 

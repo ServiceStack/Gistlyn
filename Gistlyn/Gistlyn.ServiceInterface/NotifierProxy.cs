@@ -10,14 +10,12 @@ namespace Gistlyn.ServiceInterface
     {
         IServerEvents serverEvents;
         UserSession session;
-        string sessionId;
         string gistHash;
         const string channel = "gist";
 
         public NotifierProxy(UserSession session, IServerEvents serverEvents, string gistHash)
         {
             this.session = session;
-            this.sessionId = session.GetSessionId();
             this.serverEvents = serverEvents;
             this.gistHash = gistHash;
         }

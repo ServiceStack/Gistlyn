@@ -104,6 +104,22 @@ function runScript(scriptId, noCache)
 
     showButtons(scriptId, true);
 
+    /*$.ajax({
+        url: "/servicestack/json/reply/RunJsIncludedScripts?format=json", 
+        data: JSON.stringify({scriptId: scriptId, gistHash: scriptInfo.gistHash, mainCode : mainCode, scripts: scriptInfo.scripts, packages: scriptInfo.packages, noCache: noCache}),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function(response) {
+            showButtons(scriptId, false);
+            changeScriptStatus(scriptId, response.result.status);
+            setScriptResult(scriptId, response);
+        },
+        error: function(e) {
+            changeScriptStatus(scriptId, "ThrowedException");
+            showButtons(scriptId, false);
+        }
+    });*/
+
     gateway.postToService({RunJsIncludedScripts : {scriptId: scriptId, gistHash: scriptInfo.gistHash, mainCode : mainCode, scripts: scriptInfo.scripts, packages: scriptInfo.packages, noCache: noCache}},
         function(response) {
             showButtons(scriptId, false);
@@ -119,9 +135,7 @@ function runScript(scriptId, noCache)
 
 function cancelScript(scriptId)
 {
-    var gistHash = scriptId;
-
-    gateway.postToService({CancelScript : {gistHash: gistHash}},
+    gateway.postToService({CancelJsIncludedScript : {gistHash: scriptId}},
         function(response) {
             changeScriptStatus(scriptId, response.result);
             showButtons(scriptId, false);

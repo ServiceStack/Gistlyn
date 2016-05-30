@@ -134,6 +134,28 @@ namespace Gistlyn.ServiceInterface
             };
         }
 
+        public object Any(CancelJsIncludedScript request)
+        {
+            var result = new ScriptExecutionResult() { Status = ScriptStatus.Unknown };
+
+            var runner = this.GetCacheClient().Get<ScriptRunnerInfo>(request.GistHash);
+            this.GetCacheClient().Remove(request.GistHash);
+
+            if (runner != null && runner.ScriptDomain != null)
+            {
+                AppDomain domain = runner.ScriptDomain;
+                runner.ScriptDomain = null;
+                AppDomain.Unload(domain);
+                result.Status = ScriptStatus.Cancelled;
+            }
+
+            return new CancelJsIncludedScriptResponse()
+            {
+                Result = result
+            };
+        }
+
+
         private List<AssemblyReference> AddReferencesFromPackages(List<AssemblyReference> references, string packages, out List<AssemblyReference> normalizedReferences)
         {
             List<AssemblyReference> tmpReferences = new List<AssemblyReference>();
@@ -298,7 +320,9 @@ namespace Gistlyn.ServiceInterface
             //var wrapper = new DomainWrapper();
             var writerProxy = new NotifierProxy(Session, ServerEvents, request.GistHash);
 
-            Session.SetScriptRunnerInfo(request.ScriptId, domain, wrapper);
+            ScriptRunnerInfo info = new ScriptRunnerInfo() { GistHash = request.ScriptId, ScriptDomain = domain, DomainWrapper = wrapper };
+
+            this.GetCacheClient().Set<ScriptRunnerInfo>(request.ScriptId, info);
 
             ManualResetEvent lockEvt = new ManualResetEvent(false);
 

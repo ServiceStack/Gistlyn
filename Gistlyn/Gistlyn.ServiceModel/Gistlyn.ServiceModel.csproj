@@ -59,6 +59,7 @@
     <Compile Include="EvaluateExpression.cs" />
     <Compile Include="GetIncludeScript.cs" />
     <Compile Include="RunJsIncludedScripts.cs" />
+    <Compile Include="CancelJsIncludedScript.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Types\" />
