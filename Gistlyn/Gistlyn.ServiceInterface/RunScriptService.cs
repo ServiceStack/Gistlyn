@@ -133,9 +133,12 @@ namespace Gistlyn.ServiceInterface
             };
         }
 
-        private List<AssemblyReference> AddReferencesFromPackages(List<AssemblyReference> references, string packages)
+        private List<AssemblyReference> AddReferencesFromPackages(List<AssemblyReference> references, string packages, out List<AssemblyReference> normalizedReferences)
         {
-            List<AssemblyReference> tmpReferences = references ?? new List<AssemblyReference>();
+            List<AssemblyReference> tmpReferences = new List<AssemblyReference>();
+
+            if (references != null) 
+                tmpReferences.AddRange(references);
 
             if (!String.IsNullOrEmpty(packages))
             {
@@ -159,9 +162,10 @@ namespace Gistlyn.ServiceInterface
 
             //distinct by name
             tmpReferences = tmpReferences.GroupBy(a => a.Name).Select(g => g.First()).ToList();
-            List<AssemblyReference> addedReferences = tmpReferences
-                                                             .Select(r => new AssemblyReference().PopulateWith(r))
-                                                             .ToList();
+            //normalizedReferences - references with original path
+            normalizedReferences = tmpReferences
+                .Select(r => new AssemblyReference().PopulateWith(r))
+                .ToList();
 
             foreach (AssemblyReference reference in tmpReferences)
             {
@@ -172,7 +176,7 @@ namespace Gistlyn.ServiceInterface
                 }
             }
 
-            return addedReferences;
+            return tmpReferences;
         }
 
         public object Any(RunMultipleScripts request)
@@ -203,7 +207,8 @@ namespace Gistlyn.ServiceInterface
             }
 
 
-            List<AssemblyReference> addedReferences = AddReferencesFromPackages(request.References, request.Packages);
+            List<AssemblyReference> normalizedReferences;
+            List<AssemblyReference> addedReferences = AddReferencesFromPackages(request.References, request.Packages, out normalizedReferences);
 
             Evidence evidence = new Evidence(AppDomain.CurrentDomain.Evidence);
             AppDomainSetup setup = new AppDomainSetup();
@@ -230,7 +235,7 @@ namespace Gistlyn.ServiceInterface
             return new RunMultipleScriptResponse
             {
                 Result = result,
-                References = addedReferences
+                References = normalizedReferences
             };
         }
 
@@ -273,7 +278,8 @@ namespace Gistlyn.ServiceInterface
                 }
             }
 
-            List<AssemblyReference> addedReferences = AddReferencesFromPackages(request.References, request.Packages);
+            List<AssemblyReference> normalizedReferences;
+            List<AssemblyReference> addedReferences = AddReferencesFromPackages(request.References, request.Packages, out normalizedReferences);
 
             //Create domain and run script
             Evidence evidence = new Evidence(AppDomain.CurrentDomain.Evidence);
@@ -309,7 +315,7 @@ namespace Gistlyn.ServiceInterface
             return new RunJsIncludedScriptsResponse
             {
                 Result = result,
-                References = addedReferences
+                References = normalizedReferences
             };
         }
     }
