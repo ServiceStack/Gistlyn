@@ -77,6 +77,7 @@ namespace Gistlyn.SnippetEngine
 
                 JsConfig.MaxDepth = 10;
                 json.Json = variable != null ? variable.ToJson() : String.Empty;
+                json.Name = name;
             }
 
             return json;
@@ -297,9 +298,11 @@ namespace Gistlyn.SnippetEngine
 
             try
             {
-                var state = await CSharpScript.RunAsync<int>(script, opt);
+                state = CSharpScript.RunAsync<int>(script, opt);
+                var scriptState = await state;
+                //var scriptState = state.Result;
 
-                foreach (var variable in state.Variables)
+                foreach (var variable in scriptState.Variables)
                     result.Variables.Add(new VariableInfo() { Name = variable.Name, Value = variable.Value != null ? variable.Value.ToString() : null, Type = variable.Type.ToString() });
             }
             catch (CompilationErrorException e)
@@ -359,7 +362,7 @@ namespace Gistlyn.SnippetEngine
                 catch (Exception e)
                 {
                     scriptResult.Status = ScriptStatus.ThrowedException;
-                scriptResult.Exception = e;
+                    scriptResult.Exception = e;
                 }
             }
 

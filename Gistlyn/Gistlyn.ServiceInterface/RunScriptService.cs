@@ -305,7 +305,9 @@ namespace Gistlyn.ServiceInterface
 
             //get json of last variable
             if (sr.Variables != null && sr.Variables.Count > 0)
+            {
                 result.LastVariableJson = wrapper.GetVariableJson(sr.Variables[sr.Variables.Count - 1].Name);
+            }
 
             MemoizedResults.AddOrUpdate(new MemoizedResult() { CodeHash = codeHash, Result = result.LastVariableJson});
 

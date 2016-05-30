@@ -91,7 +91,7 @@ function runScript(scriptId, noCache)
     var mainCode = $("#main_" + scriptId).val();
     var scriptInfo = gistScripts["script_" + scriptId];
 
-    gateway.postToService({RunJsIncludedScripts : {scriptId: scriptId, gistHash: scriptInfo.gistHash, mainCode : scriptInfo.mainCode, scripts: scriptInfo.scripts, packages: scriptInfo.packages, noCache: noCache}},
+    gateway.postToService({RunJsIncludedScripts : {scriptId: scriptId, gistHash: scriptInfo.gistHash, mainCode : mainCode, scripts: scriptInfo.scripts, packages: scriptInfo.packages, noCache: noCache}},
         function(response) {
             changeScriptStatus(scriptId, response.result.status);
             setScriptResult(scriptId, response);
