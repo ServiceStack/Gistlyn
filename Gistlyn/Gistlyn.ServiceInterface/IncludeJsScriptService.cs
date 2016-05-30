@@ -39,7 +39,7 @@ $(""#cancel_{0}"").click(function() {{ cancelScript(scriptId); }});
                             </div> \
                         </div> \
                     </div> \
-					<div class=""row""> \
+					<div class=""row"" style=""margin-top: 15px;""> \
                         <div class=""col-md-5""> \
 							<span id=""results_{0}""></span> \
 						</div> \

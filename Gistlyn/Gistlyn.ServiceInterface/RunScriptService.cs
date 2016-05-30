@@ -14,6 +14,7 @@ using Gistlyn.Common.Interfaces;
 using Gistlyn.ServiceInterfaces.Auth;
 using System.Security.Policy;
 using System.Security.Cryptography;
+using System.Threading;
 
 namespace Gistlyn.ServiceInterface
 {
@@ -298,16 +299,31 @@ namespace Gistlyn.ServiceInterface
             var writerProxy = new NotifierProxy(Session, ServerEvents, request.GistHash);
 
             Session.SetScriptRunnerInfo(request.ScriptId, domain, wrapper);
-            ScriptExecutionResult sr = wrapper.Run(request.MainCode, request.Scripts, addedReferences.Select(r => r.Path).ToList(), writerProxy);
 
-            result.Exception = sr.Exception;
-            result.Errors = sr.Errors;
+            ManualResetEvent lockEvt = new ManualResetEvent(false);
 
-            //get json of last variable
-            if (sr.Variables != null && sr.Variables.Count > 0)
+            ThreadPool.QueueUserWorkItem(_ =>
             {
-                result.LastVariableJson = wrapper.GetVariableJson(sr.Variables[sr.Variables.Count - 1].Name);
-            }
+                try
+                {
+                    ScriptExecutionResult sr = wrapper.Run(request.MainCode, request.Scripts, addedReferences.Select(r => r.Path).ToList(), writerProxy);
+
+                    result.Exception = sr.Exception;
+                    result.Errors = sr.Errors;
+
+                    //get json of last variable
+                    if (sr.Variables != null && sr.Variables.Count > 0)
+                    {
+                        result.LastVariableJson = wrapper.GetVariableJson(sr.Variables[sr.Variables.Count - 1].Name);
+                    }
+                }
+                finally
+                {
+                    lockEvt.Set();
+                }
+            });
+
+            lockEvt.WaitOne();
 
             MemoizedResults.AddOrUpdate(new MemoizedResult() { CodeHash = codeHash, Result = result.LastVariableJson});
 

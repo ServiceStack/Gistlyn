@@ -82,7 +82,18 @@ function setScriptResult(scriptId, response)
     if (response.result.lastVariableJson) {
         $(id).text(response.result.lastVariableJson.name + "=" + response.result.lastVariableJson.json); 
     }
-} 
+}
+
+function showButtons(scriptId, isRunning)
+{
+    if (isRunning) {
+        $("#cancel_" + scriptId).show();
+        $("#run_" + scriptId).attr("disabled", "disabled");
+    } else {
+        $("#cancel_" + scriptId).hide();
+        $("#run_" + scriptId).removeAttr("disabled");
+    }
+}
 
 function runScript(scriptId, noCache)
 {
@@ -91,13 +102,17 @@ function runScript(scriptId, noCache)
     var mainCode = $("#main_" + scriptId).val();
     var scriptInfo = gistScripts["script_" + scriptId];
 
+    showButtons(scriptId, true);
+
     gateway.postToService({RunJsIncludedScripts : {scriptId: scriptId, gistHash: scriptInfo.gistHash, mainCode : mainCode, scripts: scriptInfo.scripts, packages: scriptInfo.packages, noCache: noCache}},
         function(response) {
+            showButtons(scriptId, false);
             changeScriptStatus(scriptId, response.result.status);
             setScriptResult(scriptId, response);
         },
         function(e) {
             changeScriptStatus(scriptId, "ThrowedException");
+            showButtons(scriptId, false);
         }
     );
 }
@@ -109,6 +124,7 @@ function cancelScript(scriptId)
     gateway.postToService({CancelScript : {gistHash: gistHash}},
         function(response) {
             changeScriptStatus(scriptId, response.result);
+            showButtons(scriptId, false);
         },
         function(e) {
             console.log("cancellation error", e)
