@@ -177,6 +177,7 @@
     <None Include="sqlite3.dll" />
     <Content Include="js\ss-utils.js" />
     <Content Include="js\gistlyn.js" />
+    <Content Include="templates\jsincluded.init.js" />
     <Content Include="sampleinclude.html" />
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +194,10 @@
   <ItemGroup>
     <Folder Include="js\" />
     <Folder Include="css\" />
+    <Folder Include="templates\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="templates\jsincluded.html" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

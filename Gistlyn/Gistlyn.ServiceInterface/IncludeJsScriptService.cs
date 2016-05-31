@@ -11,64 +11,27 @@ namespace Gistlyn.ServiceInterfaces
         [AddHeader(ContentType = "text/javascript")]
         public object Any(GetIncludeScript request)
         {
-            string scriptId = Guid.NewGuid().ToString().Replace("-", String.Empty);
-            var url = String.Empty;
-            int idx = Request.AbsoluteUri.IndexOf(Request.RawUrl, StringComparison.OrdinalIgnoreCase);
+             string scriptId = Guid.NewGuid().ToString().Replace("-", String.Empty);
+             var url = String.Empty;
+             int idx = Request.AbsoluteUri.IndexOf(Request.RawUrl, StringComparison.OrdinalIgnoreCase);
 
-            if (idx > 0)
-                url = Request.AbsoluteUri.Substring(0, idx);
+             if (idx > 0)
+                 url = Request.AbsoluteUri.Substring(0, idx);
 
-            StringBuilder builder = new StringBuilder();
+             var htmlContent = VirtualFileSources.GetFile("templates/jsincluded.html").ReadAllText();
+             var scriptContent = VirtualFileSources.GetFile("templates/jsincluded.init.js").ReadAllText();
 
-            builder.AppendFormat(@"function init_{0} () {{
-var scriptId = ""{0}"";
-var gist = ""{1}"";
-var noCache = {2};
-var url = ""{3}"";
+             StringBuilder builder = new StringBuilder();
 
-getGist(gist, scriptId, onGistResponse);
+             builder.AppendFormat(scriptContent, scriptId, request.Gist, request.NoCache.ToJson(), url);
 
-$(""#run_{0}"").click(function() {{ runScript(url, scriptId, noCache); }});
+             htmlContent = htmlContent.Replace("\r", String.Empty).Replace("\n", "\\\n").Replace("'", "''");
+             htmlContent = String.Format(htmlContent, scriptId);
 
-$(""#cancel_{0}"").click(function() {{ cancelScript(url, scriptId); }});
-           
-}}
-", scriptId, request.Gist, request.NoCache.ToJson(), url);
+             builder.AppendFormat("document.write('{0}');\n", htmlContent);
+             builder.AppendFormat("init_{0}();\n", scriptId);
 
-            builder.AppendFormat(@"document.write(' \
-            <div class=""row""> \
-                <div class=""form-group""> \
-                    <div class=""row""> \
-                        <div class=""form-group""> \
-                            <div class=""col-md-6""> \
-                                <textarea id=""main_{0}"" class=""form-control role-gisttext"" rows=""10"" required=""required""></textarea> \
-                            </div> \
-                        </div> \
-                    </div> \
-					<div class=""row"" style=""margin-top: 15px;""> \
-                        <div class=""col-md-5""> \
-							<span id=""results_{0}""></span> \
-						</div> \
-					</div> \
-                    <div class=""row""> \
-                        <div class=""form-group""> \
-                            <div class=""col-md-5""> \
-								<button id=""run_{0}"" type=""button"" class=""btn btn-primary role-run"">Run</button> \
-		                        <button id=""cancel_{0}"" type=""button"" class=""btn btn-primary role-cancel"" style=""display:none"">Cancel</button> \
-                            </div> \
-                            <div class=""col-md-1""> \
-                                <span id=""status_{0}"" class=""role-status""></span> \
-                            </div> \
-                        </div> \
-                    </div> \
-                </div> \
-            </div> \
-');
-", scriptId);
-
-            builder.AppendFormat("init_{0}();", scriptId);
-            
-            return builder.ToString();
+             return builder.ToString();
         }
 
     }
