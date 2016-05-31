@@ -1,5 +1,4 @@
-﻿var gateway = new servicestack.ClientGateway('/servicestack/');
-var gistScripts = {};
+﻿var gistScripts = {};
 
 function getGist(gistId, scriptId, onSuccess)
 {
@@ -95,7 +94,7 @@ function showButtons(scriptId, isRunning)
     }
 }
 
-function runScript(scriptId, noCache)
+function runScript(url, scriptId, noCache)
 {
     console.log("run");
 
@@ -104,11 +103,16 @@ function runScript(scriptId, noCache)
 
     showButtons(scriptId, true);
 
-    /*$.ajax({
-        url: "/servicestack/json/reply/RunJsIncludedScripts?format=json", 
+    $.ajax({
+        url: url + "/servicestack/json/reply/RunJsIncludedScripts", 
         data: JSON.stringify({scriptId: scriptId, gistHash: scriptInfo.gistHash, mainCode : mainCode, scripts: scriptInfo.scripts, packages: scriptInfo.packages, noCache: noCache}),
         contentType: "application/json; charset=utf-8",
+        type: "POST",
         dataType: "json",
+        /* xhrFields: {
+            withCredentials: true
+        },
+        crossDomain: true, */
         success: function(response) {
             showButtons(scriptId, false);
             changeScriptStatus(scriptId, response.result.status);
@@ -118,37 +122,30 @@ function runScript(scriptId, noCache)
             changeScriptStatus(scriptId, "ThrowedException");
             showButtons(scriptId, false);
         }
-    });*/
-
-    gateway.postToService({RunJsIncludedScripts : {scriptId: scriptId, gistHash: scriptInfo.gistHash, mainCode : mainCode, scripts: scriptInfo.scripts, packages: scriptInfo.packages, noCache: noCache}},
-        function(response) {
-            showButtons(scriptId, false);
-            changeScriptStatus(scriptId, response.result.status);
-            setScriptResult(scriptId, response);
-        },
-        function(e) {
-            changeScriptStatus(scriptId, "ThrowedException");
-            showButtons(scriptId, false);
-        }
-    );
+    });
 }
 
-function cancelScript(scriptId)
+function cancelScript(url, scriptId)
 {
-    gateway.postToService({CancelJsIncludedScript : {gistHash: scriptId}},
-        function(response) {
+    $.ajax({
+        url: url + "/servicestack/json/reply/CancelJsIncludedScript", 
+        data: JSON.stringify({gistHash: scriptId}),
+        contentType: "application/json; charset=utf-8",
+        type: "POST",
+        dataType: "json",
+        success: function(response) {
             changeScriptStatus(scriptId, response.result);
             showButtons(scriptId, false);
         },
-        function(e) {
+        error: function(e) {
             console.log("cancellation error", e)
         }
-    );
+    });
 }
 
-function subscribeServerEvents(channel)
+function subscribeServerEvents(url, channel)
 {
-    var source = new EventSource('/servicestack/event-stream?channels=' + channel + '&t=' + new Date().getTime()); //disable cache
+    var source = new EventSource(url + '/servicestack/event-stream?channels=' + channel + '&t=' + new Date().getTime()); //disable cache
     source.addEventListener('error', function (e) {
         console.log(e);
         //addEntry({ msg: "ERROR!", cls: "error" });

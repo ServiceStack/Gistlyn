@@ -12,6 +12,11 @@ namespace Gistlyn.ServiceInterfaces
         public object Any(GetIncludeScript request)
         {
             string scriptId = Guid.NewGuid().ToString().Replace("-", String.Empty);
+            var url = String.Empty;
+            int idx = Request.AbsoluteUri.IndexOf(Request.RawUrl, StringComparison.OrdinalIgnoreCase);
+
+            if (idx > 0)
+                url = Request.AbsoluteUri.Substring(0, idx);
 
             StringBuilder builder = new StringBuilder();
 
@@ -19,15 +24,16 @@ namespace Gistlyn.ServiceInterfaces
 var scriptId = ""{0}"";
 var gist = ""{1}"";
 var noCache = {2};
+var url = ""{3}"";
 
 getGist(gist, scriptId, onGistResponse);
 
-$(""#run_{0}"").click(function() {{ runScript(scriptId, noCache); }});
+$(""#run_{0}"").click(function() {{ runScript(url, scriptId, noCache); }});
 
-$(""#cancel_{0}"").click(function() {{ cancelScript(scriptId); }});
+$(""#cancel_{0}"").click(function() {{ cancelScript(url, scriptId); }});
            
 }}
-", scriptId, request.Gist, request.NoCache.ToJson());
+", scriptId, request.Gist, request.NoCache.ToJson(), url);
 
             builder.AppendFormat(@"document.write(' \
             <div class=""row""> \

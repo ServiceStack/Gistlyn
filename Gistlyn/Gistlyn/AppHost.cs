@@ -73,6 +73,9 @@ namespace Gistlyn
 
             //Config examples
             //this.Plugins.Add(new PostmanFeature());
+
+            //To limit access to scripts only from the known sites
+            //this.Plugins.Add(new CorsFeature(allowedOrigins: "http://127.0.0.1:8080", allowCredentials: true));
             this.Plugins.Add(new CorsFeature());
 
             container.Register<IAppSettings>(new AppSettings());
