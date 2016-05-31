@@ -7,7 +7,7 @@ namespace Gistlyn.Common.Objects
 
         public string CodeHash { get; set; }
 
-        public ScriptVariableJson Result { get; set; }
+        public JsIncludedScriptExecutionResult Result { get; set; }
     }
 }
 

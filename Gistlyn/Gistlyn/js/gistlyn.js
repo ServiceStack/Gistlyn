@@ -57,7 +57,7 @@ function changeScriptStatus(scriptId, status)
        case "Running":
             $("#run_" + scriptId).attr("disabled", "disabled");
             $("#cancel_"  + scriptId).show();
-            $("#status_" + scriptId).text("Running");
+            $("#status_" + scriptId).text("Executing");
             break;
     }
 }
@@ -102,6 +102,7 @@ function runScript(url, scriptId, noCache)
     var scriptInfo = gistScripts["script_" + scriptId];
 
     showButtons(scriptId, true);
+    changeScriptStatus(scriptId, "PrepareToRun");
 
     $.ajax({
         url: url + "/servicestack/json/reply/RunJsIncludedScripts", 

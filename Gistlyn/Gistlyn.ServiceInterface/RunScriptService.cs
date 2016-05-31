@@ -296,7 +296,7 @@ namespace Gistlyn.ServiceInterface
                 MemoizedResult mr = MemoizedResults.Get(codeHash);
                 if (mr != null)
                 {
-                    result.LastVariableJson = mr.Result;
+                    result = mr.Result;
                     return new RunJsIncludedScriptsResponse() { Result = result };
                 }
             }
@@ -349,7 +349,7 @@ namespace Gistlyn.ServiceInterface
 
             lockEvt.WaitOne();
 
-            MemoizedResults.AddOrUpdate(new MemoizedResult() { CodeHash = codeHash, Result = result.LastVariableJson});
+            MemoizedResults.AddOrUpdate(new MemoizedResult() { CodeHash = codeHash, Result = result });
 
             //Unload appdomain only in synchroneous version
             //AppDomain.Unload(domain);
