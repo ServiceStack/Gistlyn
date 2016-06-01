@@ -28,7 +28,11 @@ function getGist(gistId, scriptId, onSuccess)
 function onGistResponse(response)
 {
     //TODO: change to getElementById
-    $("#main_" + response.scriptId).val(response.mainCode);
+    var editor = CodeMirror.fromTextArea(document.getElementById("main_" + response.scriptId), {
+        lineNumbers: true
+    });
+    editor.getDoc().setValue(response.mainCode);
+    //$("#main_" + response.scriptId).val(response.mainCode);
 
     gistScripts["script_" + response.scriptId] = response;
 

@@ -179,6 +179,8 @@
     <Content Include="js\gistlyn.js" />
     <Content Include="templates\jsincluded.init.js" />
     <Content Include="sampleinclude.html" />
+    <Content Include="bower_components\CodeMirror\lib\codemirror.css" />
+    <Content Include="bower_components\CodeMirror\lib\codemirror.js" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
