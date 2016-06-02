@@ -198,6 +198,19 @@ function getGist()
             $("#gistlist").empty();
             var template = Handlebars.compile( $("#gists-template").html() );
             $("#gistlist").append( template(response) );
+            $.each($("#gistlist .role-execblock"), function(idx, val) {
+                var filename = $(".role-filename", $(val)).text().toUpperCase();
+                /*if (filename != "PACKAGES.CONFIG" ) {
+                    //set type to xml
+                }*/
+                var editor = CodeMirror.fromTextArea($("textarea",$(val))[0], {
+                    lineNumbers: true,
+                    mode: "text/x-csharp",
+                    theme: "default",
+                    indentUnit: 4
+                });
+                $(".role-filename", $(val)).data("editor", editor);
+            });
         },
 		datatype: "jsonp"
 	});
