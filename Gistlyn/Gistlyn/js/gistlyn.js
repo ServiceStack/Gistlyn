@@ -1,4 +1,5 @@
 ﻿var gistScripts = {};
+var codeMirrorEditors = {};
 
 function getGist(gistId, scriptId, onSuccess)
 {
@@ -28,10 +29,7 @@ function getGist(gistId, scriptId, onSuccess)
 function onGistResponse(response)
 {
     //TODO: change to getElementById
-    var editor = CodeMirror.fromTextArea(document.getElementById("main_" + response.scriptId), {
-        lineNumbers: true
-    });
-    editor.getDoc().setValue(response.mainCode);
+    codeMirrorEditors[response.scriptId].getDoc().setValue(response.mainCode);
     //$("#main_" + response.scriptId).val(response.mainCode);
 
     gistScripts["script_" + response.scriptId] = response;
@@ -102,7 +100,7 @@ function runScript(url, scriptId, noCache)
 {
     console.log("run");
 
-    var mainCode = $("#main_" + scriptId).val();
+    var mainCode = codeMirrorEditors[scriptId].getDoc().getValue(); //$("#main_" + scriptId).val();
     var scriptInfo = gistScripts["script_" + scriptId];
 
     showButtons(scriptId, true);
