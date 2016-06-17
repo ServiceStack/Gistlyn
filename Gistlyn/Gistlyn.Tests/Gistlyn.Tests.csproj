@@ -70,11 +70,11 @@
   <ItemGroup>
     <ProjectReference Include="..\Gistlyn.ServiceInterface\Gistlyn.ServiceInterface.csproj">
       <Project>{801a0f89-d5f6-49a6-bcea-6624388c98a4}</Project>
-      <Name>Rosling.ServiceInterface</Name>
+      <Name>Gistlyn.ServiceInterface</Name>
     </ProjectReference>
     <ProjectReference Include="..\Gistlyn.ServiceModel\Gistlyn.ServiceModel.csproj">
       <Project>{53E82AC1-DD1D-4C66-B55F-F9F4ACFB2F40}</Project>
-      <Name>Rosling.ServiceModel</Name>
+      <Name>Gistlyn.ServiceModel</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
