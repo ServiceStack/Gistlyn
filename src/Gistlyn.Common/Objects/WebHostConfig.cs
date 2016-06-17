@@ -16,7 +16,7 @@ namespace Gistlyn.Common.Objects
 
         public WebHostConfig(IAppSettings appConfig)
         {
-            NugetPackagesDirectory = appConfig.Get("NugetPackagesDirectory", "~/../packages".MapHostAbsolutePath());
+            NugetPackagesDirectory = appConfig.Get("NugetPackagesDirectory", "~/App_Data/packages".MapHostAbsolutePath());
             ConnectionString = appConfig.Get("ConnectionString", "~/App_Data/db.sqlite".MapHostAbsolutePath());
         }
     }
