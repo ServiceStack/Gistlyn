@@ -1,7 +1,9 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Gistlyn.ServiceModel.Types;
+using ServiceStack;
 
 namespace Gistlyn.ServiceInterface
 {
@@ -14,28 +16,43 @@ namespace Gistlyn.ServiceInterface
 
     public class AppData : IDataContext
     {
+        public AppData(string nugetPackagesDirectory)
+        {
+            NugetPackagesDirectory = nugetPackagesDirectory;
+            packagesIndex = NugetPackagesDirectory.CombineWith("packages.json");
+            if (File.Exists(packagesIndex))
+            {
+                var json = File.ReadAllText(packagesIndex);
+                Packages = json.FromJson<List<NugetPackageInfo>>();
+            }
+        }
+
+        private readonly string packagesIndex;
         public string NugetPackagesDirectory { get; set; }
 
-        readonly List<NugetPackageInfo> packages = new List<NugetPackageInfo>();
+        public List<NugetPackageInfo> Packages = new List<NugetPackageInfo>();
 
         readonly ConcurrentDictionary<string, MemoizedResult> memoizedResults = new ConcurrentDictionary<string, MemoizedResult>();
 
         public void SavePackage(NugetPackageInfo package)
         {
-            lock (packages)
-                packages.Add(package);
+            lock (Packages)
+            {
+                Packages.Add(package);
+                File.WriteAllText(packagesIndex, Packages.ToJson());
+            }
         }
 
         public List<NugetPackageInfo> GetPackageAndDependencies(string packageId, string version)
         {
-            lock (packages)
-                return packages.Where(p => p.Id == packageId && p.Ver == version).ToList();
+            lock (Packages)
+                return Packages.Where(p => p.Id == packageId && p.Ver == version).ToList();
         }
 
         public List<NugetPackageInfo> SearchPackages(string packageId, string version)
         {
-            lock (packages)
-                return packages.Where(x => packageId == null || x.Id.Contains(packageId)).OrderBy(x => x.Id).ToList();
+            lock (Packages)
+                return Packages.Where(x => packageId == null || x.Id.Contains(packageId)).OrderBy(x => x.Id).ToList();
         }
 
         public void SetMemoizedResult(MemoizedResult result)

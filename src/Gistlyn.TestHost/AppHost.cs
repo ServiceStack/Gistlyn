@@ -60,15 +60,10 @@ namespace Gistlyn.TestHost
             //this.Plugins.Add(new CorsFeature(allowedOrigins: "http://127.0.0.1:8080", allowCredentials: true));
             this.Plugins.Add(new CorsFeature());
 
-            var appData = new AppData {
-                NugetPackagesDirectory = AppSettings.Get("NugetPackagesDirectory", "~/App_Data/packages".MapHostAbsolutePath()),
-            };
-            container.Register(appData);
+            container.Register(new AppData(
+                AppSettings.Get("NugetPackagesDirectory", "~/App_Data/packages".MapHostAbsolutePath())));
 
-            if (Directory.Exists(appData.NugetPackagesDirectory))
-                Directory.Delete(appData.NugetPackagesDirectory, recursive:true);
-
-            container.Register<IDataContext>(new MemoryDataContext());
+            container.Register<IDataContext>(container.Resolve<AppData>());
 
             //Define the Auth modes you support and where to store it
             Plugins.Add(new AuthFeature(
