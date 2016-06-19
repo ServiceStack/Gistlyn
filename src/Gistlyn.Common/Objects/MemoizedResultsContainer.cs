@@ -5,20 +5,18 @@ namespace Gistlyn.Common.Objects
 {
     public class MemoizedResultsContainer
     {
-        private object lockObj = new object();
-        private Dictionary<string, MemoizedResult> memoizedResults = new Dictionary<string, MemoizedResult>();
-
-        public Dictionary<string, MemoizedResult> MemoizedResults { get { return memoizedResults; } }
+        private readonly object lockObj = new object();
+        public readonly Dictionary<string, MemoizedResult> MemoizedResults = new Dictionary<string, MemoizedResult>();
 
         public void AddOrUpdate(MemoizedResult result)
         {
             //TODO: limit memory usage in bytes and use LRU cache
             lock (lockObj)
             {
-                if (memoizedResults.ContainsKey(result.CodeHash))
-                    memoizedResults[result.CodeHash] = result;
+                if (MemoizedResults.ContainsKey(result.CodeHash))
+                    MemoizedResults[result.CodeHash] = result;
                 else
-                    memoizedResults.Add(result.CodeHash, result);
+                    MemoizedResults.Add(result.CodeHash, result);
             }
         }
 
@@ -26,10 +24,9 @@ namespace Gistlyn.Common.Objects
         {
             lock (lockObj)
             {
-                if (memoizedResults.ContainsKey(codeHash))
-                    return memoizedResults[codeHash];
-                else
-                    return null;
+                return MemoizedResults.ContainsKey(codeHash) 
+                    ? MemoizedResults[codeHash] 
+                    : null;
             }
         }
     }

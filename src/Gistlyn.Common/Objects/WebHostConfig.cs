@@ -1,5 +1,4 @@
-﻿using System;
-using ServiceStack;
+﻿using ServiceStack;
 using ServiceStack.Configuration;
 
 namespace Gistlyn.Common.Objects

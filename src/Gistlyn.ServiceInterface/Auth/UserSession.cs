@@ -1,18 +1,12 @@
-﻿using Gistlyn.Common.Interfaces;
-using ServiceStack.Caching;
+﻿using System;
 using ServiceStack;
-using ServiceStack.Auth;
-using ServiceStack.Web;
-using System.Threading.Tasks;
-using Gistlyn.Common.Objects;
-using System;
-using Gistlyn.ServiceInterface;
+using ServiceStack.Caching;
 
-namespace Gistlyn.ServiceInterfaces.Auth
+namespace Gistlyn.ServiceInterface.Auth
 {
     public class UserSession
     {
-        ICacheClient cache;
+        readonly ICacheClient cache;
 
         public UserSession(ICacheClient cache)
         {
@@ -36,8 +30,8 @@ namespace Gistlyn.ServiceInterfaces.Auth
         public void SetScriptRunnerInfo(string gistHash, AppDomain scriptAppDomain, DomainWrapper wrapper)
         {
             var session = SessionFeature.GetOrCreateSession<CustomUserSession>(cache);
-            string key = SessionFeature.GetSessionKey();
-            ScriptRunnerInfo info = new ScriptRunnerInfo() { GistHash = gistHash, ScriptDomain = scriptAppDomain, DomainWrapper = wrapper };
+            var key = SessionFeature.GetSessionKey();
+            var info = new ScriptRunnerInfo { GistHash = gistHash, ScriptDomain = scriptAppDomain, DomainWrapper = wrapper };
 
             lock (session.lockObj)
             {
@@ -47,14 +41,12 @@ namespace Gistlyn.ServiceInterfaces.Auth
                     session.Scripts.Add(gistHash, info);
                     
             }
-            cache.Set<CustomUserSession>(key, session);
+            cache.Set(key, session);
         }
 
         public ScriptRunnerInfo GetScriptRunnerInfo(string gistHash)
         {
             var session = SessionFeature.GetOrCreateSession<CustomUserSession>(cache);
-            string key = SessionFeature.GetSessionKey();
-
             lock (session.lockObj)
             {
                 return session.Scripts.ContainsKey(gistHash) ? session.Scripts[gistHash] : null;

@@ -1,15 +1,11 @@
-﻿using System.Security.Cryptography;
+﻿using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Text;
-using ServiceStack.Logging;
-using System.Collections.Generic;
 using ServiceStack;
 using ServiceStack.Auth;
-using System.Threading.Tasks;
-using Gistlyn.Common.Objects;
-using System;
-using Gistlyn.ServiceInterface;
+using ServiceStack.Logging;
 
-namespace Gistlyn.ServiceInterfaces.Auth
+namespace Gistlyn.ServiceInterface.Auth
 {
     /// <summary>
     /// Create your own strong-typed Custom AuthUserSession where you can add additional AuthUserSession 
@@ -24,9 +20,7 @@ namespace Gistlyn.ServiceInterfaces.Auth
 
         public Dictionary<string, ScriptRunnerInfo> Scripts = new Dictionary<string, ScriptRunnerInfo>();
 
-        public CustomUserSession()
-        {
-        }
+        public CustomUserSession() {}
 
         public override void OnAuthenticated(IServiceBase authService, IAuthSession session, IAuthTokens tokens, Dictionary<string, string> authInfo)
         {
@@ -38,8 +32,6 @@ namespace Gistlyn.ServiceInterfaces.Auth
             //IDataStore store = authService.TryResolve<IDataStore>();
 
             //authService.SaveSession(this, TimeSpan.FromDays(7 * 2));
-
-
 
             //Resolve the DbFactory from the IOC and persist the user info
             //authService.TryResolve<IDbConnectionFactory>().Exec(dbCmd => dbCmd.Save(user));

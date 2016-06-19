@@ -1,5 +1,4 @@
-﻿using System;
-namespace Gistlyn.Common.Objects
+﻿namespace Gistlyn.Common.Objects
 {
     public class MemoizedResult
     {

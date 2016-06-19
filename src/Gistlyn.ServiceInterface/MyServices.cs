@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+using Gistlyn.ServiceInterface.Auth;
 using ServiceStack;
 using Gistlyn.ServiceModel;
-using Gistlyn.ServiceInterfaces.Auth;
 
 namespace Gistlyn.ServiceInterface
 {

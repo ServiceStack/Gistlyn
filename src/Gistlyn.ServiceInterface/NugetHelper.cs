@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Versioning;
 using Gistlyn.Common.Interfaces;
 using Gistlyn.Common.Objects;
 using NuGet;
@@ -13,17 +11,18 @@ namespace Gistlyn.ServiceInterface
     {
         public static NugetPackageInfo GetPackageInfo(this IPackage package)
         {
-            NugetPackageInfo info = new NugetPackageInfo();
-
-            info.Id = package.Id;
-            info.Version = package.Version.Version;
-            info.Ver = package.Version.ToNormalizedString();
+            var info = new NugetPackageInfo
+            {
+                Id = package.Id,
+                Version = package.Version.Version,
+                Ver = package.Version.ToNormalizedString()
+            };
 
             info.Assemblies = package.AssemblyReferences
-                .Select(a => new AssemblyReference()
-                { 
-                    Name = a.Name, 
-                    Path = Path.Combine(info.Id + "." + package.Version.ToNormalizedString(), a.Path) 
+                .Select(a => new AssemblyReference
+                {
+                    Name = a.Name,
+                    Path = Path.Combine(info.Id + "." + package.Version.ToNormalizedString(), a.Path)
                 })
                 .ToList();
 
@@ -33,18 +32,17 @@ namespace Gistlyn.ServiceInterface
         public static void InstallPackage(IDataContext dataContext, string nugetPackagesDir, string packageId, string version)
         {
             //Connect to the official package repository
-            IPackageRepository repo = PackageRepositoryFactory.Default.CreateRepository("https://packages.nuget.org/api/v2");
+            var repo = PackageRepositoryFactory.Default.CreateRepository("https://packages.nuget.org/api/v2");
 
             //Initialize the package manager
-            string path = nugetPackagesDir;
-            PackageManager packageManager = new PackageManager(repo, path);
+            var packageManager = new PackageManager(repo, nugetPackagesDir);
 
-            packageManager.PackageInstalled += new EventHandler<PackageOperationEventArgs>(delegate (object sender, PackageOperationEventArgs e)
+            packageManager.PackageInstalled += (sender, e) =>
             {
                 var info = e.Package.GetPackageInfo();
 
                 dataContext.SavePackage(info);
-            });
+            };
 
             //Download and unzip the package
             packageManager.InstallPackage(packageId, SemanticVersion.Parse(version)); //new SemanticVersion(request.Version)
@@ -53,7 +51,7 @@ namespace Gistlyn.ServiceInterface
 
         public static List<AssemblyReference> RestorePackage(IDataContext dataContext, string nugetPackagesDir, string packageId, string version)
         {
-            List<NugetPackageInfo> packages = dataContext.GetPackageAndDependencies(packageId, version);
+            var packages = dataContext.GetPackageAndDependencies(packageId, version);
 
             //trying to install first
             if (packages.Count == 0)
@@ -62,20 +60,20 @@ namespace Gistlyn.ServiceInterface
                 packages = dataContext.GetPackageAndDependencies(packageId, version);
             }
 
-            List<AssemblyReference> assemblies = new List<AssemblyReference>();
+            var assemblies = new List<AssemblyReference>();
 
             foreach (var package in packages)
             {
-                List<FrameworkTargetableAssembly> ftAssemblies = new List<FrameworkTargetableAssembly>();
+                var ftAssemblies = new List<FrameworkTargetableAssembly>();
                 foreach (var asm in package.Assemblies)
                 {
-                    FrameworkTargetableAssembly ft = new FrameworkTargetableAssembly(asm);
+                    var ft = new FrameworkTargetableAssembly(asm);
                     ftAssemblies.Add(ft);
                 }
 
                 IEnumerable<FrameworkTargetableAssembly> compatibleLibs;
-                FrameworkName projectFramework = VersionUtility.ParseFrameworkName("net45");
-                VersionUtility.TryGetCompatibleItems<FrameworkTargetableAssembly>(projectFramework, ftAssemblies, out compatibleLibs);
+                var projectFramework = VersionUtility.ParseFrameworkName("net45");
+                VersionUtility.TryGetCompatibleItems(projectFramework, ftAssemblies, out compatibleLibs);
 
                 var bestCompatible = compatibleLibs.FirstOrDefault();
 

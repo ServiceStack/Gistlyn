@@ -1,17 +1,14 @@
-using System;
 using System.Collections.Generic;
 using Gistlyn.Common.Interfaces;
 using Gistlyn.Common.Objects;
 using ServiceStack.Data;
-using ServiceStack;
-using System.Linq;
 using ServiceStack.OrmLite;
 
 namespace Gistlyn.DataContext
 {
     public class GistlynDataContext : IDataContext
     {
-        IDbConnectionFactory dbFactory;
+        readonly IDbConnectionFactory dbFactory;
 
         public GistlynDataContext(IDbConnectionFactory dbFactory)
         {
@@ -31,7 +28,7 @@ namespace Gistlyn.DataContext
 
         public List<NugetPackageInfo> GetPackageAndDependencies(string packageId, string version)
         {
-            List<NugetPackageInfo> packages = new List<NugetPackageInfo>();
+            var packages = new List<NugetPackageInfo>();
 
             using (var db = dbFactory.Open())
             {
@@ -39,7 +36,7 @@ namespace Gistlyn.DataContext
                 {
                     var q = db.From<NugetPackageInfo>().Where(p => p.Id == packageId && p.Ver == version);
 
-                    packages = db.Select<NugetPackageInfo>(q);
+                    packages = db.Select(q);
                 }
             }
 
@@ -52,11 +49,11 @@ namespace Gistlyn.DataContext
 
             using (var db = dbFactory.Open())
             {
-                var q = !String.IsNullOrEmpty(packageId)
-                               ? db.From<NugetPackageInfo>().Where(p => p.Id.Contains(packageId)).OrderBy(p => p.Id)
-                               : db.From<NugetPackageInfo>().OrderBy(p => p.Id);
+                var q = !string.IsNullOrEmpty(packageId)
+                    ? db.From<NugetPackageInfo>().Where(p => p.Id.Contains(packageId)).OrderBy(p => p.Id)
+                    : db.From<NugetPackageInfo>().OrderBy(p => p.Id);
 
-                packages = db.Select<NugetPackageInfo>(q);
+                packages = db.Select(q);
             }
 
             return packages;
@@ -71,7 +68,7 @@ namespace Gistlyn.DataContext
                 if (db.TableExists(typeof(MemoizedResult).Name))
                 {
                     var q = db.From<MemoizedResult>().Where(r => r.CodeHash == codeHash);
-                    results = db.Select<MemoizedResult>(q);
+                    results = db.Select(q);
                 }
             }
 
@@ -88,8 +85,6 @@ namespace Gistlyn.DataContext
                 }
             }
         }
-
-
     }
 }
 

@@ -8,15 +8,15 @@ namespace Gistlyn.ServiceInterface
 {
     public class FrameworkTargetableAssembly : IFrameworkTargetable
     {
-        private List<FrameworkName> frameworks;
+        private readonly List<FrameworkName> frameworks;
 
         public FrameworkTargetableAssembly(AssemblyReference assembly)
         {
             Assembly = assembly;
             string effectivePath;
             string libPath = assembly.Path.Substring(assembly.Path.IndexOf('/') + 1);
-            FrameworkName fname = VersionUtility.ParseFrameworkNameFromFilePath(libPath, out effectivePath);
-            FrameworkName projectName = VersionUtility.ParseFrameworkName("net45");
+            var fname = VersionUtility.ParseFrameworkNameFromFilePath(libPath, out effectivePath);
+            var projectName = VersionUtility.ParseFrameworkName("net45");
 
             frameworks = new List<FrameworkName>() { fname };
         }
@@ -25,14 +25,13 @@ namespace Gistlyn.ServiceInterface
 
         public IEnumerable<FrameworkName> SupportedFrameworks
         {
-            get 
+            get
             {
                 return frameworks;
             }
         }
 
         public long Compatibility { get; set; }
-
     }
 }
 

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Gistlyn.Common.Interfaces;
 using Gistlyn.Common.Objects;
 using Gistlyn.ServiceModel;
@@ -17,17 +15,17 @@ namespace Gistlyn.ServiceInterface
 
         public object Any(SearchNugetPackages request)
         {
-            IPackageRepository repo = PackageRepositoryFactory.Default.CreateRepository("https://packages.nuget.org/api/v2");
+            var repo = PackageRepositoryFactory.Default.CreateRepository("https://packages.nuget.org/api/v2");
 
             var packages = repo.Search(request.Search, request.AllowPrereleaseVersion)
-                               .Take(50)
-                               .ToList();
+                .Take(50)
+                .ToList();
 
-            List<NugetPackageInfo> packageInfos = packages
-                                                  .Select(p => new NugetPackageInfo() { Id = p.Id, Version = p.Version.Version, Ver = p.Version.Version.ToString()})
-                                                  .ToList();
+            var packageInfos = packages
+                .Select(p => new NugetPackageInfo { Id = p.Id, Version = p.Version.Version, Ver = p.Version.Version.ToString() })
+                .ToList();
 
-            return new SearchNugetPackagesResponse()
+            return new SearchNugetPackagesResponse
             {
                 Packages = packageInfos
             };
@@ -42,7 +40,7 @@ namespace Gistlyn.ServiceInterface
 
         public object Any(AddPackageAsReference request)
         {
-            return new AddPackageAsReferenceResponse()
+            return new AddPackageAsReferenceResponse
             {
                 Assemblies = NugetHelper.RestorePackage(DataContext, Config.NugetPackagesDirectory, request.PackageId, request.Version)
             };
@@ -50,9 +48,9 @@ namespace Gistlyn.ServiceInterface
 
         public object Any(SearchInstalledPackages request)
         {
-            List<NugetPackageInfo> packages = DataContext.SearchPackages(request.Search, null);
+            var packages = DataContext.SearchPackages(request.Search, null);
 
-            return new SearchInstalledPackagesResponse()
+            return new SearchInstalledPackagesResponse
             {
                 Packages = packages
             };

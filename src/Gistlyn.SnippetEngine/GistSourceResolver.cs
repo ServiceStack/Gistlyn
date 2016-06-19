@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
-using System.Linq;
-using System.Security.Policy;
 using Microsoft.CodeAnalysis;
 
 namespace Gistlyn.SnippetEngine

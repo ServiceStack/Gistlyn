@@ -1,7 +1,6 @@
 ﻿using System;
-using Gistlyn.ServiceInterface;
 
-namespace Gistlyn.ServiceInterfaces.Auth
+namespace Gistlyn.ServiceInterface.Auth
 {
     public class ScriptRunnerInfo
     {

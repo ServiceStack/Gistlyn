@@ -2,16 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using ServiceStack;
 using Gistlyn.ServiceModel;
 using Gistlyn.SnippetEngine;
 using Gistlyn.Common.Objects;
-using ServiceStack.Text;
 using System.IO;
 using XmlSerializer = System.Xml.Serialization.XmlSerializer;
 using Gistlyn.Common.Interfaces;
-using Gistlyn.ServiceInterfaces.Auth;
+using Gistlyn.ServiceInterface.Auth;
 using System.Security.Policy;
 using System.Security.Cryptography;
 using System.Threading;
@@ -32,15 +30,13 @@ namespace Gistlyn.ServiceInterface
 
         public object Any(GetScriptVariableJson request)
         {
-            ScriptVariableJson variable;
-
             var runner = Session.GetScriptRunnerInfo(request.GistHash);
 
             var wrapper = runner != null ? runner.DomainWrapper : null;
 
-            variable = wrapper != null
+            var variable = wrapper != null
                 ? wrapper.GetVariableJson(request.VariableName)
-                : new ScriptVariableJson() { Status = ScriptStatus.Unknown };
+                : new ScriptVariableJson { Status = ScriptStatus.Unknown };
 
             return variable;
         }
@@ -55,7 +51,7 @@ namespace Gistlyn.ServiceInterface
 
             result = wrapper != null
                 ? wrapper.EvaluateExpression(request.Expression)
-                : new ScriptExecutionResult() { Status = ScriptStatus.Unknown };
+                : new ScriptExecutionResult { Status = ScriptStatus.Unknown };
 
             return result;
         }
@@ -70,7 +66,7 @@ namespace Gistlyn.ServiceInterface
 
             variables = wrapper != null
                 ? wrapper.GetVariables(request.VariableName)
-                : new ScriptStateVariables() { Status = ScriptStatus.Unknown };
+                : new ScriptStateVariables { Status = ScriptStatus.Unknown };
 
             return variables;
         }
@@ -81,7 +77,7 @@ namespace Gistlyn.ServiceInterface
 
             var wrapper = runner != null ? runner.DomainWrapper : null;
 
-            return new ScriptStatusResponse()
+            return new ScriptStatusResponse
             {
                 Status = wrapper != null ? wrapper.GetScriptStatus() : ScriptStatus.Unknown
             };
@@ -89,8 +85,8 @@ namespace Gistlyn.ServiceInterface
 
         public object Any(RunScript request)
         {
-            ScriptRunner runner = new ScriptRunner();
-            ScriptExecutionResult result = new ScriptExecutionResult();
+            var runner = new ScriptRunner();
+            var result = new ScriptExecutionResult();
 
             try 
             {
@@ -158,25 +154,25 @@ namespace Gistlyn.ServiceInterface
 
         private List<AssemblyReference> AddReferencesFromPackages(List<AssemblyReference> references, string packages, out List<AssemblyReference> normalizedReferences)
         {
-            List<AssemblyReference> tmpReferences = new List<AssemblyReference>();
+            var tmpReferences = new List<AssemblyReference>();
 
             if (references != null) 
                 tmpReferences.AddRange(references);
 
-            if (!String.IsNullOrEmpty(packages))
+            if (!string.IsNullOrEmpty(packages))
             {
                 PackageCollection tmpPackages = null;
 
-                XmlSerializer serializer = new XmlSerializer(typeof(PackageCollection));
+                var serializer = new XmlSerializer(typeof(PackageCollection));
 
-                byte[] arr = packages.ToAsciiBytes();
+                var arr = packages.ToAsciiBytes();
 
-                using (MemoryStream ms = new MemoryStream(arr))
+                using (var ms = new MemoryStream(arr))
                 {
                     tmpPackages = (PackageCollection)serializer.Deserialize(ms);
                 }
 
-                foreach (NugetPackageInfo package in tmpPackages.Packages)
+                foreach (var package in tmpPackages.Packages)
                 {
                     //istall it
                     tmpReferences.AddRange(NugetHelper.RestorePackage(DataContext, Config.NugetPackagesDirectory, package.Id, package.Ver));
@@ -190,7 +186,7 @@ namespace Gistlyn.ServiceInterface
                 .Select(r => new AssemblyReference().PopulateWith(r))
                 .ToList();
 
-            foreach (AssemblyReference reference in tmpReferences)
+            foreach (var reference in tmpReferences)
             {
                 if (!Path.IsPathRooted(reference.Path))
                 {
@@ -207,7 +203,7 @@ namespace Gistlyn.ServiceInterface
             if (request.GistHash == null)
                 throw new ArgumentException("GistHash");
 
-            ScriptExecutionResult result = new ScriptExecutionResult();
+            var result = new ScriptExecutionResult();
 
             var runnerInfo = Session.GetScriptRunnerInfo(request.GistHash);
             //stop script if run
@@ -231,14 +227,16 @@ namespace Gistlyn.ServiceInterface
 
 
             List<AssemblyReference> normalizedReferences;
-            List<AssemblyReference> addedReferences = AddReferencesFromPackages(request.References, request.Packages, out normalizedReferences);
+            var addedReferences = AddReferencesFromPackages(request.References, request.Packages, out normalizedReferences);
 
-            Evidence evidence = new Evidence(AppDomain.CurrentDomain.Evidence);
-            AppDomainSetup setup = new AppDomainSetup();
-            setup.PrivateBinPath = Path.Combine(System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath, "bin");
-            setup.ApplicationBase = System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath;
+            var evidence = new Evidence(AppDomain.CurrentDomain.Evidence);
+            var setup = new AppDomainSetup
+            {
+                PrivateBinPath = Path.Combine(System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath, "bin"),
+                ApplicationBase = System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath
+            };
 
-            AppDomain domain = AppDomain.CreateDomain(Guid.NewGuid().ToString(), evidence, setup);
+            var domain = AppDomain.CreateDomain(Guid.NewGuid().ToString(), evidence, setup);
 
             var asm = typeof(DomainWrapper).Assembly.FullName;
             var type = typeof(DomainWrapper).FullName;
@@ -265,16 +263,16 @@ namespace Gistlyn.ServiceInterface
         private string GetSourceCodeHash(RunJsIncludedScripts request)
         {
             string hash;
-            string code = (request.MainCode ?? String.Empty)
-                + (request.Packages ?? String.Empty) + String.Concat(request.Scripts);
+            var code = (request.MainCode ?? string.Empty)
+                + (request.Packages ?? string.Empty) + string.Concat(request.Scripts);
             
-            using (MD5 md5 = MD5.Create())
+            using (var md5 = MD5.Create())
             {
-                byte[] retVal = md5.ComputeHash(Encoding.Unicode.GetBytes(code));
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < retVal.Length; i++)
+                var hashBytes = md5.ComputeHash(Encoding.Unicode.GetBytes(code));
+                var sb = new StringBuilder();
+                foreach (var b in hashBytes)
                 {
-                    sb.Append(retVal[i].ToString("x2"));
+                    sb.Append(b.ToString("x2"));
                 }
                 hash = sb.ToString();
             }
@@ -287,13 +285,12 @@ namespace Gistlyn.ServiceInterface
             if (request.GistHash == null)
                 throw new ArgumentException("GistHash");
 
-            JsIncludedScriptExecutionResult result = new JsIncludedScriptExecutionResult();
-            string codeHash = GetSourceCodeHash(request);
-
+            var result = new JsIncludedScriptExecutionResult();
+            var codeHash = GetSourceCodeHash(request);
 
             if (!request.NoCache)
             {
-                MemoizedResult mr = MemoizedResults.Get(codeHash);
+                var mr = MemoizedResults.Get(codeHash);
                 if (mr != null)
                 {
                     result = mr.Result;
@@ -302,15 +299,17 @@ namespace Gistlyn.ServiceInterface
             }
 
             List<AssemblyReference> normalizedReferences;
-            List<AssemblyReference> addedReferences = AddReferencesFromPackages(request.References, request.Packages, out normalizedReferences);
+            var addedReferences = AddReferencesFromPackages(request.References, request.Packages, out normalizedReferences);
 
             //Create domain and run script
-            Evidence evidence = new Evidence(AppDomain.CurrentDomain.Evidence);
-            AppDomainSetup setup = new AppDomainSetup();
-            setup.PrivateBinPath = Path.Combine(System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath, "bin");
-            setup.ApplicationBase = System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath;
+            var evidence = new Evidence(AppDomain.CurrentDomain.Evidence);
+            var setup = new AppDomainSetup
+            {
+                PrivateBinPath = Path.Combine(System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath, "bin"),
+                ApplicationBase = System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath
+            };
 
-            AppDomain domain = AppDomain.CreateDomain(Guid.NewGuid().ToString(), evidence, setup);
+            var domain = AppDomain.CreateDomain(Guid.NewGuid().ToString(), evidence, setup);
 
             var asm = typeof(DomainWrapper).Assembly.FullName;
             var type = typeof(DomainWrapper).FullName;
@@ -320,17 +319,17 @@ namespace Gistlyn.ServiceInterface
             //var wrapper = new DomainWrapper();
             var writerProxy = new NotifierProxy(Session, ServerEvents, request.GistHash);
 
-            ScriptRunnerInfo info = new ScriptRunnerInfo() { GistHash = request.ScriptId, ScriptDomain = domain, DomainWrapper = wrapper };
+            var info = new ScriptRunnerInfo { GistHash = request.ScriptId, ScriptDomain = domain, DomainWrapper = wrapper };
 
-            this.GetCacheClient().Set<ScriptRunnerInfo>(request.ScriptId, info);
+            Cache.Set(request.ScriptId, info);
 
-            ManualResetEvent lockEvt = new ManualResetEvent(false);
+            var lockEvt = new ManualResetEvent(false);
 
             ThreadPool.QueueUserWorkItem(_ =>
             {
                 try
                 {
-                    ScriptExecutionResult sr = wrapper.Run(request.MainCode, request.Scripts, addedReferences.Select(r => r.Path).ToList(), writerProxy);
+                    var sr = wrapper.Run(request.MainCode, request.Scripts, addedReferences.Select(r => r.Path).ToList(), writerProxy);
 
                     result.Exception = sr.Exception;
                     result.Errors = sr.Errors;
@@ -349,7 +348,7 @@ namespace Gistlyn.ServiceInterface
 
             lockEvt.WaitOne();
 
-            MemoizedResults.AddOrUpdate(new MemoizedResult() { CodeHash = codeHash, Result = result });
+            MemoizedResults.AddOrUpdate(new MemoizedResult { CodeHash = codeHash, Result = result });
 
             //Unload appdomain only in synchroneous version
             //AppDomain.Unload(domain);

@@ -1,22 +1,18 @@
 using System;
 using System.IO;
 using System.Text;
-using Gistlyn.Common.Objects;
-using Gistlyn.ServiceInterfaces.Auth;
-using ServiceStack;
 
 namespace Gistlyn.ServiceInterface
 {
     public class ConsoleWriter : TextWriter
     {
-        NotifierProxy proxy;
-        string cache = String.Empty;
+        readonly NotifierProxy proxy;
+        string cache = string.Empty;
 
         public ConsoleWriter(NotifierProxy proxy)
         {
             this.proxy = proxy;
         }
-
 
         public override Encoding Encoding
         {
@@ -32,7 +28,7 @@ namespace Gistlyn.ServiceInterface
             if (cache.Length >= 32 || value == '\n')
             {
                 proxy.SendConsoleMessage(cache);
-                cache = String.Empty;
+                cache = string.Empty;
             }
         }
 

@@ -10,7 +10,7 @@ namespace Gistlyn.ServiceInterface
 {
     public class DomainWrapper : MarshalByRefObject
     {
-        ScriptRunner runner = new ScriptRunner();
+        readonly ScriptRunner runner = new ScriptRunner();
         string mainScript;
         List<string> scripts;
         List<string> references;
@@ -65,10 +65,10 @@ namespace Gistlyn.ServiceInterface
             this.scripts = scripts;
             this.references = references;
 
-            ScriptExecutionResult result = new ScriptExecutionResult();
+            var result = new ScriptExecutionResult();
 
-            TextWriter tmp = Console.Out;
-            using (ConsoleWriter writer = new ConsoleWriter(writerProxy))
+            var tmp = Console.Out;
+            using (var writer = new ConsoleWriter(writerProxy))
             {
                 Console.SetOut(writer);
 
@@ -96,14 +96,14 @@ namespace Gistlyn.ServiceInterface
             this.scripts = scripts;
             this.references = references;
 
-            TextWriter tmp = Console.Out;
-            ConsoleWriter writer = new ConsoleWriter(writerProxy);
+            var writer = new ConsoleWriter(writerProxy);
             Console.SetOut(writer);
 
             tokenSource = new CancellationTokenSource();
-            ScriptExecutionResult result = runner.ExecuteAsync(mainScript, scripts, references, writerProxy, tokenSource.Token);
+            var result = runner.ExecuteAsync(mainScript, scripts, references, writerProxy, tokenSource.Token);
 
-            /*task.ContinueWith((_) =>
+            /*TextWriter tmp = Console.Out;
+            task.ContinueWith((_) =>
             {
                 Console.SetOut(tmp);
                 writer.Close();

@@ -1,5 +1,4 @@
-﻿using System;
-using Gistlyn.Common.Objects;
+﻿using Gistlyn.Common.Objects;
 
 namespace Gistlyn.Common.Interfaces
 {
