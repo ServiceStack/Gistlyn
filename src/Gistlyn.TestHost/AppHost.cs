@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Funq;
 using Gistlyn.Common.Interfaces;
 using Gistlyn.Common.Objects;
@@ -63,26 +64,19 @@ namespace Gistlyn.TestHost
             Plugins.Add(new SessionFeature());
             container.Register(c => new UserSession(c.Resolve<ICacheClient>()));
 
-            //Config examples
-            //this.Plugins.Add(new PostmanFeature());
-
             //To limit access to scripts only from the known sites
             //this.Plugins.Add(new CorsFeature(allowedOrigins: "http://127.0.0.1:8080", allowCredentials: true));
             this.Plugins.Add(new CorsFeature());
 
-            container.Register<IAppSettings>(new AppSettings());
+            var appData = new AppData {
+                NugetPackagesDirectory = AppSettings.Get("NugetPackagesDirectory", "~/App_Data/packages".MapHostAbsolutePath()),
+            };
+            container.Register(appData);
 
-            var config = new WebHostConfig(AppSettings);
+            if (Directory.Exists(appData.NugetPackagesDirectory))
+                Directory.Delete(appData.NugetPackagesDirectory, recursive:true);
 
-            container.Register(config);
-
-            var dbFactory = new OrmLiteConnectionFactory(
-                config.ConnectionString,
-                SqliteDialect.Provider);
-
-            dbFactory.Open();
-
-            container.Register<IDataContext>(new GistlynDataContext(dbFactory));
+            container.Register<IDataContext>(new MemoryDataContext());
 
             //Define the Auth modes you support and where to store it
             Plugins.Add(new AuthFeature(

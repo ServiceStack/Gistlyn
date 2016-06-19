@@ -9,7 +9,7 @@ namespace Gistlyn.ServiceInterface
 {
     public class NugetService : Service
     {
-        public WebHostConfig Config { get; set; }
+        public AppData AppData { get; set; }
 
         public IDataContext DataContext { get; set; }
 
@@ -33,7 +33,7 @@ namespace Gistlyn.ServiceInterface
 
         public object Any(InstallNugetPackage request)
         {
-            NugetHelper.InstallPackage(DataContext, Config.NugetPackagesDirectory, request.PackageId, request.Ver);
+            NugetHelper.InstallPackage(DataContext, AppData.NugetPackagesDirectory, request.PackageId, request.Ver);
 
             return new InstallNugetPackageResponse();
         }
@@ -42,7 +42,7 @@ namespace Gistlyn.ServiceInterface
         {
             return new AddPackageAsReferenceResponse
             {
-                Assemblies = NugetHelper.RestorePackage(DataContext, Config.NugetPackagesDirectory, request.PackageId, request.Version)
+                Assemblies = NugetHelper.RestorePackage(DataContext, AppData.NugetPackagesDirectory, request.PackageId, request.Version)
             };
         }
 

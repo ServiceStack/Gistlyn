@@ -55,13 +55,13 @@ namespace Gistlyn.ServiceInterface.Auth
 
         public void LogoutUser()
         {
-            string key = SessionFeature.GetSessionKey();
+            var key = SessionFeature.GetSessionKey();
             cache.Remove(key);
         }
 
         public CustomUserSession GetCustomSession()
         {
-            return SessionFeature.GetOrCreateSession<CustomUserSession>(cache); ;
+            return SessionFeature.GetOrCreateSession<CustomUserSession>(cache);
 
             //if we need to check that the user is not authenticated yet (session can be null in this case);
             //string key = SessionFeature.GetSessionKey();

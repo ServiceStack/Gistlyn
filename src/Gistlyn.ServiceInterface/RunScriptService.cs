@@ -18,7 +18,7 @@ namespace Gistlyn.ServiceInterface
 {
     public class RunScriptService : Service
     {
-        public WebHostConfig Config { get; set; }
+        public AppData AppData { get; set; }
 
         public IDataContext DataContext { get; set; }
 
@@ -151,7 +151,6 @@ namespace Gistlyn.ServiceInterface
             };
         }
 
-
         private List<AssemblyReference> AddReferencesFromPackages(List<AssemblyReference> references, string packages, out List<AssemblyReference> normalizedReferences)
         {
             var tmpReferences = new List<AssemblyReference>();
@@ -175,7 +174,7 @@ namespace Gistlyn.ServiceInterface
                 foreach (var package in tmpPackages.Packages)
                 {
                     //istall it
-                    tmpReferences.AddRange(NugetHelper.RestorePackage(DataContext, Config.NugetPackagesDirectory, package.Id, package.Ver));
+                    tmpReferences.AddRange(NugetHelper.RestorePackage(DataContext, AppData.NugetPackagesDirectory, package.Id, package.Ver));
                 }
             }
 
@@ -191,7 +190,7 @@ namespace Gistlyn.ServiceInterface
                 if (!Path.IsPathRooted(reference.Path))
                 {
                     var rootPath = System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath;
-                    reference.Path = Path.Combine(rootPath, Config.NugetPackagesDirectory, reference.Path);
+                    reference.Path = Path.Combine(rootPath, AppData.NugetPackagesDirectory, reference.Path);
                 }
             }
 
