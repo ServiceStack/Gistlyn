@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Gistlyn.Common.Objects;
+using Gistlyn.ServiceModel.Types;
 using Gistlyn.SnippetEngine;
 
 namespace Gistlyn.ServiceInterface

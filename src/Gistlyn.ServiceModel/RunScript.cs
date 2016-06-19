@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ServiceStack;
-using Gistlyn.Common.Objects;
+using Gistlyn.ServiceModel.Types;
 
 namespace Gistlyn.ServiceModel
 {

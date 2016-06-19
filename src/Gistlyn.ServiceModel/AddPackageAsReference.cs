@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Gistlyn.Common.Objects;
+using Gistlyn.ServiceModel.Types;
 using ServiceStack;
 
 namespace Gistlyn.ServiceModel
@@ -12,11 +12,9 @@ namespace Gistlyn.ServiceModel
         public string Version { get; set; }
     }
 
-
     public class AddPackageAsReferenceResponse
     {
         public List<AssemblyReference> Assemblies { get; set; }
     }
-
 }
 

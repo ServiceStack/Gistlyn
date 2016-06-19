@@ -5,14 +5,13 @@ using System.Text;
 using ServiceStack;
 using Gistlyn.ServiceModel;
 using Gistlyn.SnippetEngine;
-using Gistlyn.Common.Objects;
 using System.IO;
 using XmlSerializer = System.Xml.Serialization.XmlSerializer;
-using Gistlyn.Common.Interfaces;
 using Gistlyn.ServiceInterface.Auth;
 using System.Security.Policy;
 using System.Security.Cryptography;
 using System.Threading;
+using Gistlyn.ServiceModel.Types;
 
 namespace Gistlyn.ServiceInterface
 {
@@ -25,8 +24,6 @@ namespace Gistlyn.ServiceInterface
         public UserSession Session { get; set; }
 
         public IServerEvents ServerEvents { get; set; }
-
-        public MemoizedResultsContainer MemoizedResults { get; set; }
 
         public object Any(GetScriptVariableJson request)
         {
@@ -289,11 +286,11 @@ namespace Gistlyn.ServiceInterface
 
             if (!request.NoCache)
             {
-                var mr = MemoizedResults.Get(codeHash);
+                var mr = AppData.GetMemoizedResult(codeHash);
                 if (mr != null)
                 {
                     result = mr.Result;
-                    return new RunJsIncludedScriptsResponse() { Result = result };
+                    return new RunJsIncludedScriptsResponse { Result = result };
                 }
             }
 
@@ -347,7 +344,7 @@ namespace Gistlyn.ServiceInterface
 
             lockEvt.WaitOne();
 
-            MemoizedResults.AddOrUpdate(new MemoizedResult { CodeHash = codeHash, Result = result });
+            AppData.SetMemoizedResult(new MemoizedResult { CodeHash = codeHash, Result = result });
 
             //Unload appdomain only in synchroneous version
             //AppDomain.Unload(domain);

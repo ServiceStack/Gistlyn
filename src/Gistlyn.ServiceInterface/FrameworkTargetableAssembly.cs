@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Versioning;
-using Gistlyn.Common.Objects;
+using Gistlyn.ServiceModel.Types;
 using NuGet;
 
 namespace Gistlyn.ServiceInterface

@@ -60,16 +60,20 @@
     <Compile Include="GetIncludeScript.cs" />
     <Compile Include="RunJsIncludedScripts.cs" />
     <Compile Include="CancelJsIncludedScript.cs" />
+    <Compile Include="Types\AssemblyReference.cs" />
+    <Compile Include="Types\ConsoleMessage.cs" />
+    <Compile Include="Types\ErrorInfo.cs" />
+    <Compile Include="Types\JsIncludedScriptExecutionResult.cs" />
+    <Compile Include="Types\MemoizedResult.cs" />
+    <Compile Include="Types\NugetPackageInfo.cs" />
+    <Compile Include="Types\PackageCollection.cs" />
+    <Compile Include="Types\ScriptExecutionResult.cs" />
+    <Compile Include="Types\ScriptStateVariables.cs" />
+    <Compile Include="Types\ScriptStatus.cs" />
+    <Compile Include="Types\ScriptVariableJson.cs" />
+    <Compile Include="Types\VariableInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Types\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Gistlyn.Common\Gistlyn.Common.csproj">
-      <Project>{3f9f0e17-a17b-4dff-85bb-881d5174eacb}</Project>
-      <Name>Gistlyn.Common</Name>
-    </ProjectReference>
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

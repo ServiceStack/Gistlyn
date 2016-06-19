@@ -1,5 +1,5 @@
 ﻿using System;
-using Gistlyn.Common.Objects;
+using Gistlyn.ServiceModel.Types;
 using ServiceStack;
 
 namespace Gistlyn.ServiceModel

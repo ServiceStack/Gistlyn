@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Gistlyn.Common.Objects;
+using Gistlyn.ServiceModel.Types;
 using ServiceStack;
 
 namespace Gistlyn.ServiceModel

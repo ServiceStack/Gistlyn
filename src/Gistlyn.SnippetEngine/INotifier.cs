@@ -1,6 +1,6 @@
-﻿using Gistlyn.Common.Objects;
+﻿using Gistlyn.ServiceModel.Types;
 
-namespace Gistlyn.Common.Interfaces
+namespace Gistlyn.SnippetEngine
 {
     public interface INotifier
     {

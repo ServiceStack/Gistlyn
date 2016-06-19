@@ -75,6 +75,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="INotifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScriptRunner.cs" />
     <Compile Include="GistSourceResolver.cs" />
@@ -87,9 +88,9 @@
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Gistlyn.Common\Gistlyn.Common.csproj">
-      <Project>{3f9f0e17-a17b-4dff-85bb-881d5174eacb}</Project>
-      <Name>Gistlyn.Common</Name>
+    <ProjectReference Include="..\Gistlyn.ServiceModel\Gistlyn.ServiceModel.csproj">
+      <Project>{53e82ac1-dd1d-4c66-b55f-f9f4acfb2f40}</Project>
+      <Name>Gistlyn.ServiceModel</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

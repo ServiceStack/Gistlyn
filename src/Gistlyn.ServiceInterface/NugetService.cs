@@ -1,7 +1,6 @@
 ﻿using System.Linq;
-using Gistlyn.Common.Interfaces;
-using Gistlyn.Common.Objects;
 using Gistlyn.ServiceModel;
+using Gistlyn.ServiceModel.Types;
 using NuGet;
 using ServiceStack;
 

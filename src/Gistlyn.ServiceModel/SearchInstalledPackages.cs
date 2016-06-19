@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Gistlyn.Common.Objects;
+using Gistlyn.ServiceModel.Types;
 using ServiceStack;
 
 public class SearchInstalledPackages : IReturn<SearchInstalledPackagesResponse>

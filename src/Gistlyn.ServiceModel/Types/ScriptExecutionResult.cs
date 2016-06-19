@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Gistlyn.Common.Objects
+namespace Gistlyn.ServiceModel.Types
 {
     [Serializable]
-    public class JsIncludedScriptExecutionResult
+    public class ScriptExecutionResult
     {
         public ScriptStatus Status { get; set; }
+
+        public List<VariableInfo> Variables { get; set; }
 
         public List<ErrorInfo> Errors { get; set; }
 
         public Exception Exception { get; set; }
 
-        public ScriptVariableJson LastVariableJson { get; set; }
+        public string Console { get; set; }
     }
 }
-

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Gistlyn.Common.Objects
+namespace Gistlyn.ServiceModel.Types
 {
     [Serializable]
     public class ErrorInfo

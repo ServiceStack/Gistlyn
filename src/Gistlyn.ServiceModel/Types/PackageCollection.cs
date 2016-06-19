@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace Gistlyn.Common.Objects
+namespace Gistlyn.ServiceModel.Types
 {
     [Serializable]
     [XmlRoot("packages")]

@@ -1,16 +1,11 @@
 ﻿using System;
 using System.IO;
 using Funq;
-using Gistlyn.Common.Interfaces;
-using Gistlyn.Common.Objects;
-using Gistlyn.DataContext;
 using Gistlyn.ServiceInterface;
 using Gistlyn.ServiceInterface.Auth;
 using ServiceStack;
 using ServiceStack.Auth;
 using ServiceStack.Caching;
-using ServiceStack.Configuration;
-using ServiceStack.OrmLite;
 using ServiceStack.Text;
 
 namespace Gistlyn.TestHost
@@ -54,11 +49,8 @@ namespace Gistlyn.TestHost
                     Console.WriteLine("OnUnsubscribe");
                 }
             });
-            //this.CustomErrorHttpHandlers.Remove(HttpStatusCode.Forbidden);
 
-            //container.RegisterAutoWiredAs<MemoryChatHistory, IChatHistory>();
-
-            container.Register(new MemoizedResultsContainer());
+            //container.Register(new MemoizedResultsContainer());
 
             //session and authentication
             Plugins.Add(new SessionFeature());

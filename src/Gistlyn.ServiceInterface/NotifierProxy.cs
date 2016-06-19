@@ -1,7 +1,7 @@
 ﻿using System;
-using Gistlyn.Common.Interfaces;
-using Gistlyn.Common.Objects;
 using Gistlyn.ServiceInterface.Auth;
+using Gistlyn.ServiceModel.Types;
+using Gistlyn.SnippetEngine;
 using ServiceStack;
 
 namespace Gistlyn.ServiceInterface

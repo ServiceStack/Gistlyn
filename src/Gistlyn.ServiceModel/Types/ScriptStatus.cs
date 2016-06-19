@@ -1,4 +1,4 @@
-﻿namespace Gistlyn.Common.Objects
+﻿namespace Gistlyn.ServiceModel.Types
 {
     public enum ScriptStatus
     {

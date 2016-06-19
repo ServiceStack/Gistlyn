@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Gistlyn.Common.Interfaces;
-using Gistlyn.Common.Objects;
+using Gistlyn.ServiceModel.Types;
 using NuGet;
 
 namespace Gistlyn.ServiceInterface
