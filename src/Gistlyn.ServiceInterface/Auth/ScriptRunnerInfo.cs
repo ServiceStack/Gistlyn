@@ -4,7 +4,7 @@ namespace Gistlyn.ServiceInterface.Auth
 {
     public class ScriptRunnerInfo : IDisposable
     {
-        public string GistHash { get; set; }
+        public string SubscriptionId { get; set; }
 
         public DomainWrapper DomainWrapper { get; set; }
 

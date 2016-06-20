@@ -144,7 +144,7 @@
     <None Include="bower_components\jquery\dist\jquery.slim.min.map" />
     <None Include="bower_components\jquery\bower.json" />
     <None Include="bower_components\bootstrap\bower.json" />
-    <Content Include="js\rosling.js" />
+    <Content Include="js\gistlyn.js" />
     <Content Include="js\SStack.js" />
     <Content Include="css\offset.css" />
     <Content Include="bower_components\handlebars\handlebars.amd.js" />
@@ -163,7 +163,7 @@
     <Content Include="bower_components\bootstrap3-typeahead\bootstrap3-typeahead.js" />
     <Content Include="bower_components\bootstrap3-typeahead\bootstrap3-typeahead.min.js" />
     <Content Include="js\ss-utils.js" />
-    <Content Include="js\gistlyn.js" />
+    <Content Include="js\gistlyn-embed.js" />
     <Content Include="templates\jsincluded.init.js" />
     <Content Include="sampleinclude.html" />
     <Content Include="bower_components\CodeMirror\lib\codemirror.css" />

@@ -1,154 +1,55 @@
-﻿var gistScripts = {};
-var codeMirrorEditors = {};
+﻿var activeSub;
 
-function getGist(gistId, scriptId, onSuccess)
+//common functions
+﻿function showError(status)
 {
-    $.get({
-        url: "https://api.github.com/gists/" + gistId,
-        success: function(response) {
-            var main;
-            var scripts = [];
-            var packages;
-
-            $.each(response.files, function(idx, file) { 
-                if (file.filename.toUpperCase() == "MAIN.CS") {
-                    main = file.content;
-                } else if (file.filename.toUpperCase() == "PACKAGES.CONFIG") {
-                    packages = file.content;
-                } else {
-                    scripts.push(file.content);
-                }
-            });
-
-            onSuccess({scriptId: scriptId, gistHash: gistId, mainCode: main, scripts: scripts, packages: packages});
-        },
-        datatype: "jsonp"
+    BootstrapDialog.show({
+        type: BootstrapDialog.TYPE_DANGER,
+        title: "Error",
+        message: status.responseStatus.message,
+        buttons: [{
+            label: 'Close',
+            action: function(dialog) {
+                dialog.close();
+            }
+        }]
     });
 }
 
-function onGistResponse(response)
-{
-    //TODO: change to getElementById
-    codeMirrorEditors[response.scriptId].getDoc().setValue(response.mainCode);
-    //$("#main_" + response.scriptId).val(response.mainCode);
-
-    gistScripts["script_" + response.scriptId] = response;
-
-    $("#run_" + response.scriptId).removeAttr("disabled");
-    $("#cancel_"  + response.scriptId).hide();
-    $("#status_" + response.scriptId).text("");
+function getParameterByName(name) {
+    var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
 }
 
-function changeScriptStatus(scriptId, status)
-{
-    switch(status) {
-        case "Unknown":
-            $("#run_" + scriptId).removeAttr("disabled");
-            $("#cancel_"  + scriptId).hide();
-            $("#status_" + scriptId).text("");
-            break;
-        case "Completed":
-        case "Cancelled":
-        case "CompiledWithErrors":
-        case "ThrowedException":
-            $("#run_" + scriptId).removeAttr("disabled");
-            $("#cancel_"  + scriptId).hide();
-            $("#status_" + scriptId).text(status);
-            break;
-       case "PrepareToRun":
-       case "Running":
-            $("#run_" + scriptId).attr("disabled", "disabled");
-            $("#cancel_"  + scriptId).show();
-            $("#status_" + scriptId).text("Executing");
-            break;
-    }
+function isParameterInQuery(name) {
+    var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match;
 }
 
-function setScriptResult(scriptId, response)
-{
-    var id = "#results_" + scriptId;
-    $(id).empty();
+function getQueryHash() {
+    return window.location.hash == "#" ? "" : window.location.hash;
+}
 
-    var hasErrors = response.result.errors && response.result.errors.length > 0;
-    if (hasErrors) {
-        $.each(response.result.errors, function(idx, error) {
-            $(id).append(error.info + "<br />");
-        });
+//gistlyn-based functions
+
+function init()
+{
+    subscribeServerEvents("gist");
+
+    var gistHash = getParameterByName("gist");
+
+    if (gistHash) {
+        $("#gistId").val(gistHash);
+        getGist();
     }
 
-    if (response.result.exception) {
-        $(id).text(response.result.exception);
-    }
-
-    if (response.result.lastVariableJson) {
-        $(id).text(response.result.lastVariableJson.name + "=" + response.result.lastVariableJson.json); 
-    }
+    $("#multirun").removeAttr("disabled");
+    $("#cancel").hide();
 }
 
-function showButtons(scriptId, isRunning)
+function subscribeServerEvents(channel)
 {
-    if (isRunning) {
-        $("#cancel_" + scriptId).show();
-        $("#run_" + scriptId).attr("disabled", "disabled");
-    } else {
-        $("#cancel_" + scriptId).hide();
-        $("#run_" + scriptId).removeAttr("disabled");
-    }
-}
-
-function runScript(url, scriptId, noCache)
-{
-    console.log("run");
-
-    var mainCode = codeMirrorEditors[scriptId].getDoc().getValue(); //$("#main_" + scriptId).val();
-    var scriptInfo = gistScripts["script_" + scriptId];
-
-    showButtons(scriptId, true);
-    changeScriptStatus(scriptId, "PrepareToRun");
-
-    $.ajax({
-        url: url + "/servicestack/json/reply/RunJsIncludedScripts", 
-        data: JSON.stringify({scriptId: scriptId, gistHash: scriptInfo.gistHash, mainCode : mainCode, scripts: scriptInfo.scripts, packages: scriptInfo.packages, noCache: noCache}),
-        contentType: "application/json; charset=utf-8",
-        type: "POST",
-        dataType: "json",
-        /* xhrFields: {
-            withCredentials: true
-        },
-        crossDomain: true, */
-        success: function(response) {
-            showButtons(scriptId, false);
-            changeScriptStatus(scriptId, response.result.status);
-            setScriptResult(scriptId, response);
-        },
-        error: function(e) {
-            changeScriptStatus(scriptId, "ThrowedException");
-            showButtons(scriptId, false);
-        }
-    });
-}
-
-function cancelScript(url, scriptId)
-{
-    $.ajax({
-        url: url + "/servicestack/json/reply/CancelJsIncludedScript", 
-        data: JSON.stringify({gistHash: scriptId}),
-        contentType: "application/json; charset=utf-8",
-        type: "POST",
-        dataType: "json",
-        success: function(response) {
-            changeScriptStatus(scriptId, response.result);
-            showButtons(scriptId, false);
-        },
-        error: function(e) {
-            console.log("cancellation error", e)
-        }
-    });
-}
-
-function subscribeServerEvents(url, channel)
-{
-    var source = new EventSource(url + '/servicestack/event-stream?channels=' + channel + '&t=' + new Date().getTime()); //disable cache
+    var source = new EventSource('/servicestack/event-stream?channels=' + channel + '&t=' + new Date().getTime()); //disable cache
     source.addEventListener('error', function (e) {
         console.log(e);
         //addEntry({ msg: "ERROR!", cls: "error" });
@@ -163,19 +64,30 @@ function subscribeServerEvents(url, channel)
             onHeartbeat: function (msg, e) { if (console) console.log("onHeartbeat", msg, e); },
             onJoin: refreshUsers,
             onLeave: refreshUsers,
+            chat: function (m, e) {
+                addEntry({ id: m.id, userId: m.fromUserId, userName: m.fromName, msg: m.message, cls: m.private ? ' private' : '', channel: m.channel || e.channel });
+            },
+            helloResponse: function(m, e) {
+                console.log(m);
+            },
             ConsoleMessage: function(m, e) {
                 console.log("console out", m);
+                $("#multirunBlock").show();
+                $("#multirunBlock .role-gistresult").show();
+                var consoleOut = $("#multirunBlock textarea.role-console");
+                $(consoleOut).show();
+                $(consoleOut).val(consoleOut.val() + m.message);
             },
             ScriptExecutionResult: function(m, e) {
-                //$("#scriptStatus").text(m.status);
-                //scriptExecResponse($("#multirunBlock"), {result : m});
+                $("#scriptStatus").text(m.status);
+                scriptExecResponse($("#multirunBlock"), {result : m});
                 switch(m.status) {
                     case "Completed":
                     case "Cancelled":
                     case "CompiledWithErrors":
                     case "ThrowedException":
-                        //$("#multirun").removeAttr("disabled");
-                        //$("#cancel").hide();
+                        $("#multirun").removeAttr("disabled");
+                        $("#cancel").hide();
                         break;
                 }
 
@@ -193,4 +105,432 @@ function subscribeServerEvents(url, channel)
             }
         }
     });
+}
+
+function refreshUsers()
+{
+    console.log("refresh users");
+}
+
+function bind()
+{
+	$("#load").click(getGist);
+
+    $("#multirun").click(runMultiple);
+
+    $("#cancel").click(cancelScript);
+
+    $("#gistlist").on("click", "button.role-run", function(e){
+        runGist($(e.target).closest("div.role-execblock"));
+        //console.log($("textarea", $(e.target).closest("div.row")).val());
+    });
+
+    $("#packages").typeahead({
+        minLength: 0,
+        delay: 800,
+        showHintOnFocus: false,
+        displayText: function(val) { return val.Id + " [" + val.Ver + "]"; },
+        items: "all",
+        source: function(query, callback) {
+            $("#install").hide();
+            gateway.getFromService(
+                {SearchNugetPackages: {search : query}},
+                function(response){callback(response.packages);},
+                showError
+            );
+        },
+        afterSelect: function(value) {
+            $("#install").show();
+        }
+    });
+
+    $("#installedPackages").typeahead({
+        minLength: 0,
+        delay: 200,
+        showHintOnFocus: false,
+        displayText: function(val) { return val.Id + " [" + val.Ver + "]"; },
+        items: "all",
+        source: function(query, callback) {
+            $("#addReference").hide();
+            gateway.getFromService(
+                {SearchInstalledPackages: {search : query}},
+                function(response){callback(response.packages);},
+                showError
+            );
+        },
+        afterSelect: function(value) {
+            $("#addReference").show();
+        }
+    });
+
+
+    $("#install").click(installPackage);
+
+    $("#addReference").click(addReference);
+
+    $("#multirunBlock button.role-getvariables").click(getVariables);
+
+    $("#multirunBlock").on("click", "button.role-getVariableJson", getVariableJson);
+
+    $("#multirunBlock").on("click", "button.role-inspectVariable", inspectVariable);
+
+    $("#multirunBlock").on("click", "button.role-evaluate", evaluateExpression);
+}
+
+function getGist()
+{
+	var gistId = $("#gistId").val();
+
+	$.get({
+		url: "https://api.github.com/gists/" + gistId,
+		success: function(response) {
+            var oldGist = $("#gistId").data("gistHash");
+            $("#gistId").data("gistHash", gistId);
+
+            //clear run multiple
+            $("#multirunBlock").hide();
+            $("#multirunBlock table.role-variables tbody").empty();
+            $("#multirunBlock table.role-errors tbody").empty();
+            $("#multirunBlock span.role-exception").closest("div.row").hide();
+            //show "multirun" button
+            $("#multirun").toggle(Object.keys(response.files).length > 0);
+
+            $("#gistlist").empty();
+            var template = Handlebars.compile( $("#gists-template").html() );
+            $("#gistlist").append( template(response) );
+            $.each($("#gistlist .role-execblock"), function(idx, val) {
+                var filename = $(".role-filename", $(val)).text().toUpperCase();
+                /*if (filename != "PACKAGES.CONFIG" ) {
+                    //set type to xml
+                }*/
+                var editor = CodeMirror.fromTextArea($("textarea",$(val))[0], {
+                    lineNumbers: true,
+                    mode: "text/x-csharp",
+                    theme: "default",
+                    indentUnit: 4
+                });
+                $(".role-filename", $(val)).data("editor", editor);
+            });
+        },
+		datatype: "jsonp"
+	});
+}
+
+function runGist($block)
+{
+    var content = $("textarea", $block).val();
+	gateway.postToService({RunScript : {code : content}},
+		function(response) {
+            scriptExecResponse($block, response);
+		},
+        showError
+	);
+}
+
+function evaluateExpressionResponse($block, response)
+{
+    $("table.role-expressionVariables tbody", $block).empty();
+
+    var hasVars = response.result.variables && response.result.variables.length > 0;
+    if (hasVars) {
+        $.each(response.result.variables, function(idx, variable) {
+            var el = $("<tr></tr>");
+            var value = $('<td class="role-value"></td>').text(variable.value);
+            var type = $('<td class="role-type"></td>').text(variable.type);
+            el.append(value).append(type);
+            $("table.role-expressionVariables tbody", $block).append(el);
+        });
+    }
+    $("table.role-expressionVariables tbody", $block).closest("div.row").toggle(hasVars);
+
+    $("table.role-expressionErrors tbody", $block).empty();
+    var hasErrors = response.result.errors && response.result.errors.length > 0;
+    if (hasErrors) {
+        $.each(response.result.errors, function(idx, error) {
+            var el = $("<tr></tr>").append(error.info);
+            $("table.role-expressionErrors tbody", $block).append(el);
+        });
+    }
+    $("table.role-expressionErrors tbody", $block).closest("div.row").toggle(hasErrors);
+
+    var hasException = !!response.result.exception;
+    if (hasException) {
+        $("span.role-expressionException").text(response.result.exception);
+    }
+    $("span.role-expressionException", $block).closest("div.row").toggle(hasException);
+}
+
+function scriptExecResponse($block, response)
+{
+    $("div.role-gistresult", $block).show();
+    $("table.role-variables tbody", $block).empty();
+
+    if (response.result.parentVariable) {
+        $(".role-parentVariable", $block).data("prev", $(".role-parentVariable", $block).text());
+        $(".role-parentVariable", $block).text(response.result.parentVariable.name);
+        $(".role-getvariables", $block).text("Back");
+    } else {
+        $(".role-getvariables", $block).text("Get Variables");
+        $(".role-parentVariable", $block).data("prev", "");
+        $(".role-parentVariable", $block).text("");
+    }
+
+    var parent = $(".role-parentVariable", $block).text();
+
+    var hasVars = response.result.variables && response.result.variables.length > 0;
+    if (hasVars) {
+        $.each(response.result.variables, function(idx, variable) {
+            var el = $("<tr></tr>");
+            var name = $('<td class="role-name"></td>').text(variable.name);
+            var value = $('<td class="role-value"></td>').text(variable.value);
+            var type = $('<td class="role-type"></td>').text(variable.type);
+            var btnJson = $('<td><button class="btn btn-primary role-getVariableJson">Get Json</button></td>');
+            var btnInspect = variable.isBrowseable ? $('<td><button class="btn btn-primary role-inspectVariable">Inspect</button></td>') : $('<td></td>');
+            el.append(name).append(value).append(type).append(btnInspect).append(btnJson);
+            $("table.role-variables tbody", $block).append(el);
+        });
+    }
+    $("table.role-variables tbody", $block).closest("div.row").toggle(hasVars);
+
+    $("table.role-errors tbody", $block).empty();
+    var hasErrors = response.result.errors && response.result.errors.length > 0;
+    if (hasErrors) {
+        $.each(response.result.errors, function(idx, error) {
+            var el = $("<tr></tr>").append(error.info);
+            $("table.role-errors tbody", $block).append(el);
+        });
+    }
+    $("table.role-errors tbody", $block).closest("div.row").toggle(hasErrors);
+
+    var hasException = !!response.result.exception;
+    if (hasException) {
+        $("span.role-exception").text(response.result.exception);
+    }
+    $("span.role-exception", $block).closest("div.row").toggle(hasException);
+
+    //$("textarea.role-console", $block).val(response.Result.Console);
+}
+
+function runMultiple()
+{
+    var filenames = $("#gistlist .role-filename").text();
+    var main = $.grep($("#gistlist .role-filename"), function(val){ return $(val).text().toUpperCase() == "MAIN.CS" });
+    var packagesConfig = $.grep($("#gistlist .role-filename"), function(val){ return $(val).text().toUpperCase() == "PACKAGES.CONFIG" });
+
+    if (main.length != 1) {
+        showError({responseStatus : {message: "There must be file 'Main.cs' and it must be only one"}});
+    }
+
+    if (packagesConfig.length > 1) {
+        showError({responseStatus : {message: "There must be only one file 'packages.config'"}});
+    }
+
+    var gistHash = activeSub.id;
+    var mainCode = $("textarea", $(main[0]).closest("div.row")).val();
+    var sources = [];
+    var references = $("#assemblyReferences").data("references");
+    var packages = packagesConfig.length > 0 ? $("textarea", $(packagesConfig[0]).closest("div.row")).val() : null;
+
+    $.each($("#gistlist .role-execblock"), function(idx, val) {
+        var filename = $(".role-filename", $(val)).text().toUpperCase();
+        if (filename != "MAIN.CS" && filename != "PACKAGES.CONFIG" ) {
+            sources.push($("textarea",$(val)).val());
+        }
+    });
+
+    gateway.getFromService({GetScriptStatus : {gistHash: gistHash}},
+        function(response) {
+            if (response.status != "PrepareToRun" && response.status != "Running") {
+                runMultipleInternal(gistHash, mainCode, sources, references, packages, true);
+            } else {
+                BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_DANGER,
+                    title: "Switching environment",
+                    message: "The script is running. Do you want to stop it and run again?",
+                    buttons: [ {
+                        label: 'OK',
+                        action: function(dialog) {
+                                dialog.close();
+                                runMultipleInternal(gistHash, mainCode, sources, references, packages, true);
+                            }
+                        }, {
+                        label: 'Cancel',
+                        action: function(dialog) {
+                            dialog.close();
+                        }
+                    }]
+                });
+            }
+        },
+        showError
+    );
+}
+
+function runMultipleInternal(gistHash, mainCode, sources, references, packages, forceRun)
+{
+    var empty = {result : { variables: [], errors: [], console: ""}};
+    scriptExecResponse($("#multirunBlock"), empty);
+    $("#multirunBlock textarea.role-console").val(empty.result.console);
+
+    $("#multirunBlock").show();
+    $("#multirunBlock .role-gistresult").show();
+    $("#multirun").attr("disabled", "disabled");
+    $("#cancel").show();
+
+    gateway.postToService({RunMultipleScripts : {gistHash: gistHash, mainCode : mainCode, scripts: sources, references: references, packages: packages, forceRun: forceRun}},
+        function(response) {
+            scriptExecResponse($("#multirunBlock"), response);
+            $("#multirunBlock").show();
+
+            $("#assemblyReferences ul").empty();
+            var template = Handlebars.compile( $("#references-template").html() );
+            console.log(template({ references: response.references }));
+            $("#assemblyReferences ul").append( template({ references: response.references }) );
+        },
+        function(e) {
+            $("#multirun").removeAttr("disabled");
+            showError(e);
+        }
+    );
+}
+
+function cancelScript()
+{
+    var gistHash = activeSub.id;
+
+    gateway.postToService({CancelScript : {gistHash: gistHash}},
+        function(response) {
+            $("#multirun").removeAttr("disabled");
+            $("#cancel").hide();
+            $("#scriptStatus").text(response.result.status);
+        },
+        showError
+    );
+
+}
+
+function installPackage()
+{
+    var package = $("#packages").typeahead("getActive");
+
+    gateway.postToService({InstallNugetPackage: { packageId: package.id, version: package.version, ver: package.ver}},
+        function(response) {
+            alert("installed");
+        },
+        showError
+    );
+}
+
+function addReference()
+{
+    var package = $("#installedPackages").typeahead("getActive");
+
+    gateway.postToService({AddPackageAsReference: { packageId: package.id, version: package.ver}},
+        function(response) {
+            var references = $("#assemblyReferences").data("references");
+            if (!references) references = [];
+
+            $.each(response.assemblies, function(idx,val){
+                if ($.grep(references, function(val2) { return val2.name == val.name}).length == 0)
+                    references.push(val);
+            });
+            $("#assemblyReferences").data("references", references);
+
+            $("#assemblyReferences ul").empty();
+            var template = Handlebars.compile( $("#references-template").html() );
+            console.log(template({ references: references }));
+            $("#assemblyReferences ul").append( template({ references: references }) );
+        },
+        showError
+    );
+}
+
+function getVariables()
+{
+    var gistHash = activeSub.id;
+    var parent = $("#multirunBlock .role-parentVariable").data("prev");
+
+    gateway.getFromService({GetScriptVariables : {gistHash: gistHash, variableName: parent}},
+        function(response) {
+            if (response.status == "PrepareToRun" || response.status == "Running")
+                $("#multirunBlock span.role-runningState").text("Script is running can't get variables");
+            else 
+                $("#multirunBlock span.role-runningState").text("");
+
+            scriptExecResponse($("#multirunBlock"), { result: { variables: response.variables, errors: {}, exceptions: {}}});
+        },
+        showError
+   );
+}
+
+function getVariableJson(e)
+{
+    var $that = $(this);
+    var name = $("td.role-name", $that.closest("tr")).text();
+    var parent = $("#multirunBlock .role-parentVariable").text();
+    var gistHash = activeSub.id;
+
+    gateway.getFromService({GetScriptVariableJson : {gistHash: gistHash, variableName: (parent ? (parent + "." + name) : name)}},
+        function(response) {
+            if (response.status == "PrepareToRun" || response.status == "Running")
+                $("#multirunBlock span.role-runningState").text("Script is running. Can't get variable json representation");
+            else 
+                $("#multirunBlock span.role-runningState").text("");
+
+            console.log(response);
+
+            if (response.json) {
+                var $next=$that.closest("tr").next();
+                if ($next.hasClass("role-json")) {
+                    $("td", $next).text(response.json);
+                } else {
+                    var td = $('<td colspan="4"></td>').text(response.json);
+                    var tr = $('<tr class="role-json"></tr>').append(td);
+                    $that.closest("tr").after(tr);
+                }
+            }
+        },
+        showError
+   );
+}
+
+function inspectVariable(e)
+{
+    var $that = $(this);
+    var parentName = $("#multirunBlock .role-parentVariable").text();
+    var name = $("td.role-name", $that.closest("tr")).text();
+    var gistHash = activeSub.id;
+    var variableName = parentName ? parentName + '.' + name : name;
+
+    gateway.getFromService({GetScriptVariables: { gistHash: gistHash, variableName: variableName }},
+        function(response) {
+            if (response.status == "PrepareToRun" || response.status == "Running")
+                $("#multirunBlock span.role-runningState").text("Script is running can't get variables");
+            else 
+                $("#multirunBlock span.role-runningState").text("");
+
+            scriptExecResponse($("#multirunBlock"), { result: { parentVariable: response.parentVariable, variables: response.variables, errors: {}, exceptions: {}}});
+        },
+        showError
+    );
+}
+
+function evaluateExpression(e)
+{
+    var $that = $(this);
+    var gistHash = activeSub.id;
+    var expr = $("input.role-expression", $that.closest("div.row")).val();
+
+    gateway.getFromService({EvaluateExpression: { gistHash: gistHash, expression: expr }},
+        function(response) {
+            if (response.status == "PrepareToRun" || response.status == "Running")
+                $("#multirunBlock span.role-evaluateRunningState").text("Script is running can't evaluate expression");
+            else 
+                $("#multirunBlock span.role-evaluateRunningState").text("");
+
+            evaluateExpressionResponse($("#multirunBlock"), { result: { parentVariable: response.parentVariable, variables: response.variables, errors: response.errors, exception: response.exception}});
+        },
+        showError
+    );
+
 }
