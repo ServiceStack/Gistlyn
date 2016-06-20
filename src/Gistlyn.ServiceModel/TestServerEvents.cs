@@ -7,12 +7,12 @@ using ServiceStack;
 namespace Gistlyn.ServiceModel
 {
     [Route("/hello/{Name}")]
-    public class Hello : IReturn<HelloResponse>
+    public class TestServerEvents : IReturn<TestServerEventsResponse>
     {
         public string Name { get; set; }
     }
 
-    public class HelloResponse
+    public class TestServerEventsResponse
     {
         public string Result { get; set; }
     }

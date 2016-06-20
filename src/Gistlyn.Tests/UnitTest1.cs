@@ -14,7 +14,7 @@ namespace Gistlyn.Tests
 
         public UnitTests()
         {
-            appHost = new BasicAppHost(typeof(MyServices).Assembly)
+            appHost = new BasicAppHost(typeof(RunScriptService).Assembly)
             {
                 ConfigureContainer = container =>
                 {
@@ -33,9 +33,9 @@ namespace Gistlyn.Tests
         [Test]
         public void TestMethod1()
         {
-            var service = appHost.Container.Resolve<MyServices>();
+            var service = appHost.Container.Resolve<RunScriptService>();
 
-            var response = (HelloResponse)service.Any(new Hello { Name = "World" });
+            var response = (TestServerEventsResponse)service.Any(new TestServerEvents { Name = "World" });
 
             Assert.That(response.Result, Is.EqualTo("Hello, World!"));
         }

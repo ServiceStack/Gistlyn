@@ -17,7 +17,7 @@ namespace Gistlyn.TestHost
         /// Base constructor requires a name and assembly to locate web service classes. 
         /// </summary>
         public AppHost()
-            : base("Gistlyn", typeof(MyServices).Assembly) {}
+            : base("Gistlyn", typeof(RunScriptService).Assembly) {}
 
         /// <summary>
         /// Application specific configuration

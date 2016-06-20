@@ -6,11 +6,11 @@ using ServiceStack;
 using Gistlyn.ServiceModel;
 using Gistlyn.SnippetEngine;
 using System.IO;
-using XmlSerializer = System.Xml.Serialization.XmlSerializer;
 using Gistlyn.ServiceInterface.Auth;
 using System.Security.Policy;
 using System.Security.Cryptography;
 using System.Threading;
+using System.Xml.Serialization;
 using Gistlyn.ServiceModel.Types;
 
 namespace Gistlyn.ServiceInterface
@@ -24,6 +24,23 @@ namespace Gistlyn.ServiceInterface
         public UserSession Session { get; set; }
 
         public IServerEvents ServerEvents { get; set; }
+
+        public object Any(TestServerEvents request)
+        {
+            var response = new TestServerEventsResponse { Result = "Hello, {0}!".Fmt(request.Name) };
+
+            try
+            {
+                // Session.SetGistHash("123");
+                ServerEvents.NotifySession(Session.GetSessionId(), response, "@channels");
+                ServerEvents.NotifyUserId(request.Name, response, "@channels");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return response;
+        }
 
         public object Any(GetScriptVariableJson request)
         {

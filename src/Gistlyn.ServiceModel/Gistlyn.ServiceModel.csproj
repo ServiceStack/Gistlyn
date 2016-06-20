@@ -44,7 +44,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Hello.cs" />
+    <Compile Include="TestServerEvents.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RunScript.cs" />
     <Compile Include="RunMultipleScripts.cs" />
