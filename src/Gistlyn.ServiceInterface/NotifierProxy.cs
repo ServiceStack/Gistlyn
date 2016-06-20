@@ -10,14 +10,14 @@ namespace Gistlyn.ServiceInterface
     {
         IServerEvents serverEvents;
         UserSession session;
-        string gistHash;
+        string subscriptionId;
         const string channel = "gist";
 
-        public NotifierProxy(UserSession session, IServerEvents serverEvents, string gistHash)
+        public NotifierProxy(UserSession session, IServerEvents serverEvents, string subscriptionId)
         {
             this.session = session;
             this.serverEvents = serverEvents;
-            this.gistHash = gistHash;
+            this.subscriptionId = subscriptionId;
         }
 
         public override object InitializeLifetimeService()
@@ -28,12 +28,12 @@ namespace Gistlyn.ServiceInterface
         public void SendConsoleMessage(string message)
         {
             var consoleMessage = new ConsoleMessage { Message = message };
-            serverEvents.NotifySubscription(gistHash, consoleMessage, "gist");
+            serverEvents.NotifySubscription(subscriptionId, consoleMessage, "gist");
         }
 
         public void SendScriptExecutionResults(ScriptExecutionResult result)
         {
-            serverEvents.NotifySubscription(gistHash, result, "gist");
+            serverEvents.NotifySubscription(subscriptionId, result, "gist");
         }
 
     }

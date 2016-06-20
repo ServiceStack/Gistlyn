@@ -19,37 +19,29 @@ namespace Gistlyn.ServiceInterface.Auth
             return keyParts[keyParts.Length - 1];
         }
 
-        //public void SetGistHash(string hash)
-        //{
-        //    var session = SessionFeature.GetOrCreateSession<CustomUserSession>(cache);
-        //    string key = SessionFeature.GetSessionKey();
-        //    session.GistHash = hash;
-        //    cache.Set<CustomUserSession>(key, session);
-        //}
-
-        public void SetScriptRunnerInfo(string gistHash, AppDomain scriptAppDomain, DomainWrapper wrapper)
+        public void SetScriptRunnerInfo(string scriptId, AppDomain scriptAppDomain, DomainWrapper wrapper)
         {
             var session = SessionFeature.GetOrCreateSession<CustomUserSession>(cache);
             var key = SessionFeature.GetSessionKey();
-            var info = new ScriptRunnerInfo { GistHash = gistHash, ScriptDomain = scriptAppDomain, DomainWrapper = wrapper };
+            var info = new ScriptRunnerInfo { ScriptId = scriptId, ScriptDomain = scriptAppDomain, DomainWrapper = wrapper };
 
             lock (session.lockObj)
             {
-                if (session.Scripts.ContainsKey(gistHash))
-                    session.Scripts[gistHash] = info;
+                if (session.Scripts.ContainsKey(scriptId))
+                    session.Scripts[scriptId] = info;
                 else
-                    session.Scripts.Add(gistHash, info);
+                    session.Scripts.Add(scriptId, info);
                     
             }
             cache.Set(key, session);
         }
 
-        public ScriptRunnerInfo GetScriptRunnerInfo(string gistHash)
+        public ScriptRunnerInfo GetScriptRunnerInfo(string scriptId)
         {
             var session = SessionFeature.GetOrCreateSession<CustomUserSession>(cache);
             lock (session.lockObj)
             {
-                return session.Scripts.ContainsKey(gistHash) ? session.Scripts[gistHash] : null;
+                return session.Scripts.ContainsKey(scriptId) ? session.Scripts[scriptId] : null;
             }
         }
 

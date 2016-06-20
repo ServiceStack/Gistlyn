@@ -325,7 +325,7 @@ function runMultiple()
         showError({responseStatus : {message: "There must be only one file 'packages.config'"}});
     }
 
-    var gistHash = activeSub.id;
+    var scriptId = activeSub.id;
     var mainCode = $("textarea", $(main[0]).closest("div.row")).val();
     var sources = [];
     var references = $("#assemblyReferences").data("references");
@@ -338,10 +338,10 @@ function runMultiple()
         }
     });
 
-    gateway.getFromService({GetScriptStatus : {gistHash: gistHash}},
+    gateway.getFromService({ GetScriptStatus: { ScriptId: scriptId } },
         function(response) {
             if (response.status != "PrepareToRun" && response.status != "Running") {
-                runMultipleInternal(gistHash, mainCode, sources, references, packages, true);
+                runMultipleInternal(scriptId, mainCode, sources, references, packages, true);
             } else {
                 BootstrapDialog.show({
                     type: BootstrapDialog.TYPE_DANGER,
@@ -351,7 +351,7 @@ function runMultiple()
                         label: 'OK',
                         action: function(dialog) {
                                 dialog.close();
-                                runMultipleInternal(gistHash, mainCode, sources, references, packages, true);
+                                runMultipleInternal(scriptId, mainCode, sources, references, packages, true);
                             }
                         }, {
                         label: 'Cancel',
@@ -366,7 +366,7 @@ function runMultiple()
     );
 }
 
-function runMultipleInternal(gistHash, mainCode, sources, references, packages, forceRun)
+function runMultipleInternal(scriptId, mainCode, sources, references, packages, forceRun)
 {
     var empty = {result : { variables: [], errors: [], console: ""}};
     scriptExecResponse($("#multirunBlock"), empty);
@@ -377,7 +377,7 @@ function runMultipleInternal(gistHash, mainCode, sources, references, packages, 
     $("#multirun").attr("disabled", "disabled");
     $("#cancel").show();
 
-    gateway.postToService({RunMultipleScripts : {gistHash: gistHash, mainCode : mainCode, scripts: sources, references: references, packages: packages, forceRun: forceRun}},
+    gateway.postToService({ RunMultipleScripts: { ScriptId: scriptId, mainCode: mainCode, scripts: sources, references: references, packages: packages, forceRun: forceRun } },
         function(response) {
             scriptExecResponse($("#multirunBlock"), response);
             $("#multirunBlock").show();
@@ -396,9 +396,9 @@ function runMultipleInternal(gistHash, mainCode, sources, references, packages, 
 
 function cancelScript()
 {
-    var gistHash = activeSub.id;
+    var scriptId = activeSub.id;
 
-    gateway.postToService({CancelScript : {gistHash: gistHash}},
+    gateway.postToService({ CancelScript: { ScriptId: scriptId } },
         function(response) {
             $("#multirun").removeAttr("disabled");
             $("#cancel").hide();
@@ -447,10 +447,10 @@ function addReference()
 
 function getVariables()
 {
-    var gistHash = activeSub.id;
+    var scriptId = activeSub.id;
     var parent = $("#multirunBlock .role-parentVariable").data("prev");
 
-    gateway.getFromService({GetScriptVariables : {gistHash: gistHash, variableName: parent}},
+    gateway.getFromService({ GetScriptVariables: { ScriptId: scriptId, variableName: parent } },
         function(response) {
             if (response.status == "PrepareToRun" || response.status == "Running")
                 $("#multirunBlock span.role-runningState").text("Script is running can't get variables");
@@ -468,9 +468,9 @@ function getVariableJson(e)
     var $that = $(this);
     var name = $("td.role-name", $that.closest("tr")).text();
     var parent = $("#multirunBlock .role-parentVariable").text();
-    var gistHash = activeSub.id;
+    var scriptId = activeSub.id;
 
-    gateway.getFromService({GetScriptVariableJson : {gistHash: gistHash, variableName: (parent ? (parent + "." + name) : name)}},
+    gateway.getFromService({ GetScriptVariableJson: { ScriptId: scriptId, variableName: (parent ? (parent + "." + name) : name) } },
         function(response) {
             if (response.status == "PrepareToRun" || response.status == "Running")
                 $("#multirunBlock span.role-runningState").text("Script is running. Can't get variable json representation");
@@ -499,10 +499,10 @@ function inspectVariable(e)
     var $that = $(this);
     var parentName = $("#multirunBlock .role-parentVariable").text();
     var name = $("td.role-name", $that.closest("tr")).text();
-    var gistHash = activeSub.id;
+    var scriptId = activeSub.id;
     var variableName = parentName ? parentName + '.' + name : name;
 
-    gateway.getFromService({GetScriptVariables: { gistHash: gistHash, variableName: variableName }},
+    gateway.getFromService({ GetScriptVariables: { ScriptId: scriptId, variableName: variableName } },
         function(response) {
             if (response.status == "PrepareToRun" || response.status == "Running")
                 $("#multirunBlock span.role-runningState").text("Script is running can't get variables");
@@ -518,10 +518,10 @@ function inspectVariable(e)
 function evaluateExpression(e)
 {
     var $that = $(this);
-    var gistHash = activeSub.id;
+    var scriptId = activeSub.id;
     var expr = $("input.role-expression", $that.closest("div.row")).val();
 
-    gateway.getFromService({EvaluateExpression: { gistHash: gistHash, expression: expr }},
+    gateway.getFromService({ EvaluateExpression: { ScriptId: scriptId, expression: expr } },
         function(response) {
             if (response.status == "PrepareToRun" || response.status == "Running")
                 $("#multirunBlock span.role-evaluateRunningState").text("Script is running can't evaluate expression");

@@ -72,6 +72,12 @@ namespace Gistlyn.TestHost
                 new IAuthProvider[] {
                     new EmptyAuthProvider()
             }, null));
+
+            GlobalRequestFilters.Add((req, res, dto) =>
+            {
+                var jsv = dto.Dump();
+                jsv.Print();
+            });
         }
 
         public override void Dispose()

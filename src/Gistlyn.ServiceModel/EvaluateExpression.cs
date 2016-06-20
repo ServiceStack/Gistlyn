@@ -3,7 +3,7 @@ namespace Gistlyn.ServiceModel
 {
     public class EvaluateExpression
     {
-        public string GistHash { get; set; }
+        public string ScriptId { get; set; }
 
         public string Expression { get; set; }
     }

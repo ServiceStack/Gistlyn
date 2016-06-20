@@ -6,7 +6,7 @@ namespace Gistlyn.ServiceModel
 {
     public class GetScriptStatus : IReturn<ScriptStatusResponse>
     {
-        public string GistHash { get; set; }
+        public string ScriptId { get; set; }
     }
 
     public class ScriptStatusResponse

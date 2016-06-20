@@ -16,7 +16,7 @@ namespace Gistlyn.ServiceInterface
         List<string> references;
         CancellationTokenSource tokenSource;
 
-        public string GistHash { get; set; }
+        public string ScriptId { get; set; }
 
         public string MainScript { get { return mainScript; } }
 

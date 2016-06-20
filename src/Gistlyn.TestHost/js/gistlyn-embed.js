@@ -132,7 +132,7 @@ function cancelScript(url, scriptId)
 {
     $.ajax({
         url: url + "/servicestack/json/reply/CancelJsIncludedScript", 
-        data: JSON.stringify({gistHash: scriptId}),
+        data: JSON.stringify({ ScriptId: scriptId }),
         contentType: "application/json; charset=utf-8",
         type: "POST",
         dataType: "json",

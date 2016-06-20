@@ -6,7 +6,7 @@ namespace Gistlyn.ServiceModel
 {
     public class CancelJsIncludedScript : IReturn<CancelJsIncludedScriptResponse>
     {
-        public string GistHash { get; set; }
+        public string ScriptId { get; set; }
     }
 
     public class CancelJsIncludedScriptResponse
