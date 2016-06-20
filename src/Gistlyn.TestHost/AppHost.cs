@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Funq;
 using Gistlyn.ServiceInterface;
@@ -71,6 +72,18 @@ namespace Gistlyn.TestHost
                 new IAuthProvider[] {
                     new EmptyAuthProvider()
             }, null));
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            var memCache = (MemoryCacheClient) Resolve<ICacheClient>();
+            var allKeys = memCache.GetAllKeys();
+            foreach (var key in allKeys)
+            {
+                using (memCache.Get(key) as IDisposable) {}
+            }
         }
     }
 }
