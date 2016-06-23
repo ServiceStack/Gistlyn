@@ -1,5 +1,4 @@
 ﻿using System;
-using Gistlyn.ServiceInterface.Auth;
 using Gistlyn.ServiceModel.Types;
 using Gistlyn.SnippetEngine;
 using ServiceStack;
@@ -8,14 +7,12 @@ namespace Gistlyn.ServiceInterface
 {
     public class NotifierProxy : MarshalByRefObject, INotifier
     {
-        IServerEvents serverEvents;
-        UserSession session;
-        string subscriptionId;
+        readonly IServerEvents serverEvents;
+        readonly string subscriptionId;
         const string channel = "gist";
 
-        public NotifierProxy(UserSession session, IServerEvents serverEvents, string subscriptionId)
+        public NotifierProxy(IServerEvents serverEvents, string subscriptionId)
         {
-            this.session = session;
             this.serverEvents = serverEvents;
             this.subscriptionId = subscriptionId;
         }
@@ -28,14 +25,13 @@ namespace Gistlyn.ServiceInterface
         public void SendConsoleMessage(string message)
         {
             var consoleMessage = new ConsoleMessage { Message = message };
-            serverEvents.NotifySubscription(subscriptionId, consoleMessage, "gist");
+            serverEvents.NotifySubscription(subscriptionId, consoleMessage, channel);
         }
 
         public void SendScriptExecutionResults(ScriptExecutionResult result)
         {
-            serverEvents.NotifySubscription(subscriptionId, result, "gist");
+            serverEvents.NotifySubscription(subscriptionId, result, channel);
         }
-
     }
 }
 
