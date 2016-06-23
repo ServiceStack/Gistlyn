@@ -51,12 +51,6 @@ namespace Gistlyn.TestHost
                 }
             });
 
-            //container.Register(new MemoizedResultsContainer());
-
-            //session and authentication
-            Plugins.Add(new SessionFeature());
-            container.Register(c => new UserSession(c.Resolve<ICacheClient>()));
-
             //To limit access to scripts only from the known sites
             //this.Plugins.Add(new CorsFeature(allowedOrigins: "http://127.0.0.1:8080", allowCredentials: true));
             this.Plugins.Add(new CorsFeature());
@@ -65,19 +59,6 @@ namespace Gistlyn.TestHost
                 AppSettings.Get("NugetPackagesDirectory", "~/App_Data/packages".MapHostAbsolutePath())));
 
             container.Register<IDataContext>(container.Resolve<AppData>());
-
-            //Define the Auth modes you support and where to store it
-            Plugins.Add(new AuthFeature(
-                () => new CustomUserSession(),
-                new IAuthProvider[] {
-                    new EmptyAuthProvider()
-            }, null));
-
-            GlobalRequestFilters.Add((req, res, dto) =>
-            {
-                var jsv = dto.Dump();
-                jsv.Print();
-            });
         }
 
         public override void Dispose()

@@ -21,8 +21,6 @@ namespace Gistlyn.ServiceInterface
 
         public IDataContext DataContext { get; set; }
 
-        public UserSession Session { get; set; }
-
         public IServerEvents ServerEvents { get; set; }
 
         public object Any(TestServerEvents request)
@@ -31,7 +29,7 @@ namespace Gistlyn.ServiceInterface
 
             try
             {
-                ServerEvents.NotifySession(Session.GetSessionId(), response, "@channels");
+                ServerEvents.NotifySession(Request.GetSessionId(), response, "@channels");
                 ServerEvents.NotifyUserId(request.Name, response, "@channels");
             }
             catch (Exception e)
@@ -43,7 +41,7 @@ namespace Gistlyn.ServiceInterface
 
         public object Any(GetScriptVariableJson request)
         {
-            var runner = Session.GetScriptRunnerInfo(request.ScriptId);
+            var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
 
             var wrapper = runner != null ? runner.DomainWrapper : null;
 
@@ -58,7 +56,7 @@ namespace Gistlyn.ServiceInterface
         {
             ScriptExecutionResult result;
 
-            var runner = Session.GetScriptRunnerInfo(request.ScriptId);
+            var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
 
             var wrapper = runner != null ? runner.DomainWrapper : null;
 
@@ -73,7 +71,7 @@ namespace Gistlyn.ServiceInterface
         {
             ScriptStateVariables variables;
 
-            var runner = Session.GetScriptRunnerInfo(request.ScriptId);
+            var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
 
             var wrapper = runner != null ? runner.DomainWrapper : null;
 
@@ -86,7 +84,7 @@ namespace Gistlyn.ServiceInterface
 
         public object Any(GetScriptStatus request)
         {
-            var runner = Session.GetScriptRunnerInfo(request.ScriptId);
+            var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
 
             var wrapper = runner != null ? runner.DomainWrapper : null;
 
@@ -118,13 +116,13 @@ namespace Gistlyn.ServiceInterface
         {
             var result = new ScriptExecutionResult { Status = ScriptStatus.Unknown };
 
-            var runner = Session.GetScriptRunnerInfo(request.ScriptId);
+            var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
 
             if (runner != null && runner.ScriptDomain != null)
             {
                 AppDomain domain = runner.ScriptDomain;
                 runner.ScriptDomain = null;
-                Session.SetScriptRunnerInfo(runner.ScriptId, null, null);
+                LocalCache.RemoveScriptRunnerInfo(runner.ScriptId);
                 AppDomain.Unload(domain);
                 result.Status = ScriptStatus.Cancelled;
             }
@@ -217,7 +215,7 @@ namespace Gistlyn.ServiceInterface
 
             var result = new ScriptExecutionResult();
 
-            var runnerInfo = Session.GetScriptRunnerInfo(request.ScriptId);
+            var runnerInfo = LocalCache.GetScriptRunnerInfo(request.ScriptId);
             //stop script if run
             if (runnerInfo != null && runnerInfo.ScriptDomain != null)
             {
@@ -255,12 +253,16 @@ namespace Gistlyn.ServiceInterface
 
             var wrapper = (DomainWrapper)domain.CreateInstanceAndUnwrap(asm, type);
             wrapper.ScriptId = request.ScriptId;
-            //var wrapper = new DomainWrapper();
-            var writerProxy = new NotifierProxy(Session, ServerEvents, request.ScriptId);
+            var writerProxy = new NotifierProxy(ServerEvents, request.ScriptId);
 
             result = wrapper.RunAsync(request.MainCode, request.Scripts, addedReferences.Select(r => r.Path).ToList(), writerProxy);
 
-            Session.SetScriptRunnerInfo(request.ScriptId, domain, wrapper);
+            LocalCache.SetScriptRunnerInfo(request.ScriptId, new ScriptRunnerInfo
+            {
+                ScriptId = request.ScriptId,
+                ScriptDomain = domain,
+                DomainWrapper = wrapper,
+            });
 
             //Unload appdomain only in synchroneous version
             //AppDomain.Unload(domain);
@@ -328,8 +330,7 @@ namespace Gistlyn.ServiceInterface
 
             var wrapper = (DomainWrapper)domain.CreateInstanceAndUnwrap(asm, type);
             wrapper.ScriptId = request.ScriptId;
-            //var wrapper = new DomainWrapper();
-            var writerProxy = new NotifierProxy(Session, ServerEvents, request.ScriptId);
+            var writerProxy = new NotifierProxy(ServerEvents, request.ScriptId);
 
             var info = new ScriptRunnerInfo { ScriptId = request.ScriptId, ScriptDomain = domain, DomainWrapper = wrapper };
 
