@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using Funq;
 using Gistlyn.ServiceInterface;
-using Gistlyn.ServiceInterface.Auth;
 using ServiceStack;
-using ServiceStack.Auth;
 using ServiceStack.Caching;
 using ServiceStack.Text;
 
@@ -51,8 +47,6 @@ namespace Gistlyn.TestHost
                 }
             });
 
-            //To limit access to scripts only from the known sites
-            //this.Plugins.Add(new CorsFeature(allowedOrigins: "http://127.0.0.1:8080", allowCredentials: true));
             this.Plugins.Add(new CorsFeature());
 
             container.Register(new AppData(

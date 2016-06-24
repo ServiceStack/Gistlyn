@@ -184,6 +184,11 @@ ClientBin/
 *.pfx
 *.publishsettings
 node_modules/
+jspm_packages/
+typings/
+wwwroot/
+apps/
+webdeploy.zip
 orleans.codegen.cs
 
 # RIA/Silverlight projects
