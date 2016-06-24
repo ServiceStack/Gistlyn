@@ -6,7 +6,7 @@
 
         public string CodeHash { get; set; }
 
-        public JsIncludedScriptExecutionResult Result { get; set; }
+        public EmbedScriptExecutionResult Result { get; set; }
     }
 }
 

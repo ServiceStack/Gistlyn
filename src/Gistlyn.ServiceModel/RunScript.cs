@@ -1,20 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ServiceStack;
+﻿using System.Collections.Generic;
 using Gistlyn.ServiceModel.Types;
+using ServiceStack;
 
 namespace Gistlyn.ServiceModel
 {
+    [Route("/scripts/{ScriptId}/run")]
     public class RunScript : IReturn<RunScriptResponse>
     {
-        public string Code { get; set; }
+        public string ScriptId { get; set; }
+
+        public string MainSource { get; set; }
+
+        public List<string> Sources { get; set; }
+
+        public List<AssemblyReference> References { get; set; }
+
+        public string Packages { get; set; }
+
+        public bool ForceRun { get; set; }
     }
 
     public class RunScriptResponse
     {
-        public ScriptExecutionResult Result { get; set;}
+        public ScriptExecutionResult Result { get; set; }
+
+        public List<AssemblyReference> References { get; set; }
     }
 }
+

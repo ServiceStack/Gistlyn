@@ -5,15 +5,16 @@ using ServiceStack;
 
 namespace Gistlyn.ServiceModel
 {
-    public class RunJsIncludedScripts : IReturn<RunJsIncludedScriptsResponse>
+    [Route("/embed-scripts/{ScriptId}/gists/{GistHash}/run")]
+    public class RunEmbedScript : IReturn<RunEmbedScriptResponse>
     {
         public string ScriptId { get; set; }
 
         public string GistHash { get; set; }
 
-        public string MainCode { get; set; }
+        public string MainSource { get; set; }
 
-        public List<string> Scripts { get; set; }
+        public List<string> Sources { get; set; }
 
         public List<AssemblyReference> References { get; set; }
 
@@ -22,9 +23,9 @@ namespace Gistlyn.ServiceModel
         public bool NoCache { get; set; }
     }
 
-    public class RunJsIncludedScriptsResponse
+    public class RunEmbedScriptResponse
     {
-        public JsIncludedScriptExecutionResult Result { get; set; }
+        public EmbedScriptExecutionResult Result { get; set; }
 
         public List<AssemblyReference> References { get; set; }
     }

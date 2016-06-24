@@ -5,6 +5,7 @@ using ServiceStack;
 
 namespace Gistlyn.ServiceModel
 {
+    [Route("/packages/references")]
     public class AddPackageAsReference : IReturn<AddPackageAsReferenceResponse>
     {
         public string PackageId { get; set; }

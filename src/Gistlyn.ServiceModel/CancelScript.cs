@@ -4,6 +4,7 @@ using ServiceStack;
 
 namespace Gistlyn.ServiceModel
 {
+    [Route("/scripts/{ScriptId}/cancel")]
     public class CancelScript : IReturn<CancelScriptResponse>
     {
         public string ScriptId { get; set; }

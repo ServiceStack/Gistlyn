@@ -107,8 +107,8 @@ function runScript(url, scriptId, noCache)
     changeScriptStatus(scriptId, "PrepareToRun");
 
     $.ajax({
-        url: url + "/servicestack/json/reply/RunJsIncludedScripts", 
-        data: JSON.stringify({scriptId: scriptId, gistHash: scriptInfo.gistHash, mainCode : mainCode, scripts: scriptInfo.scripts, packages: scriptInfo.packages, noCache: noCache}),
+        url: url + "/servicestack/json/reply/RunEmbedScript",
+        data: JSON.stringify({scriptId: scriptId, gistHash: scriptInfo.gistHash, mainSource : mainCode, sources: scriptInfo.scripts, packages: scriptInfo.packages, noCache: noCache}),
         contentType: "application/json; charset=utf-8",
         type: "POST",
         dataType: "json",
@@ -131,7 +131,7 @@ function runScript(url, scriptId, noCache)
 function cancelScript(url, scriptId)
 {
     $.ajax({
-        url: url + "/servicestack/json/reply/CancelJsIncludedScript", 
+        url: url + "/servicestack/json/reply/CancelEmbedScript",
         data: JSON.stringify({ ScriptId: scriptId }),
         contentType: "application/json; charset=utf-8",
         type: "POST",
@@ -141,7 +141,7 @@ function cancelScript(url, scriptId)
             showButtons(scriptId, false);
         },
         error: function(e) {
-            console.log("cancellation error", e)
+            console.log("cancellation error", e);
         }
     });
 }

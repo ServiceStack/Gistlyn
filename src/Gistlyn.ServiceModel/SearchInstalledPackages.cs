@@ -2,12 +2,16 @@
 using Gistlyn.ServiceModel.Types;
 using ServiceStack;
 
-public class SearchInstalledPackages : IReturn<SearchInstalledPackagesResponse>
+namespace Gistlyn.ServiceModel
 {
-    public string Search { get; set; }
-}
+    [Route("/packages/search/{Search}")]
+    public class SearchInstalledPackages : IReturn<SearchInstalledPackagesResponse>
+    {
+        public string Search { get; set; }
+    }
 
-public class SearchInstalledPackagesResponse
-{
-    public List<NugetPackageInfo> Packages { get; set; }
+    public class SearchInstalledPackagesResponse
+    {
+        public List<NugetPackageInfo> Packages { get; set; }
+    }
 }

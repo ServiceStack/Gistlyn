@@ -219,7 +219,7 @@ function getGist()
 function runGist($block)
 {
     var content = $("textarea", $block).val();
-	gateway.postToService({RunScript : {code : content}},
+    gateway.postToService({ EvaluateSource: { code: content } },
 		function(response) {
             scriptExecResponse($block, response);
 		},
@@ -377,7 +377,7 @@ function runMultipleInternal(scriptId, mainCode, sources, references, packages, 
     $("#multirun").attr("disabled", "disabled");
     $("#cancel").show();
 
-    gateway.postToService({ RunMultipleScripts: { ScriptId: scriptId, mainCode: mainCode, scripts: sources, references: references, packages: packages, forceRun: forceRun } },
+    gateway.postToService({ RunScript: { ScriptId: scriptId, mainSource: mainCode, sources: sources, references: references, packages: packages, forceRun: forceRun } },
         function(response) {
             scriptExecResponse($("#multirunBlock"), response);
             $("#multirunBlock").show();

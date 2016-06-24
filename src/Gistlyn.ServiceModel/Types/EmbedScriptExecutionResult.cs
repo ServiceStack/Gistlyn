@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Gistlyn.ServiceModel.Types
 {
     [Serializable]
-    public class JsIncludedScriptExecutionResult
+    public class EmbedScriptExecutionResult
     {
         public ScriptStatus Status { get; set; }
 

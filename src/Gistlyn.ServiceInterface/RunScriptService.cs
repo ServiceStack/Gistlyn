@@ -94,7 +94,7 @@ namespace Gistlyn.ServiceInterface
             };
         }
 
-        public object Any(RunScript request)
+        public object Any(EvaluateSource request)
         {
             var runner = new ScriptRunner();
             var result = new ScriptExecutionResult();
@@ -107,7 +107,7 @@ namespace Gistlyn.ServiceInterface
                 result.Exception = e;
             }
 
-            return new RunScriptResponse {
+            return new EvaluateSourceResponse {
                 Result = result
             };
         }
@@ -135,13 +135,13 @@ namespace Gistlyn.ServiceInterface
             //    result.Status = sess.DomainWrapper.GetScriptStatus();
             //}
 
-            return new CancelScriptResponse()
+            return new CancelScriptResponse
             {
                 Result = result
             };
         }
 
-        public object Any(CancelJsIncludedScript request)
+        public object Any(CancelEmbedScript request)
         {
             var result = new ScriptExecutionResult { Status = ScriptStatus.Unknown };
 
@@ -156,7 +156,7 @@ namespace Gistlyn.ServiceInterface
                 result.Status = ScriptStatus.Cancelled;
             }
 
-            return new CancelJsIncludedScriptResponse()
+            return new CancelEmbedScriptResponse
             {
                 Result = result
             };
@@ -208,7 +208,7 @@ namespace Gistlyn.ServiceInterface
             return tmpReferences;
         }
 
-        public object Any(RunMultipleScripts request)
+        public object Any(RunScript request)
         {
             if (request.ScriptId == null)
                 throw new ArgumentException("ScriptId");
@@ -228,7 +228,7 @@ namespace Gistlyn.ServiceInterface
                 else 
                 {
                     result.Status = ScriptStatus.AnotherScriptExecuting;
-                    return new RunMultipleScriptResponse
+                    return new RunScriptResponse
                     {
                         Result = result
                     };
@@ -255,7 +255,7 @@ namespace Gistlyn.ServiceInterface
             wrapper.ScriptId = request.ScriptId;
             var writerProxy = new NotifierProxy(ServerEvents, request.ScriptId);
 
-            result = wrapper.RunAsync(request.MainCode, request.Scripts, addedReferences.Select(r => r.Path).ToList(), writerProxy);
+            result = wrapper.RunAsync(request.MainSource, request.Sources, addedReferences.Select(r => r.Path).ToList(), writerProxy);
 
             LocalCache.SetScriptRunnerInfo(request.ScriptId, new ScriptRunnerInfo
             {
@@ -267,18 +267,18 @@ namespace Gistlyn.ServiceInterface
             //Unload appdomain only in synchroneous version
             //AppDomain.Unload(domain);
 
-            return new RunMultipleScriptResponse
+            return new RunScriptResponse
             {
                 Result = result,
                 References = normalizedReferences
             };
         }
 
-        private string GetSourceCodeHash(RunJsIncludedScripts request)
+        private string GetSourceCodeHash(RunEmbedScript request)
         {
             string hash;
-            var code = (request.MainCode ?? string.Empty)
-                + (request.Packages ?? string.Empty) + string.Concat(request.Scripts);
+            var code = (request.MainSource ?? string.Empty)
+                + (request.Packages ?? string.Empty) + string.Concat(request.Sources);
             
             using (var md5 = MD5.Create())
             {
@@ -294,12 +294,12 @@ namespace Gistlyn.ServiceInterface
             return hash;
         }
 
-        public object Any(RunJsIncludedScripts request)
+        public object Any(RunEmbedScript request)
         {
             if (request.GistHash == null)
                 throw new ArgumentException("GistHash");
 
-            var result = new JsIncludedScriptExecutionResult();
+            var result = new EmbedScriptExecutionResult();
             var codeHash = GetSourceCodeHash(request);
 
             if (!request.NoCache)
@@ -308,7 +308,7 @@ namespace Gistlyn.ServiceInterface
                 if (mr != null)
                 {
                     result = mr.Result;
-                    return new RunJsIncludedScriptsResponse { Result = result };
+                    return new RunEmbedScriptResponse { Result = result };
                 }
             }
 
@@ -342,7 +342,7 @@ namespace Gistlyn.ServiceInterface
             {
                 try
                 {
-                    var sr = wrapper.Run(request.MainCode, request.Scripts, addedReferences.Select(r => r.Path).ToList(), writerProxy);
+                    var sr = wrapper.Run(request.MainSource, request.Sources, addedReferences.Select(r => r.Path).ToList(), writerProxy);
 
                     result.Exception = sr.Exception;
                     result.Errors = sr.Errors;
@@ -366,7 +366,7 @@ namespace Gistlyn.ServiceInterface
             //Unload appdomain only in synchroneous version
             //AppDomain.Unload(domain);
 
-            return new RunJsIncludedScriptsResponse
+            return new RunEmbedScriptResponse
             {
                 Result = result,
                 References = normalizedReferences

@@ -46,8 +46,8 @@
   <ItemGroup>
     <Compile Include="TestServerEvents.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="EvaluateSource.cs" />
     <Compile Include="RunScript.cs" />
-    <Compile Include="RunMultipleScripts.cs" />
     <Compile Include="SearchNugetPackages.cs" />
     <Compile Include="InstallNugetPackage.cs" />
     <Compile Include="AddPackageAsReference.cs" />
@@ -57,13 +57,13 @@
     <Compile Include="CancelScript.cs" />
     <Compile Include="GetScriptStatus.cs" />
     <Compile Include="EvaluateExpression.cs" />
-    <Compile Include="GetIncludeScript.cs" />
-    <Compile Include="RunJsIncludedScripts.cs" />
-    <Compile Include="CancelJsIncludedScript.cs" />
+    <Compile Include="GetEmbedScript.cs" />
+    <Compile Include="RunEmbedScript.cs" />
+    <Compile Include="CancelEmbedScript.cs" />
     <Compile Include="Types\AssemblyReference.cs" />
     <Compile Include="Types\ConsoleMessage.cs" />
     <Compile Include="Types\ErrorInfo.cs" />
-    <Compile Include="Types\JsIncludedScriptExecutionResult.cs" />
+    <Compile Include="Types\EmbedScriptExecutionResult.cs" />
     <Compile Include="Types\MemoizedResult.cs" />
     <Compile Include="Types\NugetPackageInfo.cs" />
     <Compile Include="Types\PackageCollection.cs" />

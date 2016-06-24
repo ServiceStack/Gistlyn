@@ -164,7 +164,7 @@
     <Content Include="bower_components\bootstrap3-typeahead\bootstrap3-typeahead.min.js" />
     <Content Include="js\ss-utils.js" />
     <Content Include="js\gistlyn-embed.js" />
-    <Content Include="templates\jsincluded.init.js" />
+    <Content Include="templates\embed.init.js" />
     <Content Include="sampleinclude.html" />
     <Content Include="bower_components\CodeMirror\lib\codemirror.css" />
     <Content Include="bower_components\CodeMirror\lib\codemirror.js" />
@@ -184,7 +184,7 @@
     <Folder Include="App_Data\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="templates\jsincluded.html" />
+    <EmbeddedResource Include="templates\embed.html" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

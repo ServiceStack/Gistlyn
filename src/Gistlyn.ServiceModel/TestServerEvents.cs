@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using ServiceStack;
+﻿using ServiceStack;
 
 namespace Gistlyn.ServiceModel
 {
-    [Route("/hello/{Name}")]
+    [Route("/test")]
+    [Route("/test/{Name}")]
     public class TestServerEvents : IReturn<TestServerEventsResponse>
     {
         public string Name { get; set; }

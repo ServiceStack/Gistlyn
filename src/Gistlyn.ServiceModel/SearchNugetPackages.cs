@@ -5,6 +5,7 @@ using ServiceStack;
 
 namespace Gistlyn.ServiceModel
 {
+    [Route("/nuget/packages/search/{Search}")]
     public class SearchNugetPackages : IReturn<SearchNugetPackagesResponse>
     {
         public string Search { get; set; }

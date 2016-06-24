@@ -4,6 +4,7 @@ using ServiceStack;
 
 namespace Gistlyn.ServiceModel
 {
+    [Route("/scripts/{ScriptId}/status")]
     public class GetScriptStatus : IReturn<ScriptStatusResponse>
     {
         public string ScriptId { get; set; }

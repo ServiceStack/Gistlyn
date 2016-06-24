@@ -3,6 +3,7 @@ using ServiceStack;
 
 namespace Gistlyn.ServiceModel
 {
+    [Route("/packages/install")]
     public class InstallNugetPackage : IReturn<InstallNugetPackageResponse>
     {
         public string PackageId { get; set; }
