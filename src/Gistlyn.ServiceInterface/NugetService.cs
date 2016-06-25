@@ -21,7 +21,7 @@ namespace Gistlyn.ServiceInterface
                 .ToList();
 
             var packageInfos = packages
-                .Select(p => new NugetPackageInfo { Id = p.Id, Version = p.Version.Version, Ver = p.Version.Version.ToString() })
+                .Select(p => new NugetPackageInfo { Id = p.Id, Ver = p.Version.Version.ToString() })
                 .ToList();
 
             return new SearchNugetPackagesResponse

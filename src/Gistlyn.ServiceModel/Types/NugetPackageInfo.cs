@@ -10,8 +10,6 @@ namespace Gistlyn.ServiceModel.Types
         [XmlAttribute("id")]
         public string Id { get; set; }
 
-        public Version Version { get; set; }
-
         [XmlAttribute("version")]
         public string Ver { get; set; }
 

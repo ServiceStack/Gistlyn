@@ -413,7 +413,7 @@ function installPackage()
 {
     var package = $("#packages").typeahead("getActive");
 
-    gateway.postToService({InstallNugetPackage: { packageId: package.id, version: package.version, ver: package.ver}},
+    gateway.postToService({InstallNugetPackage: { packageId: package.id, ver: package.ver}},
         function(response) {
             alert("installed");
         },

@@ -1,5 +1,4 @@
-﻿using System;
-using ServiceStack;
+﻿using ServiceStack;
 
 namespace Gistlyn.ServiceModel
 {
@@ -7,8 +6,6 @@ namespace Gistlyn.ServiceModel
     public class InstallNugetPackage : IReturn<InstallNugetPackageResponse>
     {
         public string PackageId { get; set; }
-
-        public Version Version { get; set; }
 
         public string Ver { get; set; }
 
