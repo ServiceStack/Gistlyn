@@ -13,7 +13,7 @@ namespace Gistlyn.ServiceInterface
             var info = new NugetPackageInfo
             {
                 Id = package.Id,
-                Ver = package.Version.ToNormalizedString()
+                Version = package.Version.ToNormalizedString()
             };
 
             info.Assemblies = package.AssemblyReferences

@@ -11,7 +11,7 @@ namespace Gistlyn.ServiceModel.Types
         public string Id { get; set; }
 
         [XmlAttribute("version")]
-        public string Ver { get; set; }
+        public string Version { get; set; }
 
         [XmlAttribute("targetFramework")]
         public string TargetFramework { get; set; }

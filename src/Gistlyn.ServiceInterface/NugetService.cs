@@ -21,7 +21,7 @@ namespace Gistlyn.ServiceInterface
                 .ToList();
 
             var packageInfos = packages
-                .Select(p => new NugetPackageInfo { Id = p.Id, Ver = p.Version.Version.ToString() })
+                .Select(p => new NugetPackageInfo { Id = p.Id, Version = p.Version.ToNormalizedString() })
                 .ToList();
 
             return new SearchNugetPackagesResponse
@@ -32,7 +32,7 @@ namespace Gistlyn.ServiceInterface
 
         public object Any(InstallNugetPackage request)
         {
-            NugetHelper.InstallPackage(DataContext, AppData.NugetPackagesDirectory, request.PackageId, request.Ver);
+            NugetHelper.InstallPackage(DataContext, AppData.NugetPackagesDirectory, request.PackageId, request.Version);
 
             return new InstallNugetPackageResponse();
         }

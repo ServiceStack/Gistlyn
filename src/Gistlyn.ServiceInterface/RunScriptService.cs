@@ -185,7 +185,7 @@ namespace Gistlyn.ServiceInterface
                 foreach (var package in tmpPackages.Packages)
                 {
                     //istall it
-                    tmpReferences.AddRange(NugetHelper.RestorePackage(DataContext, AppData.NugetPackagesDirectory, package.Id, package.Ver));
+                    tmpReferences.AddRange(NugetHelper.RestorePackage(DataContext, AppData.NugetPackagesDirectory, package.Id, package.Version));
                 }
             }
 

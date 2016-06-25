@@ -46,7 +46,7 @@ namespace Gistlyn.ServiceInterface
         public List<NugetPackageInfo> GetPackageAndDependencies(string packageId, string version)
         {
             lock (Packages)
-                return Packages.Where(p => p.Id == packageId && p.Ver == version).ToList();
+                return Packages.Where(p => p.Id == packageId && p.Version == version).ToList();
         }
 
         public List<NugetPackageInfo> SearchPackages(string packageId, string version)

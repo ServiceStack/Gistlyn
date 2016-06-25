@@ -7,7 +7,7 @@ namespace Gistlyn.ServiceModel
     {
         public string PackageId { get; set; }
 
-        public string Ver { get; set; }
+        public string Version { get; set; }
 
         public bool AllowPrereleaseVersion { get; set; }
     }

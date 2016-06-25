@@ -413,7 +413,7 @@ function installPackage()
 {
     var package = $("#packages").typeahead("getActive");
 
-    gateway.postToService({InstallNugetPackage: { packageId: package.id, ver: package.ver}},
+    gateway.postToService({ InstallNugetPackage: { packageId: package.id, version: package.version } },
         function(response) {
             alert("installed");
         },
@@ -425,7 +425,7 @@ function addReference()
 {
     var package = $("#installedPackages").typeahead("getActive");
 
-    gateway.postToService({AddPackageAsReference: { packageId: package.id, version: package.ver}},
+    gateway.postToService({ AddPackageAsReference: { packageId: package.id, version: package.version } },
         function(response) {
             var references = $("#assemblyReferences").data("references");
             if (!references) references = [];
