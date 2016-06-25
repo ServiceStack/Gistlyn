@@ -107,10 +107,14 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="config.js" />
+    <Content Include="css\codemirror.css" />
     <Content Include="default.html" />
     <Content Include="deps.lib.js" />
+    <Content Include="img\editor-bg.png" />
+    <Content Include="img\logo-32-inverted.png" />
     <Content Include="packages.config" />
     <Content Include="package.json" />
+    <Content Include="src\codemirror.js" />
     <Content Include="typings.json" />
     <Content Include="tsconfig.json" />
     <Content Include="css\app.css" />
@@ -139,6 +143,7 @@
   </ItemGroup>-->
   <ItemGroup>
     <TypeScriptCompile Include="src\app.tsx" />
+    <TypeScriptCompile Include="src\Gistlyn.dtos.ts" />
     <TypeScriptCompile Include="src\hello.tsx" />
     <TypeScriptCompile Include="src\deps.tsx" />
   </ItemGroup>
@@ -151,7 +156,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="img\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
   <ItemGroup>

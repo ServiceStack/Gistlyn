@@ -1,0 +1,35 @@
+﻿.CodeMirror {
+    margin: 0;
+    padding: 0;
+    font-family: monospace;
+    font-size: 10pt;
+    line-height: 1.4;
+    color: black;
+}
+
+.cm-s-default span.cm-punctuation { color: green; }
+.cm-s-default span.cm-operator { color: purple; }
+.cm-s-default span.cm-keyword { color: blue; }
+.cm-s-default span.cm-atom { color: brown; }
+.cm-s-default span.cm-def { color: #0000FF; }
+.cm-s-default span.variable { color: black; }
+.cm-s-default span.variable-2, .cm-s-default span.variable-3 { color: #004499; }
+.cm-s-default span.cm-property { color: black; }
+.cm-s-default span.cm-comment { color: green; }
+.cm-s-default span.cm-string span.cm-string-2 { color: red; }
+.cm-s-default.CodeMirror-focused div.CodeMirror-selected { background: #ADD6FF; }
+.cm-s-default .CodeMirror-line::selection, .cm-s-default .CodeMirror-line > span::selection, .cm-s-default .CodeMirror-line > span > span::selection {
+     background: rgba(255, 255, 255, 0.10);
+}
+
+div.CodeMirror span.CodeMirror-matchingbracket {
+    background: #E6F0E6;
+    color: black;
+}
+
+.CodeMirror-fullscreen {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  height: auto;
+  z-index: 9;
+}
