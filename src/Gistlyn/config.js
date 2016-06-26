@@ -9,12 +9,16 @@ System.config({
 
   map: {
     "codemirror": "npm:codemirror@5.16.0",
+    "es6-promises": "npm:es6-promises@1.0.10",
     "es6-shim": "github:es-shims/es6-shim@0.35.1",
+    "isomorphic-fetch": "npm:isomorphic-fetch@2.2.1",
     "jquery": "npm:jquery@2.2.4",
     "jspm": "npm:jspm@0.16.39",
     "react": "npm:react@15.1.0",
     "react-codemirror": "npm:react-codemirror@0.2.6",
     "react-dom": "npm:react-dom@15.1.0",
+    "react-redux": "npm:react-redux@4.4.5",
+    "redux": "npm:redux@3.5.2",
     "ss-utils": "npm:ss-utils@0.1.4",
     "github:jspm/nodelibs-assert@0.1.0": {
       "assert": "npm:assert@1.4.1"
@@ -583,6 +587,9 @@ System.config({
       "d": "npm:d@0.1.1",
       "es5-ext": "npm:es5-ext@0.10.11",
       "es6-symbol": "npm:es6-symbol@3.0.2"
+    },
+    "npm:es6-promises@1.0.10": {
+      "timers": "github:jspm/nodelibs-timers@0.1.0"
     },
     "npm:es6-symbol@3.0.2": {
       "d": "npm:d@0.1.1",
@@ -1204,6 +1211,15 @@ System.config({
     "npm:react-dom@15.1.0": {
       "react": "npm:react@15.1.0"
     },
+    "npm:react-redux@4.4.5": {
+      "hoist-non-react-statics": "npm:hoist-non-react-statics@1.2.0",
+      "invariant": "npm:invariant@2.2.1",
+      "lodash": "npm:lodash@4.13.1",
+      "loose-envify": "npm:loose-envify@1.2.0",
+      "process": "github:jspm/nodelibs-process@0.1.2",
+      "react": "npm:react@15.1.0",
+      "redux": "npm:redux@3.5.2"
+    },
     "npm:react@15.1.0": {
       "fbjs": "npm:fbjs@0.8.3",
       "loose-envify": "npm:loose-envify@1.2.0",
@@ -1256,6 +1272,13 @@ System.config({
     "npm:rechoir@0.6.2": {
       "path": "github:jspm/nodelibs-path@0.1.0",
       "resolve": "npm:resolve@1.1.7"
+    },
+    "npm:redux@3.5.2": {
+      "lodash": "npm:lodash@4.13.1",
+      "lodash-es": "npm:lodash-es@4.13.1",
+      "loose-envify": "npm:loose-envify@1.2.0",
+      "process": "github:jspm/nodelibs-process@0.1.2",
+      "symbol-observable": "npm:symbol-observable@0.2.4"
     },
     "npm:regenerator-runtime@0.9.5": {
       "path": "github:jspm/nodelibs-path@0.1.0",

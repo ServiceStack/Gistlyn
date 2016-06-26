@@ -4,6 +4,7 @@
 /// <reference path='../typings/browser.d.ts'/>
 import * as React from 'react';
 import { render } from 'react-dom';
+import * as ES6 from 'es6-shim';
 
 class Deps extends React.Component<any, any> {
     render() {
@@ -12,3 +13,5 @@ class Deps extends React.Component<any, any> {
 }
 
 const ignore = () => render(<Deps/>, document.body);
+
+const ignoreES6 = () => new ES6.Promise(() => (ES6.Object.assign({}, {})));

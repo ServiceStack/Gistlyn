@@ -108,6 +108,7 @@
   <ItemGroup>
     <Content Include="config.js" />
     <Content Include="css\codemirror.css" />
+    <Content Include="testclient.html" />
     <Content Include="default.html" />
     <Content Include="deps.lib.js" />
     <Content Include="img\editor-bg.png" />
@@ -146,6 +147,9 @@
     <TypeScriptCompile Include="src\Gistlyn.dtos.ts" />
     <TypeScriptCompile Include="src\hello.tsx" />
     <TypeScriptCompile Include="src\deps.tsx" />
+    <TypeScriptCompile Include="src\TestClient.tsx" />
+    <TypeScriptCompile Include="src\utils.ts" />
+    <TypeScriptCompile Include="src\JsonServiceClient.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="wwwroot_build\README.txt" />
