@@ -67,10 +67,19 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './utils', 'react
                 var result = next(action);
                 if (action.type === 'GIST_CHANGE') {
                     fetch("https://api.github.com/gists/" + gist)
-                        .then(function (res) { return res.json().then(function (r) {
-                        //console.log('loading files...', r.files);
-                        store.dispatch({ type: 'GIST_LOAD', files: r.files });
-                    }); });
+                        .then(function (res) {
+                        if (!res.ok) {
+                            throw res;
+                        }
+                        else {
+                            return res.json().then(function (r) {
+                                store.dispatch({ type: 'GIST_LOAD', files: r.files });
+                            });
+                        }
+                    })
+                        .catch(function (res) {
+                        store.dispatch({ type: 'ERROR_RAISE', error: { code: res.status, message: "Gist with hash '" + gist + "' was " + res.statusText } });
+                    });
                 }
                 return result;
             }; }; };
@@ -82,10 +91,12 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './utils', 'react
                         return Object.assign({}, state, { files: action.files });
                     case 'FILE_CHANGE':
                         return Object.assign({}, state, { activeFile: action.activeFile });
+                    case 'ERROR_RAISE':
+                        return Object.assign({}, state, { error: action.error });
                     default:
                         return state;
                 }
-            }, { gist: null, files: {}, activeFile: null }, redux_1.applyMiddleware(updateGist));
+            }, { gist: null, files: null, activeFile: null, error: null }, redux_1.applyMiddleware(updateGist));
             App = (function (_super) {
                 __extends(App, _super);
                 function App() {
@@ -98,39 +109,46 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './utils', 'react
                         var gist = target.value;
                         _this.props.updateGist(gist);
                     };
-                    var keys = Object.keys(this.props.files);
-                    keys.sort(function (a, b) {
-                        if (a.toLowerCase() === "main.cs")
-                            return -1;
-                        if (b.toLowerCase() === "main.cs")
-                            return 1;
-                        if (!a.endsWith(".cs") && b.endsWith(".cs"))
-                            return 1;
-                        if (a === b)
-                            return 0;
-                        return a < b ? -1 : 0;
-                    });
                     var source = "";
                     var Tabs = [];
-                    keys.forEach(function (k) {
-                        var file = _this.props.files[k];
-                        var active = k === _this.props.activeFile ||
-                            (_this.props.activeFile == null && k.toLowerCase() === "main.cs");
-                        Tabs.push((React.createElement("div", {className: active ? 'active' : null, onClick: function (e) { return _this.props.changeTab(file.filename); }}, React.createElement("b", null, file.filename))));
-                        if (active) {
-                            source = file.content;
-                            options["mode"] = file.filename.endsWith('.config')
-                                ? "application/xml"
-                                : "text/x-csharp";
-                        }
-                    });
-                    return (React.createElement("div", {id: "body"}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png"}), React.createElement("h3", null, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, React.createElement("input", {type: "text", id: "txtGist", placeholder: "gist hash or url", value: this.props.gist, onChange: function (e) { return handleGistUpdate(e); }})))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement("div", {className: "editor"}, React.createElement("div", {id: "tabs"}, Tabs), React.createElement(react_codemirror_1.default, {value: source, options: options})), React.createElement("div", {className: "preview"}, "preview"))), React.createElement("div", {id: "footer"})));
+                    if (this.props.files) {
+                        var keys = Object.keys(this.props.files);
+                        keys.sort(function (a, b) {
+                            if (a.toLowerCase() === "main.cs")
+                                return -1;
+                            if (b.toLowerCase() === "main.cs")
+                                return 1;
+                            if (!a.endsWith(".cs") && b.endsWith(".cs"))
+                                return 1;
+                            if (a === b)
+                                return 0;
+                            return a < b ? -1 : 0;
+                        });
+                        keys.forEach(function (k) {
+                            var file = _this.props.files[k];
+                            var active = k === _this.props.activeFile ||
+                                (_this.props.activeFile == null && k.toLowerCase() === "main.cs");
+                            Tabs.push((React.createElement("div", {className: active ? 'active' : null, onClick: function (e) { return _this.props.changeTab(file.filename); }}, React.createElement("b", null, file.filename))));
+                            if (active) {
+                                source = file.content;
+                                options["mode"] = file.filename.endsWith('.config')
+                                    ? "application/xml"
+                                    : "text/x-csharp";
+                            }
+                        });
+                    }
+                    var Preview = React.createElement("span", null, "preview");
+                    if (this.props.error != null) {
+                        Preview = (React.createElement("div", {style: { margin: '10px' }, className: "alert alert-error"}, this.props.error.message));
+                    }
+                    return (React.createElement("div", {id: "body"}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png"}), React.createElement("h3", null, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, React.createElement("input", {type: "text", id: "txtGist", placeholder: "gist hash or url", value: this.props.gist, onChange: function (e) { return handleGistUpdate(e); }})))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement("div", {className: "editor"}, React.createElement("div", {id: "tabs"}, Tabs), React.createElement(react_codemirror_1.default, {value: source, options: options})), React.createElement("div", {className: "preview"}, Preview))), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "run"}, React.createElement("i", {className: "material-icons", title: "run"}, "play_arrow")))));
                 };
                 App = __decorate([
                     reduxify(function (state) { return ({
                         gist: state.gist,
                         files: state.files,
-                        activeFile: state.activeFile
+                        activeFile: state.activeFile,
+                        error: state.error
                     }); }, function (dispatch) { return ({
                         updateGist: function (gist) { return dispatch({ type: 'GIST_CHANGE', gist: gist }); },
                         changeTab: function (activeFile) { return dispatch({ type: 'FILE_CHANGE', activeFile: activeFile }); }

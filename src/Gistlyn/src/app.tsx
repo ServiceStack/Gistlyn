@@ -39,10 +39,18 @@ const updateGist = store => next => action => {
 
     if (action.type === 'GIST_CHANGE') {
         fetch("https://api.github.com/gists/" + gist)
-            .then((res) => res.json().then((r) => {
-                //console.log('loading files...', r.files);
-                store.dispatch({ type: 'GIST_LOAD', files: r.files });
-            }));
+            .then((res) => {
+                if (!res.ok) {
+                    throw res;
+                } else {
+                    return res.json().then((r) => {
+                        store.dispatch({ type: 'GIST_LOAD', files: r.files });
+                    });
+                }
+            })
+            .catch(res => {
+                store.dispatch({ type: 'ERROR_RAISE', error: { code: res.status, message: `Gist with hash '${gist}' was ${res.statusText}` } });
+            });
     }
 
     return result;
@@ -61,18 +69,21 @@ let store = createStore(
                 return Object.assign({}, state, { files: action.files });
             case 'FILE_CHANGE':
                 return Object.assign({}, state, { activeFile: action.activeFile });
+            case 'ERROR_RAISE':
+                return Object.assign({}, state, { error: action.error });
             default:
                 return state;
         }
     },
-    { gist: null, files: {}, activeFile: null },
+    { gist: null, files: null, activeFile: null, error: null },
     applyMiddleware(updateGist));
 
 @reduxify(
     (state) => ({
         gist: state.gist,
         files: state.files,
-        activeFile: state.activeFile
+        activeFile: state.activeFile,
+        error: state.error
     }),
     (dispatch) => ({
         updateGist: (gist) => dispatch({ type: 'GIST_CHANGE', gist }),
@@ -88,41 +99,51 @@ class App extends React.Component<any, any> {
             this.props.updateGist(gist);
         }
 
-        var keys = Object.keys(this.props.files);
-        keys.sort((a, b) => {
-            if (a.toLowerCase() === "main.cs")
-                return -1;
-            if (b.toLowerCase() === "main.cs")
-                return 1;
-            if (!a.endsWith(".cs") && b.endsWith(".cs"))
-                return 1;
-            if (a === b)
-                return 0;
-            return a < b ? -1 : 0;
-        });
-
         let source = "";
-
         const Tabs = [];
-        keys.forEach((k) => {
-            const file = this.props.files[k];
-            const active = k === this.props.activeFile ||
-                (this.props.activeFile == null && k.toLowerCase() === "main.cs");
 
-            Tabs.push((
-                <div className={active ? 'active' : null}
-                     onClick={e => this.props.changeTab(file.filename) }><b>
-                    {file.filename}
-                </b></div>
-            ));
+        if (this.props.files) {
+            var keys = Object.keys(this.props.files);
+            keys.sort((a, b) => {
+                if (a.toLowerCase() === "main.cs")
+                    return -1;
+                if (b.toLowerCase() === "main.cs")
+                    return 1;
+                if (!a.endsWith(".cs") && b.endsWith(".cs"))
+                    return 1;
+                if (a === b)
+                    return 0;
+                return a < b ? -1 : 0;
+            });
 
-            if (active) {
-                source = file.content;
-                options["mode"] = file.filename.endsWith('.config')
-                    ? "application/xml"
-                    : "text/x-csharp";
-            }
-        });
+            keys.forEach((k) => {
+                const file = this.props.files[k];
+                const active = k === this.props.activeFile ||
+                    (this.props.activeFile == null && k.toLowerCase() === "main.cs");
+
+                Tabs.push((
+                    <div className={active ? 'active' : null}
+                        onClick={e => this.props.changeTab(file.filename) }><b>
+                            {file.filename}
+                        </b></div>
+                ));
+
+                if (active) {
+                    source = file.content;
+                    options["mode"] = file.filename.endsWith('.config')
+                        ? "application/xml"
+                        : "text/x-csharp";
+                }
+            });
+        }
+
+        var Preview = <span>preview</span>;
+
+        if (this.props.error != null) {
+            Preview = (<div style={{ margin: '10px' }} className="alert alert-error">
+                {this.props.error.message}
+            </div>);
+        }
 
         return (
             <div id="body">
@@ -146,11 +167,17 @@ class App extends React.Component<any, any> {
                             </div>
                             <CodeMirror value={source} options={options} />
                         </div>
-                        <div className="preview">preview</div>
+                        <div className="preview">
+                            {Preview}
+                        </div>
                     </div>
                 </div>
 
-                <div id="footer"></div>
+                <div id="footer">
+                    <div id="run">
+                        <i className="material-icons" title="run">play_arrow</i>
+                    </div>
+                </div>
             </div>
         );
     }
