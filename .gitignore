@@ -240,3 +240,4 @@ _Pvt_Extensions
 # FAKE - F# Make
 .fake/
 src/Gistlyn.TestHost/App_Data/db.sqlite
+src/Gistlyn/deps.lib.js
