@@ -14,6 +14,7 @@ System.config({
     "isomorphic-fetch": "npm:isomorphic-fetch@2.2.1",
     "jquery": "npm:jquery@2.2.4",
     "jspm": "npm:jspm@0.16.39",
+    "octicons": "npm:octicons@4.2.0",
     "react": "npm:react@15.1.0",
     "react-codemirror": "npm:react-codemirror@0.2.6",
     "react-dom": "npm:react-dom@15.1.0",
@@ -1112,6 +1113,9 @@ System.config({
     "npm:oauth-sign@0.8.2": {
       "crypto": "github:jspm/nodelibs-crypto@0.1.0",
       "querystring": "github:jspm/nodelibs-querystring@0.1.0"
+    },
+    "npm:octicons@4.2.0": {
+      "systemjs-json": "github:systemjs/plugin-json@0.1.2"
     },
     "npm:once@1.3.3": {
       "wrappy": "npm:wrappy@1.0.2"

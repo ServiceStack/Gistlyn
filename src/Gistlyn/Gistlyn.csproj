@@ -108,6 +108,9 @@
   <ItemGroup>
     <Content Include="config.js" />
     <Content Include="css\codemirror.css" />
+    <Content Include="css\iconfont\material-icons.css" />
+    <Content Include="css\iconfont\MaterialIcons-Regular.svg" />
+    <Content Include="css\octicon\octicon.css" />
     <Content Include="testclient.html" />
     <Content Include="default.html" />
     <Content Include="deps.lib.js" />
@@ -120,6 +123,17 @@
     <Content Include="tsconfig.json" />
     <Content Include="css\app.css" />
     <Content Include="gulpfile.js" />
+    <Content Include="css\iconfont\codepoints" />
+    <Content Include="css\iconfont\MaterialIcons-Regular.eot" />
+    <Content Include="css\iconfont\MaterialIcons-Regular.ijmap" />
+    <Content Include="css\iconfont\MaterialIcons-Regular.ttf" />
+    <Content Include="css\iconfont\MaterialIcons-Regular.woff" />
+    <Content Include="css\iconfont\MaterialIcons-Regular.woff2" />
+    <Content Include="css\octicon\octicons.ttf" />
+    <Content Include="css\octicon\octicons.woff" />
+    <Content Include="css\roboto\Roboto-Regular.ttf" />
+    <Content Include="css\roboto\roboto-v15-latin-regular.woff" />
+    <Content Include="css\roboto\roboto-v15-latin-regular.woff2" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

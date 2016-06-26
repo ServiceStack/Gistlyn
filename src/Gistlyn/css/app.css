@@ -32,6 +32,23 @@ table {
     border-spacing: 0;
 }
 
+/* icon fonts */
+
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Roboto'), local('Roboto-Regular'), url('roboto/roboto-v15-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+ */
+    url('roboto/roboto-v15-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+@font-face {
+  font-family: 'octicons';
+  src: url('octicon/octicons.woff') format('woff'),
+       url('octicon/octicons.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 /* css */
 
 body {
@@ -89,12 +106,6 @@ html,body,#app,#body {
  #txtGist:-ms-input-placeholder {  
     color: #f7f7f7 !important;  
 }
-::selection {
-    background: #0371BE; /* WebKit/Blink Browsers */
-}
-::-moz-selection {
-    background: #0371BE; /* Gecko Browsers */
-}
 
 #content {
     background: #fff;
@@ -150,4 +161,62 @@ html,body,#app,#body {
     color: #444;
     margin-bottom: -1px;
     cursor: auto;
+}
+
+#run {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: -30px;
+}
+#run i {
+    font-size: 60px;
+    cursor: pointer;
+    color: #01215A;
+}
+#run i:hover {
+    color: #0371BE;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+.alert-error {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}
+
+/* Custom */
+
+::selection {
+    background: #0371BE; /* WebKit/Blink Browsers */
+}
+::-moz-selection {
+    background: #0371BE; /* Gecko Browsers */
+}
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+ 
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 2px rgba(0,0,0,0.3);
+}
+ 
+::-webkit-scrollbar-thumb {
+  background-color: darkgrey;
+  outline: 1px solid slategrey;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Chrome/Safari/Opera */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* IE/Edge */
+  user-select: none;           /* non-prefixed version, currently
+                                  not supported by any browser */
 }

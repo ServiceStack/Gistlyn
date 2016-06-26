@@ -13,6 +13,7 @@
       "es6-shim": "github:es-shims/es6-shim@^0.35.0",
       "isomorphic-fetch": "^2.2.1",
       "jquery": "^2.2.2",
+      "octicons": "^4.2.0",
       "react": "^15.0.1",
       "react-codemirror": "^0.2.6",
       "react-dom": "^15.0.1",
@@ -44,5 +45,8 @@
     "requirejs": "~2.1.15",
     "run-sequence": "^1.1.5",
     "yargs": "^4.2.0"
+  },
+  "dependencies": {
+    "octicons": "^4.2.0"
   }
 }
