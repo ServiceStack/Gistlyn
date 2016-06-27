@@ -23,6 +23,11 @@ namespace Gistlyn.ServiceInterface
 
         public IServerEvents ServerEvents { get; set; }
 
+        public object Any(Hello request)
+        {
+            return new HelloResponse { Result = "Hello, {0}!".Fmt(request.Name) };
+        }
+
         public object Any(TestServerEvents request)
         {
             var response = new TestServerEventsResponse { Result = "Hello, {0}!".Fmt(request.Name) };
@@ -99,15 +104,17 @@ namespace Gistlyn.ServiceInterface
             var runner = new ScriptRunner();
             var result = new ScriptExecutionResult();
 
-            try 
+            try
             {
-                result = runner.Execute (request.Code).Result;
-            } catch (Exception e)
+                result = runner.Execute(request.Code).Result;
+            }
+            catch (Exception e)
             {
                 result.Exception = e;
             }
 
-            return new EvaluateSourceResponse {
+            return new EvaluateSourceResponse
+            {
                 Result = result
             };
         }
@@ -166,7 +173,7 @@ namespace Gistlyn.ServiceInterface
         {
             var tmpReferences = new List<AssemblyReference>();
 
-            if (references != null) 
+            if (references != null)
                 tmpReferences.AddRange(references);
 
             if (!string.IsNullOrEmpty(packages))
@@ -221,11 +228,11 @@ namespace Gistlyn.ServiceInterface
             {
                 var scriptStatus = runnerInfo.DomainWrapper.GetScriptStatus();
 
-                if (request.ForceRun ||  (scriptStatus != ScriptStatus.PrepareToRun && scriptStatus != ScriptStatus.Running))
+                if (request.ForceRun || (scriptStatus != ScriptStatus.PrepareToRun && scriptStatus != ScriptStatus.Running))
                 {
                     AppDomain.Unload(runnerInfo.ScriptDomain);
                 }
-                else 
+                else
                 {
                     result.Status = ScriptStatus.AnotherScriptExecuting;
                     return new RunScriptResponse
@@ -279,7 +286,7 @@ namespace Gistlyn.ServiceInterface
             string hash;
             var code = (request.MainSource ?? string.Empty)
                 + (request.Packages ?? string.Empty) + string.Concat(request.Sources);
-            
+
             using (var md5 = MD5.Create())
             {
                 var hashBytes = md5.ComputeHash(Encoding.Unicode.GetBytes(code));

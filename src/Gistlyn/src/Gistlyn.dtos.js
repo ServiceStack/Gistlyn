@@ -1,5 +1,5 @@
 /* Options:
-Date: 2016-06-25 11:57:04
+Date: 2016-06-27 01:11:26
 Version: 4.060
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:54991
@@ -19,6 +19,13 @@ var Gistlyn;
 (function (Gistlyn) {
     var ServiceModel;
     (function (ServiceModel) {
+        // @DataContract
+        var ResponseStatus = (function () {
+            function ResponseStatus() {
+            }
+            return ResponseStatus;
+        }());
+        ServiceModel.ResponseStatus = ResponseStatus;
         var VariableInfo = (function () {
             function VariableInfo() {
             }
@@ -49,19 +56,6 @@ var Gistlyn;
             return NugetPackageInfo;
         }());
         ServiceModel.NugetPackageInfo = NugetPackageInfo;
-        var ErrorInfo = (function () {
-            function ErrorInfo() {
-            }
-            return ErrorInfo;
-        }());
-        ServiceModel.ErrorInfo = ErrorInfo;
-        // @DataContract
-        var ResponseStatus = (function () {
-            function ResponseStatus() {
-            }
-            return ResponseStatus;
-        }());
-        ServiceModel.ResponseStatus = ResponseStatus;
         // @DataContract
         var ResponseError = (function () {
             function ResponseError() {
@@ -69,6 +63,18 @@ var Gistlyn;
             return ResponseError;
         }());
         ServiceModel.ResponseError = ResponseError;
+        var ErrorInfo = (function () {
+            function ErrorInfo() {
+            }
+            return ErrorInfo;
+        }());
+        ServiceModel.ErrorInfo = ErrorInfo;
+        var HelloResponse = (function () {
+            function HelloResponse() {
+            }
+            return HelloResponse;
+        }());
+        ServiceModel.HelloResponse = HelloResponse;
         var TestServerEventsResponse = (function () {
             function TestServerEventsResponse() {
             }
@@ -147,6 +153,12 @@ var Gistlyn;
             return SearchInstalledPackagesResponse;
         }());
         ServiceModel.SearchInstalledPackagesResponse = SearchInstalledPackagesResponse;
+        var Hello = (function () {
+            function Hello() {
+            }
+            return Hello;
+        }());
+        ServiceModel.Hello = Hello;
         // @Route("/test")
         // @Route("/test/{Name}")
         var TestServerEvents = (function () {

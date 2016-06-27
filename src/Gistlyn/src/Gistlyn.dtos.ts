@@ -1,5 +1,5 @@
 /* Options:
-Date: 2016-06-25 11:57:04
+Date: 2016-06-27 01:11:26
 Version: 4.060
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:54991
@@ -26,6 +26,25 @@ module Gistlyn.ServiceModel
 
     export interface IReturn<T>
     {
+    }
+
+    // @DataContract
+    export class ResponseStatus
+    {
+        // @DataMember(Order=1)
+        errorCode: string;
+
+        // @DataMember(Order=2)
+        message: string;
+
+        // @DataMember(Order=3)
+        stackTrace: string;
+
+        // @DataMember(Order=4)
+        errors: ResponseError[];
+
+        // @DataMember(Order=5)
+        meta: { [index:string]: string; };
     }
 
     export const enum ScriptStatus
@@ -74,33 +93,9 @@ module Gistlyn.ServiceModel
     export class NugetPackageInfo
     {
         id: string;
-        ver: string;
+        version: string;
         targetFramework: string;
         assemblies: AssemblyReference[];
-    }
-
-    export class ErrorInfo
-    {
-        info: string;
-    }
-
-    // @DataContract
-    export class ResponseStatus
-    {
-        // @DataMember(Order=1)
-        errorCode: string;
-
-        // @DataMember(Order=2)
-        message: string;
-
-        // @DataMember(Order=3)
-        stackTrace: string;
-
-        // @DataMember(Order=4)
-        errors: ResponseError[];
-
-        // @DataMember(Order=5)
-        meta: { [index:string]: string; };
     }
 
     // @DataContract
@@ -117,6 +112,17 @@ module Gistlyn.ServiceModel
 
         // @DataMember(Order=4, EmitDefaultValue=false)
         meta: { [index:string]: string; };
+    }
+
+    export class ErrorInfo
+    {
+        info: string;
+    }
+
+    export class HelloResponse
+    {
+        result: string;
+        responseStatus: ResponseStatus;
     }
 
     export class TestServerEventsResponse
@@ -190,6 +196,11 @@ module Gistlyn.ServiceModel
         packages: NugetPackageInfo[];
     }
 
+    export class Hello implements IReturn<HelloResponse>
+    {
+        name: string;
+    }
+
     // @Route("/test")
     // @Route("/test/{Name}")
     export class TestServerEvents implements IReturn<TestServerEventsResponse>
@@ -248,8 +259,8 @@ module Gistlyn.ServiceModel
         scriptId: string;
         mainSource: string;
         sources: string[];
+        packagesConfig: string;
         references: AssemblyReference[];
-        packages: string;
         forceRun: boolean;
     }
 
@@ -276,7 +287,7 @@ module Gistlyn.ServiceModel
     export class InstallNugetPackage implements IReturn<InstallNugetPackageResponse>
     {
         packageId: string;
-        ver: string;
+        version: string;
         allowPrereleaseVersion: boolean;
     }
 
