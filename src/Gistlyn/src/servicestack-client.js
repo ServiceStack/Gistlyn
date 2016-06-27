@@ -1,10 +1,28 @@
 System.register([], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var ReadyState, ServerEventsClient, JsonServiceClient, css, splitOnFirst, queryString, combinePaths;
+    var ResponseStatus, ResponseError, ErrorResponse, ReadyState, ServerEventsClient, HttpMethods, JsonServiceClient, nameOf, css, splitOnFirst, queryString, combinePaths, createPath, createUrl, appendQueryString;
     return {
         setters:[],
         execute: function() {
+            ResponseStatus = (function () {
+                function ResponseStatus() {
+                }
+                return ResponseStatus;
+            }());
+            exports_1("ResponseStatus", ResponseStatus);
+            ResponseError = (function () {
+                function ResponseError() {
+                }
+                return ResponseError;
+            }());
+            exports_1("ResponseError", ResponseError);
+            ErrorResponse = (function () {
+                function ErrorResponse() {
+                }
+                return ErrorResponse;
+            }());
+            exports_1("ErrorResponse", ErrorResponse);
             /**
              * EventSource
              */
@@ -18,11 +36,13 @@ System.register([], function(exports_1, context_1) {
                 function ServerEventsClient(baseUrl, channels, options, eventSource) {
                     if (options === void 0) { options = {}; }
                     if (eventSource === void 0) { eventSource = null; }
-                    this.baseUrl = baseUrl;
                     this.channels = channels;
                     this.options = options;
                     this.eventSource = eventSource;
-                    this.eventSourceUrl = combinePaths(baseUrl, 'event-stream');
+                    if (this.channels.length === 0)
+                        throw "at least 1 channel is required";
+                    this.eventSourceUrl = combinePaths(baseUrl, "event-stream") + "?";
+                    this.updateChannels(channels);
                     if (eventSource == null) {
                         this.eventSource = new EventSource(this.eventSourceUrl);
                         this.eventSource.onmessage = this.onMessage.bind(this);
@@ -31,7 +51,7 @@ System.register([], function(exports_1, context_1) {
                 ServerEventsClient.prototype.onMessage = function (e) {
                     var _this = this;
                     var opt = this.options;
-                    var parts = splitOnFirst(e.data, ' ');
+                    var parts = splitOnFirst(e.data, " ");
                     var selector = parts[0];
                     var selParts = splitOnFirst(selector, "@");
                     if (selParts.length > 1) {
@@ -40,10 +60,10 @@ System.register([], function(exports_1, context_1) {
                     }
                     var json = parts[1];
                     var msg = json ? JSON.parse(json) : null;
-                    parts = splitOnFirst(selector, '.');
+                    parts = splitOnFirst(selector, ".");
                     if (parts.length <= 1)
                         throw "invalid selector format: " + selector;
-                    var op = parts[0], target = parts[1].replace(new RegExp("%20", 'g'), " ");
+                    var op = parts[0], target = parts[1].replace(new RegExp("%20", "g"), " ");
                     if (opt.validate && opt.validate(op, target, msg, json) === false)
                         return;
                     var tokens = splitOnFirst(target, "$");
@@ -68,12 +88,11 @@ System.register([], function(exports_1, context_1) {
                                         _this.reconnectServerEvents({ errorArgs: { error: "CLOSED" } });
                                         return;
                                     }
-                                    var req = new Request(opt.heartbeatUrl, {
+                                    fetch(new Request(opt.heartbeatUrl, {
                                         method: "POST",
                                         mode: "cors",
                                         headers: headers
-                                    });
-                                    fetch(req)
+                                    }))
                                         .then(function (res) {
                                         if (!res.ok)
                                             throw res;
@@ -106,6 +125,10 @@ System.register([], function(exports_1, context_1) {
                         }
                     }
                     else if (op === "trigger") {
+                        //$(el || document).trigger(cmd, [msg, e]); //no jQuery
+                        if (opt.trigger && opt.trigger[cmd] == typeof "function") {
+                            opt.trigger[cmd].call(el || document, msg, e);
+                        }
                     }
                     else if (op === "css") {
                         css(els || document.querySelectorAll("body"), cmd, msg);
@@ -144,25 +167,84 @@ System.register([], function(exports_1, context_1) {
                 };
                 ServerEventsClient.prototype.updateChannels = function (channels) {
                     this.channels = channels;
-                    if (!this.eventSource)
-                        return;
-                    var url = this.eventSource.url;
-                    this.eventSourceUrl = url.substring(0, Math.min(url.indexOf("?"), url.length)) + "?channels=" + channels.join(",");
+                    var url = this.eventSource != null
+                        ? this.eventSource.url
+                        : this.eventSourceUrl;
+                    this.eventSourceUrl = url.substring(0, Math.min(url.indexOf("?"), url.length)) + "?channels=" + channels.join(",") + "&t=" + new Date().getTime();
                 };
                 return ServerEventsClient;
             }());
             exports_1("ServerEventsClient", ServerEventsClient);
+            HttpMethods = (function () {
+                function HttpMethods() {
+                }
+                HttpMethods.Get = "GET";
+                HttpMethods.Post = "POST";
+                HttpMethods.Put = "PUT";
+                HttpMethods.Delete = "DELETE";
+                HttpMethods.Patch = "PATCH";
+                HttpMethods.Head = "HEAD";
+                HttpMethods.Options = "OPTIONS";
+                HttpMethods.hasRequestBody = function (method) {
+                    return !(method === "GET" || method === "DELETE" || method === "HEAD" || method === "OPTIONS");
+                };
+                return HttpMethods;
+            }());
+            exports_1("HttpMethods", HttpMethods);
             JsonServiceClient = (function () {
                 function JsonServiceClient(baseUrl) {
+                    if (baseUrl == null)
+                        throw "baseUrl is required";
                     this.baseUrl = baseUrl;
+                    this.replyBaseUrl = combinePaths(baseUrl, "json", "reply") + "/";
+                    this.oneWayBaseUrl = combinePaths(baseUrl, "json", "oneway") + "/";
+                    this.mode = "cors";
+                    this.headers = new Headers();
+                    this.headers.set("Content-Type", "application/json");
                 }
                 JsonServiceClient.prototype.get = function (request) {
-                    console.log(request);
-                    return fetch("/").then(function (r) { return null; });
+                    return this.send(HttpMethods.Get, request);
+                };
+                JsonServiceClient.prototype.send = function (method, request) {
+                    var url = combinePaths(this.replyBaseUrl, nameOf(request));
+                    var hasRequestBody = HttpMethods.hasRequestBody(method);
+                    if (!hasRequestBody)
+                        url = appendQueryString(url, request);
+                    var req = new Request(url, {
+                        method: method,
+                        mode: this.mode,
+                        headers: this.headers
+                    });
+                    if (hasRequestBody)
+                        req.body = JSON.stringify(request);
+                    return fetch(url, req)
+                        .then(function (res) {
+                        if (!res.ok)
+                            throw res;
+                        return res.json().then(function (o) {
+                            var r = o;
+                            return r;
+                        });
+                    })
+                        .catch(function (res) {
+                        return res.json().then(function (o) {
+                            var r = o;
+                            return r;
+                        });
+                    });
                 };
                 return JsonServiceClient;
             }());
             exports_1("JsonServiceClient", JsonServiceClient);
+            nameOf = function (o) {
+                var ctor = o && o.constructor;
+                if (ctor == null)
+                    throw o + " doesn't have constructor";
+                if (ctor.name)
+                    return ctor.name;
+                var str = ctor.toString();
+                return str.substring(9, str.indexOf("(")); //"function ".length == 9
+            };
             /* utils */
             exports_1("css", css = function (selector, name, value) {
                 var els = typeof selector == "string"
@@ -219,6 +301,41 @@ System.register([], function(exports_1, context_1) {
                 if (parts[0] === "")
                     combinedPaths.unshift("");
                 return combinedPaths.join("/") || (combinedPaths.length ? "/" : ".");
+            });
+            exports_1("createPath", createPath = function (route, args) {
+                var argKeys = {};
+                for (var k in args) {
+                    argKeys[k.toLowerCase()] = k;
+                }
+                var parts = route.split("/");
+                var url = "";
+                for (var i = 0; i < parts.length; i++) {
+                    var p = parts[i];
+                    if (p == null)
+                        p = "";
+                    if (p[0] === "{" && p[p.length - 1] === "}") {
+                        var key = argKeys[p.substring(1, p.length - 1).toLowerCase()];
+                        if (key) {
+                            p = args[key];
+                            delete args[key];
+                        }
+                    }
+                    if (url.length > 0)
+                        url += "/";
+                    url += p;
+                }
+                return url;
+            });
+            exports_1("createUrl", createUrl = function (route, args) {
+                var url = createPath(route, args);
+                return appendQueryString(url, args);
+            });
+            exports_1("appendQueryString", appendQueryString = function (url, args) {
+                for (var k in args) {
+                    url += url.indexOf("?") >= 0 ? "&" : "?";
+                    url += k + "=" + encodeURIComponent(args[k]);
+                }
+                return url;
             });
         }
     }

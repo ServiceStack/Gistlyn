@@ -1,9 +1,24 @@
 ﻿export interface IReturnVoid {
 }
-
 export interface IReturn<T> {
+    getResponseType():T;
 }
-
+export class ResponseStatus {
+    errorCode: string;
+    message: string;
+    stackTrace: string;
+    errors: ResponseError[];
+    meta: { [index: string]: string; };
+}
+export class ResponseError {
+    errorCode: string;
+    fieldName: string;
+    message: string;
+    meta: { [index: string]: string; };
+}
+export class ErrorResponse {
+    responseStatus: ResponseStatus;
+}
 
 export interface ISseCommand {
     userId: string;
@@ -68,12 +83,16 @@ export class ServerEventsClient {
     eventSourceStop: boolean;
 
     constructor(
-        public baseUrl: string,
+        baseUrl: string,
         public channels: string[],
         public options: any = {},
-        public eventSource: IEventSourceStatic = null)
-    {
-        this.eventSourceUrl = combinePaths(baseUrl, 'event-stream');
+        public eventSource: IEventSourceStatic = null) {
+        if (this.channels.length === 0)
+            throw "at least 1 channel is required";
+
+        this.eventSourceUrl = combinePaths(baseUrl, "event-stream") + "?";
+        this.updateChannels(channels);
+
         if (eventSource == null) {
             this.eventSource = new EventSource(this.eventSourceUrl);
             this.eventSource.onmessage = this.onMessage.bind(this);
@@ -83,7 +102,7 @@ export class ServerEventsClient {
     onMessage(e: IOnMessageEvent) {
         var opt = this.options;
 
-        var parts = splitOnFirst(e.data, ' ');
+        var parts = splitOnFirst(e.data, " ");
         var selector = parts[0];
         var selParts = splitOnFirst(selector, "@");
         if (selParts.length > 1) {
@@ -93,12 +112,12 @@ export class ServerEventsClient {
         const json = parts[1];
         const msg = json ? JSON.parse(json) : null;
 
-        parts = splitOnFirst(selector, '.');
+        parts = splitOnFirst(selector, ".");
         if (parts.length <= 1)
             throw "invalid selector format: " + selector;
 
         var op = parts[0],
-            target = parts[1].replace(new RegExp("%20", 'g'), " ");
+            target = parts[1].replace(new RegExp("%20", "g"), " ");
 
         if (opt.validate && opt.validate(op, target, msg, json) === false)
             return;
@@ -129,12 +148,11 @@ export class ServerEventsClient {
                             return;
                         }
 
-                        var req = new Request(opt.heartbeatUrl, {
-                            method: "POST",
-                            mode: "cors",
-                            headers: headers
-                        });
-                        fetch(req)
+                        fetch(new Request(opt.heartbeatUrl, {
+                                method: "POST",
+                                mode: "cors",
+                                headers: headers
+                            }))
                             .then(res => {
                                 if (!res.ok)
                                     throw res;
@@ -167,7 +185,10 @@ export class ServerEventsClient {
             }
         }
         else if (op === "trigger") {
-            //$(el || document).trigger(cmd, [msg, e]);
+            //$(el || document).trigger(cmd, [msg, e]); //no jQuery
+            if (opt.trigger && opt.trigger[cmd] == typeof "function") {
+                opt.trigger[cmd].call(el || document, msg, e);
+            }
         }
         else if (op === "css") {
             css(els || document.querySelectorAll("body"), cmd, msg);
@@ -209,22 +230,97 @@ export class ServerEventsClient {
 
     updateChannels(channels) {
         this.channels = channels;
-        if (!this.eventSource) return;
-        const url = this.eventSource.url;
-        this.eventSourceUrl = url.substring(0, Math.min(url.indexOf("?"), url.length)) + "?channels=" + channels.join(",");
+        const url = this.eventSource != null
+            ? this.eventSource.url
+            : this.eventSourceUrl;
+        this.eventSourceUrl = url.substring(0, Math.min(url.indexOf("?"), url.length)) + "?channels=" + channels.join(",") + "&t=" + new Date().getTime();
     }
+}
+
+export class HttpMethods {
+    static Get = "GET";
+    static Post = "POST";
+    static Put = "PUT";
+    static Delete = "DELETE";
+    static Patch = "PATCH";
+    static Head = "HEAD";
+    static Options = "OPTIONS";
+
+    static hasRequestBody = (method: string) =>
+        !(method === "GET" || method === "DELETE" || method === "HEAD" || method === "OPTIONS");
 }
 
 export class JsonServiceClient
 {
     baseUrl: string;
-    constructor(baseUrl: string) { this.baseUrl = baseUrl; }
+    replyBaseUrl: string;
+    oneWayBaseUrl: string;
+    mode:string;
+    headers:Headers;
+
+    constructor(baseUrl: string) {
+        if (baseUrl == null)
+            throw "baseUrl is required";
+
+        this.baseUrl = baseUrl;
+        this.replyBaseUrl = combinePaths(baseUrl, "json", "reply") + "/";
+        this.oneWayBaseUrl = combinePaths(baseUrl, "json", "oneway") + "/";
+
+        this.mode = "cors";
+        this.headers = new Headers();
+        this.headers.set("Content-Type", "application/json");
+    }
 
     get<T>(request: IReturn<T>): Promise<T> {
-        console.log(request);
-        return fetch("/").then(r => <T>null);
+        return this.send(HttpMethods.Get, request);
+    }
+
+    send<T>(method: string, request: IReturn<T>): Promise<T> {
+        let url = combinePaths(this.replyBaseUrl, nameOf(request));
+
+        const hasRequestBody = HttpMethods.hasRequestBody(method);
+        if (!hasRequestBody)
+            url = appendQueryString(url, request);
+
+        const req = new Request(url,
+        {
+            method: method,
+            mode: this.mode,
+            headers: this.headers            
+        });
+
+        if (hasRequestBody)
+            (req as any).body = JSON.stringify(request);
+
+        return fetch(url, req)
+            .then(res => {
+                if (!res.ok)
+                    throw res;
+                return res.json().then(o => {
+                    var r = (o as T);
+                    return r;
+                });
+            })
+            .catch(res => {
+                return res.json().then(o => {
+                    var r = (o as ErrorResponse);
+                    return r;
+                });
+            });
     }
 }
+
+const nameOf = (o: any) => {
+    var ctor = o && o.constructor;
+    if (ctor == null)
+        throw `${o} doesn't have constructor`;
+
+    if (ctor.name)
+        return ctor.name;
+
+    var str = ctor.toString();
+    return str.substring(9, str.indexOf("(")); //"function ".length == 9
+};
 
 /* utils */
 
@@ -278,3 +374,40 @@ export const combinePaths = (...paths:string[]) : string => {
     if (parts[0] === "") combinedPaths.unshift("");
     return combinedPaths.join("/") || (combinedPaths.length ? "/" : ".");
 };
+
+
+export const createPath = (route: string, args: any) => {
+    var argKeys = {};
+    for (let k in args) {
+        argKeys[k.toLowerCase()] = k;
+    }
+    var parts = route.split("/");
+    var url = "";
+    for (let i = 0; i < parts.length; i++) {
+        var p = parts[i];
+        if (p == null) p = "";
+        if (p[0] === "{" && p[p.length - 1] === "}") {
+            const key = argKeys[p.substring(1, p.length - 1).toLowerCase()];
+            if (key) {
+                p = args[key];
+                delete args[key];
+            }
+        }
+        if (url.length > 0) url += "/";
+        url += p;
+    }
+    return url;
+};
+
+export const createUrl = (route: string, args: any) => {
+    var url = createPath(route, args);
+    return appendQueryString(url, args);
+};
+
+export const appendQueryString = (url: string, args: any): string => {
+    for (let k in args) {
+        url += url.indexOf("?") >= 0 ? "&" : "?";
+        url += k + "=" + encodeURIComponent(args[k]);
+    }
+    return url;
+}
