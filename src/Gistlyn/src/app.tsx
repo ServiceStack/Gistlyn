@@ -15,9 +15,7 @@ import "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js";
 import "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js";
 import "./codemirror.js";
 
-import './Gistlyn.dtos';
-import dto = Gistlyn.ServiceModel;
-
+import * as dto from './Gistlyn.dtos';
 
 var options = {
     lineNumbers: true,

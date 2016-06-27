@@ -1,7 +1,8 @@
 ﻿export interface IReturnVoid {
+    createResponse();
 }
 export interface IReturn<T> {
-    getResponseType():T;
+    createResponse():T;
 }
 export class ResponseStatus {
     errorCode: string;
@@ -273,6 +274,22 @@ export class JsonServiceClient
 
     get<T>(request: IReturn<T>): Promise<T> {
         return this.send(HttpMethods.Get, request);
+    }
+
+    delete<T>(request: IReturn<T>): Promise<T> {
+        return this.send(HttpMethods.Delete, request);
+    }
+
+    post<T>(request: IReturn<T>): Promise<T> {
+        return this.send(HttpMethods.Post, request);
+    }
+
+    put<T>(request: IReturn<T>): Promise<T> {
+        return this.send(HttpMethods.Put, request);
+    }
+
+    patch<T>(request: IReturn<T>): Promise<T> {
+        return this.send(HttpMethods.Patch, request);
     }
 
     send<T>(method: string, request: IReturn<T>): Promise<T> {

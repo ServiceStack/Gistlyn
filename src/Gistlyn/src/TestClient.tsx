@@ -2,36 +2,9 @@
 import * as React from 'react';
 
 import { JsonServiceClient, IReturn } from './servicestack-client';
-import './Gistlyn.dtos';
-import dto = Gistlyn.ServiceModel;
+import { Hello } from './Gistlyn.dtos';
 
 var client = new JsonServiceClient("/");
-
-//client.get(new )
-
-class Hello implements IReturn<HelloResponse>
-{
-    name: string;
-
-    getResponseType(): HelloResponse { return new HelloResponse(); }
-}
-export class HelloResponse {
-    result: string;
-    responseStatus: ResponseStatus;
-}
-export class ResponseStatus {
-    errorCode: string;
-    message: string;
-    stackTrace: string;
-    errors: ResponseError[];
-    meta: { [index: string]: string; };
-}
-export class ResponseError {
-    errorCode: string;
-    fieldName: string;
-    message: string;
-    meta: { [index: string]: string; };
-}
 
 class Test extends React.Component<any, any> {
 
@@ -41,7 +14,7 @@ class Test extends React.Component<any, any> {
 
         const request = new Hello();
         request.name = "World";
-        
+
         client.get(request)
             .then(r => {
                 console.log(r);
@@ -51,7 +24,7 @@ class Test extends React.Component<any, any> {
                 console.log('error', r);
             });
     }
-
+     
     loadGist(gist) {
         fetch("https://api.github.com/gists/" + gist)
             .then((r) => {

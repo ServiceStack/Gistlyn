@@ -205,6 +205,18 @@ System.register([], function(exports_1, context_1) {
                 JsonServiceClient.prototype.get = function (request) {
                     return this.send(HttpMethods.Get, request);
                 };
+                JsonServiceClient.prototype.delete = function (request) {
+                    return this.send(HttpMethods.Delete, request);
+                };
+                JsonServiceClient.prototype.post = function (request) {
+                    return this.send(HttpMethods.Post, request);
+                };
+                JsonServiceClient.prototype.put = function (request) {
+                    return this.send(HttpMethods.Put, request);
+                };
+                JsonServiceClient.prototype.patch = function (request) {
+                    return this.send(HttpMethods.Patch, request);
+                };
                 JsonServiceClient.prototype.send = function (method, request) {
                     var url = combinePaths(this.replyBaseUrl, nameOf(request));
                     var hasRequestBody = HttpMethods.hasRequestBody(method);
