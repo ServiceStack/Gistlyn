@@ -163,7 +163,7 @@
     <TypeScriptCompile Include="src\deps.tsx" />
     <TypeScriptCompile Include="src\TestClient.tsx" />
     <TypeScriptCompile Include="src\utils.ts" />
-    <TypeScriptCompile Include="src\JsonServiceClient.ts" />
+    <TypeScriptCompile Include="src\servicestack-client.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="wwwroot_build\README.txt" />
