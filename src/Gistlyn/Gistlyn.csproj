@@ -162,7 +162,6 @@
     <TypeScriptCompile Include="src\hello.tsx" />
     <TypeScriptCompile Include="src\deps.tsx" />
     <TypeScriptCompile Include="src\TestClient.tsx" />
-    <TypeScriptCompile Include="src\utils.ts" />
     <TypeScriptCompile Include="src\servicestack-client.ts" />
   </ItemGroup>
   <ItemGroup>
