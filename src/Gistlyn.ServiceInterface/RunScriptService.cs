@@ -237,7 +237,7 @@ namespace Gistlyn.ServiceInterface
 
 
             List<AssemblyReference> normalizedReferences;
-            var addedReferences = AddReferencesFromPackages(request.References, request.Packages, out normalizedReferences);
+            var addedReferences = AddReferencesFromPackages(request.References, request.PackagesConfig, out normalizedReferences);
 
             var evidence = new Evidence(AppDomain.CurrentDomain.Evidence);
             var setup = new AppDomainSetup

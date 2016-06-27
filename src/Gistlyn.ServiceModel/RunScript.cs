@@ -13,9 +13,9 @@ namespace Gistlyn.ServiceModel
 
         public List<string> Sources { get; set; }
 
-        public List<AssemblyReference> References { get; set; }
+        public string PackagesConfig { get; set; }
 
-        public string Packages { get; set; }
+        public List<AssemblyReference> References { get; set; }
 
         public bool ForceRun { get; set; }
     }

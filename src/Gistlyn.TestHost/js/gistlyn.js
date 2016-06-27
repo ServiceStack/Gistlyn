@@ -366,7 +366,7 @@ function runMultiple()
     );
 }
 
-function runMultipleInternal(scriptId, mainCode, sources, references, packages, forceRun)
+function runMultipleInternal(scriptId, mainCode, sources, references, packagesConfig, forceRun)
 {
     var empty = {result : { variables: [], errors: [], console: ""}};
     scriptExecResponse($("#multirunBlock"), empty);
@@ -377,7 +377,7 @@ function runMultipleInternal(scriptId, mainCode, sources, references, packages, 
     $("#multirun").attr("disabled", "disabled");
     $("#cancel").show();
 
-    gateway.postToService({ RunScript: { ScriptId: scriptId, mainSource: mainCode, sources: sources, references: references, packages: packages, forceRun: forceRun } },
+    gateway.postToService({ RunScript: { ScriptId: scriptId, mainSource: mainCode, sources: sources, references: references, packagesConfig: packagesConfig, forceRun: forceRun } },
         function(response) {
             scriptExecResponse($("#multirunBlock"), response);
             $("#multirunBlock").show();
