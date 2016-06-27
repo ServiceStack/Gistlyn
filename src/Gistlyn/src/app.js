@@ -1,8 +1,5 @@
-// A '.tsx' file enables JSX support in the TypeScript compiler, 
-// for more information see the following page on the TypeScript wiki:
-// https://github.com/Microsoft/TypeScript/wiki/JSX
 /// <reference path='../typings/browser.d.ts'/>
-System.register(['react-dom', 'react', 'redux', 'react-redux', './utils', 'react-codemirror', "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js", "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js", "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js", "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js", "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js", "./codemirror.js"], function(exports_1, context_1) {
+System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-client', 'react-codemirror', "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js", "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js", "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js", "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js", "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js", "./codemirror.js", './Gistlyn.dtos'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -16,8 +13,8 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './utils', 'react
         else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
-    var ReactDOM, React, redux_1, react_redux_1, utils_1, react_codemirror_1;
-    var options, updateGist, store, App, gist;
+    var ReactDOM, React, redux_1, react_redux_1, servicestack_client_1, react_codemirror_1;
+    var dto, options, updateGist, store, App, gist;
     function reduxify(mapStateToProps, mapDispatchToProps, mergeProps, options) {
         return function (target) { return (react_redux_1.connect(mapStateToProps, mapDispatchToProps, mergeProps, options)(target)); };
     }
@@ -35,8 +32,8 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './utils', 'react
             function (react_redux_1_1) {
                 react_redux_1 = react_redux_1_1;
             },
-            function (utils_1_1) {
-                utils_1 = utils_1_1;
+            function (servicestack_client_1_1) {
+                servicestack_client_1 = servicestack_client_1_1;
             },
             function (react_codemirror_1_1) {
                 react_codemirror_1 = react_codemirror_1_1;
@@ -46,7 +43,8 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './utils', 'react
             function (_3) {},
             function (_4) {},
             function (_5) {},
-            function (_6) {}],
+            function (_6) {},
+            function (_7) {}],
         execute: function() {
             options = {
                 lineNumbers: true,
@@ -101,7 +99,20 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './utils', 'react
                 __extends(App, _super);
                 function App() {
                     _super.apply(this, arguments);
+                    this.run = function () {
+                    };
                 }
+                App.prototype.componentWillMount = function () {
+                    this.client = new servicestack_client_1.JsonServiceClient("/");
+                    this.sse = new servicestack_client_1.ServerEventsClient("/", ["gist"], {
+                        handlers: {
+                            onConnect: function (sub) {
+                                this.activeSub = sub;
+                                this.scriptId = sub.id;
+                            }
+                        }
+                    });
+                };
                 App.prototype.render = function () {
                     var _this = this;
                     var handleGistUpdate = function (e) {
@@ -141,7 +152,7 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './utils', 'react
                     if (this.props.error != null) {
                         Preview = (React.createElement("div", {style: { margin: '10px' }, className: "alert alert-error"}, this.props.error.message));
                     }
-                    return (React.createElement("div", {id: "body"}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png"}), React.createElement("h3", null, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, React.createElement("input", {type: "text", id: "txtGist", placeholder: "gist hash or url", value: this.props.gist, onChange: function (e) { return handleGistUpdate(e); }})))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement("div", {className: "editor"}, React.createElement("div", {id: "tabs"}, Tabs), React.createElement(react_codemirror_1.default, {value: source, options: options})), React.createElement("div", {className: "preview"}, Preview))), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "run"}, React.createElement("i", {className: "material-icons", title: "run"}, "play_arrow")))));
+                    return (React.createElement("div", {id: "body"}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png"}), React.createElement("h3", null, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, React.createElement("input", {type: "text", id: "txtGist", placeholder: "gist hash or url", value: this.props.gist, onChange: function (e) { return handleGistUpdate(e); }})))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement("div", {className: "editor"}, React.createElement("div", {id: "tabs"}, Tabs), React.createElement(react_codemirror_1.default, {value: source, options: options})), React.createElement("div", {className: "preview"}, Preview))), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "run"}, React.createElement("i", {className: "material-icons", title: "run", onClick: this.run}, "play_arrow")))));
                 };
                 App = __decorate([
                     reduxify(function (state) { return ({
@@ -156,7 +167,7 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './utils', 'react
                 ], App);
                 return App;
             }(React.Component));
-            gist = utils_1.queryString(location.href)["gist"] || "6831799881c92434f80e141c8a2699eb";
+            gist = servicestack_client_1.queryString(location.href)["gist"] || "6831799881c92434f80e141c8a2699eb";
             store.dispatch({ type: 'GIST_CHANGE', gist: gist });
             ReactDOM.render(React.createElement(react_redux_1.Provider, {store: store}, React.createElement(App, null)), document.getElementById("app"));
         }

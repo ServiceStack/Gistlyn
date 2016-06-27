@@ -1,14 +1,11 @@
-﻿// A '.tsx' file enables JSX support in the TypeScript compiler, 
-// for more information see the following page on the TypeScript wiki:
-// https://github.com/Microsoft/TypeScript/wiki/JSX
-/// <reference path='../typings/browser.d.ts'/>
+﻿/// <reference path='../typings/browser.d.ts'/>
 
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
 import { createStore, applyMiddleware } from 'redux';
 import { Provider, connect } from 'react-redux';
 
-import { queryString } from './utils';
+import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect } from './servicestack-client';
 import CodeMirror from 'react-codemirror';
 
 import "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js";
@@ -17,6 +14,10 @@ import "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js";
 import "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js";
 import "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js";
 import "./codemirror.js";
+
+import './Gistlyn.dtos';
+import dto = Gistlyn.ServiceModel;
+
 
 var options = {
     lineNumbers: true,
@@ -91,6 +92,27 @@ let store = createStore(
     })
 )
 class App extends React.Component<any, any> {
+
+    client:JsonServiceClient;
+    sse: ServerEventsClient;
+    activeSub: ISseConnect;
+    scriptId: string;
+
+    componentWillMount(): void {
+        this.client = new JsonServiceClient("/");
+        this.sse = new ServerEventsClient("/", ["gist"],
+        {
+            handlers: {
+                onConnect(sub: ISseConnect) {
+                    this.activeSub = sub;
+                    this.scriptId = sub.id;
+                }
+            }
+        });
+    }
+
+    run = () => {
+    }
 
     render() {
         const handleGistUpdate = (e: React.FormEvent) => {
@@ -175,7 +197,7 @@ class App extends React.Component<any, any> {
 
                 <div id="footer">
                     <div id="run">
-                        <i className="material-icons" title="run">play_arrow</i>
+                        <i className="material-icons" title="run" onClick={this.run}>play_arrow</i>
                     </div>
                 </div>
             </div>
