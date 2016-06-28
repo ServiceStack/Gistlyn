@@ -5,7 +5,7 @@ import * as React from 'react';
 import { createStore, applyMiddleware } from 'redux';
 import { Provider, connect } from 'react-redux';
 
-import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnLast } from './servicestack-client';
+import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnLast, humanize } from './servicestack-client';
 import CodeMirror from 'react-codemirror';
 
 import "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js";
@@ -113,8 +113,13 @@ var sse = new ServerEventsClient("/", ["gist"], {
             //console.log("ScriptExecutionResult", m, e);
             if (m.status === store.getState().scriptStatus) return;
 
-            store.dispatch({ type: 'CONSOLE_LOG', logs: [m.status] });
+            store.dispatch({ type: 'CONSOLE_LOG', logs: [humanize(m.status)] });
             store.dispatch({ type: 'SCRIPT_STATUS', scriptStatus: m.status });
+
+            if (m.status === "CompiledWithErrors" && m.errors) {
+                const errorMsgs = m.errors.map(e => <span className="error">{e.info}</span>);
+                store.dispatch({ type: 'CONSOLE_LOG', logs: errorMsgs });
+            }
         }
     }
 });

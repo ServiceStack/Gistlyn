@@ -133,8 +133,12 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         //console.log("ScriptExecutionResult", m, e);
                         if (m.status === store.getState().scriptStatus)
                             return;
-                        store.dispatch({ type: 'CONSOLE_LOG', logs: [m.status] });
+                        store.dispatch({ type: 'CONSOLE_LOG', logs: [servicestack_client_1.humanize(m.status)] });
                         store.dispatch({ type: 'SCRIPT_STATUS', scriptStatus: m.status });
+                        if (m.status === "CompiledWithErrors" && m.errors) {
+                            var errorMsgs = m.errors.map(function (e) { return React.createElement("span", {className: "error"}, e.info); });
+                            store.dispatch({ type: 'CONSOLE_LOG', logs: errorMsgs });
+                        }
                     }
                 }
             });

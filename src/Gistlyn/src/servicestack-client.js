@@ -2,7 +2,7 @@
 System.register([], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var ResponseStatus, ResponseError, ErrorResponse, ReadyState, ServerEventsClient, HttpMethods, JsonServiceClient, toCamelCase, sanitize, nameOf, css, splitOnFirst, splitOnLast, queryString, combinePaths, createPath, createUrl, appendQueryString;
+    var ResponseStatus, ResponseError, ErrorResponse, ReadyState, ServerEventsClient, HttpMethods, JsonServiceClient, toCamelCase, sanitize, nameOf, css, splitOnFirst, splitOnLast, splitCase, humanize, queryString, combinePaths, createPath, createUrl, appendQueryString;
     return {
         setters:[],
         execute: function() {
@@ -309,6 +309,10 @@ System.register([], function(exports_1, context_1) {
                     ? [s.substring(0, pos), s.substring(pos + 1)]
                     : [s];
             });
+            splitCase = function (t) {
+                return typeof t != 'string' ? t : t.replace(/([A-Z]|[0-9]+)/g, ' $1').replace(/_/g, ' ');
+            };
+            exports_1("humanize", humanize = function (s) { return (!s || s.indexOf(' ') >= 0 ? s : splitCase(s)); });
             exports_1("queryString", queryString = function (url) {
                 if (!url || url.indexOf('?') === -1)
                     return {};

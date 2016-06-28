@@ -167,7 +167,7 @@ html,body,#app,#body {
     position: absolute;
     left: 50%;
     top: 50%;
-    margin: -30px;
+    margin: -60px 0 0 -30px;
 }
 #run i {
     font-size: 60px;
@@ -202,6 +202,9 @@ html,body,#app,#body {
     color: #3c763d;
     background-color: #dff0d8;
     border-color: #d6e9c6;
+}
+#console span.error {
+    color: red;
 }
 
 #preview {

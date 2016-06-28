@@ -399,6 +399,11 @@ export const splitOnLast = (s, c): string[] => {
         : [s];
 };
 
+const splitCase = (t) => 
+    typeof t != 'string' ? t : t.replace(/([A-Z]|[0-9]+)/g, ' $1').replace(/_/g, ' ');
+
+export const humanize = s => (!s || s.indexOf(' ') >= 0 ? s : splitCase(s));
+
 export const queryString = (url) : any => {
     if (!url || url.indexOf('?') === -1) return {};
     var pairs = splitOnFirst(url, '?')[1].split('&');
