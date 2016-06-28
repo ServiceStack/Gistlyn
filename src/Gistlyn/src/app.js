@@ -68,21 +68,33 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                 var oldGist = store.getState().gist;
                 var result = next(action);
                 var state = store.getState();
+                var gistCacheKey = "/v1/gists/" + state.gist;
                 if (action.type === 'GIST_CHANGE' && action.gist && oldGist !== action.gist) {
-                    fetch("https://api.github.com/gists/" + action.gist)
-                        .then(function (res) {
-                        if (!res.ok) {
-                            throw res;
-                        }
-                        else {
-                            return res.json().then(function (r) {
-                                store.dispatch({ type: 'GIST_LOAD', files: r.files, activeFileName: getSortedFileNames(r.files)[0] });
-                            });
-                        }
-                    })
-                        .catch(function (res) {
-                        store.dispatch({ type: 'ERROR_RAISE', error: { code: res.status, message: "Gist with hash '" + action.gist + "' was " + res.statusText } });
-                    });
+                    var json = localStorage.getItem(gistCacheKey);
+                    if (json) {
+                        var files = JSON.parse(json);
+                        store.dispatch({ type: 'GIST_LOAD', files: files, activeFileName: getSortedFileNames(files)[0] });
+                    }
+                    else {
+                        fetch("https://api.github.com/gists/" + action.gist)
+                            .then(function (res) {
+                            if (!res.ok) {
+                                throw res;
+                            }
+                            else {
+                                return res.json().then(function (r) {
+                                    localStorage.setItem(gistCacheKey, JSON.stringify(r.files));
+                                    store.dispatch({ type: 'GIST_LOAD', files: r.files, activeFileName: getSortedFileNames(r.files)[0] });
+                                });
+                            }
+                        })
+                            .catch(function (res) {
+                            store.dispatch({ type: 'ERROR_RAISE', error: { code: res.status, message: "Gist with hash '" + action.gist + "' was " + res.statusText } });
+                        });
+                    }
+                }
+                else if (action.type === "SOURCE_CHANGE") {
+                    localStorage.setItem(gistCacheKey, JSON.stringify(state.files));
                 }
                 return result;
             }; }; };

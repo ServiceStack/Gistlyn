@@ -15,7 +15,7 @@ import "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js";
 import "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js";
 import "./codemirror.js";
 
-import { RunScript, GetScriptStatus, CancelScript } from './Gistlyn.dtos';
+import { RunScript, GetScriptStatus, CancelScript, GetScriptVariables } from './Gistlyn.dtos';
 
 var options = {
     lineNumbers: true,
@@ -39,21 +39,31 @@ const updateGist = store => next => action => {
     var oldGist = store.getState().gist;
     var result = next(action);
     var state = store.getState();
+    const gistCacheKey = `/v1/gists/${state.gist}`;
 
     if (action.type === 'GIST_CHANGE' && action.gist && oldGist !== action.gist) {
-        fetch("https://api.github.com/gists/" + action.gist)
-            .then((res) => {
-                if (!res.ok) {
-                    throw res;
-                } else {
-                    return res.json().then((r) => {
-                        store.dispatch({ type: 'GIST_LOAD', files: r.files, activeFileName: getSortedFileNames(r.files)[0] });
-                    });
-                }
-            })
-            .catch(res => {
-                store.dispatch({ type: 'ERROR_RAISE', error: { code: res.status, message: `Gist with hash '${action.gist}' was ${res.statusText}` } });
-            });
+        const json = localStorage.getItem(gistCacheKey);
+        if (json) {
+            const files = JSON.parse(json);
+            store.dispatch({ type: 'GIST_LOAD', files, activeFileName: getSortedFileNames(files)[0] });
+        } else {
+            fetch("https://api.github.com/gists/" + action.gist)
+                .then((res) => {
+                    if (!res.ok) {
+                        throw res;
+                    } else {
+                        return res.json().then((r) => {
+                            localStorage.setItem(gistCacheKey, JSON.stringify(r.files));
+                            store.dispatch({ type: 'GIST_LOAD', files: r.files, activeFileName: getSortedFileNames(r.files)[0] });
+                        });
+                    }
+                })
+                .catch(res => {
+                    store.dispatch({ type: 'ERROR_RAISE', error: { code: res.status, message: `Gist with hash '${action.gist}' was ${res.statusText}` } });
+                });
+        }
+    } else if (action.type === "SOURCE_CHANGE") {
+        localStorage.setItem(gistCacheKey, JSON.stringify(state.files));
     }
 
     return result;
