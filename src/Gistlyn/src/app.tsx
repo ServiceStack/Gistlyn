@@ -15,7 +15,7 @@ import "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js";
 import "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js";
 import "./codemirror.js";
 
-import { RunScript } from './Gistlyn.dtos';
+import { RunScript, GetScriptStatus, CancelScript } from './Gistlyn.dtos';
 
 var options = {
     lineNumbers: true,
@@ -33,9 +33,12 @@ var options = {
     }
 };
 
+const ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
+
 const updateGist = store => next => action => {
     var oldGist = store.getState().gist;
     var result = next(action);
+    var state = store.getState();
 
     if (action.type === 'GIST_CHANGE' && action.gist && oldGist !== action.gist) {
         fetch("https://api.github.com/gists/" + action.gist)
@@ -44,7 +47,7 @@ const updateGist = store => next => action => {
                     throw res;
                 } else {
                     return res.json().then((r) => {
-                        store.dispatch({ type: 'GIST_LOAD', files: r.files });
+                        store.dispatch({ type: 'GIST_LOAD', files: r.files, activeFileName: getSortedFileNames(r.files)[0] });
                     });
                 }
             })
@@ -66,18 +69,34 @@ let store = createStore(
             case 'SSE_CONNECT':
                 return Object.assign({}, state, { activeSub: action.activeSub });
             case 'GIST_CHANGE':
-                return Object.assign({}, state, { gist: action.gist, error: null, files:null, activeFile:null });
+                return Object.assign({}, state, { gist: action.gist, error: null, files:null, activeFileName:null });
             case 'GIST_LOAD':
-                return Object.assign({}, state, { files: action.files, hasLoaded: true });
-            case 'FILE_CHANGE':
-                return Object.assign({}, state, { activeFile: action.activeFile });
+                return Object.assign({}, state, { files: action.files, activeFileName:action.activeFileName, hasLoaded: true });
+            case 'FILE_SELECT':
+                return Object.assign({}, state, { activeFileName: action.activeFileName });
             case 'ERROR_RAISE':
                 return Object.assign({}, state, { error: action.error });
+            case 'CONSOLE_LOG':
+                return Object.assign({}, state, { logs: [...state.logs, ...action.logs] });
+            case 'SCRIPT_STATUS':
+                return Object.assign({}, state, { scriptStatus: action.scriptStatus });
+            case 'SOURCE_CHANGE':
+                const file = Object.assign({}, state.files[action.fileName], { content: action.content });
+                return Object.assign({}, state, { files: Object.assign({}, state.files, { [action.fileName]: file }) });
             default:
                 return state;
         }
     },
-    { gist: null, activeSub: null, files: null, activeFile: null, hasLoaded: false, error: null },
+    {
+        gist: null, 
+        activeSub: null, 
+        files: null, 
+        activeFileName: null, 
+        hasLoaded: false, 
+        error: null, 
+        logs:[], 
+        scriptStatus:null 
+    },
     applyMiddleware(updateGist));
 
 var client = new JsonServiceClient("/");
@@ -85,9 +104,36 @@ var sse = new ServerEventsClient("/", ["gist"], {
     handlers: {
         onConnect(activeSub:ISseConnect) {
             store.dispatch({ type: 'SSE_CONNECT', activeSub });
+        },
+        ConsoleMessage(m, e) {
+            //console.log("ConsoleMessage", m, e);
+            store.dispatch({ type: 'CONSOLE_LOG', logs: [m.message] });
+        },
+        ScriptExecutionResult(m, e) {
+            //console.log("ScriptExecutionResult", m, e);
+            if (m.status === store.getState().scriptStatus) return;
+
+            store.dispatch({ type: 'CONSOLE_LOG', logs: [m.status] });
+            store.dispatch({ type: 'SCRIPT_STATUS', scriptStatus: m.status });
         }
     }
 });
+
+const getSortedFileNames = (files) => {
+    const fileNames = Object.keys(files);
+    fileNames.sort((a, b) => {
+        if (a.toLowerCase() === "main.cs")
+            return -1;
+        if (b.toLowerCase() === "main.cs")
+            return 1;
+        if (!a.endsWith(".cs") && b.endsWith(".cs"))
+            return 1;
+        if (a === b)
+            return 0;
+        return a < b ? -1 : 0;
+    });
+    return fileNames;
+};
 
 @reduxify(
     (state) => ({
@@ -95,14 +141,19 @@ var sse = new ServerEventsClient("/", ["gist"], {
         hasLoaded: state.hasLoaded,
         activeSub: state.activeSub,
         files: state.files,
-        activeFile: state.activeFile,
-        error: state.error
+        activeFileName: state.activeFileName,
+        logs: state.logs,
+        error: state.error,
+        scriptStatus: state.scriptStatus
     }),
     (dispatch) => ({
         updateGist: (gist) => dispatch({ type: 'GIST_CHANGE', gist }),
-        changeTab: (activeFile) => dispatch({ type: 'FILE_CHANGE', activeFile }),
+        updateSource: (fileName, content) => dispatch({ type: 'SOURCE_CHANGE', fileName, content }),
+        selectFileName: (activeFileName) => dispatch({ type: 'FILE_SELECT', activeFileName }),
         raiseError: (error) => dispatch({ type: 'ERROR_RAISE', error }),
-        clearError: () => dispatch({ type: 'ERROR_CLEAR' })
+        clearError: () => dispatch({ type: 'ERROR_CLEAR' }),
+        logToConsole: (logs) => dispatch({ type:'CONSOLE_LOG', logs }),
+        setScriptStatus: (scriptStatus) => dispatch({ type:'SCRIPT_STATUS', scriptStatus })
     })
 )
 class App extends React.Component<any, any> {
@@ -145,13 +196,34 @@ class App extends React.Component<any, any> {
                 request.sources.push(this.props.files[k].content);
         }
 
+        this.props.setScriptStatus("Started");
+
         client.post(request)
             .then(r => {
-                console.log('success', r);
+                console.log('run success', r);
+                this.props.logToConsole(r.references.map(ref => `loaded ${ref.name}`));
             })
             .catch(r => {
-                console.log('error', r);
+                console.log('run error', r);
                 this.props.raiseError(r.responseStatus);
+                this.props.setScriptStatus("Failed");
+            });
+    }
+
+    cancel = () => {
+        this.props.clearError();
+        const request = new CancelScript();
+        request.scriptId = this.scriptId;
+        client.post(request)
+            .then(r => {
+                console.log('cancel success', r);
+                this.props.setScriptStatus("Cancelled");
+                this.props.logToConsole(["Cancelled by user"]);
+            })
+            .catch(r => {
+                console.log('cancel error', r);
+                this.props.raiseError(r.responseStatus);
+                this.props.setScriptStatus("Failed");
             });
     }
 
@@ -162,33 +234,33 @@ class App extends React.Component<any, any> {
         this.props.updateGist(hash);
     }
 
+    updateSource(src: string) {
+        this.props.updateSource(this.props.activeFileName, src);
+    }
+
+    consoleScroll:HTMLDivElement;
+
+    componentDidUpdate() {
+        if (!this.consoleScroll) return;
+        this.consoleScroll.scrollTop = this.consoleScroll.scrollHeight;
+    }
+
     render() {
 
         let source = "";
         const Tabs = [];
 
         if (this.props.files) {
-            var keys = Object.keys(this.props.files);
-            keys.sort((a, b) => {
-                if (a.toLowerCase() === "main.cs")
-                    return -1;
-                if (b.toLowerCase() === "main.cs")
-                    return 1;
-                if (!a.endsWith(".cs") && b.endsWith(".cs"))
-                    return 1;
-                if (a === b)
-                    return 0;
-                return a < b ? -1 : 0;
-            });
+            var keys = getSortedFileNames(this.props.files);
 
             keys.forEach((k) => {
                 const file = this.props.files[k];
-                const active = k === this.props.activeFile ||
-                    (this.props.activeFile == null && k.toLowerCase() === "main.cs");
+                const active = k === this.props.activeFileName ||
+                    (this.props.activeFileName == null && k.toLowerCase() === "main.cs");
 
                 Tabs.push((
                     <div className={active ? 'active' : null}
-                        onClick={e => this.props.changeTab(file.filename) }><b>
+                        onClick={e => this.props.selectFileName(file.filename) }><b>
                             {file.filename}
                         </b></div>
                 ));
@@ -202,23 +274,55 @@ class App extends React.Component<any, any> {
             });
         }
 
-        var main = this.getMainFile();
+        const main = this.getMainFile();
         if (this.props.hasLoaded && this.props.gist && this.props.files && main == null && this.props.error == null) {
             this.props.error = { message: "main.cs is missing" };
         }
 
-        var Preview = <span>preview</span>;
+        const isScriptRunning = ScriptStatusRunning.indexOf(this.props.scriptStatus) >= 0;
+
+        var Preview = [(
+            <div id="vars" className="section">
+                {isScriptRunning
+                 ? (<div style={{ margin: '40px', color: "#31708f" }}>
+                        <i className="material-icons" style={{position:"absolute"}}>build</i>
+                        <p style={{padding:"0 0 0 30px", fontSize:"22px"}}>Executing Script...</p>
+                    </div>)
+                 : null}
+            </div>
+        )];
 
         if (this.props.error != null) {
             var code = this.props.error.errorCode ? `(${this.props.error.errorCode}) ` : ""; 
-            Preview = (<div id="errors">
-                <div style={{ margin: '10px' }} className="alert alert-error">
-                    {code}{this.props.error.message}
-                </div>
-                { this.props.error.stackTrace != null
-                    ? <pre style={{ color: "red", padding: "5px 30px" }}>{this.props.error.stackTrace}</pre>
-                    : null}
-            </div>);
+            Preview = [(
+                <div id="errors" className="section">
+                    <div style={{ margin: "25px 25px 40px 25px", color: "#a94442" }}>
+                        {code}{this.props.error.message}
+                    </div>
+                    { this.props.error.stackTrace != null
+                        ? <pre style={{ color: "red", padding: "5px 30px" }}>{this.props.error.stackTrace}</pre>
+                        : null}
+                </div>)];
+        }
+
+        if (this.props.logs.length > 0) {
+            Preview.push((
+                <div id="console" className="section" style={{borderBottom:"solid 1px #ddd"}}>
+                    <div className="head" style={{font:"14px/20px arial", height:"22px", textAlign:"right", borderBottom:"solid 1px #ddd"}}>
+                        <b style={{ background:"#444", color:"#fff", padding:"4px 8px" }}>console</b>
+                    </div>
+                    <div className="scroll" style={{overflow:"auto", maxHeight:"350px"}} ref={(el) => this.consoleScroll = el}>
+                        <table style={{width:"100%"}}>
+                            <tbody style={{font:"13px/18px monospace", color:"#444"}}>
+                                {this.props.logs.map(log => (
+                                    <tr>
+                                        <td style={{padding:"2px 8px"}}>{log}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>));
         }
 
         return (
@@ -243,13 +347,13 @@ class App extends React.Component<any, any> {
 
                 <div id="content">
                     <div id="ide">
-                        <div className="editor">
-                            <div id="tabs">
+                        <div id="editor">
+                            <div id="tabs" style={{display: this.props.files ? 'flex' : 'none'}}>
                                 {Tabs}
                             </div>
-                            <CodeMirror value={source} options={options} />
+                            <CodeMirror value={source} options={options} onChange={src => this.updateSource(src)} />
                         </div>
-                        <div className="preview">
+                        <div id="preview">
                             {Preview}
                         </div>
                     </div>
@@ -258,7 +362,9 @@ class App extends React.Component<any, any> {
                 <div id="footer">
                     <div id="run">
                         {main != null
-                            ? <i className="material-icons" title="run" onClick={this.run}>play_arrow</i>
+                            ? (!isScriptRunning 
+                                ? <i className="material-icons" title="run" onClick={this.run}>play_arrow</i>
+                                : <i className="material-icons" title="cancel script" onClick={this.cancel} style={{ color:"#FF5252" }}>cancel</i>)
                             : <i className="material-icons disabled" title="disabled">play_arrow</i>}
                     </div>
                 </div>

@@ -89,7 +89,7 @@ html,body,#app,#body {
     padding: 0 0 0 0;
 }
 #txtGist {
-    width: 420px;
+    width: 300px;
     padding: 4px 8px;
     border: none;
     font-size: 14px;
@@ -127,14 +127,14 @@ html,body,#app,#body {
     height: 100%;
 }
 
-.editor {
+#editor {
     display: flex;
     flex-flow: column;
     flex: 1;
     overflow: auto;
     color: #000;
 }
-.preview {
+#preview {
     flex: 1;
     background: #F7F7F7;
     border-left: 1px solid #ddd;
@@ -192,6 +192,28 @@ html,body,#app,#body {
     color: #a94442;
     background-color: #f2dede;
     border-color: #ebccd1;
+}
+.alert-info {
+    color: #31708f;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+}
+.alert-success {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+}
+
+#preview {
+    display: flex;
+    flex-flow: column;
+}
+
+#vars, #errors {
+    flex: 2;
+}
+#console {
+    flex: 1;
 }
 
 /* Custom */
