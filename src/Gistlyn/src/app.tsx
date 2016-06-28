@@ -5,7 +5,7 @@ import * as React from 'react';
 import { createStore, applyMiddleware } from 'redux';
 import { Provider, connect } from 'react-redux';
 
-import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect } from './servicestack-client';
+import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnLast } from './servicestack-client';
 import CodeMirror from 'react-codemirror';
 
 import "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js";
@@ -15,7 +15,7 @@ import "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js";
 import "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js";
 import "./codemirror.js";
 
-import * as dto from './Gistlyn.dtos';
+import { RunScript } from './Gistlyn.dtos';
 
 var options = {
     lineNumbers: true,
@@ -34,10 +34,11 @@ var options = {
 };
 
 const updateGist = store => next => action => {
+    var oldGist = store.getState().gist;
     var result = next(action);
 
-    if (action.type === 'GIST_CHANGE') {
-        fetch("https://api.github.com/gists/" + gist)
+    if (action.type === 'GIST_CHANGE' && action.gist && oldGist !== action.gist) {
+        fetch("https://api.github.com/gists/" + action.gist)
             .then((res) => {
                 if (!res.ok) {
                     throw res;
@@ -48,7 +49,7 @@ const updateGist = store => next => action => {
                 }
             })
             .catch(res => {
-                store.dispatch({ type: 'ERROR_RAISE', error: { code: res.status, message: `Gist with hash '${gist}' was ${res.statusText}` } });
+                store.dispatch({ type: 'ERROR_RAISE', error: { code: res.status, message: `Gist with hash '${action.gist}' was ${res.statusText}` } });
             });
     }
 
@@ -62,10 +63,12 @@ function reduxify(mapStateToProps, mapDispatchToProps?, mergeProps?, options?) {
 let store = createStore(
     (state, action) => {
         switch (action.type) {
+            case 'SSE_CONNECT':
+                return Object.assign({}, state, { activeSub: action.activeSub });
             case 'GIST_CHANGE':
-                return Object.assign({}, state, { gist: action.gist });
+                return Object.assign({}, state, { gist: action.gist, error: null, files:null, activeFile:null });
             case 'GIST_LOAD':
-                return Object.assign({}, state, { files: action.files });
+                return Object.assign({}, state, { files: action.files, hasLoaded: true });
             case 'FILE_CHANGE':
                 return Object.assign({}, state, { activeFile: action.activeFile });
             case 'ERROR_RAISE':
@@ -74,50 +77,92 @@ let store = createStore(
                 return state;
         }
     },
-    { gist: null, files: null, activeFile: null, error: null },
+    { gist: null, activeSub: null, files: null, activeFile: null, hasLoaded: false, error: null },
     applyMiddleware(updateGist));
+
+var client = new JsonServiceClient("/");
+var sse = new ServerEventsClient("/", ["gist"], {
+    handlers: {
+        onConnect(activeSub:ISseConnect) {
+            store.dispatch({ type: 'SSE_CONNECT', activeSub });
+        }
+    }
+});
 
 @reduxify(
     (state) => ({
         gist: state.gist,
+        hasLoaded: state.hasLoaded,
+        activeSub: state.activeSub,
         files: state.files,
         activeFile: state.activeFile,
         error: state.error
     }),
     (dispatch) => ({
         updateGist: (gist) => dispatch({ type: 'GIST_CHANGE', gist }),
-        changeTab: (activeFile) => dispatch({ type: 'FILE_CHANGE', activeFile })
+        changeTab: (activeFile) => dispatch({ type: 'FILE_CHANGE', activeFile }),
+        raiseError: (error) => dispatch({ type: 'ERROR_RAISE', error }),
+        clearError: () => dispatch({ type: 'ERROR_CLEAR' })
     })
 )
 class App extends React.Component<any, any> {
 
-    client:JsonServiceClient;
-    sse: ServerEventsClient;
-    activeSub: ISseConnect;
-    scriptId: string;
-
-    componentWillMount(): void {
-        this.client = new JsonServiceClient("/");
-        this.sse = new ServerEventsClient("/", ["gist"],
-        {
-            handlers: {
-                onConnect(sub: ISseConnect) {
-                    this.activeSub = sub;
-                    this.scriptId = sub.id;
-                }
+    getFile(fileName: string): any {
+        if (this.props.files == null)
+            return null;
+        for (let k in this.props.files) {
+            if (k.toLowerCase() === fileName) {
+                return this.props.files[k];
             }
-        });
+        }
+        return null;
+    }
+
+    getFileContents(fileName:string):string {
+        const file = this.getFile(fileName);
+        return file != null
+            ? file.content
+            : null;
+    }
+
+    getMainFile() {
+        return this.getFile("main.cs");
+    }
+
+    get scriptId(): string {
+        return this.props.activeSub && this.props.activeSub.id;
     }
 
     run = () => {
+        this.props.clearError();
+        var request = new RunScript();
+        request.scriptId = this.scriptId;
+        request.mainSource = this.getMainFile().content;
+        request.packagesConfig = this.getFileContents("packages.config");
+        request.sources = [];
+        for (var k in this.props.files || []) {
+            if (k.endsWith(".cs") && k.toLowerCase() !== "main.cs")
+                request.sources.push(this.props.files[k].content);
+        }
+
+        client.post(request)
+            .then(r => {
+                console.log('success', r);
+            })
+            .catch(r => {
+                console.log('error', r);
+                this.props.raiseError(r.responseStatus);
+            });
+    }
+
+    handleGistUpdate(e: React.FormEvent) {
+        const target = e.target as HTMLInputElement;
+        const parts = splitOnLast(target.value, '/');
+        const hash = parts[parts.length - 1];
+        this.props.updateGist(hash);
     }
 
     render() {
-        const handleGistUpdate = (e: React.FormEvent) => {
-            const target = e.target as HTMLInputElement;
-            var gist = target.value;
-            this.props.updateGist(gist);
-        }
 
         let source = "";
         const Tabs = [];
@@ -157,11 +202,22 @@ class App extends React.Component<any, any> {
             });
         }
 
+        var main = this.getMainFile();
+        if (this.props.hasLoaded && this.props.gist && this.props.files && main == null && this.props.error == null) {
+            this.props.error = { message: "main.cs is missing" };
+        }
+
         var Preview = <span>preview</span>;
 
         if (this.props.error != null) {
-            Preview = (<div style={{ margin: '10px' }} className="alert alert-error">
-                {this.props.error.message}
+            var code = this.props.error.errorCode ? `(${this.props.error.errorCode}) ` : ""; 
+            Preview = (<div id="errors">
+                <div style={{ margin: '10px' }} className="alert alert-error">
+                    {code}{this.props.error.message}
+                </div>
+                { this.props.error.stackTrace != null
+                    ? <pre style={{ color: "red", padding: "5px 30px" }}>{this.props.error.stackTrace}</pre>
+                    : null}
             </div>);
         }
 
@@ -174,7 +230,13 @@ class App extends React.Component<any, any> {
                         <div id="gist">
                             <input type="text" id="txtGist" placeholder="gist hash or url" 
                                    value={this.props.gist}
-                                   onChange={e => handleGistUpdate(e) } />
+                                   onFocus={e => (e.target as HTMLInputElement).select() }
+                                   onChange={e => this.handleGistUpdate(e) } />
+                            { main != null
+                                ? <i className="material-icons" style={{ color: "#0f9", fontSize: "30px", position:"absolute", margin: "-2px 0 0 7px"}}>check</i>
+                                : this.props.error
+                                    ? <i className="material-icons" style={{ color: "#ebccd1", fontSize: "30px", position: "absolute", margin:"-2px 0 0 7px" }}>error</i>
+                                    : null }
                         </div>
                     </div>
                 </div>
@@ -195,7 +257,9 @@ class App extends React.Component<any, any> {
 
                 <div id="footer">
                     <div id="run">
-                        <i className="material-icons" title="run" onClick={this.run}>play_arrow</i>
+                        {main != null
+                            ? <i className="material-icons" title="run" onClick={this.run}>play_arrow</i>
+                            : <i className="material-icons disabled" title="disabled">play_arrow</i>}
                     </div>
                 </div>
             </div>
@@ -203,9 +267,9 @@ class App extends React.Component<any, any> {
     }
 }
 
-var gist = queryString(location.href)["gist"] || "6831799881c92434f80e141c8a2699eb";
+var qsGist = queryString(location.href)["gist"] || "efc71477cee60916ef71d839084d1afd";
 
-store.dispatch({ type: 'GIST_CHANGE', gist });
+store.dispatch({ type: 'GIST_CHANGE', gist: qsGist });
 
 ReactDOM.render(
     <Provider store={store}>

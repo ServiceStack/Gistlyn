@@ -1,4 +1,6 @@
-﻿export interface IReturnVoid {
+﻿/// <reference path='../typings/browser.d.ts'/>
+
+export interface IReturnVoid {
     createResponse();
 }
 export interface IReturn<T> {
@@ -320,14 +322,43 @@ export class JsonServiceClient
             })
             .catch(res => {
                 return res.json().then(o => {
-                    var r = (o as ErrorResponse);
-                    return r;
+                    var errorDto = sanitize(o);
+                    if (!errorDto["responseStatus"]) {
+                        const error = new ErrorResponse();
+                        error.responseStatus = new ResponseStatus();
+                        error.responseStatus.errorCode = res.statusCode;
+                        error.responseStatus.message = res.statusText;
+                        throw error;
+                    }
+                    throw o;
                 });
             });
     }
 }
 
-const nameOf = (o: any) => {
+export const toCamelCase = (key:string) => {
+    return !key ? key : key.charAt(0).toLowerCase() + key.substring(1);
+}
+
+export const sanitize = (status:any):any => {
+    if (status["errors"])
+        return status;
+    var to:any = {};
+    for (let k in status)
+        to[toCamelCase(k)] = status[k];
+    to.errors = [];
+
+    (status.Errors || []).forEach(o => {
+        var err = {};
+        for (var k in o)
+            err[toCamelCase(k)] = o[k];
+        to.errors.push(err);
+    });
+    return to;
+}
+
+
+export const nameOf = (o: any) => {
     var ctor = o && o.constructor;
     if (ctor == null)
         throw `${o} doesn't have constructor`;
@@ -358,6 +389,14 @@ export const splitOnFirst = (s, c) : string[] => {
     if (!s) return [s];
     var pos = s.indexOf(c);
     return pos >= 0 ? [s.substring(0, pos), s.substring(pos + 1)] : [s];
+};
+
+export const splitOnLast = (s, c): string[] => {
+    if (!s) return [s];
+    var pos = s.lastIndexOf(c);
+    return pos >= 0
+        ? [s.substring(0, pos), s.substring(pos + 1)]
+        : [s];
 };
 
 export const queryString = (url) : any => {

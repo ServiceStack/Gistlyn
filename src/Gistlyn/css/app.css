@@ -89,7 +89,7 @@ html,body,#app,#body {
     padding: 0 0 0 0;
 }
 #txtGist {
-    width: 350px;
+    width: 420px;
     padding: 4px 8px;
     border: none;
     font-size: 14px;
@@ -176,6 +176,10 @@ html,body,#app,#body {
 }
 #run i:hover {
     color: #0371BE;
+}
+#run i.disabled, #run i.disabled:hover {
+    cursor: auto;
+    color: #999;
 }
 
 .alert {

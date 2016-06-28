@@ -1,7 +1,8 @@
+/// <reference path='../typings/browser.d.ts'/>
 System.register([], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var ResponseStatus, ResponseError, ErrorResponse, ReadyState, ServerEventsClient, HttpMethods, JsonServiceClient, nameOf, css, splitOnFirst, queryString, combinePaths, createPath, createUrl, appendQueryString;
+    var ResponseStatus, ResponseError, ErrorResponse, ReadyState, ServerEventsClient, HttpMethods, JsonServiceClient, toCamelCase, sanitize, nameOf, css, splitOnFirst, splitOnLast, queryString, combinePaths, createPath, createUrl, appendQueryString;
     return {
         setters:[],
         execute: function() {
@@ -240,15 +241,40 @@ System.register([], function(exports_1, context_1) {
                     })
                         .catch(function (res) {
                         return res.json().then(function (o) {
-                            var r = o;
-                            return r;
+                            var errorDto = sanitize(o);
+                            if (!errorDto["responseStatus"]) {
+                                var error = new ErrorResponse();
+                                error.responseStatus = new ResponseStatus();
+                                error.responseStatus.errorCode = res.statusCode;
+                                error.responseStatus.message = res.statusText;
+                                throw error;
+                            }
+                            throw o;
                         });
                     });
                 };
                 return JsonServiceClient;
             }());
             exports_1("JsonServiceClient", JsonServiceClient);
-            nameOf = function (o) {
+            exports_1("toCamelCase", toCamelCase = function (key) {
+                return !key ? key : key.charAt(0).toLowerCase() + key.substring(1);
+            });
+            exports_1("sanitize", sanitize = function (status) {
+                if (status["errors"])
+                    return status;
+                var to = {};
+                for (var k in status)
+                    to[toCamelCase(k)] = status[k];
+                to.errors = [];
+                (status.Errors || []).forEach(function (o) {
+                    var err = {};
+                    for (var k in o)
+                        err[toCamelCase(k)] = o[k];
+                    to.errors.push(err);
+                });
+                return to;
+            });
+            exports_1("nameOf", nameOf = function (o) {
                 var ctor = o && o.constructor;
                 if (ctor == null)
                     throw o + " doesn't have constructor";
@@ -256,7 +282,7 @@ System.register([], function(exports_1, context_1) {
                     return ctor.name;
                 var str = ctor.toString();
                 return str.substring(9, str.indexOf("(")); //"function ".length == 9
-            };
+            });
             /* utils */
             exports_1("css", css = function (selector, name, value) {
                 var els = typeof selector == "string"
@@ -274,6 +300,14 @@ System.register([], function(exports_1, context_1) {
                     return [s];
                 var pos = s.indexOf(c);
                 return pos >= 0 ? [s.substring(0, pos), s.substring(pos + 1)] : [s];
+            });
+            exports_1("splitOnLast", splitOnLast = function (s, c) {
+                if (!s)
+                    return [s];
+                var pos = s.lastIndexOf(c);
+                return pos >= 0
+                    ? [s.substring(0, pos), s.substring(pos + 1)]
+                    : [s];
             });
             exports_1("queryString", queryString = function (url) {
                 if (!url || url.indexOf('?') === -1)

@@ -25,6 +25,8 @@ namespace Gistlyn.ServiceModel
         public ScriptExecutionResult Result { get; set; }
 
         public List<AssemblyReference> References { get; set; }
+
+        public ResponseStatus ResponseStatus { get; set; }
     }
 }
 
