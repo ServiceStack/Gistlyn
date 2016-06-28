@@ -4,6 +4,7 @@ using ServiceStack;
 
 namespace Gistlyn.ServiceModel
 {
+    [Route("/scripts/{ScriptId}/vars")]
     [Route("/scripts/{ScriptId}/vars/{VariableName}")]
     public class GetScriptVariables : IReturn<ScriptStateVariables>
     {

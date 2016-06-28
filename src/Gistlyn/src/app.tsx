@@ -15,7 +15,7 @@ import "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js";
 import "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js";
 import "./codemirror.js";
 
-import { RunScript, GetScriptStatus, CancelScript, GetScriptVariables } from './Gistlyn.dtos';
+import { RunScript, GetScriptStatus, CancelScript, GetScriptVariables, VariableInfo } from './Gistlyn.dtos';
 
 var options = {
     lineNumbers: true,
@@ -93,6 +93,8 @@ let store = createStore(
             case 'SOURCE_CHANGE':
                 const file = Object.assign({}, state.files[action.fileName], { content: action.content });
                 return Object.assign({}, state, { files: Object.assign({}, state.files, { [action.fileName]: file }) });
+            case 'VARS_LOAD':
+                return Object.assign({}, state, { variables: action.variables });
             default:
                 return state;
         }
@@ -104,8 +106,9 @@ let store = createStore(
         activeFileName: null, 
         hasLoaded: false, 
         error: null, 
+        scriptStatus:null, 
         logs:[], 
-        scriptStatus:null 
+        variables:[]
     },
     applyMiddleware(updateGist));
 
@@ -129,6 +132,14 @@ var sse = new ServerEventsClient("/", ["gist"], {
             if (m.status === "CompiledWithErrors" && m.errors) {
                 const errorMsgs = m.errors.map(e => <span className="error">{e.info}</span>);
                 store.dispatch({ type: 'CONSOLE_LOG', logs: errorMsgs });
+            }
+            else if (m.status === "Completed") {
+                var request = new GetScriptVariables();
+                request.scriptId = store.getState().activeSub.id;
+                client.get(request)
+                    .then(r => {
+                        store.dispatch({ type: "VARS_LOAD", variables: r.variables });
+                    });
             }
         }
     }
@@ -158,6 +169,7 @@ const getSortedFileNames = (files) => {
         files: state.files,
         activeFileName: state.activeFileName,
         logs: state.logs,
+        variables: state.variables,
         error: state.error,
         scriptStatus: state.scriptStatus
     }),
@@ -296,20 +308,11 @@ class App extends React.Component<any, any> {
 
         const isScriptRunning = ScriptStatusRunning.indexOf(this.props.scriptStatus) >= 0;
 
-        var Preview = [(
-            <div id="vars" className="section">
-                {isScriptRunning
-                 ? (<div style={{ margin: '40px', color: "#31708f" }}>
-                        <i className="material-icons" style={{position:"absolute"}}>build</i>
-                        <p style={{padding:"0 0 0 30px", fontSize:"22px"}}>Executing Script...</p>
-                    </div>)
-                 : null}
-            </div>
-        )];
+        var Preview = [];
 
         if (this.props.error != null) {
             var code = this.props.error.errorCode ? `(${this.props.error.errorCode}) ` : ""; 
-            Preview = [(
+            Preview.push((
                 <div id="errors" className="section">
                     <div style={{ margin: "25px 25px 40px 25px", color: "#a94442" }}>
                         {code}{this.props.error.message}
@@ -317,7 +320,39 @@ class App extends React.Component<any, any> {
                     { this.props.error.stackTrace != null
                         ? <pre style={{ color: "red", padding: "5px 30px" }}>{this.props.error.stackTrace}</pre>
                         : null}
-                </div>)];
+                </div>));
+        } else if (isScriptRunning) {
+            Preview.push((
+                <div id="status" className="section">
+                    <div style={{ margin: '40px', color: "#31708f" }}>
+                        <i className="material-icons" style={{ position: "absolute" }}>build</i>
+                        <p style={{ padding: "0 0 0 30px", fontSize: "22px" }}>Executing Script...</p>
+                    </div>
+                </div>));
+        }
+        else if (this.props.variables.length > 0) {
+            var vars = this.props.variables as VariableInfo[];
+            Preview.push((
+                <div id="vars" className="section">
+                    <table style={{width:"100%"}}>
+                        <thead>
+                            <tr>
+                                <th>name</th>
+                                <th>value</th>
+                                <th style={{borderRight:"none"}}>type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {vars.map(v => (
+                            <tr>
+                                <td>{v.name}</td>
+                                <td>{v.value}</td>
+                                <td>{v.type}</td>
+                            </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>));
         }
 
         if (this.props.logs.length > 0) {

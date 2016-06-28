@@ -117,6 +117,8 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                     case 'SOURCE_CHANGE':
                         var file = Object.assign({}, state.files[action.fileName], { content: action.content });
                         return Object.assign({}, state, { files: Object.assign({}, state.files, (_a = {}, _a[action.fileName] = file, _a)) });
+                    case 'VARS_LOAD':
+                        return Object.assign({}, state, { variables: action.variables });
                     default:
                         return state;
                 }
@@ -128,8 +130,9 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                 activeFileName: null,
                 hasLoaded: false,
                 error: null,
+                scriptStatus: null,
                 logs: [],
-                scriptStatus: null
+                variables: []
             }, redux_1.applyMiddleware(updateGist));
             client = new servicestack_client_1.JsonServiceClient("/");
             sse = new servicestack_client_1.ServerEventsClient("/", ["gist"], {
@@ -150,6 +153,14 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         if (m.status === "CompiledWithErrors" && m.errors) {
                             var errorMsgs = m.errors.map(function (e) { return React.createElement("span", {className: "error"}, e.info); });
                             store.dispatch({ type: 'CONSOLE_LOG', logs: errorMsgs });
+                        }
+                        else if (m.status === "Completed") {
+                            var request = new Gistlyn_dtos_1.GetScriptVariables();
+                            request.scriptId = store.getState().activeSub.id;
+                            client.get(request)
+                                .then(function (r) {
+                                store.dispatch({ type: "VARS_LOAD", variables: r.variables });
+                            });
                         }
                     }
                 }
@@ -278,14 +289,19 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         this.props.error = { message: "main.cs is missing" };
                     }
                     var isScriptRunning = ScriptStatusRunning.indexOf(this.props.scriptStatus) >= 0;
-                    var Preview = [(React.createElement("div", {id: "vars", className: "section"}, isScriptRunning
-                            ? (React.createElement("div", {style: { margin: '40px', color: "#31708f" }}, React.createElement("i", {className: "material-icons", style: { position: "absolute" }}, "build"), React.createElement("p", {style: { padding: "0 0 0 30px", fontSize: "22px" }}, "Executing Script...")))
-                            : null))];
+                    var Preview = [];
                     if (this.props.error != null) {
                         var code = this.props.error.errorCode ? "(" + this.props.error.errorCode + ") " : "";
-                        Preview = [(React.createElement("div", {id: "errors", className: "section"}, React.createElement("div", {style: { margin: "25px 25px 40px 25px", color: "#a94442" }}, code, this.props.error.message), this.props.error.stackTrace != null
-                                ? React.createElement("pre", {style: { color: "red", padding: "5px 30px" }}, this.props.error.stackTrace)
-                                : null))];
+                        Preview.push((React.createElement("div", {id: "errors", className: "section"}, React.createElement("div", {style: { margin: "25px 25px 40px 25px", color: "#a94442" }}, code, this.props.error.message), this.props.error.stackTrace != null
+                            ? React.createElement("pre", {style: { color: "red", padding: "5px 30px" }}, this.props.error.stackTrace)
+                            : null)));
+                    }
+                    else if (isScriptRunning) {
+                        Preview.push((React.createElement("div", {id: "status", className: "section"}, React.createElement("div", {style: { margin: '40px', color: "#31708f" }}, React.createElement("i", {className: "material-icons", style: { position: "absolute" }}, "build"), React.createElement("p", {style: { padding: "0 0 0 30px", fontSize: "22px" }}, "Executing Script...")))));
+                    }
+                    else if (this.props.variables.length > 0) {
+                        var vars = this.props.variables;
+                        Preview.push((React.createElement("div", {id: "vars", className: "section"}, React.createElement("table", {style: { width: "100%" }}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", null, "name"), React.createElement("th", null, "value"), React.createElement("th", {style: { borderRight: "none" }}, "type"))), React.createElement("tbody", null, vars.map(function (v) { return (React.createElement("tr", null, React.createElement("td", null, v.name), React.createElement("td", null, v.value), React.createElement("td", null, v.type))); }))))));
                     }
                     if (this.props.logs.length > 0) {
                         Preview.push((React.createElement("div", {id: "console", className: "section", style: { borderBottom: "solid 1px #ddd" }}, React.createElement("div", {className: "head", style: { font: "14px/20px arial", height: "22px", textAlign: "right", borderBottom: "solid 1px #ddd" }}, React.createElement("b", {style: { background: "#444", color: "#fff", padding: "4px 8px" }}, "console")), React.createElement("div", {className: "scroll", style: { overflow: "auto", maxHeight: "350px" }, ref: function (el) { return _this.consoleScroll = el; }}, React.createElement("table", {style: { width: "100%" }}, React.createElement("tbody", {style: { font: "13px/18px monospace", color: "#444" }}, this.props.logs.map(function (log) { return (React.createElement("tr", null, React.createElement("td", {style: { padding: "2px 8px" }}, log))); })))))));
@@ -308,6 +324,7 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         files: state.files,
                         activeFileName: state.activeFileName,
                         logs: state.logs,
+                        variables: state.variables,
                         error: state.error,
                         scriptStatus: state.scriptStatus
                     }); }, function (dispatch) { return ({

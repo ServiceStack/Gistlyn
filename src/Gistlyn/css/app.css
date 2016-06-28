@@ -212,11 +212,26 @@ html,body,#app,#body {
     flex-flow: column;
 }
 
-#vars, #errors {
+#status, #vars, #errors {
     flex: 2;
 }
 #console {
     flex: 1;
+}
+#vars thead tr {
+    background: #01215A;
+}
+#vars th {
+    text-align: left;
+    color: #fff;
+    padding: 4px 12px;
+    line-height: 14px;
+    border-right: solid 1px #ddd;
+    border-top: solid 5px #01215A;
+    border-bottom: solid 5px #01215A;
+}
+#vars td {
+    padding: 4px 12px;
 }
 
 /* Custom */
