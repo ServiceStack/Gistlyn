@@ -61,17 +61,17 @@ namespace Gistlyn.ServiceInterface
             return variable;
         }
 
-        public async Task<EvaluateExpressionResponse> Any(EvaluateExpression request)
+        public EvaluateExpressionResponse Any(EvaluateExpression request)
         {
             var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
-
             var wrapper = runner != null ? runner.DomainWrapper : null;
+            if (wrapper == null)
+                throw HttpError.NotFound("Script no longer exists on server");
 
-            var result = wrapper != null
-                ? await wrapper.EvaluateExpression(request.Expression, request.IncludeJson)
-                : new ScriptExecutionResult { Status = ScriptStatus.Unknown };
-
-            return new EvaluateExpressionResponse { Result = result };
+            return new EvaluateExpressionResponse
+            {
+                Result = wrapper.EvaluateExpression(request.Expression, request.IncludeJson)
+            };
         }
 
         public object Any(GetScriptVariables request)
@@ -280,7 +280,10 @@ namespace Gistlyn.ServiceInterface
                 DomainWrapper = wrapper,
             });
 
-            var scriptsRemoved = UnloadExistingScripts(existingUserScripts.Where(x => x.ScriptId != request.ScriptId));
+            var unloadOldUserScripts = existingUserScripts
+                .Where(x => x.ScriptId != request.ScriptId && DateTime.UtcNow - x.CreatedDate > TimeSpan.FromMinutes(1));
+
+            var scriptsRemoved = UnloadExistingScripts(unloadOldUserScripts);
 
             return new RunScriptResponse
             {

@@ -333,7 +333,7 @@ namespace Gistlyn.SnippetEngine
             return Execute(script, opt);
         }
 
-        public async Task<ScriptExecutionResult> EvaluateExpression(string expr, bool includeJson=false)
+        public ScriptExecutionResult EvaluateExpression(string expr, bool includeJson=false)
         {
             var scriptResult = new ScriptExecutionResult
             {
@@ -348,17 +348,16 @@ namespace Gistlyn.SnippetEngine
                 {
                     var info = new VariableInfo { Name = string.Empty };
 
-                    var stateResult = await state.Result.ContinueWithAsync(expr);
+                    //Need to block on Async otherwise fails on ScriptExecutionResult is not marked [Serializable] when it is
+                    var stateResult = state.Result.ContinueWithAsync(expr).Result;
 
                     if (stateResult.ReturnValue != null)
                     {
                         info.Type = stateResult.ReturnValue.GetType().ToString();
                         info.Value = stateResult.ReturnValue.ToString();
-                    }
 
-                    if (includeJson)
-                    {
-                        info.Json = stateResult.ReturnValue.ToJson();
+                        if (includeJson)
+                            info.Json = stateResult.ReturnValue.ToJson();
                     }
 
                     scriptResult.Variables.Add(info);
