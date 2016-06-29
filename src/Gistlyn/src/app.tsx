@@ -7,6 +7,7 @@ import { Provider, connect } from 'react-redux';
 
 import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnLast, humanize } from './servicestack-client';
 import CodeMirror from 'react-codemirror';
+import { JsonViewer } from './json-viewer';
 
 import "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js";
 import "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js";
@@ -15,7 +16,16 @@ import "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js";
 import "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js";
 import "./codemirror.js";
 
-import { RunScript, GetScriptStatus, CancelScript, GetScriptVariables, VariableInfo, EvaluateExpression, ScriptStatus } from './Gistlyn.dtos';
+import {
+    RunScript,
+    GetScriptStatus,
+    CancelScript,
+    GetScriptVariables,
+    VariableInfo,
+    EvaluateExpression,
+    ScriptStatus,
+    ScriptExecutionResult
+} from './Gistlyn.dtos';
 
 var options = {
     lineNumbers: true,
@@ -96,6 +106,8 @@ let store = createStore(
                 return Object.assign({}, state, { error: action.error });
             case 'CONSOLE_LOG':
                 return Object.assign({}, state, { logs: [...state.logs, ...action.logs] });
+            case 'CONSOLE_CLEAR':
+                return Object.assign({}, state, { logs: [{msg:""}] });
             case 'SCRIPT_STATUS':
                 return Object.assign({}, state, { scriptStatus: action.scriptStatus });
             case 'SOURCE_CHANGE':
@@ -190,6 +202,7 @@ const getSortedFileNames = (files) => {
         variables: state.variables,
         inspectedVariables: state.inspectedVariables,
         expression: state.expression,
+        expressionResult: state.expressionResult,
         error: state.error,
         scriptStatus: state.scriptStatus
     }),
@@ -199,6 +212,7 @@ const getSortedFileNames = (files) => {
         selectFileName: (activeFileName) => dispatch({ type: 'FILE_SELECT', activeFileName }),
         raiseError: (error) => dispatch({ type: 'ERROR_RAISE', error }),
         clearError: () => dispatch({ type: 'ERROR_CLEAR' }),
+        clearConsole: () => dispatch({ type: 'CONSOLE_CLEAR' }),
         logConsole: (logs) => dispatch({ type:'CONSOLE_LOG', logs }),
         logConsoleError: (status) => dispatch({ type:'CONSOLE_LOG', logs:[Object.assign({ msg:status.message, cls:"error"}, status)] }),
         logConsoleMsgs: (txtMessages) => dispatch({ type:'CONSOLE_LOG', logs:txtMessages.map(msg => ({ msg })) }),
@@ -295,7 +309,7 @@ class App extends React.Component<any, any> {
             .then(r => {
                 if (r.status !== "Completed") {
                     const msg = r.status === "Unknown"
-                        ? "Script no longer exists on the server"
+                        ? "Script no longer exists on server"
                         : `Script Error: ${humanize(r.status)}`;
                     this.props.logConsole([{ msg, cls: "error" }]);
                 } else {
@@ -340,19 +354,22 @@ class App extends React.Component<any, any> {
 
     setAndEvaluateExpression(expr: string) {
         this.props.setExpression(expr);
+        this.evaluateExpression(expr);
     }
 
-    evaluateExpression() {
+    evaluateExpression(expr:string) {
         const request = new EvaluateExpression();
         request.scriptId = this.scriptId;
-        request.expression = this.props.expression;
+        request.expression = expr;
         request.includeJson = true;
 
         client.post(request)
             .then(r => {
                 this.props.setExpressionResult(r.result);
             })
-            .catch(e => this.props.logConsoleError(e.responseStatus));
+            .catch(e => {
+                this.props.logConsoleError(e.responseStatus);
+            });
     }
 
     revertGist(clearAll:boolean=false) {
@@ -430,6 +447,8 @@ class App extends React.Component<any, any> {
         }
         else if (this.props.variables.length > 0) {
             var vars = this.props.variables as VariableInfo[];
+            var exprResult = this.props.expressionResult as ScriptExecutionResult;
+            var exprVar = exprResult != null && exprResult.variables.length > 0 ? exprResult.variables[0] : null;
             Preview.push((
                 <div id="vars" className="section">
                     <table style={{ width: "100%" }}>
@@ -445,8 +464,17 @@ class App extends React.Component<any, any> {
                         </tbody>
                     </table>
                     <div id="evaluate">
-                        <input type="text" id="evaluate" placeholder="Evaluate Expression" value={this.props.expression} onChange={e => this.props.setExpression((e.target as HTMLInputElement).value)} />
-                        <i className="material-icons" title="run">play_arrow</i>
+                        <input type="text" placeholder="Evaluate Expression" value={this.props.expression} 
+                            onChange={e => this.props.setExpression((e.target as HTMLInputElement).value)}
+                            onKeyPress={e => e.which === 13 ? this.evaluateExpression(this.props.expression) : null } />
+                        <i className="material-icons" title="run" onClick={e => this.evaluateExpression(this.props.expression) }>play_arrow</i>
+                        {exprVar
+                            ? (
+                                <div id="expression-result">
+                                    <JsonViewer json={exprVar.json} />
+                                </div>
+                            )
+                            : null}
                     </div>
                 </div>));
         } else {
@@ -459,6 +487,7 @@ class App extends React.Component<any, any> {
                     <div className="head" style={{font:"14px/20px arial", height:"22px", textAlign:"right", borderBottom:"solid 1px #ddd"}}>
                         <b style={{ background:"#444", color:"#fff", padding:"4px 8px" }}>console</b>
                     </div>
+                    <i className="material-icons clear-btn" title="clear console" onClick={e => this.props.clearConsole() }>clear</i>
                     <div className="scroll" style={{overflow:"auto", maxHeight:"350px"}} ref={(el) => this.consoleScroll = el}>
                         <table style={{width:"100%"}}>
                             <tbody style={{font:"13px/18px monospace", color:"#444"}}>
@@ -477,7 +506,7 @@ class App extends React.Component<any, any> {
             <div id="body">
                 <div className="titlebar">
                     <div className="container">
-                        <img id="logo" src="img/logo-32-inverted.png" />
+                        <a href="https://servicestack.net" title="servicestack.net" target="_blank"><img id="logo" src="img/logo-32-inverted.png" /></a>
                         <h3>Gistlyn</h3> <sup style={{ padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}>BETA</sup>
                         <div id="gist">
                             <input type="text" id="txtGist" placeholder="gist hash or url" 

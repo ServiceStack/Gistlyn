@@ -155,6 +155,7 @@
     <TypeScriptCompile Include="src\Gistlyn.dtos.ts" />
     <TypeScriptCompile Include="src\hello.tsx" />
     <TypeScriptCompile Include="src\deps.tsx" />
+    <TypeScriptCompile Include="src\json-viewer.tsx" />
     <TypeScriptCompile Include="src\TestClient.tsx" />
     <TypeScriptCompile Include="src\servicestack-client.ts" />
   </ItemGroup>

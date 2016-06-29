@@ -1,5 +1,5 @@
 /// <reference path='../typings/browser.d.ts'/>
-System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-client', 'react-codemirror', "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js", "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js", "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js", "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js", "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js", "./codemirror.js", './Gistlyn.dtos'], function(exports_1, context_1) {
+System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-client', 'react-codemirror', './json-viewer', "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js", "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js", "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js", "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js", "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js", "./codemirror.js", './Gistlyn.dtos'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -13,7 +13,7 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
         else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
-    var ReactDOM, React, redux_1, react_redux_1, servicestack_client_1, react_codemirror_1, Gistlyn_dtos_1;
+    var ReactDOM, React, redux_1, react_redux_1, servicestack_client_1, react_codemirror_1, json_viewer_1, Gistlyn_dtos_1;
     var options, ScriptStatusRunning, ScriptStatusError, StateKey, GistCacheKey, updateGist, store, client, sse, getSortedFileNames, App, stateJson, state, e, qsGist;
     function reduxify(mapStateToProps, mapDispatchToProps, mergeProps, options) {
         return function (target) { return (react_redux_1.connect(mapStateToProps, mapDispatchToProps, mergeProps, options)(target)); };
@@ -37,6 +37,9 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
             },
             function (react_codemirror_1_1) {
                 react_codemirror_1 = react_codemirror_1_1;
+            },
+            function (json_viewer_1_1) {
+                json_viewer_1 = json_viewer_1_1;
             },
             function (_1) {},
             function (_2) {},
@@ -119,6 +122,8 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         return Object.assign({}, state, { error: action.error });
                     case 'CONSOLE_LOG':
                         return Object.assign({}, state, { logs: state.logs.concat(action.logs) });
+                    case 'CONSOLE_CLEAR':
+                        return Object.assign({}, state, { logs: [{ msg: "" }] });
                     case 'SCRIPT_STATUS':
                         return Object.assign({}, state, { scriptStatus: action.scriptStatus });
                     case 'SOURCE_CHANGE':
@@ -282,7 +287,7 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         .then(function (r) {
                         if (r.status !== "Completed") {
                             var msg = r.status === "Unknown"
-                                ? "Script no longer exists on the server"
+                                ? "Script no longer exists on server"
                                 : "Script Error: " + servicestack_client_1.humanize(r.status);
                             _this.props.logConsole([{ msg: msg, cls: "error" }]);
                         }
@@ -308,18 +313,21 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                 };
                 App.prototype.setAndEvaluateExpression = function (expr) {
                     this.props.setExpression(expr);
+                    this.evaluateExpression(expr);
                 };
-                App.prototype.evaluateExpression = function () {
+                App.prototype.evaluateExpression = function (expr) {
                     var _this = this;
                     var request = new Gistlyn_dtos_1.EvaluateExpression();
                     request.scriptId = this.scriptId;
-                    request.expression = this.props.expression;
+                    request.expression = expr;
                     request.includeJson = true;
                     client.post(request)
                         .then(function (r) {
                         _this.props.setExpressionResult(r.result);
                     })
-                        .catch(function (e) { return _this.props.logConsoleError(e.responseStatus); });
+                        .catch(function (e) {
+                        _this.props.logConsoleError(e.responseStatus);
+                    });
                 };
                 App.prototype.revertGist = function (clearAll) {
                     if (clearAll === void 0) { clearAll = false; }
@@ -370,15 +378,19 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                     }
                     else if (this.props.variables.length > 0) {
                         var vars = this.props.variables;
-                        Preview.push((React.createElement("div", {id: "vars", className: "section"}, React.createElement("table", {style: { width: "100%" }}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", {className: "name"}, "name"), React.createElement("th", {className: "value"}, "value"), React.createElement("th", {className: "type"}, "type"))), React.createElement("tbody", null, vars.map(function (v) { return _this.getVariableRows(v); }))), React.createElement("div", {id: "evaluate"}, React.createElement("input", {type: "text", id: "evaluate", placeholder: "Evaluate Expression", value: this.props.expression, onChange: function (e) { return _this.props.setExpression(e.target.value); }}), React.createElement("i", {className: "material-icons", title: "run"}, "play_arrow")))));
+                        var exprResult = this.props.expressionResult;
+                        var exprVar = exprResult != null && exprResult.variables.length > 0 ? exprResult.variables[0] : null;
+                        Preview.push((React.createElement("div", {id: "vars", className: "section"}, React.createElement("table", {style: { width: "100%" }}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", {className: "name"}, "name"), React.createElement("th", {className: "value"}, "value"), React.createElement("th", {className: "type"}, "type"))), React.createElement("tbody", null, vars.map(function (v) { return _this.getVariableRows(v); }))), React.createElement("div", {id: "evaluate"}, React.createElement("input", {type: "text", placeholder: "Evaluate Expression", value: this.props.expression, onChange: function (e) { return _this.props.setExpression(e.target.value); }, onKeyPress: function (e) { return e.which === 13 ? _this.evaluateExpression(_this.props.expression) : null; }}), React.createElement("i", {className: "material-icons", title: "run", onClick: function (e) { return _this.evaluateExpression(_this.props.expression); }}, "play_arrow"), exprVar
+                            ? (React.createElement("div", {id: "expression-result"}, React.createElement(json_viewer_1.JsonViewer, {json: exprVar.json})))
+                            : null))));
                     }
                     else {
                         Preview.push(React.createElement("div", {id: "placeholder"}));
                     }
                     if (this.props.logs.length > 0) {
-                        Preview.push((React.createElement("div", {id: "console", className: "section", style: { borderBottom: "solid 1px #ddd" }}, React.createElement("div", {className: "head", style: { font: "14px/20px arial", height: "22px", textAlign: "right", borderBottom: "solid 1px #ddd" }}, React.createElement("b", {style: { background: "#444", color: "#fff", padding: "4px 8px" }}, "console")), React.createElement("div", {className: "scroll", style: { overflow: "auto", maxHeight: "350px" }, ref: function (el) { return _this.consoleScroll = el; }}, React.createElement("table", {style: { width: "100%" }}, React.createElement("tbody", {style: { font: "13px/18px monospace", color: "#444" }}, this.props.logs.map(function (log) { return (React.createElement("tr", null, React.createElement("td", {style: { padding: "2px 8px" }}, React.createElement("span", {className: log.cls}, log.msg)))); })))))));
+                        Preview.push((React.createElement("div", {id: "console", className: "section", style: { borderBottom: "solid 1px #ddd" }}, React.createElement("div", {className: "head", style: { font: "14px/20px arial", height: "22px", textAlign: "right", borderBottom: "solid 1px #ddd" }}, React.createElement("b", {style: { background: "#444", color: "#fff", padding: "4px 8px" }}, "console")), React.createElement("i", {className: "material-icons clear-btn", title: "clear console", onClick: function (e) { return _this.props.clearConsole(); }}, "clear"), React.createElement("div", {className: "scroll", style: { overflow: "auto", maxHeight: "350px" }, ref: function (el) { return _this.consoleScroll = el; }}, React.createElement("table", {style: { width: "100%" }}, React.createElement("tbody", {style: { font: "13px/18px monospace", color: "#444" }}, this.props.logs.map(function (log) { return (React.createElement("tr", null, React.createElement("td", {style: { padding: "2px 8px" }}, React.createElement("span", {className: log.cls}, log.msg)))); })))))));
                     }
-                    return (React.createElement("div", {id: "body"}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png"}), React.createElement("h3", null, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, React.createElement("input", {type: "text", id: "txtGist", placeholder: "gist hash or url", value: this.props.gist, onFocus: function (e) { return e.target.select(); }, onChange: function (e) { return _this.handleGistUpdate(e); }}), main != null
+                    return (React.createElement("div", {id: "body"}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("a", {href: "https://servicestack.net", title: "servicestack.net", target: "_blank"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png"})), React.createElement("h3", null, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, React.createElement("input", {type: "text", id: "txtGist", placeholder: "gist hash or url", value: this.props.gist, onFocus: function (e) { return e.target.select(); }, onChange: function (e) { return _this.handleGistUpdate(e); }}), main != null
                         ? React.createElement("i", {className: "material-icons", style: { color: "#0f9", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "check")
                         : this.props.error
                             ? React.createElement("i", {className: "material-icons", style: { color: "#ebccd1", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "error")
@@ -399,6 +411,7 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         variables: state.variables,
                         inspectedVariables: state.inspectedVariables,
                         expression: state.expression,
+                        expressionResult: state.expressionResult,
                         error: state.error,
                         scriptStatus: state.scriptStatus
                     }); }, function (dispatch) { return ({
@@ -410,6 +423,7 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         selectFileName: function (activeFileName) { return dispatch({ type: 'FILE_SELECT', activeFileName: activeFileName }); },
                         raiseError: function (error) { return dispatch({ type: 'ERROR_RAISE', error: error }); },
                         clearError: function () { return dispatch({ type: 'ERROR_CLEAR' }); },
+                        clearConsole: function () { return dispatch({ type: 'CONSOLE_CLEAR' }); },
                         logConsole: function (logs) { return dispatch({ type: 'CONSOLE_LOG', logs: logs }); },
                         logConsoleError: function (status) { return dispatch({ type: 'CONSOLE_LOG', logs: [Object.assign({ msg: status.message, cls: "error" }, status)] }); },
                         logConsoleMsgs: function (txtMessages) { return dispatch({ type: 'CONSOLE_LOG', logs: txtMessages.map(function (msg) { return ({ msg: msg }); }) }); },
