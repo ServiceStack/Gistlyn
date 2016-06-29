@@ -20,6 +20,7 @@ namespace Gistlyn
 
         public override void Configure(Container container)
         {
+            JsConfig.MaxDepth = 10;
             JsConfig.EmitCamelCaseNames = true;
 
             Plugins.Add(new ServerEventsFeature());

@@ -14,7 +14,7 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
     var ReactDOM, React, redux_1, react_redux_1, servicestack_client_1, react_codemirror_1, Gistlyn_dtos_1;
-    var options, ScriptStatusRunning, updateGist, store, client, sse, getSortedFileNames, App, qsGist;
+    var options, ScriptStatusRunning, StateKey, GistCacheKey, updateGist, store, client, sse, getSortedFileNames, App, stateJson, state, e, qsGist;
     function reduxify(mapStateToProps, mapDispatchToProps, mergeProps, options) {
         return function (target) { return (react_redux_1.connect(mapStateToProps, mapDispatchToProps, mergeProps, options)(target)); };
     }
@@ -64,13 +64,14 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                 }
             };
             ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
+            StateKey = "/v1/state";
+            GistCacheKey = function (gist) { return ("/v1/gists/" + gist); };
             updateGist = function (store) { return function (next) { return function (action) {
                 var oldGist = store.getState().gist;
                 var result = next(action);
                 var state = store.getState();
-                var gistCacheKey = "/v1/gists/" + state.gist;
-                if (action.type === 'GIST_CHANGE' && action.gist && oldGist !== action.gist) {
-                    var json = localStorage.getItem(gistCacheKey);
+                if (action.type === 'GIST_CHANGE' && action.gist && (action.reload || oldGist !== action.gist)) {
+                    var json = localStorage.getItem(GistCacheKey(state.gist));
                     if (json) {
                         var files = JSON.parse(json);
                         store.dispatch({ type: 'GIST_LOAD', files: files, activeFileName: getSortedFileNames(files)[0] });
@@ -83,7 +84,7 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                             }
                             else {
                                 return res.json().then(function (r) {
-                                    localStorage.setItem(gistCacheKey, JSON.stringify(r.files));
+                                    localStorage.setItem(GistCacheKey(state.gist), JSON.stringify(r.files));
                                     store.dispatch({ type: 'GIST_LOAD', files: r.files, activeFileName: getSortedFileNames(r.files)[0] });
                                 });
                             }
@@ -94,18 +95,23 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                     }
                 }
                 else if (action.type === "SOURCE_CHANGE") {
-                    localStorage.setItem(gistCacheKey, JSON.stringify(state.files));
+                    localStorage.setItem(GistCacheKey(state.gist), JSON.stringify(state.files));
+                }
+                if (action.type !== "LOAD") {
+                    localStorage.setItem(StateKey, JSON.stringify(state));
                 }
                 return result;
             }; }; };
             store = redux_1.createStore(function (state, action) {
                 switch (action.type) {
+                    case 'LOAD':
+                        return action.state;
                     case 'SSE_CONNECT':
                         return Object.assign({}, state, { activeSub: action.activeSub });
                     case 'GIST_CHANGE':
                         return Object.assign({}, state, { gist: action.gist, error: null, files: null, activeFileName: null });
                     case 'GIST_LOAD':
-                        return Object.assign({}, state, { files: action.files, activeFileName: action.activeFileName, hasLoaded: true });
+                        return Object.assign({}, state, { files: action.files, activeFileName: action.activeFileName, variables: [], logs: [], hasLoaded: true });
                     case 'FILE_SELECT':
                         return Object.assign({}, state, { activeFileName: action.activeFileName });
                     case 'ERROR_RAISE':
@@ -118,11 +124,17 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         var file = Object.assign({}, state.files[action.fileName], { content: action.content });
                         return Object.assign({}, state, { files: Object.assign({}, state.files, (_a = {}, _a[action.fileName] = file, _a)) });
                     case 'VARS_LOAD':
-                        return Object.assign({}, state, { variables: action.variables });
+                        return Object.assign({}, state, { variables: action.variables, inspectedVariables: {} });
+                    case 'VARS_INSPECT':
+                        return Object.assign({}, state, { inspectedVariables: Object.assign({}, state.inspectedVariables, (_b = {}, _b[action.name] = action.variables, _b)) });
+                    case 'EXPRESSION_SET':
+                        return Object.assign({}, state, { expression: action.expression });
+                    case 'EXPRESSION_LOAD':
+                        return Object.assign({}, state, { expressionResult: action.expressionResult });
                     default:
                         return state;
                 }
-                var _a;
+                var _a, _b;
             }, {
                 gist: null,
                 activeSub: null,
@@ -132,7 +144,10 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                 error: null,
                 scriptStatus: null,
                 logs: [],
-                variables: []
+                variables: [],
+                inspectedVariables: {},
+                expression: null,
+                expressionResult: null
             }, redux_1.applyMiddleware(updateGist));
             client = new servicestack_client_1.JsonServiceClient("/");
             sse = new servicestack_client_1.ServerEventsClient("/", ["gist"], {
@@ -199,11 +214,9 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         _this.props.setScriptStatus("Started");
                         client.post(request)
                             .then(function (r) {
-                            console.log('run success', r);
                             _this.props.logToConsole(r.references.map(function (ref) { return ("loaded " + ref.name); }));
                         })
                             .catch(function (r) {
-                            console.log('run error', r);
                             _this.props.raiseError(r.responseStatus);
                             _this.props.setScriptStatus("Failed");
                         });
@@ -214,12 +227,10 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         request.scriptId = _this.scriptId;
                         client.post(request)
                             .then(function (r) {
-                            console.log('cancel success', r);
                             _this.props.setScriptStatus("Cancelled");
                             _this.props.logToConsole(["Cancelled by user"]);
                         })
                             .catch(function (r) {
-                            console.log('cancel error', r);
                             _this.props.raiseError(r.responseStatus);
                             _this.props.setScriptStatus("Failed");
                         });
@@ -259,6 +270,50 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                 };
                 App.prototype.updateSource = function (src) {
                     this.props.updateSource(this.props.activeFileName, src);
+                };
+                App.prototype.inspectVariable = function (v) {
+                    var _this = this;
+                    var request = new Gistlyn_dtos_1.GetScriptVariables();
+                    request.scriptId = this.scriptId;
+                    request.variableName = v.name;
+                    client.get(request)
+                        .then(function (r) {
+                        _this.props.inspectVariable(v.name, r.variables);
+                    });
+                };
+                App.prototype.getVariableRows = function (v) {
+                    var _this = this;
+                    var varProps = this.props.inspectedVariables[v.name];
+                    var rows = [(React.createElement("tr", null, React.createElement("td", {className: "name"}, v.isBrowseable
+                            ? (varProps
+                                ? React.createElement("span", {className: "octicon octicon-triangle-down", style: { margin: "0 10px 0 0" }, onClick: function (e) { return _this.props.inspectVariable(v.name, null); }})
+                                : React.createElement("span", {className: "octicon octicon-triangle-right", style: { margin: "0 10px 0 0" }, onClick: function (e) { return _this.inspectVariable(v); }}))
+                            : React.createElement("span", {className: "octicon octicon-triangle-right", style: { margin: "0 10px 0 0", color: "#f7f7f7" }}), React.createElement("a", {onClick: function (e) { return _this.setAndEvaluateExpression(v.name); }}, v.name)), React.createElement("td", {className: "value"}, v.value), React.createElement("td", {className: "type"}, v.type)))];
+                    if (varProps) {
+                        varProps.forEach(function (p) {
+                            rows.push((React.createElement("tr", null, React.createElement("td", {className: "name", style: { padding: "0 0 0 50px" }}, React.createElement("a", {onClick: function (e) { return _this.setAndEvaluateExpression(v.name + "." + p.name); }}, p.name)), React.createElement("td", {className: "value"}, p.value), React.createElement("td", {className: "type"}, p.type))));
+                        });
+                    }
+                    return rows;
+                };
+                App.prototype.setAndEvaluateExpression = function (expr) {
+                    this.props.setExpression(expr);
+                };
+                App.prototype.evaluateExpression = function () {
+                    var _this = this;
+                    var request = new Gistlyn_dtos_1.EvaluateExpression();
+                    request.scriptId = this.scriptId;
+                    request.expression = this.props.expression;
+                    request.includeJson = true;
+                    client.post(request)
+                        .then(function (r) {
+                        _this.props.setExpressionResult(r.result);
+                    })
+                        .catch(function (e) { return _this.props.logToConsole([e.responseStatus]); });
+                };
+                App.prototype.revertGist = function () {
+                    localStorage.removeItem(GistCacheKey(this.props.gist));
+                    this.props.updateGist(this.props.gist, true);
                 };
                 App.prototype.componentDidUpdate = function () {
                     if (!this.consoleScroll)
@@ -301,7 +356,10 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                     }
                     else if (this.props.variables.length > 0) {
                         var vars = this.props.variables;
-                        Preview.push((React.createElement("div", {id: "vars", className: "section"}, React.createElement("table", {style: { width: "100%" }}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", null, "name"), React.createElement("th", null, "value"), React.createElement("th", {style: { borderRight: "none" }}, "type"))), React.createElement("tbody", null, vars.map(function (v) { return (React.createElement("tr", null, React.createElement("td", null, v.name), React.createElement("td", null, v.value), React.createElement("td", null, v.type))); }))))));
+                        Preview.push((React.createElement("div", {id: "vars", className: "section"}, React.createElement("table", {style: { width: "100%" }}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", {className: "name"}, "name"), React.createElement("th", {className: "value"}, "value"), React.createElement("th", {className: "type"}, "type"))), React.createElement("tbody", null, vars.map(function (v) { return _this.getVariableRows(v); }))), React.createElement("div", {id: "evaluate"}, React.createElement("input", {type: "text", id: "evaluate", placeholder: "Evaluate Expression", value: this.props.expression, onChange: function (e) { return _this.props.setExpression(e.target.value); }}), React.createElement("i", {className: "material-icons", title: "run"}, "play_arrow")))));
+                    }
+                    else {
+                        Preview.push(React.createElement("div", {id: "placeholder"}));
                     }
                     if (this.props.logs.length > 0) {
                         Preview.push((React.createElement("div", {id: "console", className: "section", style: { borderBottom: "solid 1px #ddd" }}, React.createElement("div", {className: "head", style: { font: "14px/20px arial", height: "22px", textAlign: "right", borderBottom: "solid 1px #ddd" }}, React.createElement("b", {style: { background: "#444", color: "#fff", padding: "4px 8px" }}, "console")), React.createElement("div", {className: "scroll", style: { overflow: "auto", maxHeight: "350px" }, ref: function (el) { return _this.consoleScroll = el; }}, React.createElement("table", {style: { width: "100%" }}, React.createElement("tbody", {style: { font: "13px/18px monospace", color: "#444" }}, this.props.logs.map(function (log) { return (React.createElement("tr", null, React.createElement("td", {style: { padding: "2px 8px" }}, log))); })))))));
@@ -310,11 +368,11 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         ? React.createElement("i", {className: "material-icons", style: { color: "#0f9", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "check")
                         : this.props.error
                             ? React.createElement("i", {className: "material-icons", style: { color: "#ebccd1", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "error")
-                            : null))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement("div", {id: "editor"}, React.createElement("div", {id: "tabs", style: { display: this.props.files ? 'flex' : 'none' }}, Tabs), React.createElement(react_codemirror_1.default, {value: source, options: options, onChange: function (src) { return _this.updateSource(src); }})), React.createElement("div", {id: "preview"}, Preview))), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "run"}, main != null
+                            : null))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement("div", {id: "editor"}, React.createElement("div", {id: "tabs", style: { display: this.props.files ? 'flex' : 'none' }}, Tabs), React.createElement(react_codemirror_1.default, {value: source, options: options, onChange: function (src) { return _this.updateSource(src); }})), React.createElement("div", {id: "preview"}, Preview))), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "actions"}, React.createElement("div", {id: "revert", onClick: function (e) { return _this.revertGist(); }}, React.createElement("i", {className: "material-icons"}, "undo"), React.createElement("p", null, "Revert Changes"))), React.createElement("div", {id: "run"}, main != null
                         ? (!isScriptRunning
-                            ? React.createElement("i", {className: "material-icons", title: "run", onClick: this.run}, "play_arrow")
+                            ? React.createElement("i", {className: "material-icons", title: "run", onClick: this.run}, "play_circle_outline")
                             : React.createElement("i", {className: "material-icons", title: "cancel script", onClick: this.cancel, style: { color: "#FF5252" }}, "cancel"))
-                        : React.createElement("i", {className: "material-icons disabled", title: "disabled"}, "play_arrow")))));
+                        : React.createElement("i", {className: "material-icons disabled", title: "disabled"}, "play_circle_outline")))));
                 };
                 App = __decorate([
                     reduxify(function (state) { return ({
@@ -325,22 +383,45 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         activeFileName: state.activeFileName,
                         logs: state.logs,
                         variables: state.variables,
+                        inspectedVariables: state.inspectedVariables,
+                        expression: state.expression,
                         error: state.error,
                         scriptStatus: state.scriptStatus
                     }); }, function (dispatch) { return ({
-                        updateGist: function (gist) { return dispatch({ type: 'GIST_CHANGE', gist: gist }); },
+                        updateGist: function (gist, reload) {
+                            if (reload === void 0) { reload = false; }
+                            return dispatch({ type: 'GIST_CHANGE', gist: gist, reload: reload });
+                        },
                         updateSource: function (fileName, content) { return dispatch({ type: 'SOURCE_CHANGE', fileName: fileName, content: content }); },
                         selectFileName: function (activeFileName) { return dispatch({ type: 'FILE_SELECT', activeFileName: activeFileName }); },
                         raiseError: function (error) { return dispatch({ type: 'ERROR_RAISE', error: error }); },
                         clearError: function () { return dispatch({ type: 'ERROR_CLEAR' }); },
                         logToConsole: function (logs) { return dispatch({ type: 'CONSOLE_LOG', logs: logs }); },
-                        setScriptStatus: function (scriptStatus) { return dispatch({ type: 'SCRIPT_STATUS', scriptStatus: scriptStatus }); }
+                        setScriptStatus: function (scriptStatus) { return dispatch({ type: 'SCRIPT_STATUS', scriptStatus: scriptStatus }); },
+                        inspectVariable: function (name, variables) { return dispatch({ type: 'VARS_INSPECT', name: name, variables: variables }); },
+                        setExpression: function (expression) { return dispatch({ type: 'EXPRESSION_SET', expression: expression }); },
+                        setExpressionResult: function (expressionResult) { return dispatch({ type: 'EXPRESSION_LOAD', expressionResult: expressionResult }); }
                     }); })
                 ], App);
                 return App;
             }(React.Component));
-            qsGist = servicestack_client_1.queryString(location.href)["gist"] || "efc71477cee60916ef71d839084d1afd";
-            store.dispatch({ type: 'GIST_CHANGE', gist: qsGist });
+            stateJson = localStorage.getItem(StateKey);
+            state = null;
+            if (stateJson) {
+                try {
+                    state = JSON.parse(stateJson);
+                    store.dispatch({ type: 'LOAD', state: state });
+                }
+                catch (e) {
+                    console.log('ERROR loading state:', e, stateJson);
+                    localStorage.removeItem(StateKey);
+                }
+            }
+            if (!state) {
+                qsGist = servicestack_client_1.queryString(location.href)["gist"] || "efc71477cee60916ef71d839084d1afd";
+                //alt: 6831799881c92434f80e141c8a2699eb
+                store.dispatch({ type: 'GIST_CHANGE', gist: qsGist });
+            }
             ReactDOM.render(React.createElement(react_redux_1.Provider, {store: store}, React.createElement(App, null)), document.getElementById("app"));
         }
     }

@@ -15,7 +15,7 @@ import "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js";
 import "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js";
 import "./codemirror.js";
 
-import { RunScript, GetScriptStatus, CancelScript, GetScriptVariables, VariableInfo } from './Gistlyn.dtos';
+import { RunScript, GetScriptStatus, CancelScript, GetScriptVariables, VariableInfo, EvaluateExpression } from './Gistlyn.dtos';
 
 var options = {
     lineNumbers: true,
@@ -34,15 +34,16 @@ var options = {
 };
 
 const ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
+const StateKey = "/v1/state";
+const GistCacheKey = (gist) => `/v1/gists/${gist}`;
 
 const updateGist = store => next => action => {
     var oldGist = store.getState().gist;
     var result = next(action);
     var state = store.getState();
-    const gistCacheKey = `/v1/gists/${state.gist}`;
 
-    if (action.type === 'GIST_CHANGE' && action.gist && oldGist !== action.gist) {
-        const json = localStorage.getItem(gistCacheKey);
+    if (action.type === 'GIST_CHANGE' && action.gist && (action.reload || oldGist !== action.gist)) {
+        const json = localStorage.getItem(GistCacheKey(state.gist));
         if (json) {
             const files = JSON.parse(json);
             store.dispatch({ type: 'GIST_LOAD', files, activeFileName: getSortedFileNames(files)[0] });
@@ -53,7 +54,7 @@ const updateGist = store => next => action => {
                         throw res;
                     } else {
                         return res.json().then((r) => {
-                            localStorage.setItem(gistCacheKey, JSON.stringify(r.files));
+                            localStorage.setItem(GistCacheKey(state.gist), JSON.stringify(r.files));
                             store.dispatch({ type: 'GIST_LOAD', files: r.files, activeFileName: getSortedFileNames(r.files)[0] });
                         });
                     }
@@ -63,7 +64,11 @@ const updateGist = store => next => action => {
                 });
         }
     } else if (action.type === "SOURCE_CHANGE") {
-        localStorage.setItem(gistCacheKey, JSON.stringify(state.files));
+        localStorage.setItem(GistCacheKey(state.gist), JSON.stringify(state.files));
+    }
+
+    if (action.type !== "LOAD") {
+        localStorage.setItem(StateKey, JSON.stringify(state));
     }
 
     return result;
@@ -76,12 +81,14 @@ function reduxify(mapStateToProps, mapDispatchToProps?, mergeProps?, options?) {
 let store = createStore(
     (state, action) => {
         switch (action.type) {
+            case 'LOAD':
+                return action.state;
             case 'SSE_CONNECT':
                 return Object.assign({}, state, { activeSub: action.activeSub });
             case 'GIST_CHANGE':
                 return Object.assign({}, state, { gist: action.gist, error: null, files:null, activeFileName:null });
             case 'GIST_LOAD':
-                return Object.assign({}, state, { files: action.files, activeFileName:action.activeFileName, hasLoaded: true });
+                return Object.assign({}, state, { files: action.files, activeFileName:action.activeFileName, variables:[], logs:[], hasLoaded: true });
             case 'FILE_SELECT':
                 return Object.assign({}, state, { activeFileName: action.activeFileName });
             case 'ERROR_RAISE':
@@ -94,7 +101,13 @@ let store = createStore(
                 const file = Object.assign({}, state.files[action.fileName], { content: action.content });
                 return Object.assign({}, state, { files: Object.assign({}, state.files, { [action.fileName]: file }) });
             case 'VARS_LOAD':
-                return Object.assign({}, state, { variables: action.variables });
+                return Object.assign({}, state, { variables: action.variables, inspectedVariables:{} });
+            case 'VARS_INSPECT':
+                return Object.assign({}, state, { inspectedVariables: Object.assign({}, state.inspectedVariables, { [action.name]: action.variables }) });
+            case 'EXPRESSION_SET':
+                return Object.assign({}, state, { expression: action.expression });
+            case 'EXPRESSION_LOAD':
+                return Object.assign({}, state, { expressionResult: action.expressionResult });
             default:
                 return state;
         }
@@ -108,7 +121,10 @@ let store = createStore(
         error: null, 
         scriptStatus:null, 
         logs:[], 
-        variables:[]
+        variables:[],
+        inspectedVariables:{},
+        expression: null,
+        expressionResult: null
     },
     applyMiddleware(updateGist));
 
@@ -170,17 +186,22 @@ const getSortedFileNames = (files) => {
         activeFileName: state.activeFileName,
         logs: state.logs,
         variables: state.variables,
+        inspectedVariables: state.inspectedVariables,
+        expression: state.expression,
         error: state.error,
         scriptStatus: state.scriptStatus
     }),
     (dispatch) => ({
-        updateGist: (gist) => dispatch({ type: 'GIST_CHANGE', gist }),
+        updateGist: (gist, reload=false) => dispatch({ type: 'GIST_CHANGE', gist, reload }),
         updateSource: (fileName, content) => dispatch({ type: 'SOURCE_CHANGE', fileName, content }),
         selectFileName: (activeFileName) => dispatch({ type: 'FILE_SELECT', activeFileName }),
         raiseError: (error) => dispatch({ type: 'ERROR_RAISE', error }),
         clearError: () => dispatch({ type: 'ERROR_CLEAR' }),
         logToConsole: (logs) => dispatch({ type:'CONSOLE_LOG', logs }),
-        setScriptStatus: (scriptStatus) => dispatch({ type:'SCRIPT_STATUS', scriptStatus })
+        setScriptStatus: (scriptStatus) => dispatch({ type:'SCRIPT_STATUS', scriptStatus }),
+        inspectVariable: (name, variables) => dispatch({ type:'VARS_INSPECT', name, variables }),
+        setExpression: (expression) => dispatch({ type: 'EXPRESSION_SET', expression }),
+        setExpressionResult: (expressionResult) => dispatch({ type: 'EXPRESSION_LOAD', expressionResult })
     })
 )
 class App extends React.Component<any, any> {
@@ -227,11 +248,9 @@ class App extends React.Component<any, any> {
 
         client.post(request)
             .then(r => {
-                console.log('run success', r);
                 this.props.logToConsole(r.references.map(ref => `loaded ${ref.name}`));
             })
             .catch(r => {
-                console.log('run error', r);
                 this.props.raiseError(r.responseStatus);
                 this.props.setScriptStatus("Failed");
             });
@@ -243,12 +262,10 @@ class App extends React.Component<any, any> {
         request.scriptId = this.scriptId;
         client.post(request)
             .then(r => {
-                console.log('cancel success', r);
                 this.props.setScriptStatus("Cancelled");
                 this.props.logToConsole(["Cancelled by user"]);
             })
             .catch(r => {
-                console.log('cancel error', r);
                 this.props.raiseError(r.responseStatus);
                 this.props.setScriptStatus("Failed");
             });
@@ -263,6 +280,73 @@ class App extends React.Component<any, any> {
 
     updateSource(src: string) {
         this.props.updateSource(this.props.activeFileName, src);
+    }
+
+    inspectVariable(v: VariableInfo) {
+        const request = new GetScriptVariables();
+        request.scriptId = this.scriptId;
+        request.variableName = v.name;
+
+        client.get(request)
+            .then(r => {
+                this.props.inspectVariable(v.name, r.variables);
+            });
+    }
+
+    getVariableRows(v: VariableInfo) {
+        var varProps = this.props.inspectedVariables[v.name];
+        var rows = [(
+            <tr>
+                <td className="name">
+                    {v.isBrowseable
+                        ? (varProps 
+                            ? <span className="octicon octicon-triangle-down" style={{ margin: "0 10px 0 0" }} onClick={e => this.props.inspectVariable(v.name, null)}></span>
+                            : <span className="octicon octicon-triangle-right" style={{ margin: "0 10px 0 0" }} onClick={e => this.inspectVariable(v)}></span>)
+                        : <span className="octicon octicon-triangle-right" style={{ margin: "0 10px 0 0", color: "#f7f7f7" }}></span>}
+                    <a onClick={e => this.setAndEvaluateExpression(v.name)}>{v.name}</a>
+                </td>
+                <td className="value">{v.value}</td>
+                <td className="type">{v.type}</td>
+            </tr>
+        )];
+
+        if (varProps) {
+            varProps.forEach(p => {
+                rows.push((
+                    <tr>
+                        <td className="name" style={{padding:"0 0 0 50px"}}>
+                            <a onClick={e => this.setAndEvaluateExpression(v.name + "." + p.name)}>{p.name}</a>
+                        </td>
+                        <td className="value">{p.value}</td>
+                        <td className="type">{p.type}</td>
+                    </tr>
+                ));
+            });
+        }
+
+        return rows;
+    }
+
+    setAndEvaluateExpression(expr: string) {
+        this.props.setExpression(expr);
+    }
+
+    evaluateExpression() {
+        const request = new EvaluateExpression();
+        request.scriptId = this.scriptId;
+        request.expression = this.props.expression;
+        request.includeJson = true;
+
+        client.post(request)
+            .then(r => {
+                this.props.setExpressionResult(r.result);
+            })
+            .catch(e => this.props.logToConsole([e.responseStatus]));
+    }
+
+    revertGist() {
+        localStorage.removeItem(GistCacheKey(this.props.gist));
+        this.props.updateGist(this.props.gist, true);
     }
 
     consoleScroll:HTMLDivElement;
@@ -334,25 +418,25 @@ class App extends React.Component<any, any> {
             var vars = this.props.variables as VariableInfo[];
             Preview.push((
                 <div id="vars" className="section">
-                    <table style={{width:"100%"}}>
+                    <table style={{ width: "100%" }}>
                         <thead>
                             <tr>
-                                <th>name</th>
-                                <th>value</th>
-                                <th style={{borderRight:"none"}}>type</th>
+                                <th className="name">name</th>
+                                <th className="value">value</th>
+                                <th className="type">type</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {vars.map(v => (
-                            <tr>
-                                <td>{v.name}</td>
-                                <td>{v.value}</td>
-                                <td>{v.type}</td>
-                            </tr>
-                            ))}
+                            {vars.map(v => this.getVariableRows(v))}
                         </tbody>
                     </table>
+                    <div id="evaluate">
+                        <input type="text" id="evaluate" placeholder="Evaluate Expression" value={this.props.expression} onChange={e => this.props.setExpression((e.target as HTMLInputElement).value)} />
+                        <i className="material-icons" title="run">play_arrow</i>
+                    </div>
                 </div>));
+        } else {
+            Preview.push(<div id="placeholder"></div>);
         }
 
         if (this.props.logs.length > 0) {
@@ -410,12 +494,18 @@ class App extends React.Component<any, any> {
                 </div>
 
                 <div id="footer">
+                    <div id="actions">
+                        <div id="revert" onClick={e => this.revertGist()}>
+                            <i className="material-icons">undo</i>
+                            <p>Revert Changes</p>
+                        </div>
+                    </div>
                     <div id="run">
                         {main != null
                             ? (!isScriptRunning 
-                                ? <i className="material-icons" title="run" onClick={this.run}>play_arrow</i>
+                                ? <i className="material-icons" title="run" onClick={this.run}>play_circle_outline</i>
                                 : <i className="material-icons" title="cancel script" onClick={this.cancel} style={{ color:"#FF5252" }}>cancel</i>)
-                            : <i className="material-icons disabled" title="disabled">play_arrow</i>}
+                            : <i className="material-icons disabled" title="disabled">play_circle_outline</i>}
                     </div>
                 </div>
             </div>
@@ -423,9 +513,25 @@ class App extends React.Component<any, any> {
     }
 }
 
-var qsGist = queryString(location.href)["gist"] || "efc71477cee60916ef71d839084d1afd";
+var stateJson = localStorage.getItem(StateKey);
+var state = null;
+if (stateJson) {
+    try {
+        state = JSON.parse(stateJson);
+        store.dispatch({ type: 'LOAD', state });
+    } catch (e) {
+        console.log('ERROR loading state:', e, stateJson);
+        localStorage.removeItem(StateKey);
+    }
+} 
 
-store.dispatch({ type: 'GIST_CHANGE', gist: qsGist });
+if (!state)
+{
+    var qsGist = queryString(location.href)["gist"] || "efc71477cee60916ef71d839084d1afd";
+    //alt: 6831799881c92434f80e141c8a2699eb
+    store.dispatch({ type: 'GIST_CHANGE', gist: qsGist });
+}
+
 
 ReactDOM.render(
     <Provider store={store}>
