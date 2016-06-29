@@ -34,6 +34,7 @@ var options = {
 };
 
 const ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
+const ScriptStatusError = ["Cancelled", "CompiledWithErrors", "ThrowedException"];
 const StateKey = "/v1/state";
 const GistCacheKey = (gist) => `/v1/gists/${gist}`;
 
@@ -142,7 +143,8 @@ var sse = new ServerEventsClient("/", ["gist"], {
             //console.log("ScriptExecutionResult", m, e);
             if (m.status === store.getState().scriptStatus) return;
 
-            store.dispatch({ type: 'CONSOLE_LOG', logs: [{msg:humanize(m.status)}] });
+            const cls = ScriptStatusError.indexOf(m.status) >= 0 ? "error" : "";
+            store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: humanize(m.status), cls }] });
             store.dispatch({ type: 'SCRIPT_STATUS', scriptStatus: m.status });
 
             if (m.status === "CompiledWithErrors" && m.errors) {

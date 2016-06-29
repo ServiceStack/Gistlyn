@@ -102,37 +102,30 @@ namespace Gistlyn.ServiceInterface
         public object Any(EvaluateSource request)
         {
             var runner = new ScriptRunner();
-            var result = new ScriptExecutionResult();
+            var response = new EvaluateSourceResponse();
 
             try
             {
-                result = runner.Execute(request.Code).Result;
+                response.Result = runner.Execute(request.Code).Result;
             }
             catch (Exception e)
             {
-                result.Exception = e;
+                response.Result = new ScriptExecutionResult { Exception =  e };
             }
 
-            return new EvaluateSourceResponse
-            {
-                Result = result
-            };
+            return response;
         }
 
         public object Any(CancelScript request)
         {
-            var result = new ScriptExecutionResult { Status = ScriptStatus.Unknown };
-
             var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
 
-            if (runner != null && runner.ScriptDomain != null)
+            var result = new ScriptExecutionResult
             {
-                AppDomain domain = runner.ScriptDomain;
-                runner.ScriptDomain = null;
-                LocalCache.RemoveScriptRunnerInfo(runner.ScriptId);
-                AppDomain.Unload(domain);
-                result.Status = ScriptStatus.Cancelled;
-            }
+                Status = Cancel(runner)
+                    ? ScriptStatus.Cancelled
+                    : ScriptStatus.Unknown
+            };
 
             ////cancellation token does not work in mono
             ////leave this alternative way when cancellation token will be implemented
@@ -146,6 +139,19 @@ namespace Gistlyn.ServiceInterface
             {
                 Result = result
             };
+        }
+
+        private bool Cancel(ScriptRunnerInfo runner)
+        {
+            if (runner != null && runner.ScriptDomain != null)
+            {
+                var domain = runner.ScriptDomain;
+                runner.ScriptDomain = null;
+                LocalCache.RemoveScriptRunnerInfo(runner.ScriptId);
+                AppDomain.Unload(domain);
+                return true;
+            }
+            return false;
         }
 
         public object Any(CancelEmbedScript request)
@@ -269,6 +275,7 @@ namespace Gistlyn.ServiceInterface
             {
                 ScriptId = request.ScriptId,
                 SessionId = base.Request.GetPermanentSessionId(),
+                CreatedDate = DateTime.UtcNow,
                 ScriptDomain = domain,
                 DomainWrapper = wrapper,
             });
@@ -290,8 +297,9 @@ namespace Gistlyn.ServiceInterface
             {
                 try
                 {
-                    AppDomain.Unload(runnerInfo.ScriptDomain);
-                    LocalCache.RemoveScriptRunnerInfo(runnerInfo.ScriptId);
+                    Cancel(runnerInfo);
+                    var writerProxy = new NotifierProxy(ServerEvents, runnerInfo.ScriptId);
+                    writerProxy.SendScriptExecutionResults(new ScriptExecutionResult { Status = ScriptStatus.Cancelled });
                     count++;
                 }
                 catch (Exception ex)

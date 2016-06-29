@@ -14,7 +14,7 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
     var ReactDOM, React, redux_1, react_redux_1, servicestack_client_1, react_codemirror_1, Gistlyn_dtos_1;
-    var options, ScriptStatusRunning, StateKey, GistCacheKey, updateGist, store, client, sse, getSortedFileNames, App, stateJson, state, e, qsGist;
+    var options, ScriptStatusRunning, ScriptStatusError, StateKey, GistCacheKey, updateGist, store, client, sse, getSortedFileNames, App, stateJson, state, e, qsGist;
     function reduxify(mapStateToProps, mapDispatchToProps, mergeProps, options) {
         return function (target) { return (react_redux_1.connect(mapStateToProps, mapDispatchToProps, mergeProps, options)(target)); };
     }
@@ -64,6 +64,7 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                 }
             };
             ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
+            ScriptStatusError = ["Cancelled", "CompiledWithErrors", "ThrowedException"];
             StateKey = "/v1/state";
             GistCacheKey = function (gist) { return ("/v1/gists/" + gist); };
             updateGist = function (store) { return function (next) { return function (action) {
@@ -163,7 +164,8 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         //console.log("ScriptExecutionResult", m, e);
                         if (m.status === store.getState().scriptStatus)
                             return;
-                        store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: servicestack_client_1.humanize(m.status) }] });
+                        var cls = ScriptStatusError.indexOf(m.status) >= 0 ? "error" : "";
+                        store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: servicestack_client_1.humanize(m.status), cls: cls }] });
                         store.dispatch({ type: 'SCRIPT_STATUS', scriptStatus: m.status });
                         if (m.status === "CompiledWithErrors" && m.errors) {
                             var errorMsgs = m.errors.map(function (e) { return ({ msg: e.info, cls: "error" }); });
