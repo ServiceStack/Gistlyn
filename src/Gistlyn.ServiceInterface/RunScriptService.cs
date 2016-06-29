@@ -10,6 +10,7 @@ using Gistlyn.ServiceInterface.Auth;
 using System.Security.Policy;
 using System.Security.Cryptography;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Gistlyn.ServiceModel.Types;
 
@@ -57,30 +58,26 @@ namespace Gistlyn.ServiceInterface
             return variable;
         }
 
-        public object Any(EvaluateExpression request)
+        public async Task<EvaluateExpressionResponse> Any(EvaluateExpression request)
         {
-            ScriptExecutionResult result;
-
             var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
 
             var wrapper = runner != null ? runner.DomainWrapper : null;
 
-            result = wrapper != null
-                ? wrapper.EvaluateExpression(request.Expression)
+            var result = wrapper != null
+                ? await wrapper.EvaluateExpression(request.Expression, request.IncludeJson)
                 : new ScriptExecutionResult { Status = ScriptStatus.Unknown };
 
-            return result;
+            return new EvaluateExpressionResponse { Result = result };
         }
 
         public object Any(GetScriptVariables request)
         {
-            ScriptStateVariables variables;
-
             var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
 
             var wrapper = runner != null ? runner.DomainWrapper : null;
 
-            variables = wrapper != null
+            var variables = wrapper != null
                 ? wrapper.GetVariables(request.VariableName)
                 : new ScriptStateVariables { Status = ScriptStatus.Unknown };
 

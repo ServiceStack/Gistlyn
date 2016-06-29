@@ -1,5 +1,5 @@
 /* Options:
-Date: 2016-06-27 19:19:06
+Date: 2016-06-28 20:45:26
 Version: 4.00
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:54991
@@ -56,14 +56,6 @@ export const enum ScriptStatus
     anotherScriptExecuting,
 }
 
-export class VariableInfo
-{
-    name: string;
-    value: string;
-    type: string;
-    isBrowseable: boolean;
-}
-
 export class ScriptExecutionResult
 {
     status: ScriptStatus;
@@ -71,6 +63,15 @@ export class ScriptExecutionResult
     errors: ErrorInfo[];
     errorResponseStatus: ResponseStatus;
     console: string;
+}
+
+export class VariableInfo
+{
+    name: string;
+    value: string;
+    type: string;
+    json: string;
+    isBrowseable: boolean;
 }
 
 export class AssemblyReference
@@ -134,6 +135,12 @@ export class ScriptVariableJson
     json: string;
 }
 
+export class EvaluateExpressionResponse
+{
+    result: ScriptExecutionResult;
+    responseStatus: ResponseStatus;
+}
+
 export class ScriptStateVariables
 {
     status: ScriptStatus;
@@ -165,6 +172,7 @@ export class RunScriptResponse
 {
     result: ScriptExecutionResult;
     references: AssemblyReference[];
+    responseStatus: ResponseStatus;
 }
 
 export class RunEmbedScriptResponse
@@ -215,13 +223,16 @@ export class GetScriptVariableJson implements IReturn<ScriptVariableJson>
     createResponse() { return new ScriptVariableJson(); }
 }
 
-// @Route("/scripts/evaluate")
-export class EvaluateExpression
+// @Route("/scripts/{ScriptId}/evaluate")
+export class EvaluateExpression implements IReturn<EvaluateExpressionResponse>
 {
     scriptId: string;
     expression: string;
+    includeJson: boolean;
+    createResponse() { return new EvaluateExpressionResponse(); }
 }
 
+// @Route("/scripts/{ScriptId}/vars")
 // @Route("/scripts/{ScriptId}/vars/{VariableName}")
 export class GetScriptVariables implements IReturn<ScriptStateVariables>
 {

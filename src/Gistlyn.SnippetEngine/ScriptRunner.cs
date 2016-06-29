@@ -74,7 +74,6 @@ namespace Gistlyn.SnippetEngine
                 GetVariableResult varResult;
                 var variable = GetVariableByName(name, out varResult);
 
-                JsConfig.MaxDepth = 10;
                 json.Json = variable != null ? variable.ToJson() : string.Empty;
                 json.Name = name;
             }
@@ -89,7 +88,7 @@ namespace Gistlyn.SnippetEngine
             
             var type = obj.GetType();
 
-            return !type.IsPrimitive && type != typeof(string);
+            return type.IsClass && type != typeof(string);
         }
 
         private object GetVariableByName(string parentVariable, out GetVariableResult error)
@@ -197,7 +196,7 @@ namespace Gistlyn.SnippetEngine
                             Name = prop.Name,
                             Value = val != null ? val.ToString() : null,
                             Type = val != null ? val.GetType().ToString() : prop.PropertyType.ToString(),
-                            IsBrowseable = IsObjectBrowseable(val)
+                            IsBrowseable = IsObjectBrowseable(val),
                         };
                         variables.Variables.Add(info);
                     }
@@ -211,7 +210,7 @@ namespace Gistlyn.SnippetEngine
                             Name = variable.Name,
                             Value = variable.Value != null ? variable.Value.ToString() : null,
                             Type = variable.Type.ToString(),
-                            IsBrowseable = IsObjectBrowseable(variable.Value)
+                            IsBrowseable = IsObjectBrowseable(variable.Value),
                         });
                     }
                 }
@@ -304,12 +303,12 @@ namespace Gistlyn.SnippetEngine
                 //var scriptState = state.Result;
 
                 foreach (var variable in scriptState.Variables)
-                    result.Variables.Add(new VariableInfo() { Name = variable.Name, Value = variable.Value != null ? variable.Value.ToString() : null, Type = variable.Type.ToString() });
+                    result.Variables.Add(new VariableInfo { Name = variable.Name, Value = variable.Value != null ? variable.Value.ToString() : null, Type = variable.Type.ToString() });
             }
             catch (CompilationErrorException e)
             {
                 foreach (var err in e.Diagnostics)
-                    result.Errors.Add(new ErrorInfo() { Info = err.ToString() });
+                    result.Errors.Add(new ErrorInfo { Info = err.ToString() });
             }
             catch (Exception e)
             {
@@ -334,7 +333,7 @@ namespace Gistlyn.SnippetEngine
             return Execute(script, opt);
         }
 
-        public async Task<ScriptExecutionResult> EvaluateExpression(string expr)
+        public async Task<ScriptExecutionResult> EvaluateExpression(string expr, bool includeJson=false)
         {
             var scriptResult = new ScriptExecutionResult
             {
@@ -356,13 +355,19 @@ namespace Gistlyn.SnippetEngine
                         info.Type = stateResult.ReturnValue.GetType().ToString();
                         info.Value = stateResult.ReturnValue.ToString();
                     }
+
+                    if (includeJson)
+                    {
+                        info.Json = stateResult.ReturnValue.ToJson();
+                    }
+
                     scriptResult.Variables.Add(info);
                 }
                 catch (CompilationErrorException e)
                 {
                     scriptResult.Status = ScriptStatus.CompiledWithErrors;
                     foreach (var err in e.Diagnostics)
-                        scriptResult.Errors.Add(new ErrorInfo() { Info = err.ToString() });
+                        scriptResult.Errors.Add(new ErrorInfo { Info = err.ToString() });
                 }
                 catch (Exception e)
                 {

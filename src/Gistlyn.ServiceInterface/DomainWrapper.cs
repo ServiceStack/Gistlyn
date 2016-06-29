@@ -37,11 +37,9 @@ namespace Gistlyn.ServiceInterface
             }
         }
 
-        public ScriptExecutionResult EvaluateExpression(string expr)
+        public Task<ScriptExecutionResult> EvaluateExpression(string expr, bool includeJson)
         {
-            ScriptExecutionResult result = runner.EvaluateExpression(expr).Result;
-
-            return result;
+            return runner.EvaluateExpression(expr, includeJson);
         }
 
         public ScriptStatus GetScriptStatus()
