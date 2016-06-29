@@ -200,6 +200,7 @@ System.register([], function(exports_1, context_1) {
                     this.replyBaseUrl = combinePaths(baseUrl, "json", "reply") + "/";
                     this.oneWayBaseUrl = combinePaths(baseUrl, "json", "oneway") + "/";
                     this.mode = "cors";
+                    this.credentials = 'include';
                     this.headers = new Headers();
                     this.headers.set("Content-Type", "application/json");
                 }
@@ -226,6 +227,7 @@ System.register([], function(exports_1, context_1) {
                     var req = new Request(url, {
                         method: method,
                         mode: this.mode,
+                        credentials: this.credentials,
                         headers: this.headers
                     });
                     if (hasRequestBody)

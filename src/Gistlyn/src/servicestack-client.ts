@@ -258,7 +258,8 @@ export class JsonServiceClient
     baseUrl: string;
     replyBaseUrl: string;
     oneWayBaseUrl: string;
-    mode:string;
+    mode: string;
+    credentials: string;
     headers:Headers;
 
     constructor(baseUrl: string) {
@@ -270,6 +271,7 @@ export class JsonServiceClient
         this.oneWayBaseUrl = combinePaths(baseUrl, "json", "oneway") + "/";
 
         this.mode = "cors";
+        this.credentials = 'include';
         this.headers = new Headers();
         this.headers.set("Content-Type", "application/json");
     }
@@ -305,6 +307,7 @@ export class JsonServiceClient
         {
             method: method,
             mode: this.mode,
+            credentials: this.credentials,
             headers: this.headers            
         });
 
