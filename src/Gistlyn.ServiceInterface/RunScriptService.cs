@@ -13,11 +13,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Gistlyn.ServiceModel.Types;
+using ServiceStack.Logging;
 
 namespace Gistlyn.ServiceInterface
 {
     public class RunScriptService : Service
     {
+        public static ILog Log = LogManager.GetLogger(typeof(RunScriptService));
+
         public AppData AppData { get; set; }
 
         public IDataContext DataContext { get; set; }
@@ -219,6 +222,8 @@ namespace Gistlyn.ServiceInterface
 
             var result = new ScriptExecutionResult();
 
+            var existingUserScripts = GetExistingActiveUserScripts();
+
             var runnerInfo = LocalCache.GetScriptRunnerInfo(request.ScriptId);
             //stop script if run
             if (runnerInfo != null && runnerInfo.ScriptDomain != null)
@@ -238,7 +243,6 @@ namespace Gistlyn.ServiceInterface
                     };
                 }
             }
-
 
             List<AssemblyReference> normalizedReferences;
             var addedReferences = AddReferencesFromPackages(request.References, request.PackagesConfig, out normalizedReferences);
@@ -264,18 +268,56 @@ namespace Gistlyn.ServiceInterface
             LocalCache.SetScriptRunnerInfo(request.ScriptId, new ScriptRunnerInfo
             {
                 ScriptId = request.ScriptId,
+                SessionId = base.Request.GetPermanentSessionId(),
                 ScriptDomain = domain,
                 DomainWrapper = wrapper,
             });
 
-            //Unload appdomain only in synchroneous version
-            //AppDomain.Unload(domain);
+            var scriptsRemoved = UnloadExistingScripts(existingUserScripts.Where(x => x.ScriptId != request.ScriptId));
 
             return new RunScriptResponse
             {
                 Result = result,
-                References = normalizedReferences
+                References = normalizedReferences,
+                ScriptsRemoved = scriptsRemoved,
             };
+        }
+
+        private int UnloadExistingScripts(IEnumerable<ScriptRunnerInfo> runnerInfos)
+        {
+            var count = 0;
+            foreach (var runnerInfo in runnerInfos)
+            {
+                try
+                {
+                    AppDomain.Unload(runnerInfo.ScriptDomain);
+                    LocalCache.RemoveScriptRunnerInfo(runnerInfo.ScriptId);
+                    count++;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex);
+                }
+            }
+            return count;
+        }
+
+        private List<ScriptRunnerInfo> GetExistingActiveUserScripts()
+        {
+            var to = new List<ScriptRunnerInfo>();
+            var sessionId = Request.GetPermanentSessionId();
+            if (!string.IsNullOrEmpty(sessionId))
+            {
+                foreach (var scriptKey in LocalCache.GetAllScriptKeys())
+                {
+                    var runner = LocalCache.GetScriptRunnerInfo(scriptKey);
+                    if (runner != null && runner.SessionId == sessionId)
+                    {
+                        to.Add(runner);
+                    }
+                }
+            }
+            return to;
         }
 
         private string GetSourceCodeHash(RunEmbedScript request)

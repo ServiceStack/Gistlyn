@@ -6,6 +6,8 @@ namespace Gistlyn.ServiceInterface.Auth
     {
         public string ScriptId { get; set; }
 
+        public string SessionId { get; set; }
+
         public DomainWrapper DomainWrapper { get; set; }
 
         public AppDomain ScriptDomain { get; set; }
