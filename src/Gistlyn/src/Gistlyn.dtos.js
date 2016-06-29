@@ -1,5 +1,5 @@
 /* Options:
-Date: 2016-06-27 19:19:06
+Date: 2016-06-29 01:05:28
 Version: 4.00
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:54991
@@ -18,7 +18,7 @@ ExportAsTypes: True
 System.register([], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var ResponseStatus, VariableInfo, ScriptExecutionResult, AssemblyReference, EmbedScriptExecutionResult, NugetPackageInfo, ResponseError, ErrorInfo, HelloResponse, TestServerEventsResponse, ScriptVariableJson, ScriptStateVariables, ScriptStatusResponse, EvaluateSourceResponse, CancelScriptResponse, CancelEmbedScriptResponse, RunScriptResponse, RunEmbedScriptResponse, SearchNugetPackagesResponse, InstallNugetPackageResponse, AddPackageAsReferenceResponse, SearchInstalledPackagesResponse, Hello, TestServerEvents, GetScriptVariableJson, EvaluateExpression, GetScriptVariables, GetScriptStatus, EvaluateSource, CancelScript, CancelEmbedScript, RunScript, RunEmbedScript, SearchNugetPackages, InstallNugetPackage, AddPackageAsReference, SearchInstalledPackages, GetEmbedScript;
+    var ResponseStatus, ScriptStatus, ScriptExecutionResult, VariableInfo, AssemblyReference, EmbedScriptExecutionResult, NugetPackageInfo, ResponseError, ErrorInfo, HelloResponse, TestServerEventsResponse, ScriptVariableJson, EvaluateExpressionResponse, ScriptStateVariables, ScriptStatusResponse, EvaluateSourceResponse, CancelScriptResponse, CancelEmbedScriptResponse, RunScriptResponse, RunEmbedScriptResponse, SearchNugetPackagesResponse, InstallNugetPackageResponse, AddPackageAsReferenceResponse, SearchInstalledPackagesResponse, Hello, TestServerEvents, GetScriptVariableJson, EvaluateExpression, GetScriptVariables, GetScriptStatus, EvaluateSource, CancelScript, CancelEmbedScript, RunScript, RunEmbedScript, SearchNugetPackages, InstallNugetPackage, AddPackageAsReference, SearchInstalledPackages, GetEmbedScript;
     return {
         setters:[],
         execute: function() {
@@ -29,18 +29,29 @@ System.register([], function(exports_1, context_1) {
                 return ResponseStatus;
             }());
             exports_1("ResponseStatus", ResponseStatus);
-            VariableInfo = (function () {
-                function VariableInfo() {
-                }
-                return VariableInfo;
-            }());
-            exports_1("VariableInfo", VariableInfo);
+            (function (ScriptStatus) {
+                ScriptStatus[ScriptStatus["Unknown"] = "Unknown"] = "Unknown";
+                ScriptStatus[ScriptStatus["PrepareToRun"] = "PrepareToRun"] = "PrepareToRun";
+                ScriptStatus[ScriptStatus["Running"] = "Running"] = "Running";
+                ScriptStatus[ScriptStatus["Completed"] = "Completed"] = "Completed";
+                ScriptStatus[ScriptStatus["Cancelled"] = "Cancelled"] = "Cancelled";
+                ScriptStatus[ScriptStatus["CompiledWithErrors"] = "CompiledWithErrors"] = "CompiledWithErrors";
+                ScriptStatus[ScriptStatus["ThrowedException"] = "ThrowedException"] = "ThrowedException";
+                ScriptStatus[ScriptStatus["AnotherScriptExecuting"] = "AnotherScriptExecuting"] = "AnotherScriptExecuting";
+            })(ScriptStatus || (ScriptStatus = {}));
+            exports_1("ScriptStatus", ScriptStatus);
             ScriptExecutionResult = (function () {
                 function ScriptExecutionResult() {
                 }
                 return ScriptExecutionResult;
             }());
             exports_1("ScriptExecutionResult", ScriptExecutionResult);
+            VariableInfo = (function () {
+                function VariableInfo() {
+                }
+                return VariableInfo;
+            }());
+            exports_1("VariableInfo", VariableInfo);
             AssemblyReference = (function () {
                 function AssemblyReference() {
                 }
@@ -90,6 +101,12 @@ System.register([], function(exports_1, context_1) {
                 return ScriptVariableJson;
             }());
             exports_1("ScriptVariableJson", ScriptVariableJson);
+            EvaluateExpressionResponse = (function () {
+                function EvaluateExpressionResponse() {
+                }
+                return EvaluateExpressionResponse;
+            }());
+            exports_1("EvaluateExpressionResponse", EvaluateExpressionResponse);
             ScriptStateVariables = (function () {
                 function ScriptStateVariables() {
                 }
@@ -180,13 +197,15 @@ System.register([], function(exports_1, context_1) {
                 return GetScriptVariableJson;
             }());
             exports_1("GetScriptVariableJson", GetScriptVariableJson);
-            // @Route("/scripts/evaluate")
+            // @Route("/scripts/{ScriptId}/evaluate")
             EvaluateExpression = (function () {
                 function EvaluateExpression() {
                 }
+                EvaluateExpression.prototype.createResponse = function () { return new EvaluateExpressionResponse(); };
                 return EvaluateExpression;
             }());
             exports_1("EvaluateExpression", EvaluateExpression);
+            // @Route("/scripts/{ScriptId}/vars")
             // @Route("/scripts/{ScriptId}/vars/{VariableName}")
             GetScriptVariables = (function () {
                 function GetScriptVariables() {

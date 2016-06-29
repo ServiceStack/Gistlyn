@@ -15,7 +15,7 @@ import "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js";
 import "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js";
 import "./codemirror.js";
 
-import { RunScript, GetScriptStatus, CancelScript, GetScriptVariables, VariableInfo, EvaluateExpression } from './Gistlyn.dtos';
+import { RunScript, GetScriptStatus, CancelScript, GetScriptVariables, VariableInfo, EvaluateExpression, ScriptStatus } from './Gistlyn.dtos';
 
 var options = {
     lineNumbers: true,
@@ -136,17 +136,17 @@ var sse = new ServerEventsClient("/", ["gist"], {
         },
         ConsoleMessage(m, e) {
             //console.log("ConsoleMessage", m, e);
-            store.dispatch({ type: 'CONSOLE_LOG', logs: [m.message] });
+            store.dispatch({ type: 'CONSOLE_LOG', logs: [{msg:m.message}] });
         },
         ScriptExecutionResult(m, e) {
             //console.log("ScriptExecutionResult", m, e);
             if (m.status === store.getState().scriptStatus) return;
 
-            store.dispatch({ type: 'CONSOLE_LOG', logs: [humanize(m.status)] });
+            store.dispatch({ type: 'CONSOLE_LOG', logs: [{msg:humanize(m.status)}] });
             store.dispatch({ type: 'SCRIPT_STATUS', scriptStatus: m.status });
 
             if (m.status === "CompiledWithErrors" && m.errors) {
-                const errorMsgs = m.errors.map(e => <span className="error">{e.info}</span>);
+                const errorMsgs = m.errors.map(e => ({ msg:e.info, cls:"error"}));
                 store.dispatch({ type: 'CONSOLE_LOG', logs: errorMsgs });
             }
             else if (m.status === "Completed") {
@@ -197,7 +197,9 @@ const getSortedFileNames = (files) => {
         selectFileName: (activeFileName) => dispatch({ type: 'FILE_SELECT', activeFileName }),
         raiseError: (error) => dispatch({ type: 'ERROR_RAISE', error }),
         clearError: () => dispatch({ type: 'ERROR_CLEAR' }),
-        logToConsole: (logs) => dispatch({ type:'CONSOLE_LOG', logs }),
+        logConsole: (logs) => dispatch({ type:'CONSOLE_LOG', logs }),
+        logConsoleError: (status) => dispatch({ type:'CONSOLE_LOG', logs:[Object.assign({ msg:status.message, cls:"error"}, status)] }),
+        logConsoleMsgs: (txtMessages) => dispatch({ type:'CONSOLE_LOG', logs:txtMessages.map(msg => ({ msg })) }),
         setScriptStatus: (scriptStatus) => dispatch({ type:'SCRIPT_STATUS', scriptStatus }),
         inspectVariable: (name, variables) => dispatch({ type:'VARS_INSPECT', name, variables }),
         setExpression: (expression) => dispatch({ type: 'EXPRESSION_SET', expression }),
@@ -248,7 +250,7 @@ class App extends React.Component<any, any> {
 
         client.post(request)
             .then(r => {
-                this.props.logToConsole(r.references.map(ref => `loaded ${ref.name}`));
+                this.props.logConsoleMsgs(r.references.map(ref => `loaded ${ref.name}`));
             })
             .catch(r => {
                 this.props.raiseError(r.responseStatus);
@@ -263,7 +265,7 @@ class App extends React.Component<any, any> {
         client.post(request)
             .then(r => {
                 this.props.setScriptStatus("Cancelled");
-                this.props.logToConsole(["Cancelled by user"]);
+                this.props.logConsole([{ msg: "Cancelled by user", cls: "error" }]);
             })
             .catch(r => {
                 this.props.raiseError(r.responseStatus);
@@ -289,7 +291,14 @@ class App extends React.Component<any, any> {
 
         client.get(request)
             .then(r => {
-                this.props.inspectVariable(v.name, r.variables);
+                if (r.status !== "Completed") {
+                    const msg = r.status === "Unknown"
+                        ? "Script no longer exists on the server"
+                        : `Script Error: ${humanize(r.status)}`;
+                    this.props.logConsole([{ msg, cls: "error" }]);
+                } else {
+                    this.props.inspectVariable(v.name, r.variables);
+                }
             });
     }
 
@@ -341,11 +350,14 @@ class App extends React.Component<any, any> {
             .then(r => {
                 this.props.setExpressionResult(r.result);
             })
-            .catch(e => this.props.logToConsole([e.responseStatus]));
+            .catch(e => this.props.logConsoleError(e.responseStatus));
     }
 
-    revertGist() {
+    revertGist(clearAll:boolean=false) {
         localStorage.removeItem(GistCacheKey(this.props.gist));
+        if (clearAll) {
+            localStorage.removeItem(StateKey);
+        }
         this.props.updateGist(this.props.gist, true);
     }
 
@@ -450,7 +462,7 @@ class App extends React.Component<any, any> {
                             <tbody style={{font:"13px/18px monospace", color:"#444"}}>
                                 {this.props.logs.map(log => (
                                     <tr>
-                                        <td style={{padding:"2px 8px"}}>{log}</td>
+                                        <td style={{padding:"2px 8px"}}><span className={log.cls}>{log.msg}</span></td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -495,7 +507,7 @@ class App extends React.Component<any, any> {
 
                 <div id="footer">
                     <div id="actions">
-                        <div id="revert" onClick={e => this.revertGist()}>
+                        <div id="revert" onClick={e => this.revertGist(e.shiftKey)}>
                             <i className="material-icons">undo</i>
                             <p>Revert Changes</p>
                         </div>

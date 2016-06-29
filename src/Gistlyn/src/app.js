@@ -157,16 +157,16 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                     },
                     ConsoleMessage: function (m, e) {
                         //console.log("ConsoleMessage", m, e);
-                        store.dispatch({ type: 'CONSOLE_LOG', logs: [m.message] });
+                        store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: m.message }] });
                     },
                     ScriptExecutionResult: function (m, e) {
                         //console.log("ScriptExecutionResult", m, e);
                         if (m.status === store.getState().scriptStatus)
                             return;
-                        store.dispatch({ type: 'CONSOLE_LOG', logs: [servicestack_client_1.humanize(m.status)] });
+                        store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: servicestack_client_1.humanize(m.status) }] });
                         store.dispatch({ type: 'SCRIPT_STATUS', scriptStatus: m.status });
                         if (m.status === "CompiledWithErrors" && m.errors) {
-                            var errorMsgs = m.errors.map(function (e) { return React.createElement("span", {className: "error"}, e.info); });
+                            var errorMsgs = m.errors.map(function (e) { return ({ msg: e.info, cls: "error" }); });
                             store.dispatch({ type: 'CONSOLE_LOG', logs: errorMsgs });
                         }
                         else if (m.status === "Completed") {
@@ -214,7 +214,7 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         _this.props.setScriptStatus("Started");
                         client.post(request)
                             .then(function (r) {
-                            _this.props.logToConsole(r.references.map(function (ref) { return ("loaded " + ref.name); }));
+                            _this.props.logConsoleMsgs(r.references.map(function (ref) { return ("loaded " + ref.name); }));
                         })
                             .catch(function (r) {
                             _this.props.raiseError(r.responseStatus);
@@ -228,7 +228,7 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         client.post(request)
                             .then(function (r) {
                             _this.props.setScriptStatus("Cancelled");
-                            _this.props.logToConsole(["Cancelled by user"]);
+                            _this.props.logConsole([{ msg: "Cancelled by user", cls: "error" }]);
                         })
                             .catch(function (r) {
                             _this.props.raiseError(r.responseStatus);
@@ -278,7 +278,15 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                     request.variableName = v.name;
                     client.get(request)
                         .then(function (r) {
-                        _this.props.inspectVariable(v.name, r.variables);
+                        if (r.status !== "Completed") {
+                            var msg = r.status === "Unknown"
+                                ? "Script no longer exists on the server"
+                                : "Script Error: " + servicestack_client_1.humanize(r.status);
+                            _this.props.logConsole([{ msg: msg, cls: "error" }]);
+                        }
+                        else {
+                            _this.props.inspectVariable(v.name, r.variables);
+                        }
                     });
                 };
                 App.prototype.getVariableRows = function (v) {
@@ -309,10 +317,14 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         .then(function (r) {
                         _this.props.setExpressionResult(r.result);
                     })
-                        .catch(function (e) { return _this.props.logToConsole([e.responseStatus]); });
+                        .catch(function (e) { return _this.props.logConsoleError(e.responseStatus); });
                 };
-                App.prototype.revertGist = function () {
+                App.prototype.revertGist = function (clearAll) {
+                    if (clearAll === void 0) { clearAll = false; }
                     localStorage.removeItem(GistCacheKey(this.props.gist));
+                    if (clearAll) {
+                        localStorage.removeItem(StateKey);
+                    }
                     this.props.updateGist(this.props.gist, true);
                 };
                 App.prototype.componentDidUpdate = function () {
@@ -362,13 +374,13 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         Preview.push(React.createElement("div", {id: "placeholder"}));
                     }
                     if (this.props.logs.length > 0) {
-                        Preview.push((React.createElement("div", {id: "console", className: "section", style: { borderBottom: "solid 1px #ddd" }}, React.createElement("div", {className: "head", style: { font: "14px/20px arial", height: "22px", textAlign: "right", borderBottom: "solid 1px #ddd" }}, React.createElement("b", {style: { background: "#444", color: "#fff", padding: "4px 8px" }}, "console")), React.createElement("div", {className: "scroll", style: { overflow: "auto", maxHeight: "350px" }, ref: function (el) { return _this.consoleScroll = el; }}, React.createElement("table", {style: { width: "100%" }}, React.createElement("tbody", {style: { font: "13px/18px monospace", color: "#444" }}, this.props.logs.map(function (log) { return (React.createElement("tr", null, React.createElement("td", {style: { padding: "2px 8px" }}, log))); })))))));
+                        Preview.push((React.createElement("div", {id: "console", className: "section", style: { borderBottom: "solid 1px #ddd" }}, React.createElement("div", {className: "head", style: { font: "14px/20px arial", height: "22px", textAlign: "right", borderBottom: "solid 1px #ddd" }}, React.createElement("b", {style: { background: "#444", color: "#fff", padding: "4px 8px" }}, "console")), React.createElement("div", {className: "scroll", style: { overflow: "auto", maxHeight: "350px" }, ref: function (el) { return _this.consoleScroll = el; }}, React.createElement("table", {style: { width: "100%" }}, React.createElement("tbody", {style: { font: "13px/18px monospace", color: "#444" }}, this.props.logs.map(function (log) { return (React.createElement("tr", null, React.createElement("td", {style: { padding: "2px 8px" }}, React.createElement("span", {className: log.cls}, log.msg)))); })))))));
                     }
                     return (React.createElement("div", {id: "body"}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png"}), React.createElement("h3", null, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, React.createElement("input", {type: "text", id: "txtGist", placeholder: "gist hash or url", value: this.props.gist, onFocus: function (e) { return e.target.select(); }, onChange: function (e) { return _this.handleGistUpdate(e); }}), main != null
                         ? React.createElement("i", {className: "material-icons", style: { color: "#0f9", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "check")
                         : this.props.error
                             ? React.createElement("i", {className: "material-icons", style: { color: "#ebccd1", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "error")
-                            : null))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement("div", {id: "editor"}, React.createElement("div", {id: "tabs", style: { display: this.props.files ? 'flex' : 'none' }}, Tabs), React.createElement(react_codemirror_1.default, {value: source, options: options, onChange: function (src) { return _this.updateSource(src); }})), React.createElement("div", {id: "preview"}, Preview))), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "actions"}, React.createElement("div", {id: "revert", onClick: function (e) { return _this.revertGist(); }}, React.createElement("i", {className: "material-icons"}, "undo"), React.createElement("p", null, "Revert Changes"))), React.createElement("div", {id: "run"}, main != null
+                            : null))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement("div", {id: "editor"}, React.createElement("div", {id: "tabs", style: { display: this.props.files ? 'flex' : 'none' }}, Tabs), React.createElement(react_codemirror_1.default, {value: source, options: options, onChange: function (src) { return _this.updateSource(src); }})), React.createElement("div", {id: "preview"}, Preview))), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "actions"}, React.createElement("div", {id: "revert", onClick: function (e) { return _this.revertGist(e.shiftKey); }}, React.createElement("i", {className: "material-icons"}, "undo"), React.createElement("p", null, "Revert Changes"))), React.createElement("div", {id: "run"}, main != null
                         ? (!isScriptRunning
                             ? React.createElement("i", {className: "material-icons", title: "run", onClick: this.run}, "play_circle_outline")
                             : React.createElement("i", {className: "material-icons", title: "cancel script", onClick: this.cancel, style: { color: "#FF5252" }}, "cancel"))
@@ -396,7 +408,9 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         selectFileName: function (activeFileName) { return dispatch({ type: 'FILE_SELECT', activeFileName: activeFileName }); },
                         raiseError: function (error) { return dispatch({ type: 'ERROR_RAISE', error: error }); },
                         clearError: function () { return dispatch({ type: 'ERROR_CLEAR' }); },
-                        logToConsole: function (logs) { return dispatch({ type: 'CONSOLE_LOG', logs: logs }); },
+                        logConsole: function (logs) { return dispatch({ type: 'CONSOLE_LOG', logs: logs }); },
+                        logConsoleError: function (status) { return dispatch({ type: 'CONSOLE_LOG', logs: [Object.assign({ msg: status.message, cls: "error" }, status)] }); },
+                        logConsoleMsgs: function (txtMessages) { return dispatch({ type: 'CONSOLE_LOG', logs: txtMessages.map(function (msg) { return ({ msg: msg }); }) }); },
                         setScriptStatus: function (scriptStatus) { return dispatch({ type: 'SCRIPT_STATUS', scriptStatus: scriptStatus }); },
                         inspectVariable: function (name, variables) { return dispatch({ type: 'VARS_INSPECT', name: name, variables: variables }); },
                         setExpression: function (expression) { return dispatch({ type: 'EXPRESSION_SET', expression: expression }); },

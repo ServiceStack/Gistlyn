@@ -1,5 +1,5 @@
 /* Options:
-Date: 2016-06-28 20:45:26
+Date: 2016-06-29 01:20:33
 Version: 4.00
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:54991
@@ -44,17 +44,7 @@ export class ResponseStatus
     meta: { [index:string]: string; };
 }
 
-export const enum ScriptStatus
-{
-    unknown,
-    prepareToRun,
-    running,
-    completed,
-    cancelled,
-    compiledWithErrors,
-    throwedException,
-    anotherScriptExecuting,
-}
+export type ScriptStatus = "Unknown" | "PrepareToRun" | "Running" | "Completed" | "Cancelled" | "CompiledWithErrors" | "ThrowedException" | "AnotherScriptExecuting";
 
 export class ScriptExecutionResult
 {
