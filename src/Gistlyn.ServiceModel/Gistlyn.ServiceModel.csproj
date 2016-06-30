@@ -59,7 +59,6 @@
     <Compile Include="EvaluateExpression.cs" />
     <Compile Include="GetEmbedScript.cs" />
     <Compile Include="RunEmbedScript.cs" />
-    <Compile Include="CancelEmbedScript.cs" />
     <Compile Include="Types\AssemblyReference.cs" />
     <Compile Include="Types\ConsoleMessage.cs" />
     <Compile Include="Types\ErrorInfo.cs" />

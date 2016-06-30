@@ -1,23 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using ServiceStack;
 using Gistlyn.ServiceModel;
-using Gistlyn.SnippetEngine;
 using System.IO;
+using System.Security.Cryptography;
 using Gistlyn.ServiceInterface.Auth;
 using System.Security.Policy;
-using System.Security.Cryptography;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Text;
 using System.Xml.Serialization;
 using Gistlyn.ServiceModel.Types;
 using ServiceStack.Logging;
 
 namespace Gistlyn.ServiceInterface
 {
-    public class RunScriptService : Service
+    public partial class RunScriptService : Service
     {
         public static ILog Log = LogManager.GetLogger(typeof(RunScriptService));
 
@@ -26,187 +23,6 @@ namespace Gistlyn.ServiceInterface
         public IDataContext DataContext { get; set; }
 
         public IServerEvents ServerEvents { get; set; }
-
-        public object Any(Hello request)
-        {
-            return new HelloResponse { Result = "Hello, {0}!".Fmt(request.Name) };
-        }
-
-        public object Any(TestServerEvents request)
-        {
-            var response = new TestServerEventsResponse { Result = "Hello, {0}!".Fmt(request.Name) };
-
-            try
-            {
-                ServerEvents.NotifySession(Request.GetSessionId(), response, "@channels");
-                ServerEvents.NotifyUserId(request.Name, response, "@channels");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-            return response;
-        }
-
-        public EvaluateExpressionResponse Any(EvaluateExpression request)
-        {
-            var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
-            var wrapper = runner != null ? runner.DomainWrapper : null;
-            if (wrapper == null)
-                throw HttpError.NotFound("Script no longer exists on server");
-
-            return new EvaluateExpressionResponse
-            {
-                Result = wrapper.EvaluateExpression(request.Expression, request.IncludeJson)
-            };
-        }
-
-        public object Any(GetScriptVariables request)
-        {
-            var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
-
-            var wrapper = runner != null ? runner.DomainWrapper : null;
-
-            var variables = wrapper != null
-                ? wrapper.GetVariables(request.VariableName)
-                : new ScriptStateVariables { Status = ScriptStatus.Unknown };
-
-            return variables;
-        }
-
-        public object Any(GetScriptStatus request)
-        {
-            var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
-
-            var wrapper = runner != null ? runner.DomainWrapper : null;
-
-            return new ScriptStatusResponse
-            {
-                Status = wrapper != null ? wrapper.GetScriptStatus() : ScriptStatus.Unknown
-            };
-        }
-
-        public object Any(EvaluateSource request)
-        {
-            var runner = new ScriptRunner();
-            var response = new EvaluateSourceResponse();
-
-            try
-            {
-                response.Result = runner.Execute(request.Code).Result;
-            }
-            catch (Exception e)
-            {
-                response.Result = new ScriptExecutionResult { Exception =  e };
-            }
-
-            return response;
-        }
-
-        public object Any(CancelScript request)
-        {
-            var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
-
-            var result = new ScriptExecutionResult
-            {
-                Status = Cancel(runner)
-                    ? ScriptStatus.Cancelled
-                    : ScriptStatus.Unknown
-            };
-
-            ////cancellation token does not work in mono
-            ////leave this alternative way when cancellation token will be implemented
-            //if (sess.DomainWrapper != null && sess.DomainWrapper.GistHash == null)
-            //{
-            //    sess.DomainWrapper.Cancel();
-            //    result.Status = sess.DomainWrapper.GetScriptStatus();
-            //}
-
-            return new CancelScriptResponse
-            {
-                Result = result
-            };
-        }
-
-        private bool Cancel(ScriptRunnerInfo runner)
-        {
-            if (runner != null && runner.ScriptDomain != null)
-            {
-                var domain = runner.ScriptDomain;
-                runner.ScriptDomain = null;
-                LocalCache.RemoveScriptRunnerInfo(runner.ScriptId);
-                AppDomain.Unload(domain);
-                return true;
-            }
-            return false;
-        }
-
-        public object Any(CancelEmbedScript request)
-        {
-            var result = new ScriptExecutionResult { Status = ScriptStatus.Unknown };
-
-            var runner = this.GetCacheClient().Get<ScriptRunnerInfo>(request.ScriptId);
-            this.GetCacheClient().Remove(request.ScriptId);
-
-            if (runner != null && runner.ScriptDomain != null)
-            {
-                AppDomain domain = runner.ScriptDomain;
-                runner.ScriptDomain = null;
-                AppDomain.Unload(domain);
-                result.Status = ScriptStatus.Cancelled;
-            }
-
-            return new CancelEmbedScriptResponse
-            {
-                Result = result
-            };
-        }
-
-        private List<AssemblyReference> AddReferencesFromPackages(List<AssemblyReference> references, string packages, out List<AssemblyReference> normalizedReferences)
-        {
-            var tmpReferences = new List<AssemblyReference>();
-
-            if (references != null)
-                tmpReferences.AddRange(references);
-
-            if (!string.IsNullOrEmpty(packages))
-            {
-                PackageCollection tmpPackages = null;
-
-                var serializer = new XmlSerializer(typeof(PackageCollection));
-
-                var arr = packages.ToAsciiBytes();
-
-                using (var ms = new MemoryStream(arr))
-                {
-                    tmpPackages = (PackageCollection)serializer.Deserialize(ms);
-                }
-
-                foreach (var package in tmpPackages.Packages)
-                {
-                    //istall it
-                    tmpReferences.AddRange(NugetHelper.RestorePackage(DataContext, AppData.NugetPackagesDirectory, package.Id, package.Version));
-                }
-            }
-
-            //distinct by name
-            tmpReferences = tmpReferences.GroupBy(a => a.Name).Select(g => g.First()).ToList();
-            //normalizedReferences - references with original path
-            normalizedReferences = tmpReferences
-                .Select(r => new AssemblyReference().PopulateWith(r))
-                .ToList();
-
-            foreach (var reference in tmpReferences)
-            {
-                if (!Path.IsPathRooted(reference.Path))
-                {
-                    var rootPath = System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath;
-                    reference.Path = Path.Combine(rootPath, AppData.NugetPackagesDirectory, reference.Path);
-                }
-            }
-
-            return tmpReferences;
-        }
 
         public object Any(RunScript request)
         {
@@ -280,6 +96,119 @@ namespace Gistlyn.ServiceInterface
             };
         }
 
+        public object Any(GetScriptVariables request)
+        {
+            var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
+
+            var wrapper = runner != null ? runner.DomainWrapper : null;
+
+            var variables = wrapper != null
+                ? wrapper.GetVariables(request.VariableName)
+                : new ScriptStateVariables { Status = ScriptStatus.Unknown };
+
+            return variables;
+        }
+
+        public object Any(EvaluateExpression request)
+        {
+            var wrapper = GetDomainWrapper(request);
+            return new EvaluateExpressionResponse
+            {
+                Result = wrapper.EvaluateExpression(request.Expression, request.IncludeJson)
+            };
+        }
+
+        public object Any(CancelScript request)
+        {
+            var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
+            var result = new ScriptExecutionResult
+            {
+                Status = Cancel(runner)
+                    ? ScriptStatus.Cancelled
+                    : ScriptStatus.Unknown
+            };
+
+            ////cancellation token does not work in mono
+            ////leave this alternative way when cancellation token will be implemented
+            //if (sess.DomainWrapper != null && sess.DomainWrapper.GistHash == null)
+            //{
+            //    sess.DomainWrapper.Cancel();
+            //    result.Status = sess.DomainWrapper.GetScriptStatus();
+            //}
+
+            return new CancelScriptResponse
+            {
+                Result = result
+            };
+        }
+
+
+        private DomainWrapper GetDomainWrapper(EvaluateExpression request)
+        {
+            var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
+            var wrapper = runner != null ? runner.DomainWrapper : null;
+            if (wrapper == null)
+                throw HttpError.NotFound("Script no longer exists on server");
+            return wrapper;
+        }
+
+        private bool Cancel(ScriptRunnerInfo runner)
+        {
+            if (runner != null && runner.ScriptDomain != null)
+            {
+                var domain = runner.ScriptDomain;
+                runner.ScriptDomain = null;
+                LocalCache.RemoveScriptRunnerInfo(runner.ScriptId);
+                AppDomain.Unload(domain);
+                return true;
+            }
+            return false;
+        }
+
+        private List<AssemblyReference> AddReferencesFromPackages(List<AssemblyReference> references, string packages, out List<AssemblyReference> normalizedReferences)
+        {
+            var tmpReferences = new List<AssemblyReference>();
+
+            if (references != null)
+                tmpReferences.AddRange(references);
+
+            if (!string.IsNullOrEmpty(packages))
+            {
+                PackageCollection tmpPackages = null;
+                var serializer = new XmlSerializer(typeof(PackageCollection));
+                var arr = packages.ToAsciiBytes();
+
+                using (var ms = new MemoryStream(arr))
+                {
+                    tmpPackages = (PackageCollection)serializer.Deserialize(ms);
+                }
+
+                foreach (var package in tmpPackages.Packages)
+                {
+                    //install it
+                    tmpReferences.AddRange(NugetUtils.RestorePackage(DataContext, AppData.NugetPackagesDirectory, package.Id, package.Version));
+                }
+            }
+
+            //distinct by name
+            tmpReferences = tmpReferences.GroupBy(a => a.Name).Select(g => g.First()).ToList();
+            //normalizedReferences - references with original path
+            normalizedReferences = tmpReferences
+                .Select(r => new AssemblyReference().PopulateWith(r))
+                .ToList();
+
+            foreach (var reference in tmpReferences)
+            {
+                if (!Path.IsPathRooted(reference.Path))
+                {
+                    var rootPath = System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath;
+                    reference.Path = Path.Combine(rootPath, AppData.NugetPackagesDirectory, reference.Path);
+                }
+            }
+
+            return tmpReferences;
+        }
+
         private int UnloadExistingScripts(IEnumerable<ScriptRunnerInfo> runnerInfos)
         {
             var count = 0;
@@ -336,85 +265,6 @@ namespace Gistlyn.ServiceInterface
             }
 
             return hash;
-        }
-
-        public object Any(RunEmbedScript request)
-        {
-            if (request.GistHash == null)
-                throw new ArgumentException("GistHash");
-
-            var result = new EmbedScriptExecutionResult();
-            var codeHash = GetSourceCodeHash(request);
-
-            if (!request.NoCache)
-            {
-                var mr = AppData.GetMemoizedResult(codeHash);
-                if (mr != null)
-                {
-                    result = mr.Result;
-                    return new RunEmbedScriptResponse { Result = result };
-                }
-            }
-
-            List<AssemblyReference> normalizedReferences;
-            var addedReferences = AddReferencesFromPackages(request.References, request.Packages, out normalizedReferences);
-
-            //Create domain and run script
-            var evidence = new Evidence(AppDomain.CurrentDomain.Evidence);
-            var setup = new AppDomainSetup
-            {
-                PrivateBinPath = Path.Combine(System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath, "bin"),
-                ApplicationBase = System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath
-            };
-
-            var domain = AppDomain.CreateDomain(Guid.NewGuid().ToString(), evidence, setup);
-
-            var asm = typeof(DomainWrapper).Assembly.FullName;
-            var type = typeof(DomainWrapper).FullName;
-
-            var wrapper = (DomainWrapper)domain.CreateInstanceAndUnwrap(asm, type);
-            wrapper.ScriptId = request.ScriptId;
-            var writerProxy = new NotifierProxy(ServerEvents, request.ScriptId);
-
-            var info = new ScriptRunnerInfo { ScriptId = request.ScriptId, ScriptDomain = domain, DomainWrapper = wrapper };
-
-            Cache.Set(request.ScriptId, info);
-
-            var lockEvt = new ManualResetEvent(false);
-
-            ThreadPool.QueueUserWorkItem(_ =>
-            {
-                try
-                {
-                    var sr = wrapper.Run(request.MainSource, request.Sources, addedReferences.Select(r => r.Path).ToList(), writerProxy);
-
-                    result.Exception = sr.Exception;
-                    result.Errors = sr.Errors;
-
-                    //get json of last variable
-                    if (sr.Variables != null && sr.Variables.Count > 0)
-                    {
-                        result.LastVariableJson = wrapper.GetVariableValue(sr.Variables[sr.Variables.Count - 1].Name).ToJson();
-                    }
-                }
-                finally
-                {
-                    lockEvt.Set();
-                }
-            });
-
-            lockEvt.WaitOne();
-
-            AppData.SetMemoizedResult(new MemoizedResult { CodeHash = codeHash, Result = result });
-
-            //Unload appdomain only in synchroneous version
-            //AppDomain.Unload(domain);
-
-            return new RunEmbedScriptResponse
-            {
-                Result = result,
-                References = normalizedReferences
-            };
         }
     }
 }

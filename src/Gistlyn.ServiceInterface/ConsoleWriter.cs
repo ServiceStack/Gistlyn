@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Text;
 
@@ -30,11 +29,6 @@ namespace Gistlyn.ServiceInterface
                 proxy.SendConsoleMessage(cache);
                 cache = string.Empty;
             }
-        }
-
-        public override void WriteLine(string value)
-        {
-            base.WriteLine(value);
         }
     }
 }

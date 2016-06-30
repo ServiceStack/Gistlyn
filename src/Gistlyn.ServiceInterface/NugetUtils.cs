@@ -6,7 +6,7 @@ using NuGet;
 
 namespace Gistlyn.ServiceInterface
 {
-    public static class NugetHelper
+    public static class NugetUtils
     {
         public static NugetPackageInfo GetPackageInfo(this IPackage package)
         {

@@ -1,8 +1,8 @@
 /* Options:
-Date: 2016-06-29 01:20:33
+Date: 2016-06-30 00:23:16
 Version: 4.00
 Tip: To override a DTO option, remove "//" prefix before updating
-BaseUrl: http://localhost:54991
+BaseUrl: http://localhost:5100
 
 //GlobalNamespace:
 ExportAsTypes: True
@@ -18,7 +18,7 @@ ExportAsTypes: True
 System.register([], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var ResponseStatus, ScriptExecutionResult, VariableInfo, AssemblyReference, EmbedScriptExecutionResult, NugetPackageInfo, ResponseError, ErrorInfo, HelloResponse, TestServerEventsResponse, ScriptVariableJson, EvaluateExpressionResponse, ScriptStateVariables, ScriptStatusResponse, EvaluateSourceResponse, CancelScriptResponse, CancelEmbedScriptResponse, RunScriptResponse, RunEmbedScriptResponse, SearchNugetPackagesResponse, InstallNugetPackageResponse, AddPackageAsReferenceResponse, SearchInstalledPackagesResponse, Hello, TestServerEvents, GetScriptVariableJson, EvaluateExpression, GetScriptVariables, GetScriptStatus, EvaluateSource, CancelScript, CancelEmbedScript, RunScript, RunEmbedScript, SearchNugetPackages, InstallNugetPackage, AddPackageAsReference, SearchInstalledPackages, GetEmbedScript;
+    var ResponseStatus, ScriptExecutionResult, VariableInfo, AssemblyReference, EmbedScriptExecutionResult, NugetPackageInfo, ResponseError, ErrorInfo, HelloResponse, TestServerEventsResponse, EvaluateExpressionResponse, ScriptStateVariables, ScriptStatusResponse, EvaluateSourceResponse, CancelScriptResponse, CancelEmbedScriptResponse, RunScriptResponse, RunEmbedScriptResponse, SearchNugetPackagesResponse, InstallNugetPackageResponse, AddPackageAsReferenceResponse, SearchInstalledPackagesResponse, AuthenticateResponse, AssignRolesResponse, UnAssignRolesResponse, Hello, TestServerEvents, EvaluateExpression, GetScriptVariables, GetScriptStatus, EvaluateSource, CancelScript, CancelEmbedScript, RunScript, RunEmbedScript, SearchNugetPackages, InstallNugetPackage, AddPackageAsReference, SearchInstalledPackages, GetEmbedScript, Authenticate, AssignRoles, UnAssignRoles;
     return {
         setters:[],
         execute: function() {
@@ -84,12 +84,6 @@ System.register([], function(exports_1, context_1) {
                 return TestServerEventsResponse;
             }());
             exports_1("TestServerEventsResponse", TestServerEventsResponse);
-            ScriptVariableJson = (function () {
-                function ScriptVariableJson() {
-                }
-                return ScriptVariableJson;
-            }());
-            exports_1("ScriptVariableJson", ScriptVariableJson);
             EvaluateExpressionResponse = (function () {
                 function EvaluateExpressionResponse() {
                 }
@@ -162,6 +156,27 @@ System.register([], function(exports_1, context_1) {
                 return SearchInstalledPackagesResponse;
             }());
             exports_1("SearchInstalledPackagesResponse", SearchInstalledPackagesResponse);
+            // @DataContract
+            AuthenticateResponse = (function () {
+                function AuthenticateResponse() {
+                }
+                return AuthenticateResponse;
+            }());
+            exports_1("AuthenticateResponse", AuthenticateResponse);
+            // @DataContract
+            AssignRolesResponse = (function () {
+                function AssignRolesResponse() {
+                }
+                return AssignRolesResponse;
+            }());
+            exports_1("AssignRolesResponse", AssignRolesResponse);
+            // @DataContract
+            UnAssignRolesResponse = (function () {
+                function UnAssignRolesResponse() {
+                }
+                return UnAssignRolesResponse;
+            }());
+            exports_1("UnAssignRolesResponse", UnAssignRolesResponse);
             Hello = (function () {
                 function Hello() {
                 }
@@ -178,14 +193,6 @@ System.register([], function(exports_1, context_1) {
                 return TestServerEvents;
             }());
             exports_1("TestServerEvents", TestServerEvents);
-            // @Route("/scripts/{ScriptId}/vars/{VariableName}/json")
-            GetScriptVariableJson = (function () {
-                function GetScriptVariableJson() {
-                }
-                GetScriptVariableJson.prototype.createResponse = function () { return new ScriptVariableJson(); };
-                return GetScriptVariableJson;
-            }());
-            exports_1("GetScriptVariableJson", GetScriptVariableJson);
             // @Route("/scripts/{ScriptId}/evaluate")
             EvaluateExpression = (function () {
                 function EvaluateExpression() {
@@ -290,6 +297,36 @@ System.register([], function(exports_1, context_1) {
                 return GetEmbedScript;
             }());
             exports_1("GetEmbedScript", GetEmbedScript);
+            // @Route("/auth")
+            // @Route("/auth/{provider}")
+            // @Route("/authenticate")
+            // @Route("/authenticate/{provider}")
+            // @DataContract
+            Authenticate = (function () {
+                function Authenticate() {
+                }
+                Authenticate.prototype.createResponse = function () { return new AuthenticateResponse(); };
+                return Authenticate;
+            }());
+            exports_1("Authenticate", Authenticate);
+            // @Route("/assignroles")
+            // @DataContract
+            AssignRoles = (function () {
+                function AssignRoles() {
+                }
+                AssignRoles.prototype.createResponse = function () { return new AssignRolesResponse(); };
+                return AssignRoles;
+            }());
+            exports_1("AssignRoles", AssignRoles);
+            // @Route("/unassignroles")
+            // @DataContract
+            UnAssignRoles = (function () {
+                function UnAssignRoles() {
+                }
+                UnAssignRoles.prototype.createResponse = function () { return new UnAssignRolesResponse(); };
+                return UnAssignRoles;
+            }());
+            exports_1("UnAssignRoles", UnAssignRoles);
         }
     }
 });

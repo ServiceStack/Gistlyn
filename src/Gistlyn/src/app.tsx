@@ -18,13 +18,10 @@ import "./codemirror.js";
 
 import {
     RunScript,
-    GetScriptStatus,
+    GetScriptVariables, VariableInfo,
     CancelScript,
-    GetScriptVariables,
-    VariableInfo,
     EvaluateExpression,
-    ScriptStatus,
-    ScriptExecutionResult
+    ScriptExecutionResult, ScriptStatus
 } from './Gistlyn.dtos';
 
 var options = {
@@ -150,11 +147,9 @@ var sse = new ServerEventsClient("/", ["gist"], {
             store.dispatch({ type: 'SSE_CONNECT', activeSub });
         },
         ConsoleMessage(m, e) {
-            //console.log("ConsoleMessage", m, e);
             store.dispatch({ type: 'CONSOLE_LOG', logs: [{msg:m.message}] });
         },
-        ScriptExecutionResult(m, e) {
-            //console.log("ScriptExecutionResult", m, e);
+        ScriptExecutionResult(m:ScriptExecutionResult, e) {
             if (m.status === store.getState().scriptStatus) return;
 
             const cls = ScriptStatusError.indexOf(m.status) >= 0 ? "error" : "";

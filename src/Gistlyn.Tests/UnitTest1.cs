@@ -1,7 +1,5 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Gistlyn.ServiceInterface;
-using Gistlyn.ServiceModel;
 using ServiceStack.Testing;
 using ServiceStack;
 
@@ -28,16 +26,6 @@ namespace Gistlyn.Tests
         public void TestFixtureTearDown()
         {
             appHost.Dispose();
-        }
-
-        [Test]
-        public void TestMethod1()
-        {
-            var service = appHost.Container.Resolve<RunScriptService>();
-
-            var response = (TestServerEventsResponse)service.Any(new TestServerEvents { Name = "World" });
-
-            Assert.That(response.Result, Is.EqualTo("Hello, World!"));
         }
     }
 }

@@ -2,7 +2,7 @@
 {
     public enum ScriptStatus
     {
-        Unknown = 0,
+        Unknown,
         PrepareToRun,
         Running,
         Completed,

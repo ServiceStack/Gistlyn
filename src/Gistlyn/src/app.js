@@ -163,11 +163,9 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         store.dispatch({ type: 'SSE_CONNECT', activeSub: activeSub });
                     },
                     ConsoleMessage: function (m, e) {
-                        //console.log("ConsoleMessage", m, e);
                         store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: m.message }] });
                     },
                     ScriptExecutionResult: function (m, e) {
-                        //console.log("ScriptExecutionResult", m, e);
                         if (m.status === store.getState().scriptStatus)
                             return;
                         var cls = ScriptStatusError.indexOf(m.status) >= 0 ? "error" : "";
