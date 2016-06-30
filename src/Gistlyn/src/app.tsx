@@ -384,6 +384,7 @@ class App extends React.Component<any, any> {
     componentDidUpdate() {
         if (!this.consoleScroll) return;
         this.consoleScroll.scrollTop = this.consoleScroll.scrollHeight;
+        window.onkeydown = this.handleWindowKeyDown.bind(this);
     }
 
     showDialog(e: React.MouseEvent, el: HTMLDivElement) {
@@ -393,10 +394,27 @@ class App extends React.Component<any, any> {
         el.style.display = "block";
     }
 
-    handleBodyClick(e) {
+    handleBodyClick(e:React.MouseEvent) {
         if (this.lastDialog != null) {
             this.lastDialog.style.display = "none";
             this.lastDialog = null;
+        }
+    }
+
+    handleWindowKeyDown(e: KeyboardEvent) {
+        const target = e.target as Element;
+        if (target.tagName === "TEXTAREA" || target.tagName === "INPUT") return;
+
+        if (e.ctrlKey && (e.keyCode === 37 || e.keyCode === 39)) { //ctrl + left/right
+            if (!this.props.files || this.props.files.length === 0) return;
+            e.stopPropagation();
+            const keys = getSortedFileNames(this.props.files);
+            const activeIndex = Math.max(0, keys.indexOf(this.props.activeFileName));
+            let nextFileIndex = activeIndex + (e.keyCode === 37 ? -1 : 1);
+            nextFileIndex = nextFileIndex < 0
+                ? keys.length - 1
+                : nextFileIndex % keys.length;
+            this.props.selectFileName(keys[nextFileIndex]);
         }
     }
 

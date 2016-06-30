@@ -340,6 +340,7 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                     if (!this.consoleScroll)
                         return;
                     this.consoleScroll.scrollTop = this.consoleScroll.scrollHeight;
+                    window.onkeydown = this.handleWindowKeyDown.bind(this);
                 };
                 App.prototype.showDialog = function (e, el) {
                     if (el === this.lastDialog)
@@ -352,6 +353,23 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                     if (this.lastDialog != null) {
                         this.lastDialog.style.display = "none";
                         this.lastDialog = null;
+                    }
+                };
+                App.prototype.handleWindowKeyDown = function (e) {
+                    var target = e.target;
+                    if (target.tagName === "TEXTAREA" || target.tagName === "INPUT")
+                        return;
+                    if (e.ctrlKey && (e.keyCode === 37 || e.keyCode === 39)) {
+                        if (!this.props.files || this.props.files.length === 0)
+                            return;
+                        e.stopPropagation();
+                        var keys = getSortedFileNames(this.props.files);
+                        var activeIndex = Math.max(0, keys.indexOf(this.props.activeFileName));
+                        var nextFileIndex = activeIndex + (e.keyCode === 37 ? -1 : 1);
+                        nextFileIndex = nextFileIndex < 0
+                            ? keys.length - 1
+                            : nextFileIndex % keys.length;
+                        this.props.selectFileName(keys[nextFileIndex]);
                     }
                 };
                 App.prototype.render = function () {
