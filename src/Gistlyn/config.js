@@ -8,6 +8,7 @@ System.config({
   },
 
   map: {
+    "bootstrap": "npm:bootstrap@3.2.0",
     "codemirror": "npm:codemirror@5.16.0",
     "es6-promises": "npm:es6-promises@1.0.10",
     "es6-shim": "github:es-shims/es6-shim@0.35.1",
@@ -325,6 +326,11 @@ System.config({
     "npm:boom@2.10.1": {
       "hoek": "npm:hoek@2.16.3",
       "http": "github:jspm/nodelibs-http@1.7.1"
+    },
+    "npm:bootstrap@3.2.0": {
+      "fs": "github:jspm/nodelibs-fs@0.1.2",
+      "path": "github:jspm/nodelibs-path@0.1.0",
+      "process": "github:jspm/nodelibs-process@0.1.2"
     },
     "npm:brace-expansion@1.1.5": {
       "balanced-match": "npm:balanced-match@0.4.1",

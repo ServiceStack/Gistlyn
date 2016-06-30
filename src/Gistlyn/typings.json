@@ -1,7 +1,6 @@
 {
   "ambientDependencies": {
     "codemirror": "registry:dt/codemirror#0.0.0+20160619021621",
-    "es6-promise": "registry:dt/es6-promise#0.0.0+20160614011821",
     "es6-shim": "registry:dt/es6-shim#0.31.2+20160602141504",
     "isomorphic-fetch": "registry:dt/isomorphic-fetch#0.0.0+20160524142046",
     "jquery": "github:DefinitelyTyped/DefinitelyTyped/jquery/jquery.d.ts#470954c4f427e0805a2d633636a7c6aa7170def8",
