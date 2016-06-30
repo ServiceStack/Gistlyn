@@ -20,7 +20,7 @@ namespace Gistlyn.ServiceModel.Types
             get { return Exception != null ? new ResponseStatus(Exception.GetType().Name, Exception.Message) : null; }
         }
 
-        public ScriptVariableJson LastVariableJson { get; set; }
+        public string LastVariableJson { get; set; }
     }
 }
 

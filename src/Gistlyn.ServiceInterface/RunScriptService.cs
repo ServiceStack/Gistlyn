@@ -48,19 +48,6 @@ namespace Gistlyn.ServiceInterface
             return response;
         }
 
-        public object Any(GetScriptVariableJson request)
-        {
-            var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
-
-            var wrapper = runner != null ? runner.DomainWrapper : null;
-
-            var variable = wrapper != null
-                ? wrapper.GetVariableJson(request.VariableName)
-                : new ScriptVariableJson { Status = ScriptStatus.Unknown };
-
-            return variable;
-        }
-
         public EvaluateExpressionResponse Any(EvaluateExpression request)
         {
             var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
@@ -407,7 +394,7 @@ namespace Gistlyn.ServiceInterface
                     //get json of last variable
                     if (sr.Variables != null && sr.Variables.Count > 0)
                     {
-                        result.LastVariableJson = wrapper.GetVariableJson(sr.Variables[sr.Variables.Count - 1].Name);
+                        result.LastVariableJson = wrapper.GetVariableValue(sr.Variables[sr.Variables.Count - 1].Name).ToJson();
                     }
                 }
                 finally

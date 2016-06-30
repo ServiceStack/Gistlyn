@@ -18,14 +18,6 @@ namespace Gistlyn.SnippetEngine
         Task<ScriptState<int>> state;
         ScriptStatus status;
 
-        enum GetVariableResult
-        {
-            Success,
-            WrongExpression,
-            NullReferenceException,
-            IndexOutOfRangeException
-        }
-
         private ScriptStatus GetScriptStateStatus()
         {
             if (state != null)
@@ -62,25 +54,6 @@ namespace Gistlyn.SnippetEngine
             return GetScriptStateStatus();
         }
 
-        public ScriptVariableJson GetVariableJson(string name)
-        {
-            var json = new ScriptVariableJson
-            {
-                Status = GetScriptStatus()
-            };
-
-            if (json.Status == ScriptStatus.Completed)
-            {
-                GetVariableResult varResult;
-                var variable = GetVariableByName(name, out varResult);
-
-                json.Json = variable != null ? variable.ToJson() : string.Empty;
-                json.Name = name;
-            }
-
-            return json;
-        }
-
         private bool IsObjectBrowseable(object obj)
         {
             if (obj == null)
@@ -91,23 +64,18 @@ namespace Gistlyn.SnippetEngine
             return type.IsClass && type != typeof(string);
         }
 
-        private object GetVariableByName(string parentVariable, out GetVariableResult error)
+        public object GetVariableValue(string varName)
         {
-            if (string.IsNullOrEmpty(parentVariable))
-            {
-                throw new ArgumentException("parentVariable");
-            }
+            if (string.IsNullOrEmpty(varName))
+                throw new ArgumentException("varName");
 
-            var parts = parentVariable.Split('.');
+            var parts = varName.Split('.');
 
             //TODO: handle indexer
             object curVar = state.Result.Variables.FirstOrDefault(v => v.Name == parts[0]);
 
             if (curVar == null)
-            {
-                error = GetVariableResult.WrongExpression;
                 return null;
-            }
 
             curVar = ((ScriptVariable)curVar).Value;
 
@@ -123,10 +91,7 @@ namespace Gistlyn.SnippetEngine
 
                     //TODO: expression error
                     if (!int.TryParse(part.Substring(firstIdx, lastIdx), out index))
-                    {
-                        error = GetVariableResult.WrongExpression;
                         return null;
-                    }
 
                     //TODO: index out of range
                     var t = curVar.GetType();
@@ -147,22 +112,31 @@ namespace Gistlyn.SnippetEngine
                         var prop = t.GetProperty(part);
 
                         if (prop == null)
-                        {
-                            error = GetVariableResult.WrongExpression;
                             return null;
-                        }
                         curVar = prop.GetValue(curVar);
                     }
                 }
                 else
                 {
-                    error = GetVariableResult.WrongExpression;
                     return null;
                 }
             }
-
-            error = GetVariableResult.Success;
             return curVar;
+        }
+
+        public List<VariableInfo> GetVariables()
+        {
+            if (GetScriptStatus() == ScriptStatus.Completed)
+            {
+                return state.Result.Variables.Select(x => new VariableInfo
+                {
+                    Name = x.Name,
+                    Value = x.Value != null ? x.Value.ToString() : null,
+                    Type = x.Type.ToString(),
+                    IsBrowseable = IsObjectBrowseable(x.Value),
+                }).ToList();
+            }
+            return new List<VariableInfo>();
         }
 
         public ScriptStateVariables GetVariables(string parentVariable)
@@ -178,8 +152,7 @@ namespace Gistlyn.SnippetEngine
             {
                 if (!string.IsNullOrEmpty(parentVariable))
                 {
-                    GetVariableResult varResult;
-                    object curVar = GetVariableByName(parentVariable, out varResult);
+                    object curVar = GetVariableValue(parentVariable);
 
                     variables.ParentVariable.Type = curVar != null ? curVar.GetType().ToString() : null;
                     variables.ParentVariable.Value = curVar != null ? curVar.ToString(): null;
@@ -201,18 +174,9 @@ namespace Gistlyn.SnippetEngine
                         variables.Variables.Add(info);
                     }
                 }
-                else 
+                else
                 {
-                    foreach (var variable in state.Result.Variables)
-                    {
-                        variables.Variables.Add(new VariableInfo
-                        {
-                            Name = variable.Name,
-                            Value = variable.Value != null ? variable.Value.ToString() : null,
-                            Type = variable.Type.ToString(),
-                            IsBrowseable = IsObjectBrowseable(variable.Value),
-                        });
-                    }
+                    variables.Variables = GetVariables();
                 }
             }
 

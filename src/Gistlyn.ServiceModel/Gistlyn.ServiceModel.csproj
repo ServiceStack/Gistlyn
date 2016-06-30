@@ -54,7 +54,6 @@
     <Compile Include="AddPackageAsReference.cs" />
     <Compile Include="SearchInstalledPackages.cs" />
     <Compile Include="GetScriptVariables.cs" />
-    <Compile Include="GetScriptVariableJson.cs" />
     <Compile Include="CancelScript.cs" />
     <Compile Include="GetScriptStatus.cs" />
     <Compile Include="EvaluateExpression.cs" />

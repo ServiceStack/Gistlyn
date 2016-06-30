@@ -47,9 +47,9 @@ namespace Gistlyn.ServiceInterface
             return runner.GetScriptStatus();
         }
 
-        public ScriptVariableJson GetVariableJson(string name)
+        public object GetVariableValue(string varName)
         {
-            return runner.GetVariableJson(name);
+            return runner.GetVariableValue(varName);
         }
 
         public ScriptStateVariables GetVariables(string parentVariable)
