@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Gistlyn.ServiceInterface.Auth
+namespace Gistlyn.ServiceInterface
 {
     public class ScriptRunnerInfo : IDisposable
     {

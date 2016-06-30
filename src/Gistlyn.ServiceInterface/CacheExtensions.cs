@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Gistlyn.ServiceInterface.Auth;
 using ServiceStack;
 using ServiceStack.Caching;
 

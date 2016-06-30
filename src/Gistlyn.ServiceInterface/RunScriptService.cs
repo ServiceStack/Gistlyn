@@ -5,7 +5,6 @@ using ServiceStack;
 using Gistlyn.ServiceModel;
 using System.IO;
 using System.Security.Cryptography;
-using Gistlyn.ServiceInterface.Auth;
 using System.Security.Policy;
 using System.Text;
 using System.Xml.Serialization;

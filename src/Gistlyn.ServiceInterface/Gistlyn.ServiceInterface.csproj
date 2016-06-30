@@ -79,11 +79,10 @@
     <Compile Include="NugetUtils.cs" />
     <Compile Include="FrameworkTargetableAssembly.cs" />
     <Compile Include="CacheExtensions.cs" />
-    <Compile Include="Auth\EmptyAuthProvider.cs" />
     <Compile Include="ConsoleWriter.cs" />
     <Compile Include="DomainWrapper.cs" />
     <Compile Include="NotifierProxy.cs" />
-    <Compile Include="Auth\ScriptRunnerInfo.cs" />
+    <Compile Include="ScriptRunnerInfo.cs" />
     <Compile Include="RunScriptSupportServices.cs" />
   </ItemGroup>
   <ItemGroup>

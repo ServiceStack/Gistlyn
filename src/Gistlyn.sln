@@ -14,9 +14,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gistlyn.TestHost", "Gistlyn.TestHost\Gistlyn.TestHost.csproj", "{4389B305-B381-4B50-B1A8-BBB5259A0524}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Hosts", "Hosts", "{7B5A8DEC-4B0C-4253-9CEA-A10E33142399}"
-	ProjectSection(SolutionItems) = preProject
-		Gistlyn\Gistlyn.csproj = Gistlyn\Gistlyn.csproj
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gistlyn", "Gistlyn\Gistlyn.csproj", "{6134D196-9EE4-4698-A8F2-5518AF6F9374}"
 EndProject

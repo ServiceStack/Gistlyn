@@ -9,7 +9,6 @@ using Gistlyn.ServiceModel.Types;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using ServiceStack;
-using ServiceStack.Text;
 
 namespace Gistlyn.SnippetEngine
 {
