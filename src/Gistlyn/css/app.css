@@ -146,8 +146,31 @@ html,body,#app,#body {
     display: flex;
     flex-flow: row;
     background: #01215A;
-    padding: 8px 0 0 30px;
+    padding: 8px 0 0 6px;
     min-height: 22px;
+}
+#tabs #files-menu {
+    color: #ddd;
+    cursor: pointer;
+}
+#tabs #files-menu:hover {
+    color: #ffc;
+}
+#files-list {
+    display: none;
+    position: absolute;
+    z-index: 100;
+    background: #0371BE;
+    color: #f7f7f7;
+    margin: 2px 2px;
+    font-size: 14px;
+}
+#files-list .file div {
+    padding: 8px 10px;
+}
+#files-list .file:hover {
+    background: #0488E4;
+    cursor: pointer;
 }
 #tabs div {
     padding: 5px 8px;

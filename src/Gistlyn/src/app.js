@@ -341,10 +341,24 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         return;
                     this.consoleScroll.scrollTop = this.consoleScroll.scrollHeight;
                 };
+                App.prototype.showDialog = function (e, el) {
+                    if (el === this.lastDialog)
+                        return;
+                    e.stopPropagation();
+                    this.lastDialog = el;
+                    el.style.display = "block";
+                };
+                App.prototype.handleBodyClick = function (e) {
+                    if (this.lastDialog != null) {
+                        this.lastDialog.style.display = "none";
+                        this.lastDialog = null;
+                    }
+                };
                 App.prototype.render = function () {
                     var _this = this;
                     var source = "";
                     var Tabs = [];
+                    var FileList = [];
                     if (this.props.files) {
                         var keys = getSortedFileNames(this.props.files);
                         keys.forEach(function (k) {
@@ -352,6 +366,7 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                             var active = k === _this.props.activeFileName ||
                                 (_this.props.activeFileName == null && k.toLowerCase() === "main.cs");
                             Tabs.push((React.createElement("div", {className: active ? 'active' : null, onClick: function (e) { return _this.props.selectFileName(file.filename); }}, React.createElement("b", null, file.filename))));
+                            FileList.push((React.createElement("div", {className: "file", onClick: function (e) { return _this.props.selectFileName(file.filename); }}, React.createElement("div", null, file.filename))));
                             if (active) {
                                 source = file.content;
                                 options["mode"] = file.filename.endsWith('.config')
@@ -389,11 +404,12 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                     if (this.props.logs.length > 0) {
                         Preview.push((React.createElement("div", {id: "console", className: "section", style: { borderBottom: "solid 1px #ddd" }}, React.createElement("div", {className: "head", style: { font: "14px/20px arial", height: "22px", textAlign: "right", borderBottom: "solid 1px #ddd" }}, React.createElement("b", {style: { background: "#444", color: "#fff", padding: "4px 8px" }}, "console")), React.createElement("i", {className: "material-icons clear-btn", title: "clear console", onClick: function (e) { return _this.props.clearConsole(); }}, "clear"), React.createElement("div", {className: "scroll", style: { overflow: "auto", maxHeight: "350px" }, ref: function (el) { return _this.consoleScroll = el; }}, React.createElement("table", {style: { width: "100%" }}, React.createElement("tbody", {style: { font: "13px/18px monospace", color: "#444" }}, this.props.logs.map(function (log) { return (React.createElement("tr", null, React.createElement("td", {style: { padding: "2px 8px" }}, React.createElement("span", {className: log.cls}, log.msg)))); })))))));
                     }
-                    return (React.createElement("div", {id: "body"}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("a", {href: "https://servicestack.net", title: "servicestack.net", target: "_blank"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png"})), React.createElement("h3", null, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, React.createElement("input", {type: "text", id: "txtGist", placeholder: "gist hash or url", value: this.props.gist, onFocus: function (e) { return e.target.select(); }, onChange: function (e) { return _this.handleGistUpdate(e); }}), main != null
+                    return (React.createElement("div", {id: "body", onClick: function (e) { return _this.handleBodyClick(e); }}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("a", {href: "https://servicestack.net", title: "servicestack.net", target: "_blank"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png"})), React.createElement("h3", null, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, React.createElement("input", {type: "text", id: "txtGist", placeholder: "gist hash or url", value: this.props.gist, onFocus: function (e) { return e.target.select(); }, onChange: function (e) { return _this.handleGistUpdate(e); }}), main != null
                         ? React.createElement("i", {className: "material-icons", style: { color: "#0f9", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "check")
                         : this.props.error
                             ? React.createElement("i", {className: "material-icons", style: { color: "#ebccd1", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "error")
-                            : null))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement("div", {id: "editor"}, React.createElement("div", {id: "tabs", style: { display: this.props.files ? 'flex' : 'none' }}, Tabs), React.createElement(react_codemirror_1.default, {value: source, options: options, onChange: function (src) { return _this.updateSource(src); }})), React.createElement("div", {id: "preview"}, Preview))), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "actions"}, React.createElement("div", {id: "revert", onClick: function (e) { return _this.revertGist(e.shiftKey); }}, React.createElement("i", {className: "material-icons"}, "undo"), React.createElement("p", null, "Revert Changes"))), React.createElement("div", {id: "run"}, main != null
+                            : null))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement("div", {id: "editor"}, React.createElement("div", {id: "tabs", style: { display: this.props.files ? 'flex' : 'none' }}, FileList.length > 0
+                        ? React.createElement("i", {id: "files-menu", className: "material-icons", onClick: function (e) { return _this.showDialog(e, _this.filesList); }}, "arrow_drop_down") : null, Tabs), React.createElement("div", {id: "files-list", ref: function (e) { return _this.filesList = e; }}, FileList), React.createElement(react_codemirror_1.default, {value: source, options: options, onChange: function (src) { return _this.updateSource(src); }})), React.createElement("div", {id: "preview"}, Preview))), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "actions"}, React.createElement("div", {id: "revert", onClick: function (e) { return _this.revertGist(e.shiftKey); }}, React.createElement("i", {className: "material-icons"}, "undo"), React.createElement("p", null, "Revert Changes"))), React.createElement("div", {id: "run"}, main != null
                         ? (!isScriptRunning
                             ? React.createElement("i", {className: "material-icons", title: "run", onClick: this.run}, "play_circle_outline")
                             : React.createElement("i", {className: "material-icons", title: "cancel script", onClick: this.cancel, style: { color: "#FF5252" }}, "cancel"))

@@ -377,17 +377,34 @@ class App extends React.Component<any, any> {
         this.props.updateGist(this.props.gist, true);
     }
 
-    consoleScroll:HTMLDivElement;
+    consoleScroll: HTMLDivElement;
+    filesList: HTMLDivElement;
+    lastDialog: HTMLDivElement;
 
     componentDidUpdate() {
         if (!this.consoleScroll) return;
         this.consoleScroll.scrollTop = this.consoleScroll.scrollHeight;
     }
 
+    showDialog(e: React.MouseEvent, el: HTMLDivElement) {
+        if (el === this.lastDialog) return;
+        e.stopPropagation();
+        this.lastDialog = el;
+        el.style.display = "block";
+    }
+
+    handleBodyClick(e) {
+        if (this.lastDialog != null) {
+            this.lastDialog.style.display = "none";
+            this.lastDialog = null;
+        }
+    }
+
     render() {
 
         let source = "";
         const Tabs = [];
+        const FileList = [];
 
         if (this.props.files) {
             var keys = getSortedFileNames(this.props.files);
@@ -399,9 +416,16 @@ class App extends React.Component<any, any> {
 
                 Tabs.push((
                     <div className={active ? 'active' : null}
-                        onClick={e => this.props.selectFileName(file.filename) }><b>
+                        onClick={e => this.props.selectFileName(file.filename) }
+                        ><b>
                             {file.filename}
                         </b></div>
+                ));
+
+                FileList.push((
+                    <div className="file" onClick={e => this.props.selectFileName(file.filename) }>
+                        <div>{file.filename}</div>
+                    </div>
                 ));
 
                 if (active) {
@@ -500,7 +524,7 @@ class App extends React.Component<any, any> {
         }
 
         return (
-            <div id="body">
+            <div id="body" onClick={e => this.handleBodyClick(e)}>
                 <div className="titlebar">
                     <div className="container">
                         <a href="https://servicestack.net" title="servicestack.net" target="_blank"><img id="logo" src="img/logo-32-inverted.png" /></a>
@@ -523,7 +547,12 @@ class App extends React.Component<any, any> {
                     <div id="ide">
                         <div id="editor">
                             <div id="tabs" style={{display: this.props.files ? 'flex' : 'none'}}>
+                                {FileList.length > 0
+                                    ? <i id="files-menu" className="material-icons" onClick={e => this.showDialog(e, this.filesList) }>arrow_drop_down</i> : null }
                                 {Tabs}
+                            </div>
+                            <div id="files-list" ref={e => this.filesList = e }>
+                                {FileList}
                             </div>
                             <CodeMirror value={source} options={options} onChange={src => this.updateSource(src)} />
                         </div>
