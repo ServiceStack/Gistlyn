@@ -14,7 +14,7 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
     var ReactDOM, React, redux_1, react_redux_1, servicestack_client_1, react_codemirror_1, json_viewer_1, Gistlyn_dtos_1;
-    var options, ScriptStatusRunning, ScriptStatusError, StateKey, GistCacheKey, updateGist, store, client, sse, getSortedFileNames, App, stateJson, state, e, qsGist;
+    var options, ScriptStatusRunning, ScriptStatusError, StateKey, GistCacheKey, updateGist, defaults, store, client, sse, getSortedFileNames, App, stateJson, state, e, qsGist;
     function reduxify(mapStateToProps, mapDispatchToProps, mergeProps, options) {
         return function (target) { return (react_redux_1.connect(mapStateToProps, mapDispatchToProps, mergeProps, options)(target)); };
     }
@@ -106,6 +106,20 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                 }
                 return result;
             }; }; };
+            defaults = {
+                gist: null,
+                activeSub: null,
+                files: null,
+                activeFileName: null,
+                hasLoaded: false,
+                error: null,
+                scriptStatus: null,
+                logs: [],
+                variables: [],
+                inspectedVariables: {},
+                expression: null,
+                expressionResult: null
+            };
             store = redux_1.createStore(function (state, action) {
                 switch (action.type) {
                     case 'LOAD':
@@ -113,7 +127,7 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                     case 'SSE_CONNECT':
                         return Object.assign({}, state, { activeSub: action.activeSub });
                     case 'GIST_CHANGE':
-                        return Object.assign({}, state, { gist: action.gist, error: null, files: null, activeFileName: null });
+                        return Object.assign({}, defaults, { gist: action.gist });
                     case 'GIST_LOAD':
                         return Object.assign({}, state, { files: action.files, activeFileName: action.activeFileName, variables: [], logs: [], hasLoaded: true });
                     case 'FILE_SELECT':
@@ -141,20 +155,7 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                         return state;
                 }
                 var _a, _b;
-            }, {
-                gist: null,
-                activeSub: null,
-                files: null,
-                activeFileName: null,
-                hasLoaded: false,
-                error: null,
-                scriptStatus: null,
-                logs: [],
-                variables: [],
-                inspectedVariables: {},
-                expression: null,
-                expressionResult: null
-            }, redux_1.applyMiddleware(updateGist));
+            }, defaults, redux_1.applyMiddleware(updateGist));
             client = new servicestack_client_1.JsonServiceClient("/");
             sse = new servicestack_client_1.ServerEventsClient("/", ["gist"], {
                 handlers: {

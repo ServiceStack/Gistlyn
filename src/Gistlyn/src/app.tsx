@@ -89,6 +89,21 @@ function reduxify(mapStateToProps, mapDispatchToProps?, mergeProps?, options?) {
     return target => (connect(mapStateToProps, mapDispatchToProps, mergeProps, options)(target) as any);
 }
 
+const defaults = {
+    gist: null,
+    activeSub: null,
+    files: null,
+    activeFileName: null,
+    hasLoaded: false,
+    error: null,
+    scriptStatus: null,
+    logs: [],
+    variables: [],
+    inspectedVariables: {},
+    expression: null,
+    expressionResult: null
+};
+
 let store = createStore(
     (state, action) => {
         switch (action.type) {
@@ -97,7 +112,7 @@ let store = createStore(
             case 'SSE_CONNECT':
                 return Object.assign({}, state, { activeSub: action.activeSub });
             case 'GIST_CHANGE':
-                return Object.assign({}, state, { gist: action.gist, error: null, files:null, activeFileName:null });
+                return Object.assign({}, defaults, { gist: action.gist });
             case 'GIST_LOAD':
                 return Object.assign({}, state, { files: action.files, activeFileName:action.activeFileName, variables:[], logs:[], hasLoaded: true });
             case 'FILE_SELECT':
@@ -125,20 +140,7 @@ let store = createStore(
                 return state;
         }
     },
-    {
-        gist: null, 
-        activeSub: null, 
-        files: null, 
-        activeFileName: null, 
-        hasLoaded: false, 
-        error: null, 
-        scriptStatus:null, 
-        logs:[], 
-        variables:[],
-        inspectedVariables:{},
-        expression: null,
-        expressionResult: null
-    },
+    defaults,
     applyMiddleware(updateGist));
 
 var client = new JsonServiceClient("/");

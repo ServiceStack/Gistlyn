@@ -1,8 +1,8 @@
 /* Options:
-Date: 2016-06-29 01:20:33
+Date: 2016-06-30 00:23:16
 Version: 4.00
 Tip: To override a DTO option, remove "//" prefix before updating
-BaseUrl: http://localhost:54991
+BaseUrl: http://localhost:5100
 
 //GlobalNamespace: 
 ExportAsTypes: True
@@ -44,8 +44,6 @@ export class ResponseStatus
     meta: { [index:string]: string; };
 }
 
-export type ScriptStatus = "Unknown" | "PrepareToRun" | "Running" | "Completed" | "Cancelled" | "CompiledWithErrors" | "ThrowedException" | "AnotherScriptExecuting";
-
 export class ScriptExecutionResult
 {
     status: ScriptStatus;
@@ -54,6 +52,8 @@ export class ScriptExecutionResult
     errorResponseStatus: ResponseStatus;
     console: string;
 }
+
+export type ScriptStatus = "Unknown" | "PrepareToRun" | "Running" | "Completed" | "Cancelled" | "CompiledWithErrors" | "ThrowedException" | "AnotherScriptExecuting";
 
 export class VariableInfo
 {
@@ -75,7 +75,7 @@ export class EmbedScriptExecutionResult
     status: ScriptStatus;
     errors: ErrorInfo[];
     errorResponseStatus: ResponseStatus;
-    lastVariableJson: ScriptVariableJson;
+    lastVariableJson: string;
 }
 
 export class NugetPackageInfo
@@ -118,13 +118,6 @@ export class TestServerEventsResponse
     result: string;
 }
 
-export class ScriptVariableJson
-{
-    status: ScriptStatus;
-    name: string;
-    json: string;
-}
-
 export class EvaluateExpressionResponse
 {
     result: ScriptExecutionResult;
@@ -162,6 +155,7 @@ export class RunScriptResponse
 {
     result: ScriptExecutionResult;
     references: AssemblyReference[];
+    scriptsRemoved: number;
     responseStatus: ResponseStatus;
 }
 
@@ -191,6 +185,60 @@ export class SearchInstalledPackagesResponse
     packages: NugetPackageInfo[];
 }
 
+// @DataContract
+export class AuthenticateResponse
+{
+    // @DataMember(Order=1)
+    userId: string;
+
+    // @DataMember(Order=2)
+    sessionId: string;
+
+    // @DataMember(Order=3)
+    userName: string;
+
+    // @DataMember(Order=4)
+    displayName: string;
+
+    // @DataMember(Order=5)
+    referrerUrl: string;
+
+    // @DataMember(Order=6)
+    bearerToken: string;
+
+    // @DataMember(Order=7)
+    responseStatus: ResponseStatus;
+
+    // @DataMember(Order=8)
+    meta: { [index:string]: string; };
+}
+
+// @DataContract
+export class AssignRolesResponse
+{
+    // @DataMember(Order=1)
+    allRoles: string[];
+
+    // @DataMember(Order=2)
+    allPermissions: string[];
+
+    // @DataMember(Order=3)
+    responseStatus: ResponseStatus;
+}
+
+// @DataContract
+export class UnAssignRolesResponse
+{
+    // @DataMember(Order=1)
+    allRoles: string[];
+
+    // @DataMember(Order=2)
+    allPermissions: string[];
+
+    // @DataMember(Order=3)
+    responseStatus: ResponseStatus;
+}
+
 export class Hello implements IReturn<HelloResponse>
 {
     name: string;
@@ -203,14 +251,6 @@ export class TestServerEvents implements IReturn<TestServerEventsResponse>
 {
     name: string;
     createResponse() { return new TestServerEventsResponse(); }
-}
-
-// @Route("/scripts/{ScriptId}/vars/{VariableName}/json")
-export class GetScriptVariableJson implements IReturn<ScriptVariableJson>
-{
-    scriptId: string;
-    variableName: string;
-    createResponse() { return new ScriptVariableJson(); }
 }
 
 // @Route("/scripts/{ScriptId}/evaluate")
@@ -321,4 +361,91 @@ export class GetEmbedScript
 {
     gist: string;
     noCache: boolean;
+}
+
+// @Route("/auth")
+// @Route("/auth/{provider}")
+// @Route("/authenticate")
+// @Route("/authenticate/{provider}")
+// @DataContract
+export class Authenticate implements IReturn<AuthenticateResponse>
+{
+    // @DataMember(Order=1)
+    provider: string;
+
+    // @DataMember(Order=2)
+    state: string;
+
+    // @DataMember(Order=3)
+    oauth_token: string;
+
+    // @DataMember(Order=4)
+    oauth_verifier: string;
+
+    // @DataMember(Order=5)
+    userName: string;
+
+    // @DataMember(Order=6)
+    password: string;
+
+    // @DataMember(Order=7)
+    rememberMe: boolean;
+
+    // @DataMember(Order=8)
+    continue: string;
+
+    // @DataMember(Order=9)
+    nonce: string;
+
+    // @DataMember(Order=10)
+    uri: string;
+
+    // @DataMember(Order=11)
+    response: string;
+
+    // @DataMember(Order=12)
+    qop: string;
+
+    // @DataMember(Order=13)
+    nc: string;
+
+    // @DataMember(Order=14)
+    cnonce: string;
+
+    // @DataMember(Order=15)
+    useTokenCookie: boolean;
+
+    // @DataMember(Order=16)
+    meta: { [index:string]: string; };
+    createResponse() { return new AuthenticateResponse(); }
+}
+
+// @Route("/assignroles")
+// @DataContract
+export class AssignRoles implements IReturn<AssignRolesResponse>
+{
+    // @DataMember(Order=1)
+    userName: string;
+
+    // @DataMember(Order=2)
+    permissions: string[];
+
+    // @DataMember(Order=3)
+    roles: string[];
+    createResponse() { return new AssignRolesResponse(); }
+}
+
+// @Route("/unassignroles")
+// @DataContract
+export class UnAssignRoles implements IReturn<UnAssignRolesResponse>
+{
+    // @DataMember(Order=1)
+    userName: string;
+
+    // @DataMember(Order=2)
+    permissions: string[];
+
+    // @DataMember(Order=3)
+    roles: string[];
+    createResponse() { return new UnAssignRolesResponse(); }
 }
