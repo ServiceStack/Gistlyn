@@ -89,7 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Gistlyn.ServiceModel\Gistlyn.ServiceModel.csproj">
-      <Project>{53e82ac1-dd1d-4c66-b55f-f9f4acfb2f40}</Project>
+      <Project>{A949B1C2-9897-4215-A48C-D6B408E49F6B}</Project>
       <Name>Gistlyn.ServiceModel</Name>
     </ProjectReference>
   </ItemGroup>

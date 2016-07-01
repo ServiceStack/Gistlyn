@@ -94,7 +94,7 @@
       <Name>Gistlyn.SnippetEngine</Name>
     </ProjectReference>
     <ProjectReference Include="..\Gistlyn.ServiceModel\Gistlyn.ServiceModel.csproj">
-      <Project>{53E82AC1-DD1D-4C66-B55F-F9F4ACFB2F40}</Project>
+      <Project>{A949B1C2-9897-4215-A48C-D6B408E49F6B}</Project>
       <Name>Gistlyn.ServiceModel</Name>
     </ProjectReference>
   </ItemGroup>

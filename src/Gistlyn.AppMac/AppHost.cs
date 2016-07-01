@@ -38,6 +38,8 @@ namespace Gistlyn.AppMac
 				EmbeddedResourceBaseTypes = { typeof(AppHost), typeof(SharedEmbeddedResources) }
 			});
 
+			SharedAppHostConfig.Configure(this, "~/packages".MapAbsolutePath());
+
 			Routes.Add<NativeHostAction>("/nativehost/{Action}");
 			ServiceController.RegisterService(typeof(NativeHostService));
 		}
