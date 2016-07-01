@@ -1,4 +1,4 @@
-/// <reference path='../typings/browser.d.ts'/>
+/// <reference path='../typings/index.d.ts'/>
 System.register([], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
@@ -277,6 +277,10 @@ System.register([], function(exports_1, context_1) {
                 return to;
             });
             exports_1("nameOf", nameOf = function (o) {
+                if (!o)
+                    return "null";
+                if (typeof o.getTypeName == "function")
+                    return o.getTypeName();
                 var ctor = o && o.constructor;
                 if (ctor == null)
                     throw o + " doesn't have constructor";

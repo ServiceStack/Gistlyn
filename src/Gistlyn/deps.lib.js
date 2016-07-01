@@ -26340,7 +26340,7 @@ System.registerDynamic("npm:react-codemirror@0.2.6.js", ["npm:react-codemirror@0
   return module.exports;
 });
 
-System.register("src\\deps.js", ["npm:react@15.1.0.js", "npm:react-dom@15.1.0.js", "npm:redux@3.5.2.js", "npm:react-redux@4.4.5.js", "github:es-shims/es6-shim@0.35.1.js", "npm:react-codemirror@0.2.6.js"], function(exports_1, context_1) {
+System.register("src/deps.js", ["npm:react@15.1.0.js", "npm:react-dom@15.1.0.js", "npm:redux@3.5.2.js", "npm:react-redux@4.4.5.js", "github:es-shims/es6-shim@0.35.1.js", "npm:react-codemirror@0.2.6.js"], function(exports_1, context_1) {
   "use strict";
   var __moduleName = context_1 && context_1.id;
   var __extends = (this && this.__extends) || function(d, b) {

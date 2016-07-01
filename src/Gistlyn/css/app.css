@@ -134,6 +134,7 @@ html,body,#app,#body {
     flex: 1;
     overflow: auto;
     color: #000;
+    background: url(../img/editor-bg.png); /* needed in CEF */
 }
 #preview {
     flex: 1;
@@ -253,6 +254,7 @@ html,body,#app,#body {
 }
 
 #status, #vars, #errors, #placeholder {
+    min-height: 500px;
     flex: 2;
 }
 #console {

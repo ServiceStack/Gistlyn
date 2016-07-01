@@ -69,8 +69,8 @@ namespace Gistlyn.ServiceInterface
             var evidence = new Evidence(AppDomain.CurrentDomain.Evidence);
             var setup = new AppDomainSetup
             {
-                PrivateBinPath = Path.Combine(System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath, "bin"),
-                ApplicationBase = System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath
+                PrivateBinPath = Path.Combine(VirtualFiles.RootDirectory.RealPath, "bin"),
+                ApplicationBase = VirtualFiles.RootDirectory.RealPath
             };
 
             var domain = AppDomain.CreateDomain(Guid.NewGuid().ToString(), evidence, setup);

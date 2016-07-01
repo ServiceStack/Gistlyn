@@ -1,8 +1,8 @@
 /* Options:
-Date: 2016-06-30 00:23:16
-Version: 4.00
+Date: 2016-06-30 18:50:53
+Version: 4.061
 Tip: To override a DTO option, remove "//" prefix before updating
-BaseUrl: http://localhost:5100
+BaseUrl: http://localhost:5500
 
 //GlobalNamespace: 
 ExportAsTypes: True
@@ -25,6 +25,21 @@ export interface IReturn<T>
 {
 }
 
+export class AssemblyReference
+{
+    name: string;
+    path: string;
+}
+
+export class ScriptExecutionResult
+{
+    status: ScriptStatus;
+    variables: VariableInfo[];
+    errors: ErrorInfo[];
+    errorResponseStatus: ResponseStatus;
+    console: string;
+}
+
 // @DataContract
 export class ResponseStatus
 {
@@ -44,15 +59,6 @@ export class ResponseStatus
     meta: { [index:string]: string; };
 }
 
-export class ScriptExecutionResult
-{
-    status: ScriptStatus;
-    variables: VariableInfo[];
-    errors: ErrorInfo[];
-    errorResponseStatus: ResponseStatus;
-    console: string;
-}
-
 export type ScriptStatus = "Unknown" | "PrepareToRun" | "Running" | "Completed" | "Cancelled" | "CompiledWithErrors" | "ThrowedException" | "AnotherScriptExecuting";
 
 export class VariableInfo
@@ -64,26 +70,17 @@ export class VariableInfo
     isBrowseable: boolean;
 }
 
-export class AssemblyReference
-{
-    name: string;
-    path: string;
-}
-
-export class EmbedScriptExecutionResult
-{
-    status: ScriptStatus;
-    errors: ErrorInfo[];
-    errorResponseStatus: ResponseStatus;
-    lastVariableJson: string;
-}
-
 export class NugetPackageInfo
 {
     id: string;
     version: string;
     targetFramework: string;
     assemblies: AssemblyReference[];
+}
+
+export class ErrorInfo
+{
+    info: string;
 }
 
 // @DataContract
@@ -102,9 +99,30 @@ export class ResponseError
     meta: { [index:string]: string; };
 }
 
-export class ErrorInfo
+export class RunScriptResponse
 {
-    info: string;
+    result: ScriptExecutionResult;
+    references: AssemblyReference[];
+    scriptsRemoved: number;
+    responseStatus: ResponseStatus;
+}
+
+export class ScriptStateVariables
+{
+    status: ScriptStatus;
+    parentVariable: VariableInfo;
+    variables: VariableInfo[];
+}
+
+export class EvaluateExpressionResponse
+{
+    result: ScriptExecutionResult;
+    responseStatus: ResponseStatus;
+}
+
+export class CancelScriptResponse
+{
+    result: ScriptExecutionResult;
 }
 
 export class HelloResponse
@@ -118,19 +136,6 @@ export class TestServerEventsResponse
     result: string;
 }
 
-export class EvaluateExpressionResponse
-{
-    result: ScriptExecutionResult;
-    responseStatus: ResponseStatus;
-}
-
-export class ScriptStateVariables
-{
-    status: ScriptStatus;
-    parentVariable: VariableInfo;
-    variables: VariableInfo[];
-}
-
 export class ScriptStatusResponse
 {
     status: ScriptStatus;
@@ -139,30 +144,6 @@ export class ScriptStatusResponse
 export class EvaluateSourceResponse
 {
     result: ScriptExecutionResult;
-}
-
-export class CancelScriptResponse
-{
-    result: ScriptExecutionResult;
-}
-
-export class CancelEmbedScriptResponse
-{
-    result: ScriptExecutionResult;
-}
-
-export class RunScriptResponse
-{
-    result: ScriptExecutionResult;
-    references: AssemblyReference[];
-    scriptsRemoved: number;
-    responseStatus: ResponseStatus;
-}
-
-export class RunEmbedScriptResponse
-{
-    result: EmbedScriptExecutionResult;
-    references: AssemblyReference[];
 }
 
 export class SearchNugetPackagesResponse
@@ -239,66 +220,6 @@ export class UnAssignRolesResponse
     responseStatus: ResponseStatus;
 }
 
-export class Hello implements IReturn<HelloResponse>
-{
-    name: string;
-    createResponse() { return new HelloResponse(); }
-}
-
-// @Route("/test")
-// @Route("/test/{Name}")
-export class TestServerEvents implements IReturn<TestServerEventsResponse>
-{
-    name: string;
-    createResponse() { return new TestServerEventsResponse(); }
-}
-
-// @Route("/scripts/{ScriptId}/evaluate")
-export class EvaluateExpression implements IReturn<EvaluateExpressionResponse>
-{
-    scriptId: string;
-    expression: string;
-    includeJson: boolean;
-    createResponse() { return new EvaluateExpressionResponse(); }
-}
-
-// @Route("/scripts/{ScriptId}/vars")
-// @Route("/scripts/{ScriptId}/vars/{VariableName}")
-export class GetScriptVariables implements IReturn<ScriptStateVariables>
-{
-    scriptId: string;
-    variableName: string;
-    createResponse() { return new ScriptStateVariables(); }
-}
-
-// @Route("/scripts/{ScriptId}/status")
-export class GetScriptStatus implements IReturn<ScriptStatusResponse>
-{
-    scriptId: string;
-    createResponse() { return new ScriptStatusResponse(); }
-}
-
-// @Route("/evaluate")
-export class EvaluateSource implements IReturn<EvaluateSourceResponse>
-{
-    code: string;
-    createResponse() { return new EvaluateSourceResponse(); }
-}
-
-// @Route("/scripts/{ScriptId}/cancel")
-export class CancelScript implements IReturn<CancelScriptResponse>
-{
-    scriptId: string;
-    createResponse() { return new CancelScriptResponse(); }
-}
-
-// @Route("/embed-scripts/{ScriptId}/cancel")
-export class CancelEmbedScript implements IReturn<CancelEmbedScriptResponse>
-{
-    scriptId: string;
-    createResponse() { return new CancelEmbedScriptResponse(); }
-}
-
 // @Route("/scripts/{ScriptId}/run")
 export class RunScript implements IReturn<RunScriptResponse>
 {
@@ -309,19 +230,67 @@ export class RunScript implements IReturn<RunScriptResponse>
     references: AssemblyReference[];
     forceRun: boolean;
     createResponse() { return new RunScriptResponse(); }
+    getTypeName() { return "RunScript"; }
 }
 
-// @Route("/embed-scripts/{ScriptId}/gists/{GistHash}/run")
-export class RunEmbedScript implements IReturn<RunEmbedScriptResponse>
+// @Route("/scripts/{ScriptId}/vars")
+// @Route("/scripts/{ScriptId}/vars/{VariableName}")
+export class GetScriptVariables implements IReturn<ScriptStateVariables>
 {
     scriptId: string;
-    gistHash: string;
-    mainSource: string;
-    sources: string[];
-    references: AssemblyReference[];
-    packages: string;
-    noCache: boolean;
-    createResponse() { return new RunEmbedScriptResponse(); }
+    variableName: string;
+    createResponse() { return new ScriptStateVariables(); }
+    getTypeName() { return "GetScriptVariables"; }
+}
+
+// @Route("/scripts/{ScriptId}/evaluate")
+export class EvaluateExpression implements IReturn<EvaluateExpressionResponse>
+{
+    scriptId: string;
+    expression: string;
+    includeJson: boolean;
+    createResponse() { return new EvaluateExpressionResponse(); }
+    getTypeName() { return "EvaluateExpression"; }
+}
+
+// @Route("/scripts/{ScriptId}/cancel")
+export class CancelScript implements IReturn<CancelScriptResponse>
+{
+    scriptId: string;
+    createResponse() { return new CancelScriptResponse(); }
+    getTypeName() { return "CancelScript"; }
+}
+
+export class Hello implements IReturn<HelloResponse>
+{
+    name: string;
+    createResponse() { return new HelloResponse(); }
+    getTypeName() { return "Hello"; }
+}
+
+// @Route("/test")
+// @Route("/test/{Name}")
+export class TestServerEvents implements IReturn<TestServerEventsResponse>
+{
+    name: string;
+    createResponse() { return new TestServerEventsResponse(); }
+    getTypeName() { return "TestServerEvents"; }
+}
+
+// @Route("/scripts/{ScriptId}/status")
+export class GetScriptStatus implements IReturn<ScriptStatusResponse>
+{
+    scriptId: string;
+    createResponse() { return new ScriptStatusResponse(); }
+    getTypeName() { return "GetScriptStatus"; }
+}
+
+// @Route("/evaluate")
+export class EvaluateSource implements IReturn<EvaluateSourceResponse>
+{
+    code: string;
+    createResponse() { return new EvaluateSourceResponse(); }
+    getTypeName() { return "EvaluateSource"; }
 }
 
 // @Route("/nuget/packages/search/{Search}")
@@ -330,6 +299,7 @@ export class SearchNugetPackages implements IReturn<SearchNugetPackagesResponse>
     search: string;
     allowPrereleaseVersion: boolean;
     createResponse() { return new SearchNugetPackagesResponse(); }
+    getTypeName() { return "SearchNugetPackages"; }
 }
 
 // @Route("/packages/install")
@@ -339,6 +309,7 @@ export class InstallNugetPackage implements IReturn<InstallNugetPackageResponse>
     version: string;
     allowPrereleaseVersion: boolean;
     createResponse() { return new InstallNugetPackageResponse(); }
+    getTypeName() { return "InstallNugetPackage"; }
 }
 
 // @Route("/packages/references")
@@ -347,6 +318,7 @@ export class AddPackageAsReference implements IReturn<AddPackageAsReferenceRespo
     packageId: string;
     version: string;
     createResponse() { return new AddPackageAsReferenceResponse(); }
+    getTypeName() { return "AddPackageAsReference"; }
 }
 
 // @Route("/packages/search/{Search}")
@@ -354,13 +326,7 @@ export class SearchInstalledPackages implements IReturn<SearchInstalledPackagesR
 {
     search: string;
     createResponse() { return new SearchInstalledPackagesResponse(); }
-}
-
-// @Route("/gists/{Gist}/embed")
-export class GetEmbedScript
-{
-    gist: string;
-    noCache: boolean;
+    getTypeName() { return "SearchInstalledPackages"; }
 }
 
 // @Route("/auth")
@@ -418,6 +384,7 @@ export class Authenticate implements IReturn<AuthenticateResponse>
     // @DataMember(Order=16)
     meta: { [index:string]: string; };
     createResponse() { return new AuthenticateResponse(); }
+    getTypeName() { return "Authenticate"; }
 }
 
 // @Route("/assignroles")
@@ -433,6 +400,7 @@ export class AssignRoles implements IReturn<AssignRolesResponse>
     // @DataMember(Order=3)
     roles: string[];
     createResponse() { return new AssignRolesResponse(); }
+    getTypeName() { return "AssignRoles"; }
 }
 
 // @Route("/unassignroles")
@@ -448,4 +416,5 @@ export class UnAssignRoles implements IReturn<UnAssignRolesResponse>
     // @DataMember(Order=3)
     roles: string[];
     createResponse() { return new UnAssignRolesResponse(); }
+    getTypeName() { return "UnAssignRoles"; }
 }

@@ -2,9 +2,7 @@
 using Funq;
 using Gistlyn.ServiceInterface;
 using ServiceStack;
-using ServiceStack.Auth;
 using ServiceStack.Configuration;
-using ServiceStack.Text;
 
 namespace Gistlyn
 {
@@ -21,22 +19,7 @@ namespace Gistlyn
 
         public override void Configure(Container container)
         {
-            JsConfig.MaxDepth = 10;
-            JsConfig.EmitCamelCaseNames = true;
-
-            Plugins.Add(new ServerEventsFeature());
-
-            this.Plugins.Add(new CorsFeature());
-
-            container.Register(new AppData(
-                AppSettings.Get("NugetPackagesDirectory", "~/App_Data/packages".MapHostAbsolutePath())));
-
-            container.Register<IDataContext>(container.Resolve<AppData>());
-
-            Plugins.Add(new AuthFeature(() => new AuthUserSession(), 
-                new IAuthProvider[] {
-                    new GithubAuthProvider(AppSettings), 
-                }));
+            SharedAppHostConfig.Configure(this, "~/App_Data/packages".MapHostAbsolutePath());
         }
     }
 }

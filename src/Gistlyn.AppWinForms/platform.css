@@ -1,0 +1,13 @@
+﻿/* winforms */
+winforms, ul > li.winforms {
+    display: block;
+}
+body {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.alert-hide {
+    display: none;
+}

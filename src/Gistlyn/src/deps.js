@@ -1,3 +1,7 @@
+// A '.tsx' file enables JSX support in the TypeScript compiler, 
+// for more information see the following page on the TypeScript wiki:
+// https://github.com/Microsoft/TypeScript/wiki/JSX
+/// <reference path='../typings/index.d.ts'/>
 System.register(['react', 'react-dom', 'redux', 'react-redux', 'es6-shim', 'react-codemirror'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;

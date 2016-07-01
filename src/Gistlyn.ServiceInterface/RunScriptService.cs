@@ -61,8 +61,8 @@ namespace Gistlyn.ServiceInterface
             var evidence = new Evidence(AppDomain.CurrentDomain.Evidence);
             var setup = new AppDomainSetup
             {
-                PrivateBinPath = Path.Combine(System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath, "bin"),
-                ApplicationBase = System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath
+                PrivateBinPath = Path.Combine(VirtualFiles.RootDirectory.RealPath, "bin"),
+                ApplicationBase = VirtualFiles.RootDirectory.RealPath
             };
 
             var domain = AppDomain.CreateDomain(Guid.NewGuid().ToString(), evidence, setup);
@@ -169,46 +169,54 @@ namespace Gistlyn.ServiceInterface
 
         private List<AssemblyReference> AddReferencesFromPackages(List<AssemblyReference> references, string packages, out List<AssemblyReference> normalizedReferences)
         {
-            var tmpReferences = new List<AssemblyReference>();
-
-            if (references != null)
-                tmpReferences.AddRange(references);
-
-            if (!string.IsNullOrEmpty(packages))
+            try
             {
-                PackageCollection tmpPackages = null;
-                var serializer = new XmlSerializer(typeof(PackageCollection));
-                var arr = packages.ToAsciiBytes();
+                var tmpReferences = new List<AssemblyReference>();
 
-                using (var ms = new MemoryStream(arr))
+                if (references != null)
+                    tmpReferences.AddRange(references);
+
+                if (!string.IsNullOrEmpty(packages))
                 {
-                    tmpPackages = (PackageCollection)serializer.Deserialize(ms);
+                    PackageCollection tmpPackages = null;
+                    var serializer = new XmlSerializer(typeof(PackageCollection));
+                    var arr = packages.ToAsciiBytes();
+
+                    using (var ms = new MemoryStream(arr))
+                    {
+                        tmpPackages = (PackageCollection)serializer.Deserialize(ms);
+                    }
+
+                    foreach (var package in tmpPackages.Packages)
+                    {
+                        //install it
+                        tmpReferences.AddRange(NugetUtils.RestorePackage(DataContext, AppData.NugetPackagesDirectory, package.Id, package.Version));
+                    }
                 }
 
-                foreach (var package in tmpPackages.Packages)
+                //distinct by name
+                tmpReferences = tmpReferences.GroupBy(a => a.Name).Select(g => g.First()).ToList();
+                //normalizedReferences - references with original path
+                normalizedReferences = tmpReferences
+                    .Select(r => new AssemblyReference().PopulateWith(r))
+                    .ToList();
+
+                foreach (var reference in tmpReferences)
                 {
-                    //install it
-                    tmpReferences.AddRange(NugetUtils.RestorePackage(DataContext, AppData.NugetPackagesDirectory, package.Id, package.Version));
+                    if (!Path.IsPathRooted(reference.Path))
+                    {
+                        var rootPath = VirtualFiles.RootDirectory.RealPath;
+                        reference.Path = Path.Combine(rootPath, AppData.NugetPackagesDirectory, reference.Path);
+                    }
                 }
+
+                return tmpReferences;
+
             }
-
-            //distinct by name
-            tmpReferences = tmpReferences.GroupBy(a => a.Name).Select(g => g.First()).ToList();
-            //normalizedReferences - references with original path
-            normalizedReferences = tmpReferences
-                .Select(r => new AssemblyReference().PopulateWith(r))
-                .ToList();
-
-            foreach (var reference in tmpReferences)
+            catch (Exception ex)
             {
-                if (!Path.IsPathRooted(reference.Path))
-                {
-                    var rootPath = System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath;
-                    reference.Path = Path.Combine(rootPath, AppData.NugetPackagesDirectory, reference.Path);
-                }
+                throw ex;
             }
-
-            return tmpReferences;
         }
 
         private int UnloadExistingScripts(IEnumerable<ScriptRunnerInfo> runnerInfos)

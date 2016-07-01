@@ -1,3 +1,4 @@
+/// <reference path='../typings/index.d.ts'/>
 System.register(['react-dom', 'react', './servicestack-client', './Gistlyn.dtos'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
@@ -7,7 +8,7 @@ System.register(['react-dom', 'react', './servicestack-client', './Gistlyn.dtos'
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
     var ReactDOM, React, servicestack_client_1, Gistlyn_dtos_1;
-    var client, Test;
+    var a, client, Test;
     return {
         setters:[
             function (ReactDOM_1) {
@@ -23,6 +24,16 @@ System.register(['react-dom', 'react', './servicestack-client', './Gistlyn.dtos'
                 Gistlyn_dtos_1 = Gistlyn_dtos_1_1;
             }],
         execute: function() {
+            a = (function () {
+                function a() {
+                }
+                a.prototype.createResponse = function () { return new Gistlyn_dtos_1.HelloResponse(); };
+                a.prototype.getTypeName = function () { return "Hello2"; };
+                return a;
+            }());
+            exports_1("a", a);
+            console.log('Hello', servicestack_client_1.nameOf(new Gistlyn_dtos_1.Hello()));
+            console.log('Hello2', servicestack_client_1.nameOf(new a()));
             client = new servicestack_client_1.JsonServiceClient("/");
             Test = (function (_super) {
                 __extends(Test, _super);
@@ -30,19 +41,18 @@ System.register(['react-dom', 'react', './servicestack-client', './Gistlyn.dtos'
                     _super.apply(this, arguments);
                 }
                 Test.prototype.componentWillMount = function () {
-                    var _this = this;
                     this.state = { result: 'loading...' };
                     //this.loadGist("6831799881c92434f80e141c8a2699eb");
-                    var request = new Gistlyn_dtos_1.Hello();
-                    request.name = "World";
-                    client.get(request)
-                        .then(function (r) {
-                        console.log(r);
-                        _this.setState({ result: r.result });
-                    })
-                        .catch(function (r) {
-                        console.log('error', r);
-                    });
+                    //const request = new Hello();
+                    //request.name = "World";
+                    //client.get(request)
+                    //    .then(r => {
+                    //        console.log(r);
+                    //        this.setState({ result: r.result });
+                    //    })
+                    //    .catch(r => {
+                    //        console.log('error', r);
+                    //    });
                 };
                 Test.prototype.loadGist = function (gist) {
                     var _this = this;

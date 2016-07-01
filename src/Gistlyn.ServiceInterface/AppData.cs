@@ -7,6 +7,8 @@ using System.IO;
 using System.Linq;
 using Gistlyn.ServiceModel.Types;
 using ServiceStack;
+using ServiceStack.Auth;
+using ServiceStack.Text;
 
 namespace Gistlyn.ServiceInterface
 {
@@ -68,6 +70,29 @@ namespace Gistlyn.ServiceInterface
             MemoizedResult value;
             memoizedResults.TryGetValue(codeHash, out value);
             return value;
+        }
+    }
+
+    public static class SharedAppHostConfig
+    {
+        public static void Configure(ServiceStackHost appHost, string defaultPackagesPath)
+        {
+            JsConfig.MaxDepth = 10;
+            JsConfig.EmitCamelCaseNames = true;
+
+            appHost.Plugins.Add(new ServerEventsFeature());
+
+            appHost.Plugins.Add(new CorsFeature());
+
+            appHost.Container.Register(new AppData(
+                appHost.AppSettings.Get("NugetPackagesDirectory", defaultPackagesPath)));
+
+            appHost.Container.Register<IDataContext>(appHost.Container.Resolve<AppData>());
+
+            appHost.Plugins.Add(new AuthFeature(() => new AuthUserSession(),
+                new IAuthProvider[] {
+                    new GithubAuthProvider(appHost.AppSettings),
+                }));
         }
     }
 }

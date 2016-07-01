@@ -1,7 +1,7 @@
-﻿/// <reference path='../typings/browser.d.ts'/>
+﻿/// <reference path='../typings/index.d.ts'/>
 
-import * as ReactDOM from 'react-dom';
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import { createStore, applyMiddleware } from 'redux';
 import { Provider, connect } from 'react-redux';
 
@@ -15,7 +15,7 @@ import "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js";
 import "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js";
 import "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js";
 import "./codemirror.js";
-
+ 
 import {
     RunScript,
     GetScriptVariables, VariableInfo,
@@ -109,7 +109,7 @@ let store = createStore(
             case 'SSE_CONNECT':
                 return Object.assign({}, state, { activeSub: action.activeSub });
             case 'GIST_CHANGE':
-                return Object.assign({}, defaults, { gist: action.gist });
+                return Object.assign({}, defaults, { activeSub: state.activeSub }, { gist: action.gist });
             case 'GIST_LOAD':
                 return Object.assign({}, state, { files: action.files, activeFileName:action.activeFileName, variables:[], logs:[], hasLoaded: true });
             case 'FILE_SELECT':

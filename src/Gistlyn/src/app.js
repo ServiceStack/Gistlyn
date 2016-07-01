@@ -1,5 +1,5 @@
-/// <reference path='../typings/browser.d.ts'/>
-System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-client', 'react-codemirror', './json-viewer', "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js", "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js", "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js", "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js", "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js", "./codemirror.js", './Gistlyn.dtos'], function(exports_1, context_1) {
+/// <reference path='../typings/index.d.ts'/>
+System.register(['react', 'react-dom', 'redux', 'react-redux', './servicestack-client', 'react-codemirror', './json-viewer', "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js", "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js", "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js", "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js", "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js", "./codemirror.js", './Gistlyn.dtos'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -13,18 +13,18 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
         else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
-    var ReactDOM, React, redux_1, react_redux_1, servicestack_client_1, react_codemirror_1, json_viewer_1, Gistlyn_dtos_1;
+    var React, ReactDOM, redux_1, react_redux_1, servicestack_client_1, react_codemirror_1, json_viewer_1, Gistlyn_dtos_1;
     var options, ScriptStatusRunning, ScriptStatusError, StateKey, GistCacheKey, updateGist, defaults, store, client, sse, getSortedFileNames, App, stateJson, state, e, qsGist;
     function reduxify(mapStateToProps, mapDispatchToProps, mergeProps, options) {
         return function (target) { return (react_redux_1.connect(mapStateToProps, mapDispatchToProps, mergeProps, options)(target)); };
     }
     return {
         setters:[
-            function (ReactDOM_1) {
-                ReactDOM = ReactDOM_1;
-            },
             function (React_1) {
                 React = React_1;
+            },
+            function (ReactDOM_1) {
+                ReactDOM = ReactDOM_1;
             },
             function (redux_1_1) {
                 redux_1 = redux_1_1;
@@ -127,7 +127,7 @@ System.register(['react-dom', 'react', 'redux', 'react-redux', './servicestack-c
                     case 'SSE_CONNECT':
                         return Object.assign({}, state, { activeSub: action.activeSub });
                     case 'GIST_CHANGE':
-                        return Object.assign({}, defaults, { gist: action.gist });
+                        return Object.assign({}, defaults, { activeSub: state.activeSub }, { gist: action.gist });
                     case 'GIST_LOAD':
                         return Object.assign({}, state, { files: action.files, activeFileName: action.activeFileName, variables: [], logs: [], hasLoaded: true });
                     case 'FILE_SELECT':

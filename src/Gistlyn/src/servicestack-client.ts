@@ -1,4 +1,4 @@
-﻿/// <reference path='../typings/browser.d.ts'/>
+﻿/// <reference path='../typings/index.d.ts'/>
 
 export interface IReturnVoid {
     createResponse();
@@ -360,8 +360,13 @@ export const sanitize = (status:any):any => {
     return to;
 }
 
-
 export const nameOf = (o: any) => {
+    if (!o)
+        return "null";
+
+    if (typeof o.getTypeName == "function")
+        return o.getTypeName();
+
     var ctor = o && o.constructor;
     if (ctor == null)
         throw `${o} doesn't have constructor`;
