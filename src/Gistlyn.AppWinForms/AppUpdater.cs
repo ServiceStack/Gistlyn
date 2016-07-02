@@ -17,9 +17,7 @@ namespace Gistlyn.AppWinForms
             get
             {
                 if (updateManagerInstance != null)
-                {
                     return updateManagerInstance;
-                }
 
                 var appSettings = new AppSettings();
                 var updateManagerTask =
