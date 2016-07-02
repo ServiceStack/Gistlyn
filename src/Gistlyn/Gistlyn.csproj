@@ -124,6 +124,7 @@
     <Content Include="gulpfile.js" />
     <Content Include="config.js" />
     <Content Include="default.html" />
+    <Content Include="img\ajax-loader.gif" />
     <Content Include="img\editor-bg.png" />
     <Content Include="img\logo-32-inverted.png" />
     <Content Include="platform.css" />

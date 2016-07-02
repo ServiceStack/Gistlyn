@@ -107,6 +107,9 @@
     <EmbeddedResource Include="css\iconfont\MaterialIcons-Regular.svg" />
     <EmbeddedResource Include="css\octicon\octicon.css" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="img\ajax-loader.gif" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

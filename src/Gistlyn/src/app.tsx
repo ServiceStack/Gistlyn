@@ -15,7 +15,7 @@ import "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js";
 import "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js";
 import "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js";
 import "./codemirror.js";
- 
+
 import {
     RunScript,
     GetScriptVariables, VariableInfo,
@@ -354,7 +354,12 @@ class App extends React.Component<any, any> {
         this.evaluateExpression(expr);
     }
 
-    evaluateExpression(expr:string) {
+    evaluateExpression(expr: string) {
+        if (!expr) {
+            this.props.setExpression(expr);
+            return;
+        }
+
         const request = new EvaluateExpression();
         request.scriptId = this.scriptId;
         request.expression = expr;
@@ -478,9 +483,10 @@ class App extends React.Component<any, any> {
         } else if (isScriptRunning) {
             Preview.push((
                 <div id="status" className="section">
-                    <div style={{ margin: '40px', color: "#31708f" }}>
+                    <div style={{ margin: '40px', color:"#444", width: "215px" }} title="executing...">
+                        <img src="/img/ajax-loader.gif" style={{float:"right", margin:"5px 0 0 0"}} />
                         <i className="material-icons" style={{ position: "absolute" }}>build</i>
-                        <p style={{ padding: "0 0 0 30px", fontSize: "22px" }}>Executing Script...</p>
+                        <p style={{ padding: "0 0 0 30px", fontSize: "22px" }}>Executing Script</p>
                     </div>
                 </div>));
         }
@@ -505,7 +511,8 @@ class App extends React.Component<any, any> {
                     <div id="evaluate">
                         <input type="text" placeholder="Evaluate Expression" value={this.props.expression} 
                             onChange={e => this.props.setExpression((e.target as HTMLInputElement).value)}
-                            onKeyPress={e => e.which === 13 ? this.evaluateExpression(this.props.expression) : null } />
+                            onKeyPress={e => e.which === 13 ? this.evaluateExpression(this.props.expression) : null }
+                            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
                         <i className="material-icons" title="run" onClick={e => this.evaluateExpression(this.props.expression) }>play_arrow</i>
                         {exprVar
                             ? (
@@ -522,10 +529,8 @@ class App extends React.Component<any, any> {
 
         if (this.props.logs.length > 0) {
             Preview.push((
-                <div id="console" className="section" style={{borderBottom:"solid 1px #ddd"}}>
-                    <div className="head" style={{font:"14px/20px arial", height:"22px", textAlign:"right", borderBottom:"solid 1px #ddd"}}>
-                        <b style={{ background:"#444", color:"#fff", padding:"4px 8px" }}>console</b>
-                    </div>
+                <div id="console" className="section" style={{ borderTop: "solid 1px #ddd", borderBottom: "solid 1px #ddd", font: "14px/20px arial", height:"350px" }}>
+                    <b style={{ background: "#444", color: "#fff", padding: "1px 8px", position: "absolute", right: "3px", margin:"-22px 0" }}>console</b>
                     <i className="material-icons clear-btn" title="clear console" onClick={e => this.props.clearConsole() }>clear</i>
                     <div className="scroll" style={{overflow:"auto", maxHeight:"350px"}} ref={(el) => this.consoleScroll = el}>
                         <table style={{width:"100%"}}>
@@ -580,6 +585,8 @@ class App extends React.Component<any, any> {
                     </div>
                 </div>
 
+                <div id="footer-spacer"></div>
+
                 <div id="footer">
                     <div id="actions">
                         <div id="revert" onClick={e => this.revertGist(e.shiftKey)}>
@@ -587,13 +594,14 @@ class App extends React.Component<any, any> {
                             <p>Revert Changes</p>
                         </div>
                     </div>
-                    <div id="run">
-                        {main != null
-                            ? (!isScriptRunning 
-                                ? <i className="material-icons" title="run" onClick={this.run}>play_circle_outline</i>
-                                : <i className="material-icons" title="cancel script" onClick={this.cancel} style={{ color:"#FF5252" }}>cancel</i>)
-                            : <i className="material-icons disabled" title="disabled">play_circle_outline</i>}
-                    </div>
+                </div>
+
+                <div id="run">
+                    {main != null
+                        ? (!isScriptRunning
+                            ? <i className="material-icons" title="run" onClick={this.run}>play_circle_outline</i>
+                            : <i className="material-icons" title="cancel script" onClick={this.cancel} style={{ color: "#FF5252" }}>cancel</i>)
+                        : <i className="material-icons disabled" title="disabled">play_circle_outline</i>}
                 </div>
             </div>
         );
