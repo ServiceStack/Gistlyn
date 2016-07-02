@@ -23,10 +23,11 @@ namespace Gistlyn.AppWinForms
 
             Load += (sender, args) =>
             {
-                //FormBorderStyle = FormBorderStyle.None;
-                Left = Top = 0;
-                Width = Screen.PrimaryScreen.WorkingArea.Width;
-                Height = Screen.PrimaryScreen.WorkingArea.Height;
+                FormBorderStyle = FormBorderStyle.Sizable;
+                Left = (int) (Screen.PrimaryScreen.WorkingArea.Width * .1);
+                Top = (int)(Screen.PrimaryScreen.WorkingArea.Height * .1);
+                Width = (int) (Screen.PrimaryScreen.WorkingArea.Width * .8);
+                Height = (int) (Screen.PrimaryScreen.WorkingArea.Height * .8);
             };
 
             ChromiumBrowser.RegisterJsObject("nativeHost", new NativeHost(this));
