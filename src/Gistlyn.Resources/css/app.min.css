@@ -253,14 +253,14 @@ html,body,#app,#body {
 #preview {
     display: flex;
     flex-flow: column;
+    overflow: hidden;
 }
 
 #status, #vars, #errors, #placeholder {
-    min-height: 500px;
-    flex: 2;
+    flex: 1;
+    overflow: auto;
 }
 #console {
-    flex: 1;
 }
 #console .clear-btn {
     position: absolute;
@@ -304,10 +304,10 @@ html,body,#app,#body {
     border: solid 1px #A9A9A9;
 }
 #evaluate i {
-    position: absolute;
-    margin: 5px 0 0 -5px;
-    font-size: 38px;
+    margin: 0 0 0 -3px;
+    font-size: 30px;
     cursor: pointer;
+    vertical-align: bottom;
 }
 #evaluate i:hover {
     color: #0371BE;
