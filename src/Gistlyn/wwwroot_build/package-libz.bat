@@ -14,6 +14,7 @@ SET OUTPUTNAME=Gistlyn-console.exe
 
 SET RELEASE=..\..\Gistlyn.AppConsole\bin\Release
 
+DEL apps\%OUTPUTNAME%
 DEL libz\*.libz
 
 COPY %RELEASE%\Gistlyn.AppConsole.exe %RELEASE%\%OUTPUTNAME%

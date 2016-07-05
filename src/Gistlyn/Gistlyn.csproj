@@ -116,6 +116,10 @@
     <TypeScriptCompile Include="src\TestClient.tsx" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\..\lib\sqlite3.dll">
+      <Link>sqlite3.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="css\app.css" />
     <Content Include="css\codemirror.css" />
     <Content Include="css\iconfont\material-icons.css" />
