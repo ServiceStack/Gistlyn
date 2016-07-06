@@ -316,7 +316,7 @@ System.register([], function(exports_1, context_1) {
                     : [s];
             });
             splitCase = function (t) {
-                return typeof t != 'string' ? t : t.replace(/([A-Z]|[0-9]+)/g, ' $1').replace(/_/g, ' ');
+                return typeof t != 'string' ? t : t.replace(/([A-Z]|[0-9]+)/g, ' $1').replace(/_/g, ' ').trim();
             };
             exports_1("humanize", humanize = function (s) { return (!s || s.indexOf(' ') >= 0 ? s : splitCase(s)); });
             exports_1("queryString", queryString = function (url) {

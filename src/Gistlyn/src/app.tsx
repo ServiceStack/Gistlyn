@@ -537,7 +537,7 @@ class App extends React.Component<any, any> {
                             <tbody style={{font:"13px/18px monospace", color:"#444"}}>
                                 {this.props.logs.map(log => (
                                     <tr>
-                                        <td style={{padding:"2px 8px"}}><span className={log.cls}>{log.msg}</span></td>
+                                        <td style={{ padding: "2px 8px", tabSize:4 }}><pre className={log.cls}>{log.msg}</pre></td>
                                     </tr>
                                 ))}
                             </tbody>

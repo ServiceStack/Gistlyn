@@ -393,13 +393,13 @@ export const css = (selector: string | NodeListOf<Element>, name: string, value:
     }
 }
 
-export const splitOnFirst = (s, c) : string[] => {
+export const splitOnFirst = (s: string, c: string) : string[] => {
     if (!s) return [s];
     var pos = s.indexOf(c);
     return pos >= 0 ? [s.substring(0, pos), s.substring(pos + 1)] : [s];
 };
 
-export const splitOnLast = (s, c): string[] => {
+export const splitOnLast = (s: string, c: string): string[] => {
     if (!s) return [s];
     var pos = s.lastIndexOf(c);
     return pos >= 0
@@ -407,12 +407,12 @@ export const splitOnLast = (s, c): string[] => {
         : [s];
 };
 
-const splitCase = (t) => 
-    typeof t != 'string' ? t : t.replace(/([A-Z]|[0-9]+)/g, ' $1').replace(/_/g, ' ');
+const splitCase = (t:string) => 
+    typeof t != 'string' ? t : t.replace(/([A-Z]|[0-9]+)/g, ' $1').replace(/_/g, ' ').trim();
 
 export const humanize = s => (!s || s.indexOf(' ') >= 0 ? s : splitCase(s));
 
-export const queryString = (url) : any => {
+export const queryString = (url: string) : any => {
     if (!url || url.indexOf('?') === -1) return {};
     var pairs = splitOnFirst(url, '?')[1].split('&');
     var map = {};
