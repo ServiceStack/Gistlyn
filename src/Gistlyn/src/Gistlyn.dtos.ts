@@ -1,5 +1,5 @@
 /* Options:
-Date: 2016-06-30 18:50:53
+Date: 2016-07-06 03:33:43
 Version: 4.061
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5500
@@ -25,21 +25,6 @@ export interface IReturn<T>
 {
 }
 
-export class AssemblyReference
-{
-    name: string;
-    path: string;
-}
-
-export class ScriptExecutionResult
-{
-    status: ScriptStatus;
-    variables: VariableInfo[];
-    errors: ErrorInfo[];
-    errorResponseStatus: ResponseStatus;
-    console: string;
-}
-
 // @DataContract
 export class ResponseStatus
 {
@@ -59,6 +44,21 @@ export class ResponseStatus
     meta: { [index:string]: string; };
 }
 
+export class AssemblyReference
+{
+    name: string;
+    path: string;
+}
+
+export class ScriptExecutionResult
+{
+    status: ScriptStatus;
+    variables: VariableInfo[];
+    errors: ErrorInfo[];
+    errorResponseStatus: ResponseStatus;
+    console: string;
+}
+
 export type ScriptStatus = "Unknown" | "PrepareToRun" | "Running" | "Completed" | "Cancelled" | "CompiledWithErrors" | "ThrowedException" | "AnotherScriptExecuting";
 
 export class VariableInfo
@@ -68,19 +68,7 @@ export class VariableInfo
     type: string;
     json: string;
     isBrowseable: boolean;
-}
-
-export class NugetPackageInfo
-{
-    id: string;
-    version: string;
-    targetFramework: string;
-    assemblies: AssemblyReference[];
-}
-
-export class ErrorInfo
-{
-    info: string;
+    canInspect: boolean;
 }
 
 // @DataContract
@@ -97,6 +85,17 @@ export class ResponseError
 
     // @DataMember(Order=4, EmitDefaultValue=false)
     meta: { [index:string]: string; };
+}
+
+export class ErrorInfo
+{
+    info: string;
+}
+
+export class HelloResponse
+{
+    result: string;
+    responseStatus: ResponseStatus;
 }
 
 export class RunScriptResponse
@@ -123,47 +122,6 @@ export class EvaluateExpressionResponse
 export class CancelScriptResponse
 {
     result: ScriptExecutionResult;
-}
-
-export class HelloResponse
-{
-    result: string;
-    responseStatus: ResponseStatus;
-}
-
-export class TestServerEventsResponse
-{
-    result: string;
-}
-
-export class ScriptStatusResponse
-{
-    status: ScriptStatus;
-}
-
-export class EvaluateSourceResponse
-{
-    result: ScriptExecutionResult;
-}
-
-export class SearchNugetPackagesResponse
-{
-    packages: NugetPackageInfo[];
-}
-
-export class InstallNugetPackageResponse
-{
-    error: string;
-}
-
-export class AddPackageAsReferenceResponse
-{
-    assemblies: AssemblyReference[];
-}
-
-export class SearchInstalledPackagesResponse
-{
-    packages: NugetPackageInfo[];
 }
 
 // @DataContract
@@ -220,6 +178,14 @@ export class UnAssignRolesResponse
     responseStatus: ResponseStatus;
 }
 
+// @Route("/hello/{Name}")
+export class Hello implements IReturn<HelloResponse>
+{
+    name: string;
+    createResponse() { return new HelloResponse(); }
+    getTypeName() { return "Hello"; }
+}
+
 // @Route("/scripts/{ScriptId}/run")
 export class RunScript implements IReturn<RunScriptResponse>
 {
@@ -259,74 +225,6 @@ export class CancelScript implements IReturn<CancelScriptResponse>
     scriptId: string;
     createResponse() { return new CancelScriptResponse(); }
     getTypeName() { return "CancelScript"; }
-}
-
-export class Hello implements IReturn<HelloResponse>
-{
-    name: string;
-    createResponse() { return new HelloResponse(); }
-    getTypeName() { return "Hello"; }
-}
-
-// @Route("/test")
-// @Route("/test/{Name}")
-export class TestServerEvents implements IReturn<TestServerEventsResponse>
-{
-    name: string;
-    createResponse() { return new TestServerEventsResponse(); }
-    getTypeName() { return "TestServerEvents"; }
-}
-
-// @Route("/scripts/{ScriptId}/status")
-export class GetScriptStatus implements IReturn<ScriptStatusResponse>
-{
-    scriptId: string;
-    createResponse() { return new ScriptStatusResponse(); }
-    getTypeName() { return "GetScriptStatus"; }
-}
-
-// @Route("/evaluate")
-export class EvaluateSource implements IReturn<EvaluateSourceResponse>
-{
-    code: string;
-    createResponse() { return new EvaluateSourceResponse(); }
-    getTypeName() { return "EvaluateSource"; }
-}
-
-// @Route("/nuget/packages/search/{Search}")
-export class SearchNugetPackages implements IReturn<SearchNugetPackagesResponse>
-{
-    search: string;
-    allowPrereleaseVersion: boolean;
-    createResponse() { return new SearchNugetPackagesResponse(); }
-    getTypeName() { return "SearchNugetPackages"; }
-}
-
-// @Route("/packages/install")
-export class InstallNugetPackage implements IReturn<InstallNugetPackageResponse>
-{
-    packageId: string;
-    version: string;
-    allowPrereleaseVersion: boolean;
-    createResponse() { return new InstallNugetPackageResponse(); }
-    getTypeName() { return "InstallNugetPackage"; }
-}
-
-// @Route("/packages/references")
-export class AddPackageAsReference implements IReturn<AddPackageAsReferenceResponse>
-{
-    packageId: string;
-    version: string;
-    createResponse() { return new AddPackageAsReferenceResponse(); }
-    getTypeName() { return "AddPackageAsReference"; }
-}
-
-// @Route("/packages/search/{Search}")
-export class SearchInstalledPackages implements IReturn<SearchInstalledPackagesResponse>
-{
-    search: string;
-    createResponse() { return new SearchInstalledPackagesResponse(); }
-    getTypeName() { return "SearchInstalledPackages"; }
 }
 
 // @Route("/auth")

@@ -316,10 +316,10 @@ class App extends React.Component<any, any> {
     }
 
     getVariableRows(v: VariableInfo) {
-        var varProps = this.props.inspectedVariables[v.name];
+        var varProps = this.props.inspectedVariables[v.name] as VariableInfo[];
         var rows = [(
             <tr>
-                <td className="name">
+                <td className="name" style={{whiteSpace:"nowrap"}}>
                     {v.isBrowseable
                         ? (varProps 
                             ? <span className="octicon octicon-triangle-down" style={{ margin: "0 10px 0 0" }} onClick={e => this.props.inspectVariable(v.name, null)}></span>
@@ -336,8 +336,10 @@ class App extends React.Component<any, any> {
             varProps.forEach(p => {
                 rows.push((
                     <tr>
-                        <td className="name" style={{padding:"0 0 0 50px"}}>
-                            <a onClick={e => this.setAndEvaluateExpression(v.name + "." + p.name)}>{p.name}</a>
+                        <td className="name" style={{ padding: "0 0 0 50px" }}>
+                            {p.canInspect
+                                ? <a onClick={e => this.setAndEvaluateExpression(v.name + (p.name[0] != "[" ? "." : "") + p.name) }>{p.name}</a>
+                                : <span style={{color:"#999"}}>{p.name}</span>}
                         </td>
                         <td className="value">{p.value}</td>
                         <td className="type">{p.type}</td>
@@ -367,7 +369,13 @@ class App extends React.Component<any, any> {
 
         client.post(request)
             .then(r => {
-                this.props.setExpressionResult(r.result);
+                if (r.result.errors && r.result.errors.length > 0) {
+                    r.result.errors.forEach(x => {
+                        this.props.logConsole({ msg: x.info, cls:"error" });
+                    });
+                } else {
+                    this.props.setExpressionResult(r.result);
+                }
             })
             .catch(e => {
                 this.props.logConsoleError(e.responseStatus);
@@ -596,12 +604,12 @@ class App extends React.Component<any, any> {
                     </div>
                 </div>
 
-                <div id="run">
+                <div id="run" className={main == null ? "disabled" : ""} onClick={e => !isScriptRunning ? this.run() : this.cancel()}>
                     {main != null
                         ? (!isScriptRunning
-                            ? <i className="material-icons" title="run" onClick={this.run}>play_circle_outline</i>
-                            : <i className="material-icons" title="cancel script" onClick={this.cancel} style={{ color: "#FF5252" }}>cancel</i>)
-                        : <i className="material-icons disabled" title="disabled">play_circle_outline</i>}
+                            ? <i className="material-icons" title="run">play_circle_outline</i>
+                            : <i className="material-icons" title="cancel script" style={{ color: "#FF5252" }}>cancel</i>)
+                        : <i className="material-icons" title="disabled">play_circle_outline</i>}
                 </div>
             </div>
         );

@@ -1,5 +1,5 @@
 /* Options:
-Date: 2016-06-30 18:50:53
+Date: 2016-07-06 03:33:43
 Version: 4.061
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5500
@@ -18,10 +18,17 @@ ExportAsTypes: True
 System.register([], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var AssemblyReference, ScriptExecutionResult, ResponseStatus, VariableInfo, NugetPackageInfo, ErrorInfo, ResponseError, RunScriptResponse, ScriptStateVariables, EvaluateExpressionResponse, CancelScriptResponse, HelloResponse, TestServerEventsResponse, ScriptStatusResponse, EvaluateSourceResponse, SearchNugetPackagesResponse, InstallNugetPackageResponse, AddPackageAsReferenceResponse, SearchInstalledPackagesResponse, AuthenticateResponse, AssignRolesResponse, UnAssignRolesResponse, RunScript, GetScriptVariables, EvaluateExpression, CancelScript, Hello, TestServerEvents, GetScriptStatus, EvaluateSource, SearchNugetPackages, InstallNugetPackage, AddPackageAsReference, SearchInstalledPackages, Authenticate, AssignRoles, UnAssignRoles;
+    var ResponseStatus, AssemblyReference, ScriptExecutionResult, VariableInfo, ResponseError, ErrorInfo, HelloResponse, RunScriptResponse, ScriptStateVariables, EvaluateExpressionResponse, CancelScriptResponse, AuthenticateResponse, AssignRolesResponse, UnAssignRolesResponse, Hello, RunScript, GetScriptVariables, EvaluateExpression, CancelScript, Authenticate, AssignRoles, UnAssignRoles;
     return {
         setters:[],
         execute: function() {
+            // @DataContract
+            ResponseStatus = (function () {
+                function ResponseStatus() {
+                }
+                return ResponseStatus;
+            }());
+            exports_1("ResponseStatus", ResponseStatus);
             AssemblyReference = (function () {
                 function AssemblyReference() {
                 }
@@ -34,31 +41,12 @@ System.register([], function(exports_1, context_1) {
                 return ScriptExecutionResult;
             }());
             exports_1("ScriptExecutionResult", ScriptExecutionResult);
-            // @DataContract
-            ResponseStatus = (function () {
-                function ResponseStatus() {
-                }
-                return ResponseStatus;
-            }());
-            exports_1("ResponseStatus", ResponseStatus);
             VariableInfo = (function () {
                 function VariableInfo() {
                 }
                 return VariableInfo;
             }());
             exports_1("VariableInfo", VariableInfo);
-            NugetPackageInfo = (function () {
-                function NugetPackageInfo() {
-                }
-                return NugetPackageInfo;
-            }());
-            exports_1("NugetPackageInfo", NugetPackageInfo);
-            ErrorInfo = (function () {
-                function ErrorInfo() {
-                }
-                return ErrorInfo;
-            }());
-            exports_1("ErrorInfo", ErrorInfo);
             // @DataContract
             ResponseError = (function () {
                 function ResponseError() {
@@ -66,6 +54,18 @@ System.register([], function(exports_1, context_1) {
                 return ResponseError;
             }());
             exports_1("ResponseError", ResponseError);
+            ErrorInfo = (function () {
+                function ErrorInfo() {
+                }
+                return ErrorInfo;
+            }());
+            exports_1("ErrorInfo", ErrorInfo);
+            HelloResponse = (function () {
+                function HelloResponse() {
+                }
+                return HelloResponse;
+            }());
+            exports_1("HelloResponse", HelloResponse);
             RunScriptResponse = (function () {
                 function RunScriptResponse() {
                 }
@@ -90,54 +90,6 @@ System.register([], function(exports_1, context_1) {
                 return CancelScriptResponse;
             }());
             exports_1("CancelScriptResponse", CancelScriptResponse);
-            HelloResponse = (function () {
-                function HelloResponse() {
-                }
-                return HelloResponse;
-            }());
-            exports_1("HelloResponse", HelloResponse);
-            TestServerEventsResponse = (function () {
-                function TestServerEventsResponse() {
-                }
-                return TestServerEventsResponse;
-            }());
-            exports_1("TestServerEventsResponse", TestServerEventsResponse);
-            ScriptStatusResponse = (function () {
-                function ScriptStatusResponse() {
-                }
-                return ScriptStatusResponse;
-            }());
-            exports_1("ScriptStatusResponse", ScriptStatusResponse);
-            EvaluateSourceResponse = (function () {
-                function EvaluateSourceResponse() {
-                }
-                return EvaluateSourceResponse;
-            }());
-            exports_1("EvaluateSourceResponse", EvaluateSourceResponse);
-            SearchNugetPackagesResponse = (function () {
-                function SearchNugetPackagesResponse() {
-                }
-                return SearchNugetPackagesResponse;
-            }());
-            exports_1("SearchNugetPackagesResponse", SearchNugetPackagesResponse);
-            InstallNugetPackageResponse = (function () {
-                function InstallNugetPackageResponse() {
-                }
-                return InstallNugetPackageResponse;
-            }());
-            exports_1("InstallNugetPackageResponse", InstallNugetPackageResponse);
-            AddPackageAsReferenceResponse = (function () {
-                function AddPackageAsReferenceResponse() {
-                }
-                return AddPackageAsReferenceResponse;
-            }());
-            exports_1("AddPackageAsReferenceResponse", AddPackageAsReferenceResponse);
-            SearchInstalledPackagesResponse = (function () {
-                function SearchInstalledPackagesResponse() {
-                }
-                return SearchInstalledPackagesResponse;
-            }());
-            exports_1("SearchInstalledPackagesResponse", SearchInstalledPackagesResponse);
             // @DataContract
             AuthenticateResponse = (function () {
                 function AuthenticateResponse() {
@@ -159,6 +111,15 @@ System.register([], function(exports_1, context_1) {
                 return UnAssignRolesResponse;
             }());
             exports_1("UnAssignRolesResponse", UnAssignRolesResponse);
+            // @Route("/hello/{Name}")
+            Hello = (function () {
+                function Hello() {
+                }
+                Hello.prototype.createResponse = function () { return new HelloResponse(); };
+                Hello.prototype.getTypeName = function () { return "Hello"; };
+                return Hello;
+            }());
+            exports_1("Hello", Hello);
             // @Route("/scripts/{ScriptId}/run")
             RunScript = (function () {
                 function RunScript() {
@@ -196,78 +157,6 @@ System.register([], function(exports_1, context_1) {
                 return CancelScript;
             }());
             exports_1("CancelScript", CancelScript);
-            Hello = (function () {
-                function Hello() {
-                }
-                Hello.prototype.createResponse = function () { return new HelloResponse(); };
-                Hello.prototype.getTypeName = function () { return "Hello"; };
-                return Hello;
-            }());
-            exports_1("Hello", Hello);
-            // @Route("/test")
-            // @Route("/test/{Name}")
-            TestServerEvents = (function () {
-                function TestServerEvents() {
-                }
-                TestServerEvents.prototype.createResponse = function () { return new TestServerEventsResponse(); };
-                TestServerEvents.prototype.getTypeName = function () { return "TestServerEvents"; };
-                return TestServerEvents;
-            }());
-            exports_1("TestServerEvents", TestServerEvents);
-            // @Route("/scripts/{ScriptId}/status")
-            GetScriptStatus = (function () {
-                function GetScriptStatus() {
-                }
-                GetScriptStatus.prototype.createResponse = function () { return new ScriptStatusResponse(); };
-                GetScriptStatus.prototype.getTypeName = function () { return "GetScriptStatus"; };
-                return GetScriptStatus;
-            }());
-            exports_1("GetScriptStatus", GetScriptStatus);
-            // @Route("/evaluate")
-            EvaluateSource = (function () {
-                function EvaluateSource() {
-                }
-                EvaluateSource.prototype.createResponse = function () { return new EvaluateSourceResponse(); };
-                EvaluateSource.prototype.getTypeName = function () { return "EvaluateSource"; };
-                return EvaluateSource;
-            }());
-            exports_1("EvaluateSource", EvaluateSource);
-            // @Route("/nuget/packages/search/{Search}")
-            SearchNugetPackages = (function () {
-                function SearchNugetPackages() {
-                }
-                SearchNugetPackages.prototype.createResponse = function () { return new SearchNugetPackagesResponse(); };
-                SearchNugetPackages.prototype.getTypeName = function () { return "SearchNugetPackages"; };
-                return SearchNugetPackages;
-            }());
-            exports_1("SearchNugetPackages", SearchNugetPackages);
-            // @Route("/packages/install")
-            InstallNugetPackage = (function () {
-                function InstallNugetPackage() {
-                }
-                InstallNugetPackage.prototype.createResponse = function () { return new InstallNugetPackageResponse(); };
-                InstallNugetPackage.prototype.getTypeName = function () { return "InstallNugetPackage"; };
-                return InstallNugetPackage;
-            }());
-            exports_1("InstallNugetPackage", InstallNugetPackage);
-            // @Route("/packages/references")
-            AddPackageAsReference = (function () {
-                function AddPackageAsReference() {
-                }
-                AddPackageAsReference.prototype.createResponse = function () { return new AddPackageAsReferenceResponse(); };
-                AddPackageAsReference.prototype.getTypeName = function () { return "AddPackageAsReference"; };
-                return AddPackageAsReference;
-            }());
-            exports_1("AddPackageAsReference", AddPackageAsReference);
-            // @Route("/packages/search/{Search}")
-            SearchInstalledPackages = (function () {
-                function SearchInstalledPackages() {
-                }
-                SearchInstalledPackages.prototype.createResponse = function () { return new SearchInstalledPackagesResponse(); };
-                SearchInstalledPackages.prototype.getTypeName = function () { return "SearchInstalledPackages"; };
-                return SearchInstalledPackages;
-            }());
-            exports_1("SearchInstalledPackages", SearchInstalledPackages);
             // @Route("/auth")
             // @Route("/auth/{provider}")
             // @Route("/authenticate")

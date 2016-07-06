@@ -298,14 +298,16 @@ System.register(['react', 'react-dom', 'redux', 'react-redux', './servicestack-c
                 App.prototype.getVariableRows = function (v) {
                     var _this = this;
                     var varProps = this.props.inspectedVariables[v.name];
-                    var rows = [(React.createElement("tr", null, React.createElement("td", {className: "name"}, v.isBrowseable
+                    var rows = [(React.createElement("tr", null, React.createElement("td", {className: "name", style: { whiteSpace: "nowrap" }}, v.isBrowseable
                             ? (varProps
                                 ? React.createElement("span", {className: "octicon octicon-triangle-down", style: { margin: "0 10px 0 0" }, onClick: function (e) { return _this.props.inspectVariable(v.name, null); }})
                                 : React.createElement("span", {className: "octicon octicon-triangle-right", style: { margin: "0 10px 0 0" }, onClick: function (e) { return _this.inspectVariable(v); }}))
                             : React.createElement("span", {className: "octicon octicon-triangle-right", style: { margin: "0 10px 0 0", color: "#f7f7f7" }}), React.createElement("a", {onClick: function (e) { return _this.setAndEvaluateExpression(v.name); }}, v.name)), React.createElement("td", {className: "value"}, v.value), React.createElement("td", {className: "type"}, v.type)))];
                     if (varProps) {
                         varProps.forEach(function (p) {
-                            rows.push((React.createElement("tr", null, React.createElement("td", {className: "name", style: { padding: "0 0 0 50px" }}, React.createElement("a", {onClick: function (e) { return _this.setAndEvaluateExpression(v.name + "." + p.name); }}, p.name)), React.createElement("td", {className: "value"}, p.value), React.createElement("td", {className: "type"}, p.type))));
+                            rows.push((React.createElement("tr", null, React.createElement("td", {className: "name", style: { padding: "0 0 0 50px" }}, p.canInspect
+                                ? React.createElement("a", {onClick: function (e) { return _this.setAndEvaluateExpression(v.name + (p.name[0] != "[" ? "." : "") + p.name); }}, p.name)
+                                : React.createElement("span", {style: { color: "#999" }}, p.name)), React.createElement("td", {className: "value"}, p.value), React.createElement("td", {className: "type"}, p.type))));
                         });
                     }
                     return rows;
@@ -326,7 +328,14 @@ System.register(['react', 'react-dom', 'redux', 'react-redux', './servicestack-c
                     request.includeJson = true;
                     client.post(request)
                         .then(function (r) {
-                        _this.props.setExpressionResult(r.result);
+                        if (r.result.errors && r.result.errors.length > 0) {
+                            r.result.errors.forEach(function (x) {
+                                _this.props.logConsole({ msg: x.info, cls: "error" });
+                            });
+                        }
+                        else {
+                            _this.props.setExpressionResult(r.result);
+                        }
                     })
                         .catch(function (e) {
                         _this.props.logConsoleError(e.responseStatus);
@@ -431,11 +440,11 @@ System.register(['react', 'react-dom', 'redux', 'react-redux', './servicestack-c
                         : this.props.error
                             ? React.createElement("i", {className: "material-icons", style: { color: "#ebccd1", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "error")
                             : null))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement("div", {id: "editor"}, React.createElement("div", {id: "tabs", style: { display: this.props.files ? 'flex' : 'none' }}, FileList.length > 0
-                        ? React.createElement("i", {id: "files-menu", className: "material-icons", onClick: function (e) { return _this.showDialog(e, _this.filesList); }}, "arrow_drop_down") : null, Tabs), React.createElement("div", {id: "files-list", ref: function (e) { return _this.filesList = e; }}, FileList), React.createElement(react_codemirror_1.default, {value: source, options: options, onChange: function (src) { return _this.updateSource(src); }})), React.createElement("div", {id: "preview"}, Preview))), React.createElement("div", {id: "footer-spacer"}), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "actions"}, React.createElement("div", {id: "revert", onClick: function (e) { return _this.revertGist(e.shiftKey); }}, React.createElement("i", {className: "material-icons"}, "undo"), React.createElement("p", null, "Revert Changes")))), React.createElement("div", {id: "run"}, main != null
+                        ? React.createElement("i", {id: "files-menu", className: "material-icons", onClick: function (e) { return _this.showDialog(e, _this.filesList); }}, "arrow_drop_down") : null, Tabs), React.createElement("div", {id: "files-list", ref: function (e) { return _this.filesList = e; }}, FileList), React.createElement(react_codemirror_1.default, {value: source, options: options, onChange: function (src) { return _this.updateSource(src); }})), React.createElement("div", {id: "preview"}, Preview))), React.createElement("div", {id: "footer-spacer"}), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "actions"}, React.createElement("div", {id: "revert", onClick: function (e) { return _this.revertGist(e.shiftKey); }}, React.createElement("i", {className: "material-icons"}, "undo"), React.createElement("p", null, "Revert Changes")))), React.createElement("div", {id: "run", className: main == null ? "disabled" : "", onClick: function (e) { return !isScriptRunning ? _this.run() : _this.cancel(); }}, main != null
                         ? (!isScriptRunning
-                            ? React.createElement("i", {className: "material-icons", title: "run", onClick: this.run}, "play_circle_outline")
-                            : React.createElement("i", {className: "material-icons", title: "cancel script", onClick: this.cancel, style: { color: "#FF5252" }}, "cancel"))
-                        : React.createElement("i", {className: "material-icons disabled", title: "disabled"}, "play_circle_outline"))));
+                            ? React.createElement("i", {className: "material-icons", title: "run"}, "play_circle_outline")
+                            : React.createElement("i", {className: "material-icons", title: "cancel script", style: { color: "#FF5252" }}, "cancel"))
+                        : React.createElement("i", {className: "material-icons", title: "disabled"}, "play_circle_outline"))));
                 };
                 App = __decorate([
                     reduxify(function (state) { return ({

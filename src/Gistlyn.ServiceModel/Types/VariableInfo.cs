@@ -14,5 +14,7 @@ namespace Gistlyn.ServiceModel.Types
         public string Json { get; set; }
 
         public bool IsBrowseable { get; set; }
+
+        public bool CanInspect { get; set; }
     }
 }
