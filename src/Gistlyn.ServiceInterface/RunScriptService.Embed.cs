@@ -8,11 +8,11 @@ using System.Linq;
 using ServiceStack;
 using Gistlyn.ServiceModel;
 using System.IO;
-using Gistlyn.ServiceInterface.Auth;
 using System.Security.Policy;
 using System.Text;
 using System.Threading;
 using Gistlyn.ServiceModel.Types;
+using Gistlyn.SnippetEngine;
 
 namespace Gistlyn.ServiceInterface
 {
@@ -100,7 +100,8 @@ namespace Gistlyn.ServiceInterface
                     //get json of last variable
                     if (sr.Variables != null && sr.Variables.Count > 0)
                     {
-                        result.LastVariableJson = wrapper.GetVariableValue(sr.Variables[sr.Variables.Count - 1].Name).ToJson();
+                        var value = wrapper.GetVariableValue(sr.Variables[sr.Variables.Count - 1].Name);
+                        result.LastVariableJson = ScriptUtils.ToJson(value);
                     }
                 }
                 finally
