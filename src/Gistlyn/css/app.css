@@ -205,21 +205,24 @@ html,body,#app,#body {
 }
 
 #run {
+    z-index: 2; /* code-mirror */
     position: absolute;
     left: 50%;
     top: 50%;
     margin: -60px 0 0 -30px;
+    cursor: pointer;
+}
+#run.disabled {
+    cursor: auto;
 }
 #run i {
     font-size: 60px;
-    cursor: pointer;
     color: #01215A;
 }
 #run i:hover {
     color: #0371BE;
 }
-#run i.disabled, #run i.disabled:hover {
-    cursor: auto;
+#run.disabled i, #run.disabled i:hover {
     color: #999;
 }
 
@@ -244,7 +247,7 @@ html,body,#app,#body {
     background-color: #dff0d8;
     border-color: #d6e9c6;
 }
-#console span.error {
+#console pre.error {
     color: red;
 }
 
