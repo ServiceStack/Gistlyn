@@ -2,6 +2,7 @@
 // License: https://raw.github.com/ServiceStack/ServiceStack/master/license.txt
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -137,6 +138,7 @@ namespace Gistlyn.SnippetEngine
                     Value = x.Value != null ? x.Value.ToString() : null,
                     Type = x.Type.ToString(),
                     IsBrowseable = IsObjectBrowseable(x.Value),
+                    CanInspect = true,
                 }).ToList();
             }
             return new List<VariableInfo>();
@@ -161,8 +163,28 @@ namespace Gistlyn.SnippetEngine
                     variables.ParentVariable.Value = curVar != null ? curVar.ToString() : null;
 
                     var finalProps = curVar != null
-                        ? curVar.GetType().GetProperties(BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+                        ? curVar.GetType().GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
                         : new PropertyInfo[] { };
+
+                    var curValEnumerable = curVar as IEnumerable;
+                    if (curValEnumerable != null)
+                    {
+                        var i = 0;
+                        foreach (var val in curValEnumerable)
+                        {
+                            variables.Variables.Add(new VariableInfo
+                            {
+                                Name = "[{0}]".Fmt(i),
+                                Value = val != null ? val.ToString() : null,
+                                Type = val != null ? val.GetType().ToString() : "null",
+                                IsBrowseable = IsObjectBrowseable(val),
+                                CanInspect = true,
+                            });
+
+                            if (i++ >= 100)
+                                break;
+                        }
+                    }
 
                     foreach (var prop in finalProps)
                     {
@@ -178,6 +200,7 @@ namespace Gistlyn.SnippetEngine
                                 Value = val != null ? val.ToString() : null,
                                 Type = val != null ? val.GetType().ToString() : prop.PropertyType.ToString(),
                                 IsBrowseable = IsObjectBrowseable(val),
+                                CanInspect = prop.GetGetMethod() != null,
                             };
                             variables.Variables.Add(info);
                         }
@@ -189,6 +212,7 @@ namespace Gistlyn.SnippetEngine
                                 Value = "Threw Exception whilst trying to access value",
                                 Type = prop.PropertyType.ToString(),
                                 IsBrowseable = false,
+                                CanInspect = false,
                             });
                         }
                     }
@@ -340,7 +364,9 @@ namespace Gistlyn.SnippetEngine
                         info.Value = stateResult.ReturnValue.ToString();
 
                         if (includeJson)
-                            info.Json = stateResult.ReturnValue.ToJson();
+                        {
+                            info.Json = ScriptUtils.ToJson(stateResult.ReturnValue);
+                        }
                     }
 
                     scriptResult.Variables.Add(info);
