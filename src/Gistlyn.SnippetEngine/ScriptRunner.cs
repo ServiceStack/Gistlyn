@@ -68,56 +68,56 @@ namespace Gistlyn.SnippetEngine
             return type.IsClass && type != typeof(string);
         }
 
-        public object GetVariableValue(string varName)
+        public object GetVariableValue(string varName, out Type type)
         {
             if (string.IsNullOrEmpty(varName))
                 throw new ArgumentException("varName");
 
             var parts = varName.Split('.');
 
-            //TODO: handle indexer
-            object curVar = state.Result.Variables.FirstOrDefault(v => v.Name == parts[0]);
+            type = null;
+            var var = state.Result.Variables.FirstOrDefault(v => v.Name == parts[0]);
 
-            if (curVar == null)
+            if (var == null)
                 return null;
 
-            curVar = ((ScriptVariable)curVar).Value;
+            var value = var.Value;
+            if (parts.Length == 1)
+            {
+                type = var.Type;
+                return value;
+            }
 
-            for (int i = 0; i < parts.Length; i++)
+            for (var i = 0; i < parts.Length; i++)
             {
                 var part = parts[i];
-                //check if indexer
                 var firstIdx = part.IndexOf('[');
                 var lastIdx = part.LastIndexOf(']');
-                if (firstIdx != -1 && lastIdx != -1 && firstIdx < lastIdx)
+                var isIndexExpression = firstIdx != -1 && lastIdx != -1 && firstIdx < lastIdx;
+                if (isIndexExpression)
                 {
                     int index;
-
-                    //TODO: expression error
                     if (!int.TryParse(part.Substring(firstIdx, lastIdx), out index))
                         return null;
 
-                    //TODO: index out of range
-                    var t = curVar.GetType();
-                    //search indexer
-                    var props = t.GetProperties().Where(p => p.GetIndexParameters().Length > 0).ToArray();
-
-                    //we have indexer
-                    if (props.Length > 0)
+                    var t = value.GetType();
+                    var indexer = t.GetProperties().FirstOrDefault(p => p.GetIndexParameters().Length > 0);
+                    if (indexer != null)
                     {
-                        curVar = props[0].GetValue(curVar, new object[] { index });
+                        value = indexer.GetValue(value, new object[] { index });
                     }
                 }
                 else if (firstIdx == -1 && lastIdx == -1)
                 {
                     if (i > 0)
                     {
-                        var t = curVar.GetType();
+                        var t = value.GetType();
                         var prop = t.GetProperty(part);
 
                         if (prop == null)
                             return null;
-                        curVar = prop.GetValue(curVar);
+
+                        value = prop.GetValue(value);
                     }
                 }
                 else
@@ -125,7 +125,11 @@ namespace Gistlyn.SnippetEngine
                     return null;
                 }
             }
-            return curVar;
+
+            if (value != null)
+                type = value.GetType();
+
+            return value;
         }
 
         public List<VariableInfo> GetVariables()
@@ -157,16 +161,22 @@ namespace Gistlyn.SnippetEngine
             {
                 if (!string.IsNullOrEmpty(parentVariable))
                 {
-                    object curVar = GetVariableValue(parentVariable);
+                    Type varType;
+                    object var = GetVariableValue(parentVariable, out varType);
 
-                    variables.ParentVariable.Type = curVar != null ? curVar.GetType().ToString() : null;
-                    variables.ParentVariable.Value = curVar != null ? curVar.ToString() : null;
+                    variables.ParentVariable.Type = var != null ? var.GetType().ToString() : null;
+                    variables.ParentVariable.Value = var != null ? var.ToString() : null;
 
-                    var finalProps = curVar != null
-                        ? curVar.GetType().GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+                    var varProps = var != null
+                        ? var.GetType().GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+                        : new PropertyInfo[] { };
+                    var typeProps = varType != null
+                        ? varType.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
                         : new PropertyInfo[] { };
 
-                    var curValEnumerable = curVar as IEnumerable;
+                    var typePropNames = typeProps.Select(x => x.Name).ToArray();
+
+                    var curValEnumerable = var as IEnumerable;
                     if (curValEnumerable != null)
                     {
                         var i = 0;
@@ -186,21 +196,21 @@ namespace Gistlyn.SnippetEngine
                         }
                     }
 
-                    foreach (var prop in finalProps)
+                    foreach (var prop in varProps)
                     {
                         if (prop.GetIndexParameters().Length > 0) //Is Index property
                             continue;
 
                         try
                         {
-                            object val = prop.GetValue(curVar, null);
+                            object val = prop.GetValue(var, null);
                             var info = new VariableInfo
                             {
                                 Name = prop.Name.LastRightPart('.'),
                                 Value = val != null ? val.ToString() : null,
                                 Type = val != null ? val.GetType().ToString() : prop.PropertyType.ToString(),
                                 IsBrowseable = IsObjectBrowseable(val),
-                                CanInspect = prop.GetGetMethod() != null,
+                                CanInspect = prop.GetGetMethod() != null && typePropNames.Contains(prop.Name),
                             };
                             variables.Variables.Add(info);
                         }
