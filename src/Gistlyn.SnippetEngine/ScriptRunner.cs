@@ -12,6 +12,7 @@ using Gistlyn.ServiceModel.Types;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using ServiceStack;
+using ServiceStack.Text;
 
 namespace Gistlyn.SnippetEngine
 {
@@ -60,7 +61,7 @@ namespace Gistlyn.SnippetEngine
         {
             if (obj == null)
                 return false;
-            
+
             var type = obj.GetType();
 
             return type.IsClass && type != typeof(string);
@@ -147,7 +148,7 @@ namespace Gistlyn.SnippetEngine
             {
                 Status = GetScriptStatus(),
                 ParentVariable = new VariableInfo { Name = parentVariable },
-                Variables = new List<VariableInfo>() 
+                Variables = new List<VariableInfo>()
             };
 
             if (variables.Status == ScriptStatus.Completed)
@@ -157,7 +158,7 @@ namespace Gistlyn.SnippetEngine
                     object curVar = GetVariableValue(parentVariable);
 
                     variables.ParentVariable.Type = curVar != null ? curVar.GetType().ToString() : null;
-                    variables.ParentVariable.Value = curVar != null ? curVar.ToString(): null;
+                    variables.ParentVariable.Value = curVar != null ? curVar.ToString() : null;
 
                     var finalProps = curVar != null
                         ? curVar.GetType().GetProperties(BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
@@ -165,15 +166,31 @@ namespace Gistlyn.SnippetEngine
 
                     foreach (var prop in finalProps)
                     {
-                        object val = prop.GetValue(curVar, null);
-                        var info = new VariableInfo
+                        if (prop.GetIndexParameters().Length > 0) //Is Index property
+                            continue;
+
+                        try
                         {
-                            Name = prop.Name,
-                            Value = val != null ? val.ToString() : null,
-                            Type = val != null ? val.GetType().ToString() : prop.PropertyType.ToString(),
-                            IsBrowseable = IsObjectBrowseable(val),
-                        };
-                        variables.Variables.Add(info);
+                            object val = prop.GetValue(curVar, null);
+                            var info = new VariableInfo
+                            {
+                                Name = prop.Name.LastRightPart('.'),
+                                Value = val != null ? val.ToString() : null,
+                                Type = val != null ? val.GetType().ToString() : prop.PropertyType.ToString(),
+                                IsBrowseable = IsObjectBrowseable(val),
+                            };
+                            variables.Variables.Add(info);
+                        }
+                        catch (Exception ex)
+                        {
+                            variables.Variables.Add(new VariableInfo
+                            {
+                                Name = prop.Name.LastRightPart('.'),
+                                Value = "Threw Exception whilst trying to access value",
+                                Type = prop.PropertyType.ToString(),
+                                IsBrowseable = false,
+                            });
+                        }
                     }
                 }
                 else
@@ -299,7 +316,7 @@ namespace Gistlyn.SnippetEngine
             return Execute(script, opt);
         }
 
-        public ScriptExecutionResult EvaluateExpression(string expr, bool includeJson=false)
+        public ScriptExecutionResult EvaluateExpression(string expr, bool includeJson = false)
         {
             var scriptResult = new ScriptExecutionResult
             {
