@@ -37,7 +37,7 @@ SET INPUT=%INPUT% %RELEASE%\System.IO.FileSystem.dll
 SET INPUT=%INPUT% %RELEASE%\System.IO.FileSystem.Primitives.dll
 SET INPUT=%INPUT% %RELEASE%\System.Reflection.Metadata.dll
 
-%ILMERGE% /target:exe /targetplatform:4,"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6" /out:%STAGING%\%OUTPUTNAME% /ndebug /copyattrs %INPUT% 
+%ILMERGE% /target:exe /targetplatform:v4,"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6" /out:%STAGING%\%OUTPUTNAME% /ndebug /copyattrs %INPUT% 
 
 
 IF NOT EXIST apps (
