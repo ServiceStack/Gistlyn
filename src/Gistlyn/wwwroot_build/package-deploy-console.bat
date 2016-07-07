@@ -19,6 +19,7 @@ SET INPUT=%RELEASE%\Gistlyn.AppConsole.exe
 SET INPUT=%INPUT% %RELEASE%\Gistlyn.Resources.dll
 SET INPUT=%INPUT% %RELEASE%\Gistlyn.ServiceInterface.dll
 SET INPUT=%INPUT% %RELEASE%\Gistlyn.ServiceModel.dll
+SET INPUT=%INPUT% %RELEASE%\Gistlyn.SnippetEngine.dll
 SET INPUT=%INPUT% %RELEASE%\ServiceStack.dll
 SET INPUT=%INPUT% %RELEASE%\ServiceStack.Text.dll
 SET INPUT=%INPUT% %RELEASE%\ServiceStack.Client.dll
@@ -37,7 +38,7 @@ SET INPUT=%INPUT% %RELEASE%\System.IO.FileSystem.dll
 SET INPUT=%INPUT% %RELEASE%\System.IO.FileSystem.Primitives.dll
 SET INPUT=%INPUT% %RELEASE%\System.Reflection.Metadata.dll
 
-%ILMERGE% /target:exe /targetplatform:v4,"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6" /out:%STAGING%\%OUTPUTNAME% /ndebug /copyattrs %INPUT% 
+%ILMERGE% /target:exe /targetplatform:v4,"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6" /out:%STAGING%\%OUTPUTNAME% /ndebug /copyattrs %INPUT% /lib:%RELEASE%
 
 
 IF NOT EXIST apps (
