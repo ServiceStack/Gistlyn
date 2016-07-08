@@ -8,6 +8,7 @@ using System.Linq;
 using Gistlyn.ServiceModel.Types;
 using ServiceStack;
 using ServiceStack.Auth;
+using ServiceStack.Configuration;
 using ServiceStack.Text;
 
 namespace Gistlyn.ServiceInterface
@@ -75,6 +76,18 @@ namespace Gistlyn.ServiceInterface
 
     public static class SharedAppHostConfig
     {
+        public static DictionarySettings GetMemoryAppSettings()
+        {
+            return new DictionarySettings(new Dictionary<string, string>
+            {
+                {"oauth.RedirectUrl", "http://localhost:11001/"},
+                {"oauth.CallbackUrl", "http://localhost:11001/auth/{0}"},
+                {"oauth.github.Scopes", "user"},
+                {"oauth.github.ClientId", "7e8a80ab55b757e7de05"},
+                {"oauth.github.ClientSecret", "122eb4d2762190d024dca6a319bc7c602ee942a2"},
+            });
+        }
+
         public static void Configure(ServiceStackHost appHost, string defaultPackagesPath)
         {
             JsConfig.MaxDepth = 10;

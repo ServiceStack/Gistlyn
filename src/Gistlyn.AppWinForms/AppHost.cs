@@ -12,7 +12,10 @@ namespace Gistlyn.AppWinForms
         /// Base constructor requires a name and assembly to locate web service classes. 
         /// </summary>
         public AppHost()
-            : base("Gistlyn.AppWinForms", typeof(RunScriptService).Assembly) { }
+            : base("Gistlyn.AppWinForms", typeof(RunScriptService).Assembly)
+        {
+            AppSettings = SharedAppHostConfig.GetMemoryAppSettings();
+        }
 
         /// <summary>
         /// Application specific configuration

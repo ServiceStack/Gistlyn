@@ -143,7 +143,7 @@ let store = createStore(
 var client = new JsonServiceClient("/");
 var sse = new ServerEventsClient("/", ["gist"], {
     handlers: {
-        onConnect(activeSub:ISseConnect) {
+        onConnect(activeSub: ISseConnect) {
             store.dispatch({ type: 'SSE_CONNECT', activeSub });
         },
         ConsoleMessage(m, e) {
@@ -554,6 +554,8 @@ class App extends React.Component<any, any> {
                 </div>));
         }
 
+        var activeSub = this.props.activeSub as ISseConnect;
+
         return (
             <div id="body" onClick={e => this.handleBodyClick(e)}>
                 <div className="titlebar">
@@ -571,6 +573,21 @@ class App extends React.Component<any, any> {
                                     ? <i className="material-icons" style={{ color: "#ebccd1", fontSize: "30px", position: "absolute", margin:"-2px 0 0 7px" }}>error</i>
                                     : null }
                         </div>
+                        { activeSub == null || parseInt(activeSub.userId) < 0
+                            ? (
+                                <div id="sign-in" style={{ position: "absolute", right: 10 }}>
+                                    <a href="/auth/github" style={{ color: "#fff", textDecoration: "none" }}>
+                                        <span style={{ whiteSpace: "nowrap", fontSize: 14 }}>sign-in</span>
+                                        <span style={{ verticalAlign: "sub", margin: "0 0 0 10px" }} className="mega-octicon octicon-mark-github" title="Sign in with GitHub"></span>
+                                    </a>
+                                </div>
+                            )
+                            : (
+                                <div id="signed-in" style={{ position: "absolute", right: 10 }}>
+                                    <span style={{ whiteSpace: "nowrap", fontSize: 14 }}>{activeSub.displayName}</span>
+                                    <img src={activeSub.profileUrl} style={{ verticalAlign: "middle", margin: "0 0 0 8px", borderRadius:"50%" }} />
+                                </div>
+                            )}
                     </div>
                 </div>
 

@@ -12,7 +12,8 @@ namespace Gistlyn.AppWinForms
 {
     static class Program
     {
-        public static string HostUrl = "http://localhost:2337/";
+        //public static string HostUrl = "http://localhost:2337/";
+        public static string HostUrl = "http://localhost:11001/";
         public static AppHost AppHost;
         public static FormMain Form;
 
@@ -35,7 +36,8 @@ namespace Gistlyn.AppWinForms
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            AppHost.Init().Start("http://*:2337/");
+            //AppHost.Init().Start("http://*:2337/");
+            AppHost.Init().Start("http://*:11001/");
             "ServiceStack SelfHost listening at {0} ".Fmt(HostUrl).Print();
             Form = new FormMain();
             Form.Disposed += (sender, args) => AppUpdater.Dispose();

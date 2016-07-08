@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using Funq;
 using ServiceStack;
 using Gistlyn.Resources;
 using Gistlyn.ServiceInterface;
+using ServiceStack.Configuration;
 
 namespace Gistlyn.AppConsole
 {
@@ -15,7 +17,10 @@ namespace Gistlyn.AppConsole
         /// Base constructor requires a name and assembly to locate web service classes. 
         /// </summary>
         public AppHost()
-            : base("Gistlyn.AppConsole", typeof(RunScriptService).Assembly) { }
+            : base("Gistlyn.AppConsole", typeof(RunScriptService).Assembly)
+        {
+            AppSettings = SharedAppHostConfig.GetMemoryAppSettings();
+        }
 
         /// <summary>
         /// Application specific configuration
