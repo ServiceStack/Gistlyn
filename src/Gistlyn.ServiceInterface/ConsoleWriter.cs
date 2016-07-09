@@ -6,7 +6,7 @@ namespace Gistlyn.ServiceInterface
     public class ConsoleWriter : TextWriter
     {
         readonly NotifierProxy proxy;
-        string cache = string.Empty;
+        StringBuilder sb = new StringBuilder();
 
         public ConsoleWriter(NotifierProxy proxy)
         {
@@ -23,11 +23,11 @@ namespace Gistlyn.ServiceInterface
 
         public override void Write(char value)
         {
-            cache += value;
-            if (cache.Length >= 32 || value == '\n')
+            sb.Append(value);
+            if (value == '\n')
             {
-                proxy.SendConsoleMessage(cache);
-                cache = string.Empty;
+                proxy.SendConsoleMessage(sb.ToString());
+                sb.Length = 0;
             }
         }
     }

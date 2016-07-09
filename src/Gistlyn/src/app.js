@@ -399,8 +399,8 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                     localStorage.removeItem(state_1.StateKey);
                 }
             }
-            qsGist = servicestack_client_1.queryString(location.href)["gist"];
-            if (qsGist && qsGist != (state && state.gist)) {
+            qsGist = servicestack_client_1.queryString(location.href)["gist"] || "4fab2fa13aade23c81cabe83314c3cd0";
+            if (qsGist != (state && state.gist)) {
                 state_1.store.dispatch({ type: 'GIST_CHANGE', gist: qsGist });
             }
             window.onpopstate = function (e) {

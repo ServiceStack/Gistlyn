@@ -541,8 +541,8 @@ if (stateJson) {
     }
 } 
 
-var qsGist = queryString(location.href)["gist"];
-if (qsGist && qsGist != (state && state.gist)) {
+var qsGist = queryString(location.href)["gist"] || "4fab2fa13aade23c81cabe83314c3cd0";
+if (qsGist != (state && state.gist)) {
     store.dispatch({ type: 'GIST_CHANGE', gist: qsGist });
 }
 
