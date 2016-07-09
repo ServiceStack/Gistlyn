@@ -1,5 +1,5 @@
 /// <reference path='../typings/index.d.ts'/>
-System.register(['react', 'react-dom', 'redux', 'react-redux', './servicestack-client', 'react-codemirror', './json-viewer', "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js", "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js", "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js", "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js", "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js", "./codemirror.js", './Gistlyn.dtos'], function(exports_1, context_1) {
+System.register(['react', 'react-dom', 'react-redux', './utils', './state', './servicestack-client', './json-viewer', 'react-codemirror', "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js", "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js", "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js", "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js", "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js", "./codemirror.js", './Gistlyn.dtos'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -13,11 +13,8 @@ System.register(['react', 'react-dom', 'redux', 'react-redux', './servicestack-c
         else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
-    var React, ReactDOM, redux_1, react_redux_1, servicestack_client_1, react_codemirror_1, json_viewer_1, Gistlyn_dtos_1;
-    var options, ScriptStatusRunning, ScriptStatusError, StateKey, GistCacheKey, updateGist, defaults, store, client, sse, getSortedFileNames, App, stateJson, state, e, qsGist;
-    function reduxify(mapStateToProps, mapDispatchToProps, mergeProps, options) {
-        return function (target) { return (react_redux_1.connect(mapStateToProps, mapDispatchToProps, mergeProps, options)(target)); };
-    }
+    var React, ReactDOM, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, react_codemirror_1, Gistlyn_dtos_1;
+    var options, ScriptStatusRunning, ScriptStatusError, client, sse, App, stateJson, state, e, qsGist;
     return {
         setters:[
             function (React_1) {
@@ -26,20 +23,23 @@ System.register(['react', 'react-dom', 'redux', 'react-redux', './servicestack-c
             function (ReactDOM_1) {
                 ReactDOM = ReactDOM_1;
             },
-            function (redux_1_1) {
-                redux_1 = redux_1_1;
-            },
             function (react_redux_1_1) {
                 react_redux_1 = react_redux_1_1;
+            },
+            function (utils_1_1) {
+                utils_1 = utils_1_1;
+            },
+            function (state_1_1) {
+                state_1 = state_1_1;
             },
             function (servicestack_client_1_1) {
                 servicestack_client_1 = servicestack_client_1_1;
             },
-            function (react_codemirror_1_1) {
-                react_codemirror_1 = react_codemirror_1_1;
-            },
             function (json_viewer_1_1) {
                 json_viewer_1 = json_viewer_1_1;
+            },
+            function (react_codemirror_1_1) {
+                react_codemirror_1 = react_codemirror_1_1;
             },
             function (_1) {},
             function (_2) {},
@@ -68,154 +68,36 @@ System.register(['react', 'react-dom', 'redux', 'react-redux', './servicestack-c
             };
             ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
             ScriptStatusError = ["Cancelled", "CompiledWithErrors", "ThrowedException"];
-            StateKey = "/v1/state";
-            GistCacheKey = function (gist) { return ("/v1/gists/" + gist); };
-            updateGist = function (store) { return function (next) { return function (action) {
-                var oldGist = store.getState().gist;
-                var result = next(action);
-                var state = store.getState();
-                if (action.type !== "LOAD") {
-                    localStorage.setItem(StateKey, JSON.stringify(state));
-                }
-                if (action.type === 'GIST_CHANGE' && action.gist && (action.reload || oldGist !== action.gist)) {
-                    var json = localStorage.getItem(GistCacheKey(state.gist));
-                    if (json) {
-                        var gist = JSON.parse(json);
-                        var meta = gist.meta;
-                        var files = gist.files;
-                        document.title = meta && meta.description;
-                        store.dispatch({ type: 'GIST_LOAD', meta: meta, files: files, activeFileName: getSortedFileNames(files)[0] });
-                    }
-                    else {
-                        fetch("https://api.github.com/gists/" + action.gist)
-                            .then(function (res) {
-                            if (!res.ok) {
-                                throw res;
-                            }
-                            else {
-                                return res.json().then(function (r) {
-                                    var meta = {
-                                        id: r.id,
-                                        description: r.description,
-                                        public: r.public,
-                                        created_at: r.created_at,
-                                        updated_at: r.updated_at,
-                                        owner_login: r.owner && r.owner.login,
-                                        owner_id: r.owner && r.owner.id,
-                                        owner_avatar_url: r.owner && r.owner.avatar_url
-                                    };
-                                    document.title = meta.description;
-                                    localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: r.files, meta: meta }));
-                                    store.dispatch({ type: 'GIST_LOAD', meta: meta, files: r.files, activeFileName: getSortedFileNames(r.files)[0] });
-                                });
-                            }
-                        })
-                            .catch(function (res) {
-                            store.dispatch({ type: 'ERROR_RAISE', error: { code: res.status, message: "Gist with hash '" + action.gist + "' was " + res.statusText } });
-                        });
-                    }
-                }
-                else if (action.type === "SOURCE_CHANGE") {
-                    localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: state.files, meta: state.meta }));
-                }
-                return result;
-            }; }; };
-            defaults = {
-                gist: null,
-                activeSub: null,
-                meta: null,
-                files: null,
-                activeFileName: null,
-                hasLoaded: false,
-                error: null,
-                scriptStatus: null,
-                logs: [],
-                variables: [],
-                inspectedVariables: {},
-                expression: null,
-                expressionResult: null
-            };
-            store = redux_1.createStore(function (state, action) {
-                switch (action.type) {
-                    case 'LOAD':
-                        return action.state;
-                    case 'SSE_CONNECT':
-                        return Object.assign({}, state, { activeSub: action.activeSub });
-                    case 'GIST_CHANGE':
-                        return Object.assign({}, defaults, { activeSub: state.activeSub }, { gist: action.gist });
-                    case 'GIST_LOAD':
-                        return Object.assign({}, state, { meta: action.meta, files: action.files, activeFileName: action.activeFileName, variables: [], logs: [], hasLoaded: true });
-                    case 'FILE_SELECT':
-                        return Object.assign({}, state, { activeFileName: action.activeFileName });
-                    case 'ERROR_RAISE':
-                        return Object.assign({}, state, { error: action.error });
-                    case 'CONSOLE_LOG':
-                        return Object.assign({}, state, { logs: state.logs.concat(action.logs) });
-                    case 'CONSOLE_CLEAR':
-                        return Object.assign({}, state, { logs: [{ msg: "" }] });
-                    case 'SCRIPT_STATUS':
-                        return Object.assign({}, state, { scriptStatus: action.scriptStatus });
-                    case 'SOURCE_CHANGE':
-                        var file = Object.assign({}, state.files[action.fileName], { content: action.content });
-                        return Object.assign({}, state, { files: Object.assign({}, state.files, (_a = {}, _a[action.fileName] = file, _a)) });
-                    case 'VARS_LOAD':
-                        return Object.assign({}, state, { variables: action.variables, inspectedVariables: {} });
-                    case 'VARS_INSPECT':
-                        return Object.assign({}, state, { inspectedVariables: Object.assign({}, state.inspectedVariables, (_b = {}, _b[action.name] = action.variables, _b)) });
-                    case 'EXPRESSION_SET':
-                        return Object.assign({}, state, { expression: action.expression });
-                    case 'EXPRESSION_LOAD':
-                        return Object.assign({}, state, { expressionResult: action.expressionResult });
-                    default:
-                        return state;
-                }
-                var _a, _b;
-            }, defaults, redux_1.applyMiddleware(updateGist));
             client = new servicestack_client_1.JsonServiceClient("/");
             sse = new servicestack_client_1.ServerEventsClient("/", ["gist"], {
                 handlers: {
                     onConnect: function (activeSub) {
-                        store.dispatch({ type: 'SSE_CONNECT', activeSub: activeSub });
+                        state_1.store.dispatch({ type: 'SSE_CONNECT', activeSub: activeSub });
                     },
                     ConsoleMessage: function (m, e) {
-                        store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: m.message }] });
+                        state_1.store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: m.message }] });
                     },
                     ScriptExecutionResult: function (m, e) {
-                        if (m.status === store.getState().scriptStatus)
+                        if (m.status === state_1.store.getState().scriptStatus)
                             return;
                         var cls = ScriptStatusError.indexOf(m.status) >= 0 ? "error" : "";
-                        store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: servicestack_client_1.humanize(m.status), cls: cls }] });
-                        store.dispatch({ type: 'SCRIPT_STATUS', scriptStatus: m.status });
+                        state_1.store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: servicestack_client_1.humanize(m.status), cls: cls }] });
+                        state_1.store.dispatch({ type: 'SCRIPT_STATUS', scriptStatus: m.status });
                         if (m.status === "CompiledWithErrors" && m.errors) {
                             var errorMsgs = m.errors.map(function (e) { return ({ msg: e.info, cls: "error" }); });
-                            store.dispatch({ type: 'CONSOLE_LOG', logs: errorMsgs });
+                            state_1.store.dispatch({ type: 'CONSOLE_LOG', logs: errorMsgs });
                         }
                         else if (m.status === "Completed") {
                             var request = new Gistlyn_dtos_1.GetScriptVariables();
-                            request.scriptId = store.getState().activeSub.id;
+                            request.scriptId = state_1.store.getState().activeSub.id;
                             client.get(request)
                                 .then(function (r) {
-                                store.dispatch({ type: "VARS_LOAD", variables: r.variables });
+                                state_1.store.dispatch({ type: "VARS_LOAD", variables: r.variables });
                             });
                         }
                     }
                 }
             });
-            getSortedFileNames = function (files) {
-                var fileNames = Object.keys(files);
-                fileNames.sort(function (a, b) {
-                    if (a.toLowerCase() === "main.cs")
-                        return -1;
-                    if (b.toLowerCase() === "main.cs")
-                        return 1;
-                    if (!a.endsWith(".cs") && b.endsWith(".cs"))
-                        return 1;
-                    if (a === b)
-                        return 0;
-                    return a < b ? -1 : 0;
-                });
-                return fileNames;
-            };
             App = (function (_super) {
                 __extends(App, _super);
                 function App() {
@@ -353,14 +235,14 @@ System.register(['react', 'react-dom', 'redux', 'react-redux', './servicestack-c
                         }
                     })
                         .catch(function (e) {
-                        _this.props.logConsoleError(e.responseStatus);
+                        _this.props.logConsoleError(e.responseStatus || e); //both have schema `{ message }`
                     });
                 };
                 App.prototype.revertGist = function (clearAll) {
                     if (clearAll === void 0) { clearAll = false; }
-                    localStorage.removeItem(GistCacheKey(this.props.gist));
+                    localStorage.removeItem(state_1.GistCacheKey(this.props.gist));
                     if (clearAll) {
-                        localStorage.removeItem(StateKey);
+                        localStorage.removeItem(state_1.StateKey);
                     }
                     this.props.updateGist(this.props.gist, true);
                 };
@@ -391,7 +273,7 @@ System.register(['react', 'react-dom', 'redux', 'react-redux', './servicestack-c
                         if (!this.props.files || this.props.files.length === 0)
                             return;
                         e.stopPropagation();
-                        var keys = getSortedFileNames(this.props.files);
+                        var keys = utils_1.getSortedFileNames(this.props.files);
                         var activeIndex = Math.max(0, keys.indexOf(this.props.activeFileName));
                         var nextFileIndex = activeIndex + (e.keyCode === 37 ? -1 : 1);
                         nextFileIndex = nextFileIndex < 0
@@ -406,7 +288,7 @@ System.register(['react', 'react-dom', 'redux', 'react-redux', './servicestack-c
                     var Tabs = [];
                     var FileList = [];
                     if (this.props.files) {
-                        var keys = getSortedFileNames(this.props.files);
+                        var keys = utils_1.getSortedFileNames(this.props.files);
                         keys.forEach(function (k) {
                             var file = _this.props.files[k];
                             var active = k === _this.props.activeFileName ||
@@ -467,7 +349,7 @@ System.register(['react', 'react-dom', 'redux', 'react-redux', './servicestack-c
                         : React.createElement("i", {className: "material-icons", title: "disabled"}, "play_circle_outline"))));
                 };
                 App = __decorate([
-                    reduxify(function (state) { return ({
+                    utils_1.reduxify(function (state) { return ({
                         gist: state.gist,
                         hasLoaded: state.hasLoaded,
                         activeSub: state.activeSub,
@@ -502,24 +384,24 @@ System.register(['react', 'react-dom', 'redux', 'react-redux', './servicestack-c
                 ], App);
                 return App;
             }(React.Component));
-            stateJson = localStorage.getItem(StateKey);
+            stateJson = localStorage.getItem(state_1.StateKey);
             state = null;
             if (stateJson) {
                 try {
                     state = JSON.parse(stateJson);
-                    store.dispatch({ type: 'LOAD', state: state });
+                    state_1.store.dispatch({ type: 'LOAD', state: state });
                 }
                 catch (e) {
                     console.log('ERROR loading state:', e, stateJson);
-                    localStorage.removeItem(StateKey);
+                    localStorage.removeItem(state_1.StateKey);
                 }
             }
             if (!state) {
                 qsGist = servicestack_client_1.queryString(location.href)["gist"] || "efc71477cee60916ef71d839084d1afd";
                 //alt: 6831799881c92434f80e141c8a2699eb
-                store.dispatch({ type: 'GIST_CHANGE', gist: qsGist });
+                state_1.store.dispatch({ type: 'GIST_CHANGE', gist: qsGist });
             }
-            ReactDOM.render(React.createElement(react_redux_1.Provider, {store: store}, React.createElement(App, null)), document.getElementById("app"));
+            ReactDOM.render(React.createElement(react_redux_1.Provider, {store: state_1.store}, React.createElement(App, null)), document.getElementById("app"));
         }
     }
 });

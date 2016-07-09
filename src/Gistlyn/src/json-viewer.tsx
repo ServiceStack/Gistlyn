@@ -7,7 +7,7 @@ export interface IPrettyPrintProps {
 
 export class JsonViewer extends React.Component<IPrettyPrintProps, any> {
     render() {
-        const value = this.props.value || JSON.parse(this.props.json);
+        const value = this.props.value || (this.props.json && JSON.parse(this.props.json));
         return (<div className="jsonviewer">{val(value)}</div>);
     }
 }

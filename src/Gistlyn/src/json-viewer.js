@@ -20,7 +20,7 @@ System.register(['react'], function(exports_1, context_1) {
                     _super.apply(this, arguments);
                 }
                 JsonViewer.prototype.render = function () {
-                    var value = this.props.value || JSON.parse(this.props.json);
+                    var value = this.props.value || (this.props.json && JSON.parse(this.props.json));
                     return (React.createElement("div", {className: "jsonviewer"}, val(value)));
                 };
                 return JsonViewer;

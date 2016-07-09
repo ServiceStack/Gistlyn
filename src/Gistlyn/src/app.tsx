@@ -2,13 +2,13 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { createStore, applyMiddleware } from 'redux';
 import { Provider, connect } from 'react-redux';
-
+import { reduxify, getSortedFileNames } from './utils';
+import { store, StateKey, GistCacheKey } from './state';
 import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnLast, humanize } from './servicestack-client';
-import CodeMirror from 'react-codemirror';
 import { JsonViewer } from './json-viewer';
 
+import CodeMirror from 'react-codemirror';
 import "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js";
 import "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js";
 import "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js";
@@ -42,118 +42,6 @@ var options = {
 
 const ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
 const ScriptStatusError = ["Cancelled", "CompiledWithErrors", "ThrowedException"];
-const StateKey = "/v1/state";
-const GistCacheKey = (gist) => `/v1/gists/${gist}`;
-
-const updateGist = store => next => action => {
-    var oldGist = store.getState().gist;
-    var result = next(action);
-    var state = store.getState();
-
-    if (action.type !== "LOAD") {
-        localStorage.setItem(StateKey, JSON.stringify(state));
-    }
-
-    if (action.type === 'GIST_CHANGE' && action.gist && (action.reload || oldGist !== action.gist)) {
-        const json = localStorage.getItem(GistCacheKey(state.gist));
-        if (json) {
-            const gist = JSON.parse(json);
-            const meta = gist.meta;
-            const files = gist.files;
-            document.title = meta && meta.description;
-            store.dispatch({ type: 'GIST_LOAD', meta, files, activeFileName: getSortedFileNames(files)[0] });
-        } else {
-            fetch("https://api.github.com/gists/" + action.gist)
-                .then((res) => {
-                    if (!res.ok) {
-                        throw res;
-                    } else {
-                        return res.json().then((r) => {
-                            const meta = {
-                                id: r.id,
-                                description: r.description,
-                                public: r.public,
-                                created_at: r.created_at,
-                                updated_at: r.updated_at,
-                                owner_login: r.owner && r.owner.login,
-                                owner_id: r.owner && r.owner.id,
-                                owner_avatar_url: r.owner && r.owner.avatar_url
-                            };
-                            document.title = meta.description;
-                            localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: r.files, meta }));
-                            store.dispatch({ type: 'GIST_LOAD', meta, files: r.files, activeFileName: getSortedFileNames(r.files)[0] });
-                        });
-                    }
-                })
-                .catch(res => {
-                    store.dispatch({ type: 'ERROR_RAISE', error: { code: res.status, message: `Gist with hash '${action.gist}' was ${res.statusText}` } });
-                });
-        }
-    } else if (action.type === "SOURCE_CHANGE") {
-        localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: state.files, meta: state.meta }));
-    }
-
-    return result;
-};
-
-function reduxify(mapStateToProps, mapDispatchToProps?, mergeProps?, options?) {
-    return target => (connect(mapStateToProps, mapDispatchToProps, mergeProps, options)(target) as any);
-}
-
-const defaults = {
-    gist: null,
-    activeSub: null,
-    meta: null,
-    files: null,
-    activeFileName: null,
-    hasLoaded: false,
-    error: null,
-    scriptStatus: null,
-    logs: [],
-    variables: [],
-    inspectedVariables: {},
-    expression: null,
-    expressionResult: null
-};
-
-let store = createStore(
-    (state, action) => {
-        switch (action.type) {
-            case 'LOAD':
-                return action.state;
-            case 'SSE_CONNECT':
-                return Object.assign({}, state, { activeSub: action.activeSub });
-            case 'GIST_CHANGE':
-                return Object.assign({}, defaults, { activeSub: state.activeSub }, { gist: action.gist });
-            case 'GIST_LOAD':
-                return Object.assign({}, state, { meta: action.meta, files: action.files, activeFileName:action.activeFileName, variables:[], logs:[], hasLoaded: true });
-            case 'FILE_SELECT':
-                return Object.assign({}, state, { activeFileName: action.activeFileName });
-            case 'ERROR_RAISE':
-                return Object.assign({}, state, { error: action.error });
-            case 'CONSOLE_LOG':
-                return Object.assign({}, state, { logs: [...state.logs, ...action.logs] });
-            case 'CONSOLE_CLEAR':
-                return Object.assign({}, state, { logs: [{msg:""}] });
-            case 'SCRIPT_STATUS':
-                return Object.assign({}, state, { scriptStatus: action.scriptStatus });
-            case 'SOURCE_CHANGE':
-                const file = Object.assign({}, state.files[action.fileName], { content: action.content });
-                return Object.assign({}, state, { files: Object.assign({}, state.files, { [action.fileName]: file }) });
-            case 'VARS_LOAD':
-                return Object.assign({}, state, { variables: action.variables, inspectedVariables:{} });
-            case 'VARS_INSPECT':
-                return Object.assign({}, state, { inspectedVariables: Object.assign({}, state.inspectedVariables, { [action.name]: action.variables }) });
-            case 'EXPRESSION_SET':
-                return Object.assign({}, state, { expression: action.expression });
-            case 'EXPRESSION_LOAD':
-                return Object.assign({}, state, { expressionResult: action.expressionResult });
-            default:
-                return state;
-        }
-    },
-    defaults,
-    applyMiddleware(updateGist));
 
 var client = new JsonServiceClient("/");
 var sse = new ServerEventsClient("/", ["gist"], {
@@ -186,22 +74,6 @@ var sse = new ServerEventsClient("/", ["gist"], {
         }
     }
 });
-
-const getSortedFileNames = (files) => {
-    const fileNames = Object.keys(files);
-    fileNames.sort((a, b) => {
-        if (a.toLowerCase() === "main.cs")
-            return -1;
-        if (b.toLowerCase() === "main.cs")
-            return 1;
-        if (!a.endsWith(".cs") && b.endsWith(".cs"))
-            return 1;
-        if (a === b)
-            return 0;
-        return a < b ? -1 : 0;
-    });
-    return fileNames;
-};
 
 @reduxify(
     (state) => ({
@@ -394,7 +266,7 @@ class App extends React.Component<any, any> {
                 }
             })
             .catch(e => {
-                this.props.logConsoleError(e.responseStatus);
+                this.props.logConsoleError(e.responseStatus || e); //both have schema `{ message }`
             });
     }
 
