@@ -401,23 +401,25 @@ class App extends React.Component<any, any> {
                             </tr>
                         </thead>
                         <tbody>
-                            {vars.map(v => this.getVariableRows(v))}
+                            {vars.map(v => this.getVariableRows(v)) }
+                            <tr>
+                                <td id="evaluate" colSpan={3}>
+                                    <input type="text" placeholder="Evaluate Expression" value={this.props.expression}
+                                        onChange={e => this.props.setExpression((e.target as HTMLInputElement).value) }
+                                        onKeyPress={e => e.which === 13 ? this.evaluateExpression(this.props.expression) : null }
+                                        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+                                    <i className="material-icons" title="run" onClick={e => this.evaluateExpression(this.props.expression) }>play_arrow</i>
+                                    {exprVar
+                                        ? (
+                                            <div id="expression-result">
+                                                <JsonViewer json={exprVar.json} />
+                                            </div>
+                                        )
+                                        : null}
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
-                    <div id="evaluate">
-                        <input type="text" placeholder="Evaluate Expression" value={this.props.expression} 
-                            onChange={e => this.props.setExpression((e.target as HTMLInputElement).value)}
-                            onKeyPress={e => e.which === 13 ? this.evaluateExpression(this.props.expression) : null }
-                            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-                        <i className="material-icons" title="run" onClick={e => this.evaluateExpression(this.props.expression) }>play_arrow</i>
-                        {exprVar
-                            ? (
-                                <div id="expression-result">
-                                    <JsonViewer json={exprVar.json} />
-                                </div>
-                            )
-                            : null}
-                    </div>
                 </div>));
         } else {
             Preview.push(<div id="placeholder"></div>);

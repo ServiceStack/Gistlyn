@@ -351,7 +351,7 @@ html,body,#app,#body {
 
 /*jsonviewer*/
 #expression-result {
-    padding: 12px 14px;
+    padding: 12px 0 12px 10px;
 }
 #expression-result table {
     width: auto;
@@ -369,7 +369,7 @@ html,body,#app,#body {
 .jsonviewer .ib { display: inline-block; }
 .jsonviewer TABLE { border-collapse:collapse; border: solid 1px #ccc; clear: left; }
 .jsonviewer TH { text-align: left; padding: 4px 8px; text-shadow: #fff 1px 1px -1px; background: #f1f1f1; white-space:nowrap; font-weight: bold; }
-.jsonviewer TD { padding: 8px 8px 0 8px; vertical-align: top; }
+.jsonviewer TD { padding: 8px 8px 0 8px; vertical-align: top; line-height: 18px; }
 .jsonviewer DL { margin: 0; clear: left; }
 .jsonviewer DT { font-weight: bold; width: 160px; clear: left; float: left; display:block; white-space:nowrap; line-height: 26px; }
 .jsonviewer DD { display: block; float: left; line-height: 26px; max-width: 600px; }

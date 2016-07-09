@@ -349,7 +349,7 @@ html,body,#app,#body {
 
 /*jsonviewer*/
 #expression-result {
-    padding: 12px 14px;
+    padding: 12px 14px 12px 50px;
 }
 #expression-result table {
     width: auto;
