@@ -74,11 +74,17 @@ System.register(['react', 'react-dom', 'redux', 'react-redux', './servicestack-c
                 var oldGist = store.getState().gist;
                 var result = next(action);
                 var state = store.getState();
+                if (action.type !== "LOAD") {
+                    localStorage.setItem(StateKey, JSON.stringify(state));
+                }
                 if (action.type === 'GIST_CHANGE' && action.gist && (action.reload || oldGist !== action.gist)) {
                     var json = localStorage.getItem(GistCacheKey(state.gist));
                     if (json) {
-                        var files = JSON.parse(json);
-                        store.dispatch({ type: 'GIST_LOAD', files: files, activeFileName: getSortedFileNames(files)[0] });
+                        var gist = JSON.parse(json);
+                        var meta = gist.meta;
+                        var files = gist.files;
+                        document.title = meta && meta.description;
+                        store.dispatch({ type: 'GIST_LOAD', meta: meta, files: files, activeFileName: getSortedFileNames(files)[0] });
                     }
                     else {
                         fetch("https://api.github.com/gists/" + action.gist)
@@ -88,8 +94,19 @@ System.register(['react', 'react-dom', 'redux', 'react-redux', './servicestack-c
                             }
                             else {
                                 return res.json().then(function (r) {
-                                    localStorage.setItem(GistCacheKey(state.gist), JSON.stringify(r.files));
-                                    store.dispatch({ type: 'GIST_LOAD', files: r.files, activeFileName: getSortedFileNames(r.files)[0] });
+                                    var meta = {
+                                        id: r.id,
+                                        description: r.description,
+                                        public: r.public,
+                                        created_at: r.created_at,
+                                        updated_at: r.updated_at,
+                                        owner_login: r.owner && r.owner.login,
+                                        owner_id: r.owner && r.owner.id,
+                                        owner_avatar_url: r.owner && r.owner.avatar_url
+                                    };
+                                    document.title = meta.description;
+                                    localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: r.files, meta: meta }));
+                                    store.dispatch({ type: 'GIST_LOAD', meta: meta, files: r.files, activeFileName: getSortedFileNames(r.files)[0] });
                                 });
                             }
                         })
@@ -99,16 +116,14 @@ System.register(['react', 'react-dom', 'redux', 'react-redux', './servicestack-c
                     }
                 }
                 else if (action.type === "SOURCE_CHANGE") {
-                    localStorage.setItem(GistCacheKey(state.gist), JSON.stringify(state.files));
-                }
-                if (action.type !== "LOAD") {
-                    localStorage.setItem(StateKey, JSON.stringify(state));
+                    localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: state.files, meta: state.meta }));
                 }
                 return result;
             }; }; };
             defaults = {
                 gist: null,
                 activeSub: null,
+                meta: null,
                 files: null,
                 activeFileName: null,
                 hasLoaded: false,
@@ -129,7 +144,7 @@ System.register(['react', 'react-dom', 'redux', 'react-redux', './servicestack-c
                     case 'GIST_CHANGE':
                         return Object.assign({}, defaults, { activeSub: state.activeSub }, { gist: action.gist });
                     case 'GIST_LOAD':
-                        return Object.assign({}, state, { files: action.files, activeFileName: action.activeFileName, variables: [], logs: [], hasLoaded: true });
+                        return Object.assign({}, state, { meta: action.meta, files: action.files, activeFileName: action.activeFileName, variables: [], logs: [], hasLoaded: true });
                     case 'FILE_SELECT':
                         return Object.assign({}, state, { activeFileName: action.activeFileName });
                     case 'ERROR_RAISE':
@@ -436,7 +451,9 @@ System.register(['react', 'react-dom', 'redux', 'react-redux', './servicestack-c
                         Preview.push((React.createElement("div", {id: "console", className: "section", style: { borderTop: "solid 1px #ddd", borderBottom: "solid 1px #ddd", font: "14px/20px arial", height: "350px" }}, React.createElement("b", {style: { background: "#444", color: "#fff", padding: "1px 8px", position: "absolute", right: "3px", margin: "-22px 0" }}, "console"), React.createElement("i", {className: "material-icons clear-btn", title: "clear console", onClick: function (e) { return _this.props.clearConsole(); }}, "clear"), React.createElement("div", {className: "scroll", style: { overflow: "auto", maxHeight: "350px" }, ref: function (el) { return _this.consoleScroll = el; }}, React.createElement("table", {style: { width: "100%" }}, React.createElement("tbody", {style: { font: "13px/18px monospace", color: "#444" }}, this.props.logs.map(function (log) { return (React.createElement("tr", null, React.createElement("td", {style: { padding: "2px 8px", tabSize: 4 }}, React.createElement("pre", {className: log.cls}, log.msg)))); })))))));
                     }
                     var activeSub = this.props.activeSub;
-                    return (React.createElement("div", {id: "body", onClick: function (e) { return _this.handleBodyClick(e); }}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("a", {href: "https://servicestack.net", title: "servicestack.net", target: "_blank"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png"})), React.createElement("h3", null, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, React.createElement("input", {type: "text", id: "txtGist", placeholder: "gist hash or url", value: this.props.gist, onFocus: function (e) { return e.target.select(); }, onChange: function (e) { return _this.handleGistUpdate(e); }}), main != null
+                    return (React.createElement("div", {id: "body", onClick: function (e) { return _this.handleBodyClick(e); }}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("a", {href: "https://servicestack.net", title: "servicestack.net", target: "_blank"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png"})), React.createElement("h3", null, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, this.props.meta
+                        ? React.createElement("img", {src: this.props.meta.owner_avatar_url, title: this.props.meta.description, style: { verticalAlign: "middle", margin: "0 8px 2px 0" }})
+                        : null, React.createElement("input", {type: "text", id: "txtGist", placeholder: "gist hash or url", value: this.props.gist, onFocus: function (e) { return e.target.select(); }, onChange: function (e) { return _this.handleGistUpdate(e); }}), main != null
                         ? React.createElement("i", {className: "material-icons", style: { color: "#0f9", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "check")
                         : this.props.error
                             ? React.createElement("i", {className: "material-icons", style: { color: "#ebccd1", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "error")
@@ -454,6 +471,7 @@ System.register(['react', 'react-dom', 'redux', 'react-redux', './servicestack-c
                         gist: state.gist,
                         hasLoaded: state.hasLoaded,
                         activeSub: state.activeSub,
+                        meta: state.meta,
                         files: state.files,
                         activeFileName: state.activeFileName,
                         logs: state.logs,

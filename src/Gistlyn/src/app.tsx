@@ -50,11 +50,18 @@ const updateGist = store => next => action => {
     var result = next(action);
     var state = store.getState();
 
+    if (action.type !== "LOAD") {
+        localStorage.setItem(StateKey, JSON.stringify(state));
+    }
+
     if (action.type === 'GIST_CHANGE' && action.gist && (action.reload || oldGist !== action.gist)) {
         const json = localStorage.getItem(GistCacheKey(state.gist));
         if (json) {
-            const files = JSON.parse(json);
-            store.dispatch({ type: 'GIST_LOAD', files, activeFileName: getSortedFileNames(files)[0] });
+            const gist = JSON.parse(json);
+            const meta = gist.meta;
+            const files = gist.files;
+            document.title = meta && meta.description;
+            store.dispatch({ type: 'GIST_LOAD', meta, files, activeFileName: getSortedFileNames(files)[0] });
         } else {
             fetch("https://api.github.com/gists/" + action.gist)
                 .then((res) => {
@@ -62,8 +69,19 @@ const updateGist = store => next => action => {
                         throw res;
                     } else {
                         return res.json().then((r) => {
-                            localStorage.setItem(GistCacheKey(state.gist), JSON.stringify(r.files));
-                            store.dispatch({ type: 'GIST_LOAD', files: r.files, activeFileName: getSortedFileNames(r.files)[0] });
+                            const meta = {
+                                id: r.id,
+                                description: r.description,
+                                public: r.public,
+                                created_at: r.created_at,
+                                updated_at: r.updated_at,
+                                owner_login: r.owner && r.owner.login,
+                                owner_id: r.owner && r.owner.id,
+                                owner_avatar_url: r.owner && r.owner.avatar_url
+                            };
+                            document.title = meta.description;
+                            localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: r.files, meta }));
+                            store.dispatch({ type: 'GIST_LOAD', meta, files: r.files, activeFileName: getSortedFileNames(r.files)[0] });
                         });
                     }
                 })
@@ -72,11 +90,7 @@ const updateGist = store => next => action => {
                 });
         }
     } else if (action.type === "SOURCE_CHANGE") {
-        localStorage.setItem(GistCacheKey(state.gist), JSON.stringify(state.files));
-    }
-
-    if (action.type !== "LOAD") {
-        localStorage.setItem(StateKey, JSON.stringify(state));
+        localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: state.files, meta: state.meta }));
     }
 
     return result;
@@ -89,6 +103,7 @@ function reduxify(mapStateToProps, mapDispatchToProps?, mergeProps?, options?) {
 const defaults = {
     gist: null,
     activeSub: null,
+    meta: null,
     files: null,
     activeFileName: null,
     hasLoaded: false,
@@ -111,7 +126,7 @@ let store = createStore(
             case 'GIST_CHANGE':
                 return Object.assign({}, defaults, { activeSub: state.activeSub }, { gist: action.gist });
             case 'GIST_LOAD':
-                return Object.assign({}, state, { files: action.files, activeFileName:action.activeFileName, variables:[], logs:[], hasLoaded: true });
+                return Object.assign({}, state, { meta: action.meta, files: action.files, activeFileName:action.activeFileName, variables:[], logs:[], hasLoaded: true });
             case 'FILE_SELECT':
                 return Object.assign({}, state, { activeFileName: action.activeFileName });
             case 'ERROR_RAISE':
@@ -193,6 +208,7 @@ const getSortedFileNames = (files) => {
         gist: state.gist,
         hasLoaded: state.hasLoaded,
         activeSub: state.activeSub,
+        meta: state.meta,
         files: state.files,
         activeFileName: state.activeFileName,
         logs: state.logs,
@@ -563,6 +579,9 @@ class App extends React.Component<any, any> {
                         <a href="https://servicestack.net" title="servicestack.net" target="_blank"><img id="logo" src="img/logo-32-inverted.png" /></a>
                         <h3>Gistlyn</h3> <sup style={{ padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}>BETA</sup>
                         <div id="gist">
+                            { this.props.meta
+                                ? <img src={ this.props.meta.owner_avatar_url } title={this.props.meta.description} style={{ verticalAlign: "middle", margin:"0 8px 2px 0" }} />
+                                : null } 
                             <input type="text" id="txtGist" placeholder="gist hash or url" 
                                    value={this.props.gist}
                                    onFocus={e => (e.target as HTMLInputElement).select() }
