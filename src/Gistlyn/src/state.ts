@@ -1,8 +1,23 @@
 ﻿import { createStore, applyMiddleware } from 'redux';
 import { getSortedFileNames } from './utils';
+import { queryString, appendQueryString, splitOnFirst } from './servicestack-client';
 
 export const StateKey = "/v1/state";
 export const GistCacheKey = (gist) => `/v1/gists/${gist}`;
+
+const updateHistory = meta => {
+    if (!meta) return;
+    document.title = meta.description;
+
+    if (history.pushState && (!history.state || history.state.id != meta.id)) {
+        let qs = queryString(location.href);
+        let cleanUrl = splitOnFirst(location.href, '#')[0];
+        var url = splitOnFirst(location.href, '?')[0];
+        qs["gist"] = meta.id;
+        url = appendQueryString(url, qs);
+        history.pushState(meta, meta.description, url);
+    }
+};
 
 const updateGist = store => next => action => {
     var oldGist = store.getState().gist;
@@ -11,15 +26,17 @@ const updateGist = store => next => action => {
 
     if (action.type !== "LOAD") {
         localStorage.setItem(StateKey, JSON.stringify(state));
+    } else {
+        updateHistory(state.meta);
     }
 
-    if (action.type === 'GIST_CHANGE' && action.gist && (action.reload || oldGist !== action.gist)) {
+    if (action.type === 'GIST_CHANGE' && action.gist && (action.reload || oldGist !== action.gist || !state.files || !state.meta)) {
         const json = localStorage.getItem(GistCacheKey(state.gist));
         if (json) {
             const gist = JSON.parse(json);
             const meta = gist.meta;
             const files = gist.files;
-            document.title = meta && meta.description;
+            updateHistory(meta);
             store.dispatch({ type: 'GIST_LOAD', meta, files, activeFileName: getSortedFileNames(files)[0] });
         } else {
             fetch("https://api.github.com/gists/" + action.gist)
@@ -38,7 +55,7 @@ const updateGist = store => next => action => {
                                 owner_id: r.owner && r.owner.id,
                                 owner_avatar_url: r.owner && r.owner.avatar_url
                             };
-                            document.title = meta.description;
+                            updateHistory(meta);
                             localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: r.files, meta }));
                             store.dispatch({ type: 'GIST_LOAD', meta, files: r.files, activeFileName: getSortedFileNames(r.files)[0] });
                         });

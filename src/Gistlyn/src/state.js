@@ -1,8 +1,8 @@
-System.register(['redux', './utils'], function(exports_1, context_1) {
+System.register(['redux', './utils', './servicestack-client'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var redux_1, utils_1;
-    var StateKey, GistCacheKey, updateGist, defaults, store;
+    var redux_1, utils_1, servicestack_client_1;
+    var StateKey, GistCacheKey, updateHistory, updateGist, defaults, store;
     return {
         setters:[
             function (redux_1_1) {
@@ -10,10 +10,26 @@ System.register(['redux', './utils'], function(exports_1, context_1) {
             },
             function (utils_1_1) {
                 utils_1 = utils_1_1;
+            },
+            function (servicestack_client_1_1) {
+                servicestack_client_1 = servicestack_client_1_1;
             }],
         execute: function() {
             exports_1("StateKey", StateKey = "/v1/state");
             exports_1("GistCacheKey", GistCacheKey = function (gist) { return ("/v1/gists/" + gist); });
+            updateHistory = function (meta) {
+                if (!meta)
+                    return;
+                document.title = meta.description;
+                if (history.pushState && (!history.state || history.state.id != meta.id)) {
+                    var qs = servicestack_client_1.queryString(location.href);
+                    var cleanUrl = servicestack_client_1.splitOnFirst(location.href, '#')[0];
+                    var url = servicestack_client_1.splitOnFirst(location.href, '?')[0];
+                    qs["gist"] = meta.id;
+                    url = servicestack_client_1.appendQueryString(url, qs);
+                    history.pushState(meta, meta.description, url);
+                }
+            };
             updateGist = function (store) { return function (next) { return function (action) {
                 var oldGist = store.getState().gist;
                 var result = next(action);
@@ -21,13 +37,16 @@ System.register(['redux', './utils'], function(exports_1, context_1) {
                 if (action.type !== "LOAD") {
                     localStorage.setItem(StateKey, JSON.stringify(state));
                 }
-                if (action.type === 'GIST_CHANGE' && action.gist && (action.reload || oldGist !== action.gist)) {
+                else {
+                    updateHistory(state.meta);
+                }
+                if (action.type === 'GIST_CHANGE' && action.gist && (action.reload || oldGist !== action.gist || !state.files || !state.meta)) {
                     var json = localStorage.getItem(GistCacheKey(state.gist));
                     if (json) {
                         var gist = JSON.parse(json);
                         var meta = gist.meta;
                         var files = gist.files;
-                        document.title = meta && meta.description;
+                        updateHistory(meta);
                         store.dispatch({ type: 'GIST_LOAD', meta: meta, files: files, activeFileName: utils_1.getSortedFileNames(files)[0] });
                     }
                     else {
@@ -48,7 +67,7 @@ System.register(['redux', './utils'], function(exports_1, context_1) {
                                         owner_id: r.owner && r.owner.id,
                                         owner_avatar_url: r.owner && r.owner.avatar_url
                                     };
-                                    document.title = meta.description;
+                                    updateHistory(meta);
                                     localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: r.files, meta: meta }));
                                     store.dispatch({ type: 'GIST_LOAD', meta: meta, files: r.files, activeFileName: utils_1.getSortedFileNames(r.files)[0] });
                                 });

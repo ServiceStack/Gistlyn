@@ -452,7 +452,7 @@ class App extends React.Component<any, any> {
                         <h3>Gistlyn</h3> <sup style={{ padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}>BETA</sup>
                         <div id="gist">
                             { this.props.meta
-                                ? <img src={ this.props.meta.owner_avatar_url } title={this.props.meta.description} style={{ verticalAlign: "middle", margin:"0 8px 2px 0" }} />
+                                ? <img src={ this.props.meta.owner_avatar_url } title={this.props.meta.description} style={{ verticalAlign: "middle", margin:"0 5px 2px 0" }} />
                                 : null } 
                             <input type="text" id="txtGist" placeholder="gist hash or url" 
                                    value={this.props.gist}
@@ -466,7 +466,7 @@ class App extends React.Component<any, any> {
                         </div>
                         { activeSub == null || parseInt(activeSub.userId) < 0
                             ? (
-                                <div id="sign-in" style={{ position: "absolute", right: 10 }}>
+                                <div id="sign-in" style={{ position: "absolute", right: 5 }}>
                                     <a href="/auth/github" style={{ color: "#fff", textDecoration: "none" }}>
                                         <span style={{ whiteSpace: "nowrap", fontSize: 14 }}>sign-in</span>
                                         <span style={{ verticalAlign: "sub", margin: "0 0 0 10px" }} className="mega-octicon octicon-mark-github" title="Sign in with GitHub"></span>
@@ -474,9 +474,9 @@ class App extends React.Component<any, any> {
                                 </div>
                             )
                             : (
-                                <div id="signed-in" style={{ position: "absolute", right: 10 }}>
+                                <div id="signed-in" style={{ position: "absolute", right: 5 }}>
                                     <span style={{ whiteSpace: "nowrap", fontSize: 14 }}>{activeSub.displayName}</span>
-                                    <img src={activeSub.profileUrl} style={{ verticalAlign: "middle", margin: "0 0 0 8px", borderRadius:"50%" }} />
+                                    <img src={activeSub.profileUrl} style={{ verticalAlign: "middle", marginLeft:5, borderRadius:"50%" }} />
                                 </div>
                             )}
                     </div>
@@ -530,18 +530,33 @@ if (stateJson) {
     try {
         state = JSON.parse(stateJson);
         store.dispatch({ type: 'LOAD', state });
+
+        if (state.gist != null && !(state.files || state.meta)) {
+            store.dispatch({ type: 'GIST_CHANGE', gist: state.gist });
+        }
+
     } catch (e) {
         console.log('ERROR loading state:', e, stateJson);
         localStorage.removeItem(StateKey);
     }
 } 
 
-if (!state)
-{
-    var qsGist = queryString(location.href)["gist"] || "efc71477cee60916ef71d839084d1afd";
-    //alt: 6831799881c92434f80e141c8a2699eb
+var qsGist = queryString(location.href)["gist"];
+if (qsGist && qsGist != (state && state.gist)) {
     store.dispatch({ type: 'GIST_CHANGE', gist: qsGist });
 }
+
+window.onpopstate = e => {
+    if (!(e.state && e.state.id)) return;
+    store.dispatch({ type: 'GIST_CHANGE', gist: e.state.id });
+};
+
+/* Example gists:
+5b0435641091841a5eacff44946a22c0
+3f7cd9cbe863747a904bba10ce34ee8f
+efc71477cee60916ef71d839084d1afd
+6831799881c92434f80e141c8a2699eb
+*/
 
 
 ReactDOM.render(

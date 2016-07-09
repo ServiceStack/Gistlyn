@@ -334,14 +334,14 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                     }
                     var activeSub = this.props.activeSub;
                     return (React.createElement("div", {id: "body", onClick: function (e) { return _this.handleBodyClick(e); }}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("a", {href: "https://servicestack.net", title: "servicestack.net", target: "_blank"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png"})), React.createElement("h3", null, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, this.props.meta
-                        ? React.createElement("img", {src: this.props.meta.owner_avatar_url, title: this.props.meta.description, style: { verticalAlign: "middle", margin: "0 8px 2px 0" }})
+                        ? React.createElement("img", {src: this.props.meta.owner_avatar_url, title: this.props.meta.description, style: { verticalAlign: "middle", margin: "0 5px 2px 0" }})
                         : null, React.createElement("input", {type: "text", id: "txtGist", placeholder: "gist hash or url", value: this.props.gist, onFocus: function (e) { return e.target.select(); }, onChange: function (e) { return _this.handleGistUpdate(e); }}), main != null
                         ? React.createElement("i", {className: "material-icons", style: { color: "#0f9", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "check")
                         : this.props.error
                             ? React.createElement("i", {className: "material-icons", style: { color: "#ebccd1", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "error")
                             : null), activeSub == null || parseInt(activeSub.userId) < 0
-                        ? (React.createElement("div", {id: "sign-in", style: { position: "absolute", right: 10 }}, React.createElement("a", {href: "/auth/github", style: { color: "#fff", textDecoration: "none" }}, React.createElement("span", {style: { whiteSpace: "nowrap", fontSize: 14 }}, "sign-in"), React.createElement("span", {style: { verticalAlign: "sub", margin: "0 0 0 10px" }, className: "mega-octicon octicon-mark-github", title: "Sign in with GitHub"}))))
-                        : (React.createElement("div", {id: "signed-in", style: { position: "absolute", right: 10 }}, React.createElement("span", {style: { whiteSpace: "nowrap", fontSize: 14 }}, activeSub.displayName), React.createElement("img", {src: activeSub.profileUrl, style: { verticalAlign: "middle", margin: "0 0 0 8px", borderRadius: "50%" }}))))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement("div", {id: "editor"}, React.createElement("div", {id: "tabs", style: { display: this.props.files ? 'flex' : 'none' }}, FileList.length > 0
+                        ? (React.createElement("div", {id: "sign-in", style: { position: "absolute", right: 5 }}, React.createElement("a", {href: "/auth/github", style: { color: "#fff", textDecoration: "none" }}, React.createElement("span", {style: { whiteSpace: "nowrap", fontSize: 14 }}, "sign-in"), React.createElement("span", {style: { verticalAlign: "sub", margin: "0 0 0 10px" }, className: "mega-octicon octicon-mark-github", title: "Sign in with GitHub"}))))
+                        : (React.createElement("div", {id: "signed-in", style: { position: "absolute", right: 5 }}, React.createElement("span", {style: { whiteSpace: "nowrap", fontSize: 14 }}, activeSub.displayName), React.createElement("img", {src: activeSub.profileUrl, style: { verticalAlign: "middle", marginLeft: 5, borderRadius: "50%" }}))))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement("div", {id: "editor"}, React.createElement("div", {id: "tabs", style: { display: this.props.files ? 'flex' : 'none' }}, FileList.length > 0
                         ? React.createElement("i", {id: "files-menu", className: "material-icons", onClick: function (e) { return _this.showDialog(e, _this.filesList); }}, "arrow_drop_down") : null, Tabs), React.createElement("div", {id: "files-list", ref: function (e) { return _this.filesList = e; }}, FileList), React.createElement(react_codemirror_1.default, {value: source, options: options, onChange: function (src) { return _this.updateSource(src); }})), React.createElement("div", {id: "preview"}, Preview))), React.createElement("div", {id: "footer-spacer"}), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "actions"}, React.createElement("div", {id: "revert", onClick: function (e) { return _this.revertGist(e.shiftKey); }}, React.createElement("i", {className: "material-icons"}, "undo"), React.createElement("p", null, "Revert Changes")))), React.createElement("div", {id: "run", className: main == null ? "disabled" : "", onClick: function (e) { return !isScriptRunning ? _this.run() : _this.cancel(); }}, main != null
                         ? (!isScriptRunning
                             ? React.createElement("i", {className: "material-icons", title: "run"}, "play_circle_outline")
@@ -390,17 +390,30 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                 try {
                     state = JSON.parse(stateJson);
                     state_1.store.dispatch({ type: 'LOAD', state: state });
+                    if (state.gist != null && !(state.files || state.meta)) {
+                        state_1.store.dispatch({ type: 'GIST_CHANGE', gist: state.gist });
+                    }
                 }
                 catch (e) {
                     console.log('ERROR loading state:', e, stateJson);
                     localStorage.removeItem(state_1.StateKey);
                 }
             }
-            if (!state) {
-                qsGist = servicestack_client_1.queryString(location.href)["gist"] || "efc71477cee60916ef71d839084d1afd";
-                //alt: 6831799881c92434f80e141c8a2699eb
+            qsGist = servicestack_client_1.queryString(location.href)["gist"];
+            if (qsGist && qsGist != (state && state.gist)) {
                 state_1.store.dispatch({ type: 'GIST_CHANGE', gist: qsGist });
             }
+            window.onpopstate = function (e) {
+                if (!(e.state && e.state.id))
+                    return;
+                state_1.store.dispatch({ type: 'GIST_CHANGE', gist: e.state.id });
+            };
+            /* Example gists:
+            5b0435641091841a5eacff44946a22c0
+            3f7cd9cbe863747a904bba10ce34ee8f
+            efc71477cee60916ef71d839084d1afd
+            6831799881c92434f80e141c8a2699eb
+            */
             ReactDOM.render(React.createElement(react_redux_1.Provider, {store: state_1.store}, React.createElement(App, null)), document.getElementById("app"));
         }
     }
