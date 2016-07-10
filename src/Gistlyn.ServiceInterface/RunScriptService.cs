@@ -36,6 +36,9 @@ namespace Gistlyn.ServiceInterface
             if (request.ScriptId == null)
                 throw new ArgumentException("ScriptId");
 
+            AppData.AssertNoIllegalTokens(request.MainSource);
+            AppData.AssertNoIllegalTokens(request.Sources.ToArray());
+
             var result = new ScriptExecutionResult();
 
             var existingUserScripts = GetExistingActiveUserScripts();

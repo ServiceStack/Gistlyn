@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Service Stack LLC. All Rights Reserved.
 // License: https://raw.github.com/ServiceStack/ServiceStack/master/license.txt
 
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -35,6 +36,8 @@ namespace Gistlyn.ServiceInterface
 
         private readonly string packagesIndex;
         public string NugetPackagesDirectory { get; set; }
+
+        public string[] IllegalTokens { get; set; }
 
         public List<NugetPackageInfo> Packages = new List<NugetPackageInfo>();
 
@@ -72,6 +75,18 @@ namespace Gistlyn.ServiceInterface
             memoizedResults.TryGetValue(codeHash, out value);
             return value;
         }
+
+        public void AssertNoIllegalTokens(params string[] sources)
+        {
+            foreach (var source in sources)
+            {
+                if (source == null)
+                    continue;
+
+                if (source.IndexOfAny(IllegalTokens) > 0)
+                    throw new ArgumentException("Illegal token detected");
+            }
+        }
     }
 
     public static class SharedAppHostConfig
@@ -98,7 +113,10 @@ namespace Gistlyn.ServiceInterface
             appHost.Plugins.Add(new CorsFeature());
 
             appHost.Container.Register(new AppData(
-                appHost.AppSettings.Get("NugetPackagesDirectory", defaultPackagesPath)));
+                appHost.AppSettings.Get("NugetPackagesDirectory", defaultPackagesPath))
+            {
+                IllegalTokens = (appHost.AppSettings.GetString("IllegalTokens") ?? "Exit").FromJsv<string[]>()
+            });
 
             appHost.Container.Register<IDataContext>(appHost.Container.Resolve<AppData>());
 

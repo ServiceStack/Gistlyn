@@ -49,6 +49,9 @@ namespace Gistlyn.ServiceInterface
             if (request.GistHash == null)
                 throw new ArgumentException("GistHash");
 
+            AppData.AssertNoIllegalTokens(request.MainSource);
+            AppData.AssertNoIllegalTokens(request.Sources.ToArray());
+
             var result = new EmbedScriptExecutionResult();
             var codeHash = GetSourceCodeHash(request);
 
