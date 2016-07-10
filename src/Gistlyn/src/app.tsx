@@ -278,6 +278,16 @@ class App extends React.Component<any, any> {
         this.props.updateGist(this.props.gist, true);
     }
 
+    saveGist() {
+    }
+
+    forkGist() {
+    }
+
+    signIn() {
+        location.href = '/auth/github';
+    }
+
     consoleScroll: HTMLDivElement;
     filesList: HTMLDivElement;
     lastDialog: HTMLDivElement;
@@ -445,6 +455,7 @@ class App extends React.Component<any, any> {
         }
 
         var activeSub = this.props.activeSub as ISseConnect;
+        var authUsername = activeSub && parseInt(activeSub.userId) > 0 ? activeSub.displayName : null;
 
         return (
             <div id="body" onClick={e => this.handleBodyClick(e)}>
@@ -455,7 +466,7 @@ class App extends React.Component<any, any> {
                         <div id="gist">
                             { this.props.meta
                                 ? <img src={ this.props.meta.owner_avatar_url } title={this.props.meta.description} style={{ verticalAlign: "middle", margin:"0 5px 2px 0" }} />
-                                : null } 
+                                : <span className="octicon octicon-logo-gist" style={{ verticalAlign: "middle", margin:"0 6px 2px 0" }}></span> } 
                             <input type="text" id="txtGist" placeholder="gist hash or url" 
                                    value={this.props.gist}
                                    onFocus={e => (e.target as HTMLInputElement).select() }
@@ -463,10 +474,10 @@ class App extends React.Component<any, any> {
                             { main != null
                                 ? <i className="material-icons" style={{ color: "#0f9", fontSize: "30px", position:"absolute", margin: "-2px 0 0 7px"}}>check</i>
                                 : this.props.error
-                                    ? <i className="material-icons" style={{ color: "#ebccd1", fontSize: "30px", position: "absolute", margin:"-2px 0 0 7px" }}>error</i>
+                                    ? <i className="material-icons" style={{ color: "#CE93D8", fontSize: "30px", position: "absolute", margin:"-2px 0 0 7px" }}>error</i>
                                     : null }
                         </div>
-                        { activeSub == null || parseInt(activeSub.userId) < 0
+                        { !authUsername
                             ? (
                                 <div id="sign-in" style={{ position: "absolute", right: 5 }}>
                                     <a href="/auth/github" style={{ color: "#fff", textDecoration: "none" }}>
@@ -506,11 +517,20 @@ class App extends React.Component<any, any> {
                 <div id="footer-spacer"></div>
 
                 <div id="footer">
-                    <div id="actions">
+                    <div id="actions" style={{visibility:main ? "visible": "hidden"}}>
                         <div id="revert" onClick={e => this.revertGist(e.shiftKey)}>
                             <i className="material-icons">undo</i>
                             <p>Revert Changes</p>
                         </div>
+                        { this.props.meta && this.props.meta.owner_login == authUsername
+                            ? (<div id="save" onClick={e => this.saveGist() }>
+                                   <i className="material-icons">save</i>
+                                   <p>Save Gist</p>
+                               </div>)
+                            : (<div id="fork" onClick={e => authUsername ? this.forkGist() : this.signIn() } className={!authUsername ? "disabled" : ""} title={!authUsername ? "Sign-in to fork this gist" : "Create your own fork of this gist"}>
+                                   <span className="octicon octicon-repo-forked" style={{ margin:"3px 3px 0 0" }}></span>
+                                   <p>Fork Gist</p>
+                               </div>)}
                     </div>
                 </div>
 
