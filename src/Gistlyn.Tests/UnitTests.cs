@@ -77,12 +77,19 @@ namespace Gistlyn.Tests
 
                 var rowIds = rowsB.ConvertAll(x => x.Id);
 
-                Assert.That(ScriptUtils.HasCircularReferences(SqliteDialect.Provider));
-                Assert.That(ScriptUtils.HasCircularReferences(dbFactory));
-                Assert.That(ScriptUtils.HasCircularReferences(db));
-                Assert.That(!ScriptUtils.HasCircularReferences(rowsB));
-                Assert.That(!ScriptUtils.HasCircularReferences(rowsB[0]));
-                Assert.That(!ScriptUtils.HasCircularReferences(rowIds));
+                Assert.That(TypeSerializer.HasCircularReferences(SqliteDialect.Provider));
+                Assert.That(TypeSerializer.HasCircularReferences(dbFactory));
+                Assert.That(TypeSerializer.HasCircularReferences(db));
+                Assert.That(!TypeSerializer.HasCircularReferences(rowsB));
+                Assert.That(!TypeSerializer.HasCircularReferences(rowsB[0]));
+                Assert.That(!TypeSerializer.HasCircularReferences(rowIds));
+
+                SqliteDialect.Provider.ToSafeJson().Print();
+                dbFactory.ToSafeJson().Print();
+                db.ToSafeJson().Print();
+                rowsB.ToSafeJson().Print();
+                rowsB[0].ToSafeJson().Print();
+                rowIds.ToSafeJson().Print();
             }
         }
 
@@ -106,7 +113,7 @@ namespace Gistlyn.Tests
                 new Node(11, new Node(111)),
                 new Node(12, new Node(121)));
 
-            Assert.That(!ScriptUtils.HasCircularReferences(node));
+            Assert.That(!TypeSerializer.HasCircularReferences(node));
 
             var root = new Node(1,
                 new Node(11));
@@ -114,7 +121,7 @@ namespace Gistlyn.Tests
             var cyclicalNode = new Node(1, root);
             root.Children[0].Children = new[] { cyclicalNode };
 
-            Assert.That(ScriptUtils.HasCircularReferences(root));
+            Assert.That(TypeSerializer.HasCircularReferences(root));
         }
     }
 }
