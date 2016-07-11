@@ -97,7 +97,7 @@ namespace Gistlyn.ServiceInterface
             {
                 {"oauth.RedirectUrl", "http://localhost:11001/"},
                 {"oauth.CallbackUrl", "http://localhost:11001/auth/{0}"},
-                {"oauth.github.Scopes", "user"},
+                {"oauth.github.Scopes", "user,gist"},
                 {"oauth.github.ClientId", "7e8a80ab55b757e7de05"},
                 {"oauth.github.ClientSecret", "122eb4d2762190d024dca6a319bc7c602ee942a2"},
             });
