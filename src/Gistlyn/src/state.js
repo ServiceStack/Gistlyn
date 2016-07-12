@@ -96,7 +96,8 @@ System.register(['redux', './utils', './servicestack-client'], function(exports_
                 variables: [],
                 inspectedVariables: {},
                 expression: null,
-                expressionResult: null
+                expressionResult: null,
+                dialog: null
             };
             exports_1("store", store = redux_1.createStore(function (state, action) {
                 switch (action.type) {
@@ -129,6 +130,8 @@ System.register(['redux', './utils', './servicestack-client'], function(exports_
                         return Object.assign({}, state, { expression: action.expression });
                     case 'EXPRESSION_LOAD':
                         return Object.assign({}, state, { expressionResult: action.expressionResult });
+                    case 'DIALOG_SHOW':
+                        return Object.assign({}, state, { dialog: action.dialog });
                     default:
                         return state;
                 }

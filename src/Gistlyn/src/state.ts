@@ -5,7 +5,27 @@ import { queryString, appendQueryString, splitOnFirst } from './servicestack-cli
 export const StateKey = "/v1/state";
 export const GistCacheKey = (gist) => `/v1/gists/${gist}`;
 
-const updateHistory = meta => {
+export interface IGistMeta {
+    id: string;
+    description: string;
+    public: boolean;
+    created_at: string;
+    updated_at: string;
+    owner_login: string;
+    owner_id: string;
+    owner_avatar_url: string;
+}
+
+export interface IGistFile {
+    size: number;
+    raw_url: string;
+    type: string;
+    language: string;
+    truncated: boolean;
+    content: string;
+}
+
+const updateHistory = (meta: IGistMeta) => {
     if (!meta) return;
     document.title = meta.description;
 
@@ -34,7 +54,7 @@ const updateGist = store => next => action => {
         const json = localStorage.getItem(GistCacheKey(state.gist));
         if (json) {
             const gist = JSON.parse(json);
-            const meta = gist.meta;
+            const meta = gist.meta as IGistMeta;
             const files = gist.files;
             updateHistory(meta);
             store.dispatch({ type: 'GIST_LOAD', meta, files, activeFileName: getSortedFileNames(files)[0] });
@@ -45,7 +65,7 @@ const updateGist = store => next => action => {
                         throw res;
                     } else {
                         return res.json().then((r) => {
-                            const meta = {
+                            const meta: IGistMeta = {
                                 id: r.id,
                                 description: r.description,
                                 public: r.public,
@@ -85,7 +105,8 @@ const defaults = {
     variables: [],
     inspectedVariables: {},
     expression: null,
-    expressionResult: null
+    expressionResult: null,
+    dialog: null
 };
 
 export let store = createStore(
@@ -120,6 +141,8 @@ export let store = createStore(
                 return Object.assign({}, state, { expression: action.expression });
             case 'EXPRESSION_LOAD':
                 return Object.assign({}, state, { expressionResult: action.expressionResult });
+            case 'DIALOG_SHOW':
+                return Object.assign({}, state, { dialog: action.dialog });
             default:
                 return state;
         }
