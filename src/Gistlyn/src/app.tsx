@@ -4,7 +4,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Provider, connect } from 'react-redux';
 import { reduxify, getSortedFileNames } from './utils';
-import { store, StateKey, GistCacheKey } from './state';
+import { store, StateKey, GistCacheKey, IGistMeta, IGistFile } from './state';
 import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnLast, humanize } from './servicestack-client';
 import { JsonViewer } from './json-viewer';
 
@@ -21,7 +21,8 @@ import {
     GetScriptVariables, VariableInfo,
     CancelScript,
     EvaluateExpression,
-    ScriptExecutionResult, ScriptStatus
+    ScriptExecutionResult, ScriptStatus,
+    StoreGist, GithubFile
 } from './Gistlyn.dtos';
 
 var options = {
@@ -89,10 +90,11 @@ var sse = new ServerEventsClient("/", ["gist"], {
         expression: state.expression,
         expressionResult: state.expressionResult,
         error: state.error,
-        scriptStatus: state.scriptStatus
+        scriptStatus: state.scriptStatus,
+        dialog: state.dialog
     }),
     (dispatch) => ({
-        updateGist: (gist, reload=false) => dispatch({ type: 'GIST_CHANGE', gist, reload }),
+        changeGist: (gist, reload=false) => dispatch({ type: 'GIST_CHANGE', gist, reload }),
         updateSource: (fileName, content) => dispatch({ type: 'SOURCE_CHANGE', fileName, content }),
         selectFileName: (activeFileName) => dispatch({ type: 'FILE_SELECT', activeFileName }),
         raiseError: (error) => dispatch({ type: 'ERROR_RAISE', error }),
@@ -104,7 +106,8 @@ var sse = new ServerEventsClient("/", ["gist"], {
         setScriptStatus: (scriptStatus) => dispatch({ type:'SCRIPT_STATUS', scriptStatus }),
         inspectVariable: (name, variables) => dispatch({ type:'VARS_INSPECT', name, variables }),
         setExpression: (expression) => dispatch({ type: 'EXPRESSION_SET', expression }),
-        setExpressionResult: (expressionResult) => dispatch({ type: 'EXPRESSION_LOAD', expressionResult })
+        setExpressionResult: (expressionResult) => dispatch({ type: 'EXPRESSION_LOAD', expressionResult }),
+        showDialog: (dialog) => dispatch({ type: 'DIALOG_SHOW', dialog })
     })
 )
 class App extends React.Component<any, any> {
@@ -178,7 +181,7 @@ class App extends React.Component<any, any> {
         const target = e.target as HTMLInputElement;
         const parts = splitOnLast(target.value, '/');
         const hash = parts[parts.length - 1];
-        this.props.updateGist(hash);
+        this.props.changeGist(hash);
     }
 
     updateSource(src: string) {
@@ -275,13 +278,40 @@ class App extends React.Component<any, any> {
         if (clearAll) {
             localStorage.removeItem(StateKey);
         }
-        this.props.updateGist(this.props.gist, true);
+        this.props.changeGist(this.props.gist, true);
     }
 
-    saveGist() {
+    saveGist(opt: any = {}) {
+        const meta = this.props.meta as IGistMeta;
+        const files = this.props.files as { [index: string]: IGistFile };
+        if (!meta || !files) return;
+
+        var fileContents = {};
+        Object.keys(files).forEach(fileName => {
+            const file = new GithubFile();
+            file.filename = fileName;
+            file.content = files[fileName].content;
+            fileContents[fileName] = file;
+        });
+
+        const request = new StoreGist();
+        request.gist = this.props.gist;
+        request.public = opt.public || meta.public;
+        request.description = opt.description || meta.description;
+        request.ownerLogin = opt.ownerLogin || meta.owner_login;
+        request.files = opt.files || fileContents;
+
+        client.post(request)
+            .then(r => {
+                this.props.changeGist(r.gist);
+            })
+            .catch(e => {
+                this.props.logConsoleError(e.responseStatus || e);
+            });
     }
 
-    forkGist() {
+    saveGistAs() {
+        this.props.showDialog("save-as");
     }
 
     signIn() {
@@ -289,8 +319,10 @@ class App extends React.Component<any, any> {
     }
 
     consoleScroll: HTMLDivElement;
-    filesList: HTMLDivElement;
-    lastDialog: HTMLDivElement;
+    filesPopup: HTMLDivElement;
+    morePopup: HTMLDivElement;
+    lastPopup: HTMLDivElement;
+    txtDescription: HTMLInputElement;
 
     componentDidUpdate() {
         if (!this.consoleScroll) return;
@@ -298,17 +330,17 @@ class App extends React.Component<any, any> {
         window.onkeydown = this.handleWindowKeyDown.bind(this);
     }
 
-    showDialog(e: React.MouseEvent, el: HTMLDivElement) {
-        if (el === this.lastDialog) return;
+    showPopup(e: React.MouseEvent, el: HTMLDivElement) {
+        if (el === this.lastPopup) return;
         e.stopPropagation();
-        this.lastDialog = el;
+        this.lastPopup = el;
         el.style.display = "block";
     }
 
     handleBodyClick(e:React.MouseEvent) {
-        if (this.lastDialog != null) {
-            this.lastDialog.style.display = "none";
-            this.lastDialog = null;
+        if (this.lastPopup != null) {
+            this.lastPopup.style.display = "none";
+            this.lastPopup = null;
         }
     }
 
@@ -334,32 +366,38 @@ class App extends React.Component<any, any> {
         let source = "";
         const Tabs = [];
         const FileList = [];
+        const MorePopup = [];
+        var activeSub = this.props.activeSub as ISseConnect;
+        var authUsername = activeSub && parseInt(activeSub.userId) > 0 ? activeSub.displayName : null;
+        const meta = this.props.meta as IGistMeta;
+        const files = this.props.files as { [index: string]: IGistFile };
 
-        if (this.props.files) {
-            var keys = getSortedFileNames(this.props.files);
+        if (files != null) {
+            var keys = getSortedFileNames(files);
 
-            keys.forEach((k) => {
-                const file = this.props.files[k];
-                const active = k === this.props.activeFileName ||
-                    (this.props.activeFileName == null && k.toLowerCase() === "main.cs");
+            keys.forEach(fileName => {
+                const file = files[fileName];
+                const active = fileName === this.props.activeFileName ||
+                    (this.props.activeFileName == null && fileName.toLowerCase() === "main.cs");
 
                 Tabs.push((
                     <div className={active ? 'active' : null}
-                        onClick={e => this.props.selectFileName(file.filename) }
-                        ><b>
-                            {file.filename}
-                        </b></div>
+                        onClick={e => this.props.selectFileName(fileName) }>
+                        <b>
+                            {fileName}
+                        </b>
+                    </div>
                 ));
 
                 FileList.push((
-                    <div className="file" onClick={e => this.props.selectFileName(file.filename) }>
-                        <div>{file.filename}</div>
+                    <div className="file" onClick={e => this.props.selectFileName(fileName) }>
+                        {fileName}
                     </div>
                 ));
 
                 if (active) {
                     source = file.content;
-                    options["mode"] = file.filename.endsWith('.config')
+                    options["mode"] = fileName.endsWith('.config')
                         ? "application/xml"
                         : "text/x-csharp";
                 }
@@ -454,8 +492,53 @@ class App extends React.Component<any, any> {
                 </div>));
         }
 
-        var activeSub = this.props.activeSub as ISseConnect;
-        var authUsername = activeSub && parseInt(activeSub.userId) > 0 ? activeSub.displayName : null;
+        var Dialog = null;
+        if (this.props.dialog != null && meta != null) {
+            if (this.props.dialog === "save-as") {
+                const isPublic = meta.public;
+                var description = meta.description;
+                if (this.txtDescription) {
+                    description = this.txtDescription.value;
+                } else {
+                    setTimeout(() => this.txtDescription.select(), 0);
+                }
+                Dialog = (
+                    <div id="dialog" onClick={e => this.props.showDialog(null) } onKeyDown={e => e.keyCode === 27 ? this.props.showDialog(null) : null }>
+                        <div className="dialog" onClick={e => e.stopPropagation()}>
+                            <div className="dialog-header">
+                                <i className="material-icons close" onClick={e => this.props.showDialog(null) }>close</i>
+                                {isPublic ? "Fork" : "Save"} Gist
+                            </div>
+                            <div className="dialog-body">
+                                <div className="row">
+                                    <label htmlFor="txtDescription">Description</label>
+                                    <input ref={e => this.txtDescription = e} type="text" id="txtDescription"
+                                        defaultValue={ description }
+                                        onKeyUp={e => this.forceUpdate() } 
+                                        onKeyDown={e => e.keyCode == 13 && description ? this.saveGist({ description }) : null }
+                                        autoFocus />
+                                </div>
+                                <div className="row" style={{ color: isPublic ? "#4CAF50" : "#9C27B0" }} title={ "This gist is " + (isPublic ? "public" : "private")}>
+                                    <label></label>
+                                    <i className="material-icons" style={{ verticalAlign:"bottom", marginRight:5, fontSize:20}}>check</i>
+                                    Is {isPublic ? "public" : "private"}
+                                </div>
+                            </div>
+                            <div className="dialog-footer">
+                                <span className={"btn" + (description ? "" : " disabled") }
+                                    onClick={e => description ? this.saveGist({ description }) : null }>
+                                    Create {isPublic ? "Fork" : "Gist"}
+                                </span>
+                            </div>
+                        </div>
+                    </div>);
+            }
+        }
+
+        MorePopup.push((
+            <div onClick={e => this.props.changeGist("4fab2fa13aade23c81cabe83314c3cd0") }>New Gist</div>));
+        MorePopup.push((
+            <div onClick={e => this.props.changeGist("7eaa8f65869fa6682913e3517bec0f7e") }>New Private Gist</div>));
 
         return (
             <div id="body" onClick={e => this.handleBodyClick(e)}>
@@ -476,6 +559,10 @@ class App extends React.Component<any, any> {
                                 : this.props.error
                                     ? <i className="material-icons" style={{ color: "#CE93D8", fontSize: "30px", position: "absolute", margin:"-2px 0 0 7px" }}>error</i>
                                     : null }
+                            { meta && !meta.public
+                                ? (<span style={{ marginLeft: 40, fontSize: 12, background: "#ffefc6", color: "#888", padding: "2px 4px", borderRadius: 3 }}
+                                    title="This gist is private">secret</span>)
+                                : null }
                         </div>
                         { !authUsername
                             ? (
@@ -500,10 +587,10 @@ class App extends React.Component<any, any> {
                         <div id="editor">
                             <div id="tabs" style={{display: this.props.files ? 'flex' : 'none'}}>
                                 {FileList.length > 0
-                                    ? <i id="files-menu" className="material-icons" onClick={e => this.showDialog(e, this.filesList) }>arrow_drop_down</i> : null }
+                                    ? <i id="files-menu" className="material-icons" onClick={e => this.showPopup(e, this.filesPopup) }>arrow_drop_down</i> : null }
                                 {Tabs}
                             </div>
-                            <div id="files-list" ref={e => this.filesList = e }>
+                            <div id="popup-files" className="popup" ref={e => this.filesPopup = e }>
                                 {FileList}
                             </div>
                             <CodeMirror value={source} options={options} onChange={src => this.updateSource(src)} />
@@ -523,14 +610,22 @@ class App extends React.Component<any, any> {
                             <p>Revert Changes</p>
                         </div>
                         { this.props.meta && this.props.meta.owner_login == authUsername
-                            ? (<div id="save" onClick={e => this.saveGist() }>
+                            ? (<div id="save" onClick={e => this.saveGist({}) }>
                                    <i className="material-icons">save</i>
                                    <p>Save Gist</p>
                                </div>)
-                            : (<div id="fork" onClick={e => authUsername ? this.forkGist() : this.signIn() } className={!authUsername ? "disabled" : ""} title={!authUsername ? "Sign-in to fork this gist" : "Create your own fork of this gist"}>
+                            : (<div id="saveas" onClick={e => authUsername ? this.saveGistAs() : this.signIn() } 
+                                    className={!authUsername ? "disabled" : ""} 
+                                    title={!authUsername ? "Sign-in to save gists" : "Save a copy in your Github gists"}>
                                    <span className="octicon octicon-repo-forked" style={{ margin:"3px 3px 0 0" }}></span>
-                                   <p>Fork Gist</p>
+                                   <p>Save As</p>
                                </div>)}
+                    </div>
+                    <div id="more-menu" style={{ visibility:main ? "visible": "hidden", position:"absolute", right: 5, bottom: 5, color:"#fff", cursor: "pointer" }}>
+                        <i className="material-icons" onClick={e => this.showPopup(e, this.morePopup) }>more_vert</i>
+                    </div>
+                    <div id="popup-more" className="popup" ref={e => this.morePopup = e } style={{ position:"absolute", bottom:42, right:0 }}>
+                        {MorePopup}
                     </div>
                 </div>
 
@@ -541,6 +636,7 @@ class App extends React.Component<any, any> {
                             : <i className="material-icons" title="cancel script" style={{ color: "#FF5252" }}>cancel</i>)
                         : <i className="material-icons" title="disabled">play_circle_outline</i>}
                 </div>
+                {Dialog}
             </div>
         );
     }

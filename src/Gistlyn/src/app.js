@@ -169,7 +169,7 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                     var target = e.target;
                     var parts = servicestack_client_1.splitOnLast(target.value, '/');
                     var hash = parts[parts.length - 1];
-                    this.props.updateGist(hash);
+                    this.props.changeGist(hash);
                 };
                 App.prototype.updateSource = function (src) {
                     this.props.updateSource(this.props.activeFileName, src);
@@ -244,11 +244,38 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                     if (clearAll) {
                         localStorage.removeItem(state_1.StateKey);
                     }
-                    this.props.updateGist(this.props.gist, true);
+                    this.props.changeGist(this.props.gist, true);
                 };
-                App.prototype.saveGist = function () {
+                App.prototype.saveGist = function (opt) {
+                    var _this = this;
+                    if (opt === void 0) { opt = {}; }
+                    var meta = this.props.meta;
+                    var files = this.props.files;
+                    if (!meta || !files)
+                        return;
+                    var fileContents = {};
+                    Object.keys(files).forEach(function (fileName) {
+                        var file = new Gistlyn_dtos_1.GithubFile();
+                        file.filename = fileName;
+                        file.content = files[fileName].content;
+                        fileContents[fileName] = file;
+                    });
+                    var request = new Gistlyn_dtos_1.StoreGist();
+                    request.gist = this.props.gist;
+                    request.public = opt.public || meta.public;
+                    request.description = opt.description || meta.description;
+                    request.ownerLogin = opt.ownerLogin || meta.owner_login;
+                    request.files = opt.files || fileContents;
+                    client.post(request)
+                        .then(function (r) {
+                        _this.props.changeGist(r.gist);
+                    })
+                        .catch(function (e) {
+                        _this.props.logConsoleError(e.responseStatus || e);
+                    });
                 };
-                App.prototype.forkGist = function () {
+                App.prototype.saveGistAs = function () {
+                    this.props.showDialog("save-as");
                 };
                 App.prototype.signIn = function () {
                     location.href = '/auth/github';
@@ -259,17 +286,17 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                     this.consoleScroll.scrollTop = this.consoleScroll.scrollHeight;
                     window.onkeydown = this.handleWindowKeyDown.bind(this);
                 };
-                App.prototype.showDialog = function (e, el) {
-                    if (el === this.lastDialog)
+                App.prototype.showPopup = function (e, el) {
+                    if (el === this.lastPopup)
                         return;
                     e.stopPropagation();
-                    this.lastDialog = el;
+                    this.lastPopup = el;
                     el.style.display = "block";
                 };
                 App.prototype.handleBodyClick = function (e) {
-                    if (this.lastDialog != null) {
-                        this.lastDialog.style.display = "none";
-                        this.lastDialog = null;
+                    if (this.lastPopup != null) {
+                        this.lastPopup.style.display = "none";
+                        this.lastPopup = null;
                     }
                 };
                 App.prototype.handleWindowKeyDown = function (e) {
@@ -294,17 +321,22 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                     var source = "";
                     var Tabs = [];
                     var FileList = [];
-                    if (this.props.files) {
-                        var keys = utils_1.getSortedFileNames(this.props.files);
-                        keys.forEach(function (k) {
-                            var file = _this.props.files[k];
-                            var active = k === _this.props.activeFileName ||
-                                (_this.props.activeFileName == null && k.toLowerCase() === "main.cs");
-                            Tabs.push((React.createElement("div", {className: active ? 'active' : null, onClick: function (e) { return _this.props.selectFileName(file.filename); }}, React.createElement("b", null, file.filename))));
-                            FileList.push((React.createElement("div", {className: "file", onClick: function (e) { return _this.props.selectFileName(file.filename); }}, React.createElement("div", null, file.filename))));
+                    var MorePopup = [];
+                    var activeSub = this.props.activeSub;
+                    var authUsername = activeSub && parseInt(activeSub.userId) > 0 ? activeSub.displayName : null;
+                    var meta = this.props.meta;
+                    var files = this.props.files;
+                    if (files != null) {
+                        var keys = utils_1.getSortedFileNames(files);
+                        keys.forEach(function (fileName) {
+                            var file = files[fileName];
+                            var active = fileName === _this.props.activeFileName ||
+                                (_this.props.activeFileName == null && fileName.toLowerCase() === "main.cs");
+                            Tabs.push((React.createElement("div", {className: active ? 'active' : null, onClick: function (e) { return _this.props.selectFileName(fileName); }}, React.createElement("b", null, fileName))));
+                            FileList.push((React.createElement("div", {className: "file", onClick: function (e) { return _this.props.selectFileName(fileName); }}, fileName)));
                             if (active) {
                                 source = file.content;
-                                options["mode"] = file.filename.endsWith('.config')
+                                options["mode"] = fileName.endsWith('.config')
                                     ? "application/xml"
                                     : "text/x-csharp";
                             }
@@ -339,24 +371,40 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                     if (this.props.logs.length > 0) {
                         Preview.push((React.createElement("div", {id: "console", className: "section", style: { borderTop: "solid 1px #ddd", borderBottom: "solid 1px #ddd", font: "14px/20px arial", height: "350px" }}, React.createElement("b", {style: { background: "#444", color: "#fff", padding: "1px 8px", position: "absolute", right: "3px", margin: "-22px 0" }}, "console"), React.createElement("i", {className: "material-icons clear-btn", title: "clear console", onClick: function (e) { return _this.props.clearConsole(); }}, "clear"), React.createElement("div", {className: "scroll", style: { overflow: "auto", maxHeight: "350px" }, ref: function (el) { return _this.consoleScroll = el; }}, React.createElement("table", {style: { width: "100%" }}, React.createElement("tbody", {style: { font: "13px/18px monospace", color: "#444" }}, this.props.logs.map(function (log) { return (React.createElement("tr", null, React.createElement("td", {style: { padding: "2px 8px", tabSize: 4 }}, React.createElement("pre", {className: log.cls}, log.msg)))); })))))));
                     }
-                    var activeSub = this.props.activeSub;
-                    var authUsername = activeSub && parseInt(activeSub.userId) > 0 ? activeSub.displayName : null;
+                    var Dialog = null;
+                    if (this.props.dialog != null && meta != null) {
+                        if (this.props.dialog === "save-as") {
+                            var isPublic = meta.public;
+                            var description = meta.description;
+                            if (this.txtDescription) {
+                                description = this.txtDescription.value;
+                            }
+                            else {
+                                setTimeout(function () { return _this.txtDescription.select(); }, 0);
+                            }
+                            Dialog = (React.createElement("div", {id: "dialog", onClick: function (e) { return _this.props.showDialog(null); }, onKeyDown: function (e) { return e.keyCode === 27 ? _this.props.showDialog(null) : null; }}, React.createElement("div", {className: "dialog", onClick: function (e) { return e.stopPropagation(); }}, React.createElement("div", {className: "dialog-header"}, React.createElement("i", {className: "material-icons close", onClick: function (e) { return _this.props.showDialog(null); }}, "close"), isPublic ? "Fork" : "Save", " Gist"), React.createElement("div", {className: "dialog-body"}, React.createElement("div", {className: "row"}, React.createElement("label", {htmlFor: "txtDescription"}, "Description"), React.createElement("input", {ref: function (e) { return _this.txtDescription = e; }, type: "text", id: "txtDescription", defaultValue: description, onKeyUp: function (e) { return _this.forceUpdate(); }, onKeyDown: function (e) { return e.keyCode == 13 && description ? _this.saveGist({ description: description }) : null; }, autoFocus: true})), React.createElement("div", {className: "row", style: { color: isPublic ? "#4CAF50" : "#9C27B0" }, title: "This gist is " + (isPublic ? "public" : "private")}, React.createElement("label", null), React.createElement("i", {className: "material-icons", style: { verticalAlign: "bottom", marginRight: 5, fontSize: 20 }}, "check"), "Is ", isPublic ? "public" : "private")), React.createElement("div", {className: "dialog-footer"}, React.createElement("span", {className: "btn" + (description ? "" : " disabled"), onClick: function (e) { return description ? _this.saveGist({ description: description }) : null; }}, "Create ", isPublic ? "Fork" : "Gist")))));
+                        }
+                    }
+                    MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist("4fab2fa13aade23c81cabe83314c3cd0"); }}, "New Gist")));
+                    MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist("7eaa8f65869fa6682913e3517bec0f7e"); }}, "New Private Gist")));
                     return (React.createElement("div", {id: "body", onClick: function (e) { return _this.handleBodyClick(e); }}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("a", {href: "https://servicestack.net", title: "servicestack.net", target: "_blank"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png"})), React.createElement("h3", null, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, this.props.meta
                         ? React.createElement("img", {src: this.props.meta.owner_avatar_url, title: this.props.meta.description, style: { verticalAlign: "middle", margin: "0 5px 2px 0" }})
                         : React.createElement("span", {className: "octicon octicon-logo-gist", style: { verticalAlign: "middle", margin: "0 6px 2px 0" }}), React.createElement("input", {type: "text", id: "txtGist", placeholder: "gist hash or url", value: this.props.gist, onFocus: function (e) { return e.target.select(); }, onChange: function (e) { return _this.handleGistUpdate(e); }}), main != null
                         ? React.createElement("i", {className: "material-icons", style: { color: "#0f9", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "check")
                         : this.props.error
                             ? React.createElement("i", {className: "material-icons", style: { color: "#CE93D8", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "error")
-                            : null), !authUsername
+                            : null, meta && !meta.public
+                        ? (React.createElement("span", {style: { marginLeft: 40, fontSize: 12, background: "#ffefc6", color: "#888", padding: "2px 4px", borderRadius: 3 }, title: "This gist is private"}, "secret"))
+                        : null), !authUsername
                         ? (React.createElement("div", {id: "sign-in", style: { position: "absolute", right: 5 }}, React.createElement("a", {href: "/auth/github", style: { color: "#fff", textDecoration: "none" }}, React.createElement("span", {style: { whiteSpace: "nowrap", fontSize: 14 }}, "sign-in"), React.createElement("span", {style: { verticalAlign: "sub", margin: "0 0 0 10px" }, className: "mega-octicon octicon-mark-github", title: "Sign in with GitHub"}))))
                         : (React.createElement("div", {id: "signed-in", style: { position: "absolute", right: 5 }}, React.createElement("span", {style: { whiteSpace: "nowrap", fontSize: 14 }}, activeSub.displayName), React.createElement("img", {src: activeSub.profileUrl, style: { verticalAlign: "middle", marginLeft: 5, borderRadius: "50%" }}))))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement("div", {id: "editor"}, React.createElement("div", {id: "tabs", style: { display: this.props.files ? 'flex' : 'none' }}, FileList.length > 0
-                        ? React.createElement("i", {id: "files-menu", className: "material-icons", onClick: function (e) { return _this.showDialog(e, _this.filesList); }}, "arrow_drop_down") : null, Tabs), React.createElement("div", {id: "files-list", ref: function (e) { return _this.filesList = e; }}, FileList), React.createElement(react_codemirror_1.default, {value: source, options: options, onChange: function (src) { return _this.updateSource(src); }})), React.createElement("div", {id: "preview"}, Preview))), React.createElement("div", {id: "footer-spacer"}), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "actions", style: { visibility: main ? "visible" : "hidden" }}, React.createElement("div", {id: "revert", onClick: function (e) { return _this.revertGist(e.shiftKey); }}, React.createElement("i", {className: "material-icons"}, "undo"), React.createElement("p", null, "Revert Changes")), this.props.meta && this.props.meta.owner_login == authUsername
-                        ? (React.createElement("div", {id: "save", onClick: function (e) { return _this.saveGist(); }}, React.createElement("i", {className: "material-icons"}, "save"), React.createElement("p", null, "Save Gist")))
-                        : (React.createElement("div", {id: "fork", onClick: function (e) { return authUsername ? _this.forkGist() : _this.signIn(); }, className: !authUsername ? "disabled" : "", title: !authUsername ? "Sign-in to fork this gist" : "Create your own fork of this gist"}, React.createElement("span", {className: "octicon octicon-repo-forked", style: { margin: "3px 3px 0 0" }}), React.createElement("p", null, "Fork Gist"))))), React.createElement("div", {id: "run", className: main == null ? "disabled" : "", onClick: function (e) { return !isScriptRunning ? _this.run() : _this.cancel(); }}, main != null
+                        ? React.createElement("i", {id: "files-menu", className: "material-icons", onClick: function (e) { return _this.showPopup(e, _this.filesPopup); }}, "arrow_drop_down") : null, Tabs), React.createElement("div", {id: "popup-files", className: "popup", ref: function (e) { return _this.filesPopup = e; }}, FileList), React.createElement(react_codemirror_1.default, {value: source, options: options, onChange: function (src) { return _this.updateSource(src); }})), React.createElement("div", {id: "preview"}, Preview))), React.createElement("div", {id: "footer-spacer"}), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "actions", style: { visibility: main ? "visible" : "hidden" }}, React.createElement("div", {id: "revert", onClick: function (e) { return _this.revertGist(e.shiftKey); }}, React.createElement("i", {className: "material-icons"}, "undo"), React.createElement("p", null, "Revert Changes")), this.props.meta && this.props.meta.owner_login == authUsername
+                        ? (React.createElement("div", {id: "save", onClick: function (e) { return _this.saveGist({}); }}, React.createElement("i", {className: "material-icons"}, "save"), React.createElement("p", null, "Save Gist")))
+                        : (React.createElement("div", {id: "saveas", onClick: function (e) { return authUsername ? _this.saveGistAs() : _this.signIn(); }, className: !authUsername ? "disabled" : "", title: !authUsername ? "Sign-in to save gists" : "Save a copy in your Github gists"}, React.createElement("span", {className: "octicon octicon-repo-forked", style: { margin: "3px 3px 0 0" }}), React.createElement("p", null, "Save As")))), React.createElement("div", {id: "more-menu", style: { visibility: main ? "visible" : "hidden", position: "absolute", right: 5, bottom: 5, color: "#fff", cursor: "pointer" }}, React.createElement("i", {className: "material-icons", onClick: function (e) { return _this.showPopup(e, _this.morePopup); }}, "more_vert")), React.createElement("div", {id: "popup-more", className: "popup", ref: function (e) { return _this.morePopup = e; }, style: { position: "absolute", bottom: 42, right: 0 }}, MorePopup)), React.createElement("div", {id: "run", className: main == null ? "disabled" : "", onClick: function (e) { return !isScriptRunning ? _this.run() : _this.cancel(); }}, main != null
                         ? (!isScriptRunning
                             ? React.createElement("i", {className: "material-icons", title: "run"}, "play_circle_outline")
                             : React.createElement("i", {className: "material-icons", title: "cancel script", style: { color: "#FF5252" }}, "cancel"))
-                        : React.createElement("i", {className: "material-icons", title: "disabled"}, "play_circle_outline"))));
+                        : React.createElement("i", {className: "material-icons", title: "disabled"}, "play_circle_outline")), Dialog));
                 };
                 App = __decorate([
                     utils_1.reduxify(function (state) { return ({
@@ -372,9 +420,10 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                         expression: state.expression,
                         expressionResult: state.expressionResult,
                         error: state.error,
-                        scriptStatus: state.scriptStatus
+                        scriptStatus: state.scriptStatus,
+                        dialog: state.dialog
                     }); }, function (dispatch) { return ({
-                        updateGist: function (gist, reload) {
+                        changeGist: function (gist, reload) {
                             if (reload === void 0) { reload = false; }
                             return dispatch({ type: 'GIST_CHANGE', gist: gist, reload: reload });
                         },
@@ -389,7 +438,8 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                         setScriptStatus: function (scriptStatus) { return dispatch({ type: 'SCRIPT_STATUS', scriptStatus: scriptStatus }); },
                         inspectVariable: function (name, variables) { return dispatch({ type: 'VARS_INSPECT', name: name, variables: variables }); },
                         setExpression: function (expression) { return dispatch({ type: 'EXPRESSION_SET', expression: expression }); },
-                        setExpressionResult: function (expressionResult) { return dispatch({ type: 'EXPRESSION_LOAD', expressionResult: expressionResult }); }
+                        setExpressionResult: function (expressionResult) { return dispatch({ type: 'EXPRESSION_LOAD', expressionResult: expressionResult }); },
+                        showDialog: function (dialog) { return dispatch({ type: 'DIALOG_SHOW', dialog: dialog }); }
                     }); })
                 ], App);
                 return App;
