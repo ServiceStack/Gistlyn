@@ -1,8 +1,8 @@
 /* Options:
-Date: 2016-07-06 03:33:43
+Date: 2016-07-12 03:36:15
 Version: 4.061
 Tip: To override a DTO option, remove "//" prefix before updating
-BaseUrl: http://localhost:5500
+BaseUrl: http://localhost:11001
 
 //GlobalNamespace: 
 ExportAsTypes: True
@@ -23,6 +23,12 @@ export interface IReturnVoid
 
 export interface IReturn<T>
 {
+}
+
+export class GithubFile
+{
+    filename: string;
+    content: string;
 }
 
 // @DataContract
@@ -90,6 +96,12 @@ export class ResponseError
 export class ErrorInfo
 {
     info: string;
+}
+
+export class StoreGistResponse
+{
+    gist: string;
+    responseStatus: ResponseStatus;
 }
 
 export class HelloResponse
@@ -176,6 +188,17 @@ export class UnAssignRolesResponse
 
     // @DataMember(Order=3)
     responseStatus: ResponseStatus;
+}
+
+export class StoreGist implements IReturn<StoreGistResponse>
+{
+    gist: string;
+    public: boolean;
+    ownerLogin: string;
+    description: string;
+    files: { [index:string]: GithubFile; };
+    createResponse() { return new StoreGistResponse(); }
+    getTypeName() { return "StoreGist"; }
 }
 
 // @Route("/hello/{Name}")

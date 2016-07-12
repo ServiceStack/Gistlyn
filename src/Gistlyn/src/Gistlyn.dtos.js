@@ -1,8 +1,8 @@
 /* Options:
-Date: 2016-07-06 03:33:43
+Date: 2016-07-12 03:36:15
 Version: 4.061
 Tip: To override a DTO option, remove "//" prefix before updating
-BaseUrl: http://localhost:5500
+BaseUrl: http://localhost:11001
 
 //GlobalNamespace:
 ExportAsTypes: True
@@ -18,10 +18,16 @@ ExportAsTypes: True
 System.register([], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var ResponseStatus, AssemblyReference, ScriptExecutionResult, VariableInfo, ResponseError, ErrorInfo, HelloResponse, RunScriptResponse, ScriptStateVariables, EvaluateExpressionResponse, CancelScriptResponse, AuthenticateResponse, AssignRolesResponse, UnAssignRolesResponse, Hello, RunScript, GetScriptVariables, EvaluateExpression, CancelScript, Authenticate, AssignRoles, UnAssignRoles;
+    var GithubFile, ResponseStatus, AssemblyReference, ScriptExecutionResult, VariableInfo, ResponseError, ErrorInfo, StoreGistResponse, HelloResponse, RunScriptResponse, ScriptStateVariables, EvaluateExpressionResponse, CancelScriptResponse, AuthenticateResponse, AssignRolesResponse, UnAssignRolesResponse, StoreGist, Hello, RunScript, GetScriptVariables, EvaluateExpression, CancelScript, Authenticate, AssignRoles, UnAssignRoles;
     return {
         setters:[],
         execute: function() {
+            GithubFile = (function () {
+                function GithubFile() {
+                }
+                return GithubFile;
+            }());
+            exports_1("GithubFile", GithubFile);
             // @DataContract
             ResponseStatus = (function () {
                 function ResponseStatus() {
@@ -60,6 +66,12 @@ System.register([], function(exports_1, context_1) {
                 return ErrorInfo;
             }());
             exports_1("ErrorInfo", ErrorInfo);
+            StoreGistResponse = (function () {
+                function StoreGistResponse() {
+                }
+                return StoreGistResponse;
+            }());
+            exports_1("StoreGistResponse", StoreGistResponse);
             HelloResponse = (function () {
                 function HelloResponse() {
                 }
@@ -111,6 +123,14 @@ System.register([], function(exports_1, context_1) {
                 return UnAssignRolesResponse;
             }());
             exports_1("UnAssignRolesResponse", UnAssignRolesResponse);
+            StoreGist = (function () {
+                function StoreGist() {
+                }
+                StoreGist.prototype.createResponse = function () { return new StoreGistResponse(); };
+                StoreGist.prototype.getTypeName = function () { return "StoreGist"; };
+                return StoreGist;
+            }());
+            exports_1("StoreGist", StoreGist);
             // @Route("/hello/{Name}")
             Hello = (function () {
                 function Hello() {
