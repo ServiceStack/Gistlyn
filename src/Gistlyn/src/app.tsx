@@ -331,6 +331,7 @@ class App extends React.Component<any, any> {
     consoleScroll: HTMLDivElement;
     filesPopup: HTMLDivElement;
     morePopup: HTMLDivElement;
+    userPopup: HTMLDivElement;
     lastPopup: HTMLDivElement;
     txtGist: HTMLInputElement;
     txtDescription: HTMLInputElement;
@@ -614,12 +615,15 @@ class App extends React.Component<any, any> {
                                     </a>
                                 </div>
                             )
-                            : (
-                                <div id="signed-in" style={{ position: "absolute", right: 5 }}>
+                            : ([
+                                <div id="signed-in" style={{ position: "absolute", right: 5, cursor:"pointer" }} onClick={e => this.showPopup(e, this.userPopup) }>
                                     <span style={{ whiteSpace: "nowrap", fontSize: 14 }}>{activeSub.displayName}</span>
                                     <img src={activeSub.profileUrl} style={{ verticalAlign: "middle", marginLeft:5, borderRadius:"50%" }} />
+                                </div>,
+                                <div id="popup-user" className="popup" ref={e => this.userPopup = e } style={{ position:"absolute", top:42, right:0 }}>
+                                    <div onClick={e => location.href = "/auth/logout" }>Sign out</div>
                                 </div>
-                            )}
+                            ])}
                     </div>
                 </div>
 
