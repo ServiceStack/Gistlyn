@@ -90,22 +90,58 @@ html,body,#app,#body {
     padding: 0 0 0 0;
 }
 #txtGist {
-    width: 300px;
+    width: 320px;
     padding: 4px 8px;
     border: none;
     font-size: 14px;
-    line-height: 20px;
+    line-height: 22px;
     color: #f7f7f7;
-    background: #0488E4
+    background: #0488E4;
+    vertical-align: top;
 }
 #txtGist::-webkit-input-placeholder {
-    color: #f7f7f7 !important;
+    color: #cef !important;
 }
 #txtGist::-moz-placeholder {  /* Firefox 19+ */
-    color: #f7f7f7 !important;  
+    color: #cef !important;  
 }
  #txtGist:-ms-input-placeholder {  
-    color: #f7f7f7 !important;  
+    color: #cef !important;  
+}
+
+#desc-overlay {
+    display: inline-block;
+    background: #0488E4;
+    padding: 2px 2px;
+    vertical-align: top;
+    border: solid 1px #0488E4;
+}
+#desc-overlay .inner {
+    display: flex;
+    background: #0898EF;
+    border-radius: 10px;
+    cursor: text;
+    border: solid 1px #39f;
+}
+#desc-overlay .inner:hover {
+    color: #fff;
+    background: #099EF4;
+}
+#desc-overlay h2 {
+    padding: 0 4px;
+    line-height: 22px;
+    font-weight: normal;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    min-width: 300px;
+    max-width: 400px;
+}
+#desc-overlay i {
+    cursor: pointer;
+    float: right;
+    margin: 5px;
+    font-size: 11px;
 }
 
 #content {
@@ -276,6 +312,10 @@ html,body,#app,#body {
 #console pre.error {
     color: red;
 }
+#console pre.success {
+    color: red;
+    color: #3c763d;
+}
 
 #preview {
     display: flex;
@@ -326,6 +366,7 @@ html,body,#app,#body {
 #evaluate input {
     padding: 4px 8px;
     width: 80%;
+    max-width: 500px;
     margin: 10px 0 0 10px;
     font-size: 16px;
     border: solid 1px #A9A9A9;
@@ -410,6 +451,12 @@ html,body,#app,#body {
     font-size: 16px;
     border: solid 1px #A9A9A9;
 }
+.dialog .loading {
+    visibility: hidden;
+}
+.dialog.disabled .loading {
+    visibility: visible;
+}
 
 .btn, .btn:focus {
     text-transform: uppercase;
@@ -440,7 +487,7 @@ html,body,#app,#body {
     box-shadow: 0 2px 6px rgba(0,0,0,0.26);
     color: #fff;
 }
-.btn.disabled, .btn[disabled], fieldset[disabled] .btn {
+.disabled .btn, .btn.disabled, .btn[disabled], fieldset[disabled] .btn {
     cursor: not-allowed;
     pointer-events: none;
     opacity: .65;

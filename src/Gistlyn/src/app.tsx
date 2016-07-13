@@ -5,7 +5,7 @@ import * as ReactDOM from 'react-dom';
 import { Provider, connect } from 'react-redux';
 import { reduxify, getSortedFileNames } from './utils';
 import { store, StateKey, GistCacheKey, IGistMeta, IGistFile } from './state';
-import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnLast, humanize } from './servicestack-client';
+import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnLast, humanize, timeFmt12 } from './servicestack-client';
 import { JsonViewer } from './json-viewer';
 
 import CodeMirror from 'react-codemirror';
@@ -301,12 +301,22 @@ class App extends React.Component<any, any> {
         request.ownerLogin = opt.ownerLogin || meta.owner_login;
         request.files = opt.files || fileContents;
 
+        if (this.dialog)
+            this.dialog.classList.add("disabled");
+
+        const done = () => this.dialog && this.dialog.classList.remove("disabled");
+
         client.post(request)
             .then(r => {
-                this.props.changeGist(r.gist);
+                if (this.props.gist !== r.gist) {
+                    this.props.changeGist(r.gist);
+                }
+                this.props.logConsole([{msg:`[${timeFmt12()}] Gist was saved.`, cls:"success"}]);
+                done();
             })
             .catch(e => {
                 this.props.logConsoleError(e.responseStatus || e);
+                done();
             });
     }
 
@@ -322,7 +332,9 @@ class App extends React.Component<any, any> {
     filesPopup: HTMLDivElement;
     morePopup: HTMLDivElement;
     lastPopup: HTMLDivElement;
+    txtGist: HTMLInputElement;
     txtDescription: HTMLInputElement;
+    dialog: HTMLDivElement;
 
     componentDidUpdate() {
         if (!this.consoleScroll) return;
@@ -371,6 +383,7 @@ class App extends React.Component<any, any> {
         var authUsername = activeSub && parseInt(activeSub.userId) > 0 ? activeSub.displayName : null;
         const meta = this.props.meta as IGistMeta;
         const files = this.props.files as { [index: string]: IGistFile };
+        let description = meta != null ? meta.description : null;
 
         if (files != null) {
             var keys = getSortedFileNames(files);
@@ -496,7 +509,6 @@ class App extends React.Component<any, any> {
         if (this.props.dialog != null && meta != null) {
             if (this.props.dialog === "save-as") {
                 const isPublic = meta.public;
-                var description = meta.description;
                 if (this.txtDescription) {
                     description = this.txtDescription.value;
                 } else {
@@ -504,7 +516,7 @@ class App extends React.Component<any, any> {
                 }
                 Dialog = (
                     <div id="dialog" onClick={e => this.props.showDialog(null) } onKeyDown={e => e.keyCode === 27 ? this.props.showDialog(null) : null }>
-                        <div className="dialog" onClick={e => e.stopPropagation()}>
+                        <div className="dialog" ref={e => this.dialog = e } onClick={e => e.stopPropagation()}>
                             <div className="dialog-header">
                                 <i className="material-icons close" onClick={e => this.props.showDialog(null) }>close</i>
                                 {isPublic ? "Fork" : "Save"} Gist
@@ -525,6 +537,7 @@ class App extends React.Component<any, any> {
                                 </div>
                             </div>
                             <div className="dialog-footer">
+                                <img className="loading" src="/img/ajax-loader.gif" style={{ margin:"5px 10px 0 0"}} />
                                 <span className={"btn" + (description ? "" : " disabled") }
                                     onClick={e => description ? this.saveGist({ description }) : null }>
                                     Create {isPublic ? "Fork" : "Gist"}
@@ -540,6 +553,20 @@ class App extends React.Component<any, any> {
         MorePopup.push((
             <div onClick={e => this.props.changeGist("7eaa8f65869fa6682913e3517bec0f7e") }>New Private Gist</div>));
 
+        const toggleEdit = () => {
+            const inputWasHidden = this.txtGist.style.display !== "inline-block";
+            const showInput = !meta || !description || inputWasHidden;
+            this.txtGist.style.display = showInput ? "inline-block" : "none";
+            document.getElementById("desc-overlay").style.display = showInput ? "none" : "inline-block"; 
+
+            if (inputWasHidden) {
+                this.txtGist.focus();
+                this.txtGist.select();
+            }
+        };
+
+        const showGistInput = !meta || !description || (this.txtGist && this.txtGist == document.activeElement);
+
         return (
             <div id="body" onClick={e => this.handleBodyClick(e)}>
                 <div className="titlebar">
@@ -547,22 +574,36 @@ class App extends React.Component<any, any> {
                         <a href="https://servicestack.net" title="servicestack.net" target="_blank"><img id="logo" src="img/logo-32-inverted.png" /></a>
                         <h3>Gistlyn</h3> <sup style={{ padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}>BETA</sup>
                         <div id="gist">
-                            { this.props.meta
-                                ? <img src={ this.props.meta.owner_avatar_url } title={this.props.meta.description} style={{ verticalAlign: "middle", margin:"0 5px 2px 0" }} />
-                                : <span className="octicon octicon-logo-gist" style={{ verticalAlign: "middle", margin:"0 6px 2px 0" }}></span> } 
-                            <input type="text" id="txtGist" placeholder="gist hash or url" 
+                            { meta
+                                ? <img src={ meta.owner_avatar_url } title={meta.owner_login} style={{ verticalAlign: "bottom", margin:"0 5px 2px 0" }} />
+                                : <span className="octicon octicon-logo-gist" style={{ verticalAlign: "bottom", margin:"0 6px 6px 0" }}></span> } 
+
+                            <input ref={e => this.txtGist = e} type="text" id="txtGist" placeholder="gist hash or url" 
+                                   style={{display: showGistInput ? "inline-block": "none"}} onBlur={toggleEdit}
                                    value={this.props.gist}
                                    onFocus={e => (e.target as HTMLInputElement).select() }
                                    onChange={e => this.handleGistUpdate(e) } />
+
+                            <div id="desc-overlay" style={{display: showGistInput ? "none" : "inline-block"}}  onClick={toggleEdit}>
+                                <div className="inner">
+                                    <h2>
+                                        {description}
+                                    </h2>
+
+                                    { meta && !meta.public
+                                        ? (<span style={{ position:"absolute", margin:"3px 0px 3px -40px", fontSize: 12, background: "#ffefc6", color: "#888", padding: "2px 4px", borderRadius: 3 }}
+                                            title="This gist is private">secret</span>)
+                                        : null }
+
+                                    <i className="material-icons">close</i>
+                                </div>
+                            </div>
+
                             { main != null
                                 ? <i className="material-icons" style={{ color: "#0f9", fontSize: "30px", position:"absolute", margin: "-2px 0 0 7px"}}>check</i>
                                 : this.props.error
                                     ? <i className="material-icons" style={{ color: "#CE93D8", fontSize: "30px", position: "absolute", margin:"-2px 0 0 7px" }}>error</i>
                                     : null }
-                            { meta && !meta.public
-                                ? (<span style={{ marginLeft: 40, fontSize: 12, background: "#ffefc6", color: "#888", padding: "2px 4px", borderRadius: 3 }}
-                                    title="This gist is private">secret</span>)
-                                : null }
                         </div>
                         { !authUsername
                             ? (
@@ -604,7 +645,7 @@ class App extends React.Component<any, any> {
                 <div id="footer-spacer"></div>
 
                 <div id="footer">
-                    <div id="actions" style={{visibility:main ? "visible": "hidden"}}>
+                    <div id="actions" style={{visibility:main ? "visible": "hidden"}} className="noselect">
                         <div id="revert" onClick={e => this.revertGist(e.shiftKey)}>
                             <i className="material-icons">undo</i>
                             <p>Revert Changes</p>
@@ -615,13 +656,12 @@ class App extends React.Component<any, any> {
                                    <p>Save Gist</p>
                                </div>)
                             : (<div id="saveas" onClick={e => authUsername ? this.saveGistAs() : this.signIn() } 
-                                    className={!authUsername ? "disabled" : ""} 
                                     title={!authUsername ? "Sign-in to save gists" : "Save a copy in your Github gists"}>
                                    <span className="octicon octicon-repo-forked" style={{ margin:"3px 3px 0 0" }}></span>
-                                   <p>Save As</p>
+                                   <p>{authUsername ? "Save As" : "Sign-in to Save"}</p>
                                </div>)}
                     </div>
-                    <div id="more-menu" style={{ visibility:main ? "visible": "hidden", position:"absolute", right: 5, bottom: 5, color:"#fff", cursor: "pointer" }}>
+                    <div id="more-menu" style={{ position:"absolute", right: 5, bottom: 5, color:"#fff", cursor: "pointer" }}>
                         <i className="material-icons" onClick={e => this.showPopup(e, this.morePopup) }>more_vert</i>
                     </div>
                     <div id="popup-more" className="popup" ref={e => this.morePopup = e } style={{ position:"absolute", bottom:42, right:0 }}>
