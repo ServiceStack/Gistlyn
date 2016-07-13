@@ -70,11 +70,11 @@ namespace Gistlyn.ServiceInterface
         public object Any(StoreGist request)
         {
             var session = base.SessionAs<AuthUserSession>();
+            var isOwner = session.UserName == request.OwnerLogin;
             var gist = request.Gist;
             if (request.Public)
             {
-                var requiresFork = session.UserName != request.OwnerLogin;
-                if (requiresFork)
+                if (!isOwner)
                 {
                     var forkResponse = GithubApiBaseUrl.CombineWith("gists", gist, "forks")
                         .PostToUrl("", requestFilter: req => ConfigureWebRequest(req, session))
@@ -93,18 +93,32 @@ namespace Gistlyn.ServiceInterface
             }
             else
             {
-                request.Files.Each(f => f.Value.filename = null); //Need to remove when creating gist
+                if (!isOwner)
+                {
+                    request.Files.Each(f => f.Value.filename = null); //Need to remove when creating gist
 
-                var createResponse = GithubApiBaseUrl.CombineWith("gists")
-                    .PostJsonToUrl(new CreateGithubGist {
-                        description = request.Description,
-                        @public = false,
-                        files = request.Files,
-                    }, 
-                    requestFilter: req => ConfigureWebRequest(req, session))
-                    .FromJson<GithubGist>();
+                    var createResponse = GithubApiBaseUrl.CombineWith("gists")
+                        .PostJsonToUrl(new CreateGithubGist
+                        {
+                            description = request.Description,
+                            @public = false,
+                            files = request.Files,
+                        },
+                        requestFilter: req => ConfigureWebRequest(req, session))
+                        .FromJson<GithubGist>();
 
-                gist = createResponse.Id;
+                    gist = createResponse.Id;
+                }
+                else
+                {
+                    var updateResponse = GithubApiBaseUrl.CombineWith("gists", gist)
+                        .PatchJsonToUrl(new UpdateGithubGist
+                        {
+                            description = request.Description,
+                            files = request.Files,
+                        },
+                        requestFilter: req => ConfigureWebRequest(req, session));
+                }
             }
 
             return new StoreGistResponse { Gist = gist };
