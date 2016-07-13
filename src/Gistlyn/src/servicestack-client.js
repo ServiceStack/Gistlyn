@@ -2,7 +2,7 @@
 System.register([], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var ResponseStatus, ResponseError, ErrorResponse, ReadyState, ServerEventsClient, HttpMethods, JsonServiceClient, toCamelCase, sanitize, nameOf, css, splitOnFirst, splitOnLast, splitCase, humanize, queryString, combinePaths, createPath, createUrl, appendQueryString;
+    var ResponseStatus, ResponseError, ErrorResponse, ReadyState, ServerEventsClient, HttpMethods, JsonServiceClient, toCamelCase, sanitize, nameOf, css, splitOnFirst, splitOnLast, splitCase, humanize, queryString, combinePaths, createPath, createUrl, appendQueryString, toDate, toDateFmt, padInt, dateFmt, dateFmtHM, timeFmt12;
     return {
         setters:[],
         execute: function() {
@@ -392,6 +392,21 @@ System.register([], function(exports_1, context_1) {
                     url += k + "=" + encodeURIComponent(args[k]);
                 }
                 return url;
+            });
+            exports_1("toDate", toDate = function (s) { return new Date(parseFloat(/Date\(([^)]+)\)/.exec(s)[1])); });
+            exports_1("toDateFmt", toDateFmt = function (s) { return dateFmt(toDate(s)); });
+            exports_1("padInt", padInt = function (n) { return n < 10 ? '0' + n : n; });
+            exports_1("dateFmt", dateFmt = function (d) {
+                if (d === void 0) { d = new Date(); }
+                return d.getFullYear() + '/' + padInt(d.getMonth() + 1) + '/' + padInt(d.getDate());
+            });
+            exports_1("dateFmtHM", dateFmtHM = function (d) {
+                if (d === void 0) { d = new Date(); }
+                return d.getFullYear() + '/' + padInt(d.getMonth() + 1) + '/' + padInt(d.getDate()) + ' ' + padInt(d.getHours()) + ":" + padInt(d.getMinutes());
+            });
+            exports_1("timeFmt12", timeFmt12 = function (d) {
+                if (d === void 0) { d = new Date(); }
+                return padInt((d.getHours() + 24) % 12 || 12) + ":" + padInt(d.getMinutes()) + ":" + padInt(d.getSeconds()) + " " + (d.getHours() > 12 ? "PM" : "AM");
             });
         }
     }

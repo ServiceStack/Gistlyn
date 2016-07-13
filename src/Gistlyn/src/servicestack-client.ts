@@ -480,3 +480,11 @@ export const appendQueryString = (url: string, args: any): string => {
     }
     return url;
 }
+
+
+export const toDate = (s:string) => new Date(parseFloat(/Date\(([^)]+)\)/.exec(s)[1]));
+export const toDateFmt = (s:string) => dateFmt(toDate(s));
+export const padInt = (n:number) => n < 10 ? '0' + n : n;
+export const dateFmt = (d:Date = new Date()) => d.getFullYear() + '/' + padInt(d.getMonth() + 1) + '/' + padInt(d.getDate()); 
+export const dateFmtHM = (d:Date = new Date()) => d.getFullYear() + '/' + padInt(d.getMonth() + 1) + '/' + padInt(d.getDate()) + ' ' + padInt(d.getHours()) + ":" + padInt(d.getMinutes()); 
+export const timeFmt12 = (d:Date = new Date()) => padInt((d.getHours() + 24) % 12 || 12) + ":" + padInt(d.getMinutes()) + ":" + padInt(d.getSeconds()) + " " + (d.getHours() > 12 ? "PM" : "AM");
