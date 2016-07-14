@@ -333,6 +333,11 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                         done();
                         return Promise.resolve(null);
                     }
+                    else if (oldFileName === "main.cs" || oldFileName === "packages.config") {
+                        done();
+                        this.props.logConsoleError({ message: "Cannot rename " + oldFileName });
+                        return Promise.resolve(null);
+                    }
                     if (newFileName.indexOf('.') === -1)
                         newFileName += ".cs";
                     request.files[oldFileName].filename = newFileName;
