@@ -40,8 +40,9 @@ System.register(['redux', './utils', './servicestack-client'], function(exports_
                 else {
                     updateHistory(state.meta);
                 }
-                if (action.type === 'GIST_CHANGE' && action.gist && (action.reload || oldGist !== action.gist || !state.files || !state.meta)) {
-                    var json = localStorage.getItem(GistCacheKey(state.gist));
+                var options = action.options || {};
+                if (action.type === 'GIST_CHANGE' && action.gist && (options.reload || oldGist !== action.gist || !state.files || !state.meta)) {
+                    var json = !options.reload ? localStorage.getItem(GistCacheKey(state.gist)) : null;
                     if (json) {
                         var gist = JSON.parse(json);
                         var meta = gist.meta;
@@ -50,7 +51,14 @@ System.register(['redux', './utils', './servicestack-client'], function(exports_
                         store.dispatch({ type: 'GIST_LOAD', meta: meta, files: files, activeFileName: utils_1.getSortedFileNames(files)[0] });
                     }
                     else {
-                        fetch("https://api.github.com/gists/" + action.gist)
+                        var authUsername = state.activeSub && parseInt(state.activeSub.userId) > 0
+                            ? state.activeSub.displayName
+                            : null;
+                        var disableCache = "?t=" + new Date().getTime();
+                        var urlPrefix = authUsername //Auth requests gets bigger quota
+                            ? "/proxy/"
+                            : "https://api.github.com/";
+                        fetch(new Request(urlPrefix + "gists/" + action.gist + disableCache, { credentials: "include" }))
                             .then(function (res) {
                             if (!res.ok) {
                                 throw res;
@@ -69,7 +77,7 @@ System.register(['redux', './utils', './servicestack-client'], function(exports_
                                     };
                                     updateHistory(meta);
                                     localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: r.files, meta: meta }));
-                                    store.dispatch({ type: 'GIST_LOAD', meta: meta, files: r.files, activeFileName: utils_1.getSortedFileNames(r.files)[0] });
+                                    store.dispatch({ type: 'GIST_LOAD', meta: meta, files: r.files, activeFileName: options.activeFileName || utils_1.getSortedFileNames(r.files)[0] });
                                 });
                             }
                         })
@@ -89,6 +97,7 @@ System.register(['redux', './utils', './servicestack-client'], function(exports_
                 meta: null,
                 files: null,
                 activeFileName: null,
+                editingFileName: null,
                 hasLoaded: false,
                 error: null,
                 scriptStatus: null,
@@ -111,6 +120,8 @@ System.register(['redux', './utils', './servicestack-client'], function(exports_
                         return Object.assign({}, state, { meta: action.meta, files: action.files, activeFileName: action.activeFileName, variables: [], logs: [], hasLoaded: true });
                     case 'FILE_SELECT':
                         return Object.assign({}, state, { activeFileName: action.activeFileName });
+                    case 'FILENAME_EDIT':
+                        return Object.assign({}, state, { editingFileName: action.fileName });
                     case 'ERROR_RAISE':
                         return Object.assign({}, state, { error: action.error });
                     case 'CONSOLE_LOG':

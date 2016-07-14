@@ -109,6 +109,7 @@ const defaults = {
     meta: null,
     files: null,
     activeFileName: null,
+    editingFileName: null,
     hasLoaded: false,
     error: null,
     scriptStatus: null,
@@ -133,6 +134,8 @@ export let store = createStore(
                 return Object.assign({}, state, { meta: action.meta, files: action.files, activeFileName: action.activeFileName, variables: [], logs: [], hasLoaded: true });
             case 'FILE_SELECT':
                 return Object.assign({}, state, { activeFileName: action.activeFileName });
+            case 'FILENAME_EDIT':
+                return Object.assign({}, state, { editingFileName: action.fileName });
             case 'ERROR_RAISE':
                 return Object.assign({}, state, { error: action.error });
             case 'CONSOLE_LOG':
