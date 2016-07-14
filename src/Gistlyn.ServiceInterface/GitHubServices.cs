@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using Gistlyn.ServiceModel;
 using ServiceStack;
 using ServiceStack.Auth;
+using ServiceStack.Web;
 
 namespace Gistlyn.ServiceInterface
 {
@@ -49,6 +51,13 @@ namespace Gistlyn.ServiceInterface
         public Dictionary<string, GithubFile> files { get; set; }
     }
 
+    [Route("/proxy/{PathInfo*}")]
+    public class GithubProxy : IRequiresRequestStream, IReturn<string>
+    {
+        public string PathInfo { get; set; }
+        public Stream RequestStream { get; set; }
+    }
+
     [Authenticate]
     public class GitHubServices : Service
     {
@@ -65,6 +74,35 @@ namespace Gistlyn.ServiceInterface
 
             req.UserAgent = "Gistlyn";
             req.Headers["Authorization"] = "token " + githubToken.AccessTokenSecret;
+        }
+
+        public object Any(GithubProxy request)
+        {
+            var session = base.SessionAs<AuthUserSession>();
+
+            var apiUrl = GithubApiBaseUrl.CombineWith(request.PathInfo);
+
+            var hasRequestBody = base.Request.Verb.HasRequestBody();
+            try
+            {
+                var bytes = apiUrl.SendBytesToUrl(
+                method: base.Request.Verb,
+                requestBody: hasRequestBody ? request.RequestStream.ReadFully() : null,
+                contentType: hasRequestBody ? MimeTypes.Json : null,
+                accept: MimeTypes.Json,
+                requestFilter: req => ConfigureWebRequest(req, session),
+                responseFilter: res => base.Request.ResponseContentType = res.ContentType);
+
+                return bytes;
+            }
+            catch (WebException webEx)
+            {
+                var errorResponse = (HttpWebResponse)webEx.Response;
+                base.Response.StatusCode = (int) errorResponse.StatusCode;
+                base.Response.StatusDescription = errorResponse.StatusDescription;
+                var bytes = errorResponse.GetResponseStream().ReadFully();
+                return bytes;
+            }
         }
 
         public object Any(StoreGist request)
