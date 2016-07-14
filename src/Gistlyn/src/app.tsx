@@ -5,7 +5,7 @@ import * as ReactDOM from 'react-dom';
 import { Provider, connect } from 'react-redux';
 import { reduxify, getSortedFileNames } from './utils';
 import { store, StateKey, GistCacheKey, IGistMeta, IGistFile } from './state';
-import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnLast, humanize, timeFmt12 } from './servicestack-client';
+import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnLast, humanize, dateFmt, timeFmt12 } from './servicestack-client';
 import { JsonViewer } from './json-viewer';
 
 import CodeMirror from 'react-codemirror';
@@ -84,6 +84,7 @@ var sse = new ServerEventsClient("/", ["gist"], {
         meta: state.meta,
         files: state.files,
         activeFileName: state.activeFileName,
+        editingFileName: state.editingFileName,
         logs: state.logs,
         variables: state.variables,
         inspectedVariables: state.inspectedVariables,
@@ -94,9 +95,10 @@ var sse = new ServerEventsClient("/", ["gist"], {
         dialog: state.dialog
     }),
     (dispatch) => ({
-        changeGist: (gist, reload=false) => dispatch({ type: 'GIST_CHANGE', gist, reload }),
+        changeGist: (gist, options={}) => dispatch({ type: 'GIST_CHANGE', gist, options }),
         updateSource: (fileName, content) => dispatch({ type: 'SOURCE_CHANGE', fileName, content }),
         selectFileName: (activeFileName) => dispatch({ type: 'FILE_SELECT', activeFileName }),
+        editFileName: (fileName) => dispatch({ type: 'FILENAME_EDIT', fileName }),
         raiseError: (error) => dispatch({ type: 'ERROR_RAISE', error }),
         clearError: () => dispatch({ type: 'ERROR_CLEAR' }),
         clearConsole: () => dispatch({ type: 'CONSOLE_CLEAR' }),
@@ -278,13 +280,13 @@ class App extends React.Component<any, any> {
         if (clearAll) {
             localStorage.removeItem(StateKey);
         }
-        this.props.changeGist(this.props.gist, true);
+        this.props.changeGist(this.props.gist, { reload: true });
     }
 
-    saveGist(opt: any = {}) {
+    createStoreGist(opt: any = {}):StoreGist {
         const meta = this.props.meta as IGistMeta;
         const files = this.props.files as { [index: string]: IGistFile };
-        if (!meta || !files) return;
+        if (!meta || !files) return null;
 
         var fileContents = {};
         Object.keys(files).forEach(fileName => {
@@ -296,13 +298,20 @@ class App extends React.Component<any, any> {
 
         const request = new StoreGist();
         request.gist = this.props.gist;
+        request.ownerLogin = opt.ownerLogin || meta.owner_login;
         request.public = opt.public || meta.public;
         request.description = opt.description || meta.description;
-        request.ownerLogin = opt.ownerLogin || meta.owner_login;
         request.files = opt.files || fileContents;
+        return request;
+    }
 
+    saveGist(opt: any = {}) {
         if (this.dialog)
             this.dialog.classList.add("disabled");
+
+        const request = this.createStoreGist(opt);
+        if (request == null)
+            return;
 
         const done = () => this.dialog && this.dialog.classList.remove("disabled");
 
@@ -317,6 +326,91 @@ class App extends React.Component<any, any> {
             .catch(e => {
                 this.props.logConsoleError(e.responseStatus || e);
                 done();
+            });
+    }
+
+    handleCreateFile(e:React.SyntheticEvent) {
+        var txt = e.target as HTMLInputElement;
+        if (txt == null)
+            return;
+
+        txt.disabled = true;
+        this.createFile(txt.value)
+            .then(r => txt.disabled = false);
+    }
+
+    createFile(fileName:string) {
+        const done = () => this.props.editFileName(null);
+
+        const request = this.createStoreGist();
+        if (!fileName || fileName.trim().length == 0 || request == null) {
+            done();
+            return Promise.resolve(null);
+        }
+
+        if (fileName.indexOf('.') === -1)
+            fileName += ".cs";
+
+        request.files[fileName] = new GithubFile();
+        request.files[fileName].content = `// ${fileName}\n// Created by ${this.props.activeSub.displayName} on ${dateFmt()}\n\n`; //Gist API requires non Whitespace content
+
+        return client.post(request)
+            .then(r => {
+                this.props.changeGist(r.gist, { reload: true, activeFileName:fileName });
+            })
+            .catch(e => {
+                this.props.logConsoleError(e.responseStatus || e);
+            });
+    }
+
+    handleRenameFile(oldFileName:string, e:React.SyntheticEvent) {
+        var txt = e.target as HTMLInputElement;
+        if (txt == null)
+            return;
+
+        txt.disabled = true;
+        this.renameFile(oldFileName, txt.value)
+            .then(r => txt.disabled = false);
+    }
+
+    renameFile(oldFileName:string, newFileName:string) {
+        const done = () => this.props.editFileName(null);
+
+        const request = this.createStoreGist();
+        if (!newFileName || newFileName.trim().length == 0 || request == null) {
+            done();
+            return Promise.resolve(null);
+        }
+
+        if (newFileName.indexOf('.') === -1)
+            newFileName += ".cs";
+
+        request.files[oldFileName].filename = newFileName;
+
+        return client.post(request)
+            .then(r => {
+                this.props.changeGist(r.gist, { reload: true, activeFileName:newFileName });
+            })
+            .catch(e => {
+                this.props.logConsoleError(e.responseStatus || e);
+            });
+    }
+
+    deleteFile(fileName:string) {
+        if (!fileName) return;
+
+        var json = JSON.stringify({ files: { [fileName]: null } });
+
+        fetch("/proxy/gists/" + this.props.gist, { 
+                method: "PATCH",
+                credentials: "include",
+                body: json
+            })
+            .then((res) => {
+                this.props.changeGist(this.props.gist, { reload: true });
+            })
+            .catch(e => {
+                this.props.logConsoleError(e.responseStatus || e);
             });
     }
 
@@ -389,6 +483,11 @@ class App extends React.Component<any, any> {
         if (files != null) {
             var keys = getSortedFileNames(files);
 
+            const sizeToFit = (e:React.KeyboardEvent) => {
+                var txt = e.target as HTMLInputElement;
+                txt.size = Math.max(txt.value.length - 3, 1);
+            };
+
             keys.forEach(fileName => {
                 const file = files[fileName];
                 const active = fileName === this.props.activeFileName ||
@@ -396,10 +495,15 @@ class App extends React.Component<any, any> {
 
                 Tabs.push((
                     <div className={active ? 'active' : null}
-                        onClick={e => this.props.selectFileName(fileName) }>
-                        <b>
-                            {fileName}
-                        </b>
+                        onClick={e => !active ? this.props.selectFileName(fileName) : this.props.editFileName(fileName) }>
+                        {this.props.editingFileName !== fileName
+                            ? <b>{fileName}</b>
+                            : <input type="text" className="txtFileName" 
+                                onBlur={e => this.handleRenameFile(fileName, e)} 
+                                onKeyDown={e => e.keyCode === 13 ? (e.target as HTMLElement).blur() : null } 
+                                defaultValue={fileName} 
+                                onKeyUp={sizeToFit} size={Math.max(fileName.length - 3, 1)}
+                                autoFocus /> }
                     </div>
                 ));
 
@@ -416,6 +520,20 @@ class App extends React.Component<any, any> {
                         : "text/x-csharp";
                 }
             });
+
+            if (authUsername && meta && meta.owner_login === authUsername) {
+                Tabs.push((
+                    <div title="Add new file" onClick={e => this.props.editFileName("+") }
+                         className={this.props.editingFileName === "+" ? "active" : ""}>
+                        {this.props.editingFileName !== "+"
+                            ? <i className="material-icons" style={{fontSize:13}}>add</i>
+                            : <input type="text"className="txtFileName" 
+                                onBlur={e => this.handleCreateFile(e)} 
+                                onKeyDown={e => e.keyCode === 13 ? (e.target as HTMLElement).blur() : null } 
+                                onKeyUp={sizeToFit} size="1" autoFocus /> }
+                    </div>
+                ));
+            }
         }
 
         const main = this.getMainFile();
@@ -654,7 +772,7 @@ class App extends React.Component<any, any> {
                             <i className="material-icons">undo</i>
                             <p>Revert Changes</p>
                         </div>
-                        { this.props.meta && this.props.meta.owner_login == authUsername
+                        { meta && meta.owner_login == authUsername
                             ? (<div id="save" onClick={e => this.saveGist({}) }>
                                    <i className="material-icons">save</i>
                                    <p>Save Gist</p>
@@ -664,6 +782,12 @@ class App extends React.Component<any, any> {
                                    <span className="octicon octicon-repo-forked" style={{ margin:"3px 3px 0 0" }}></span>
                                    <p>{authUsername ? "Save As" : "Sign-in to Save"}</p>
                                </div>)}
+                        { meta && meta.owner_login === authUsername && this.props.activeFileName && this.props.activeFileName !== "main.cs" && this.props.activeFileName !== "packages.config"
+                            ? (<div id="delete-file" onClick={e => this.deleteFile(this.props.activeFileName) }>
+                                   <i className="material-icons">delete</i>
+                                   <p>Delete File</p>
+                               </div>)
+                            : null }
                     </div>
                     <div id="more-menu" style={{ position:"absolute", right: 5, bottom: 5, color:"#fff", cursor: "pointer" }}>
                         <i className="material-icons" onClick={e => this.showPopup(e, this.morePopup) }>more_vert</i>

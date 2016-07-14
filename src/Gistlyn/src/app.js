@@ -244,15 +244,14 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                     if (clearAll) {
                         localStorage.removeItem(state_1.StateKey);
                     }
-                    this.props.changeGist(this.props.gist, true);
+                    this.props.changeGist(this.props.gist, { reload: true });
                 };
-                App.prototype.saveGist = function (opt) {
-                    var _this = this;
+                App.prototype.createStoreGist = function (opt) {
                     if (opt === void 0) { opt = {}; }
                     var meta = this.props.meta;
                     var files = this.props.files;
                     if (!meta || !files)
-                        return;
+                        return null;
                     var fileContents = {};
                     Object.keys(files).forEach(function (fileName) {
                         var file = new Gistlyn_dtos_1.GithubFile();
@@ -262,12 +261,20 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                     });
                     var request = new Gistlyn_dtos_1.StoreGist();
                     request.gist = this.props.gist;
+                    request.ownerLogin = opt.ownerLogin || meta.owner_login;
                     request.public = opt.public || meta.public;
                     request.description = opt.description || meta.description;
-                    request.ownerLogin = opt.ownerLogin || meta.owner_login;
                     request.files = opt.files || fileContents;
+                    return request;
+                };
+                App.prototype.saveGist = function (opt) {
+                    var _this = this;
+                    if (opt === void 0) { opt = {}; }
                     if (this.dialog)
                         this.dialog.classList.add("disabled");
+                    var request = this.createStoreGist(opt);
+                    if (request == null)
+                        return;
                     var done = function () { return _this.dialog && _this.dialog.classList.remove("disabled"); };
                     client.post(request)
                         .then(function (r) {
@@ -281,6 +288,79 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                         _this.props.logConsoleError(e.responseStatus || e);
                         done();
                     });
+                };
+                App.prototype.handleCreateFile = function (e) {
+                    var txt = e.target;
+                    if (txt == null)
+                        return;
+                    txt.disabled = true;
+                    this.createFile(txt.value)
+                        .then(function (r) { return txt.disabled = false; });
+                };
+                App.prototype.createFile = function (fileName) {
+                    var _this = this;
+                    var done = function () { return _this.props.editFileName(null); };
+                    var request = this.createStoreGist();
+                    if (!fileName || fileName.trim().length == 0 || request == null) {
+                        done();
+                        return Promise.resolve(null);
+                    }
+                    if (fileName.indexOf('.') === -1)
+                        fileName += ".cs";
+                    request.files[fileName] = new Gistlyn_dtos_1.GithubFile();
+                    request.files[fileName].content = "// " + fileName + "\n// Created by " + this.props.activeSub.displayName + " on " + servicestack_client_1.dateFmt() + "\n\n"; //Gist API requires non Whitespace content
+                    return client.post(request)
+                        .then(function (r) {
+                        _this.props.changeGist(r.gist, { reload: true, activeFileName: fileName });
+                    })
+                        .catch(function (e) {
+                        _this.props.logConsoleError(e.responseStatus || e);
+                    });
+                };
+                App.prototype.handleRenameFile = function (oldFileName, e) {
+                    var txt = e.target;
+                    if (txt == null)
+                        return;
+                    txt.disabled = true;
+                    this.renameFile(oldFileName, txt.value)
+                        .then(function (r) { return txt.disabled = false; });
+                };
+                App.prototype.renameFile = function (oldFileName, newFileName) {
+                    var _this = this;
+                    var done = function () { return _this.props.editFileName(null); };
+                    var request = this.createStoreGist();
+                    if (!newFileName || newFileName.trim().length == 0 || request == null) {
+                        done();
+                        return Promise.resolve(null);
+                    }
+                    if (newFileName.indexOf('.') === -1)
+                        newFileName += ".cs";
+                    request.files[oldFileName].filename = newFileName;
+                    return client.post(request)
+                        .then(function (r) {
+                        _this.props.changeGist(r.gist, { reload: true, activeFileName: newFileName });
+                    })
+                        .catch(function (e) {
+                        _this.props.logConsoleError(e.responseStatus || e);
+                    });
+                };
+                App.prototype.deleteFile = function (fileName) {
+                    var _this = this;
+                    if (!fileName)
+                        return;
+                    var json = JSON.stringify({ files: (_a = {}, _a[fileName] = null, _a) });
+                    fetch("/proxy/gists/" + this.props.gist, {
+                        method: "PATCH",
+                        credentials: "include",
+                        body: json
+                    })
+                        .then(function (res) {
+                        _this.props.changeGist(_this.props.gist, { reload: true });
+                    })
+                        .catch(function (e) {
+                        _this.props.logConsoleError(e.responseStatus || e);
+                    });
+                    var _a;
                 };
                 App.prototype.saveGistAs = function () {
                     this.props.showDialog("save-as");
@@ -337,11 +417,17 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                     var description = meta != null ? meta.description : null;
                     if (files != null) {
                         var keys = utils_1.getSortedFileNames(files);
+                        var sizeToFit_1 = function (e) {
+                            var txt = e.target;
+                            txt.size = Math.max(txt.value.length - 3, 1);
+                        };
                         keys.forEach(function (fileName) {
                             var file = files[fileName];
                             var active = fileName === _this.props.activeFileName ||
                                 (_this.props.activeFileName == null && fileName.toLowerCase() === "main.cs");
-                            Tabs.push((React.createElement("div", {className: active ? 'active' : null, onClick: function (e) { return _this.props.selectFileName(fileName); }}, React.createElement("b", null, fileName))));
+                            Tabs.push((React.createElement("div", {className: active ? 'active' : null, onClick: function (e) { return !active ? _this.props.selectFileName(fileName) : _this.props.editFileName(fileName); }}, _this.props.editingFileName !== fileName
+                                ? React.createElement("b", null, fileName)
+                                : React.createElement("input", {type: "text", className: "txtFileName", onBlur: function (e) { return _this.handleRenameFile(fileName, e); }, onKeyDown: function (e) { return e.keyCode === 13 ? e.target.blur() : null; }, defaultValue: fileName, onKeyUp: sizeToFit_1, size: Math.max(fileName.length - 3, 1), autoFocus: true}))));
                             FileList.push((React.createElement("div", {className: "file", onClick: function (e) { return _this.props.selectFileName(fileName); }}, fileName)));
                             if (active) {
                                 source = file.content;
@@ -350,6 +436,11 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                                     : "text/x-csharp";
                             }
                         });
+                        if (authUsername && meta && meta.owner_login === authUsername) {
+                            Tabs.push((React.createElement("div", {title: "Add new file", onClick: function (e) { return _this.props.editFileName("+"); }, className: this.props.editingFileName === "+" ? "active" : ""}, this.props.editingFileName !== "+"
+                                ? React.createElement("i", {className: "material-icons", style: { fontSize: 13 }}, "add")
+                                : React.createElement("input", {type: "text", className: "txtFileName", onBlur: function (e) { return _this.handleCreateFile(e); }, onKeyDown: function (e) { return e.keyCode === 13 ? e.target.blur() : null; }, onKeyUp: sizeToFit_1, size: "1", autoFocus: true}))));
+                        }
                     }
                     var main = this.getMainFile();
                     if (this.props.hasLoaded && this.props.gist && this.props.files && main == null && this.props.error == null) {
@@ -420,9 +511,11 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                             React.createElement("div", {id: "signed-in", style: { position: "absolute", right: 5, cursor: "pointer" }, onClick: function (e) { return _this.showPopup(e, _this.userPopup); }}, React.createElement("span", {style: { whiteSpace: "nowrap", fontSize: 14 }}, activeSub.displayName), React.createElement("img", {src: activeSub.profileUrl, style: { verticalAlign: "middle", marginLeft: 5, borderRadius: "50%" }})),
                             React.createElement("div", {id: "popup-user", className: "popup", ref: function (e) { return _this.userPopup = e; }, style: { position: "absolute", top: 42, right: 0 }}, React.createElement("div", {onClick: function (e) { return location.href = "/auth/logout"; }}, "Sign out"))
                         ]))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement("div", {id: "editor"}, React.createElement("div", {id: "tabs", style: { display: this.props.files ? 'flex' : 'none' }}, FileList.length > 0
-                        ? React.createElement("i", {id: "files-menu", className: "material-icons", onClick: function (e) { return _this.showPopup(e, _this.filesPopup); }}, "arrow_drop_down") : null, Tabs), React.createElement("div", {id: "popup-files", className: "popup", ref: function (e) { return _this.filesPopup = e; }}, FileList), React.createElement(react_codemirror_1.default, {value: source, options: options, onChange: function (src) { return _this.updateSource(src); }})), React.createElement("div", {id: "preview"}, Preview))), React.createElement("div", {id: "footer-spacer"}), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "actions", style: { visibility: main ? "visible" : "hidden" }, className: "noselect"}, React.createElement("div", {id: "revert", onClick: function (e) { return _this.revertGist(e.shiftKey); }}, React.createElement("i", {className: "material-icons"}, "undo"), React.createElement("p", null, "Revert Changes")), this.props.meta && this.props.meta.owner_login == authUsername
+                        ? React.createElement("i", {id: "files-menu", className: "material-icons", onClick: function (e) { return _this.showPopup(e, _this.filesPopup); }}, "arrow_drop_down") : null, Tabs), React.createElement("div", {id: "popup-files", className: "popup", ref: function (e) { return _this.filesPopup = e; }}, FileList), React.createElement(react_codemirror_1.default, {value: source, options: options, onChange: function (src) { return _this.updateSource(src); }})), React.createElement("div", {id: "preview"}, Preview))), React.createElement("div", {id: "footer-spacer"}), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "actions", style: { visibility: main ? "visible" : "hidden" }, className: "noselect"}, React.createElement("div", {id: "revert", onClick: function (e) { return _this.revertGist(e.shiftKey); }}, React.createElement("i", {className: "material-icons"}, "undo"), React.createElement("p", null, "Revert Changes")), meta && meta.owner_login == authUsername
                         ? (React.createElement("div", {id: "save", onClick: function (e) { return _this.saveGist({}); }}, React.createElement("i", {className: "material-icons"}, "save"), React.createElement("p", null, "Save Gist")))
-                        : (React.createElement("div", {id: "saveas", onClick: function (e) { return authUsername ? _this.saveGistAs() : _this.signIn(); }, title: !authUsername ? "Sign-in to save gists" : "Save a copy in your Github gists"}, React.createElement("span", {className: "octicon octicon-repo-forked", style: { margin: "3px 3px 0 0" }}), React.createElement("p", null, authUsername ? "Save As" : "Sign-in to Save")))), React.createElement("div", {id: "more-menu", style: { position: "absolute", right: 5, bottom: 5, color: "#fff", cursor: "pointer" }}, React.createElement("i", {className: "material-icons", onClick: function (e) { return _this.showPopup(e, _this.morePopup); }}, "more_vert")), React.createElement("div", {id: "popup-more", className: "popup", ref: function (e) { return _this.morePopup = e; }, style: { position: "absolute", bottom: 42, right: 0 }}, MorePopup)), React.createElement("div", {id: "run", className: main == null ? "disabled" : "", onClick: function (e) { return !isScriptRunning ? _this.run() : _this.cancel(); }}, main != null
+                        : (React.createElement("div", {id: "saveas", onClick: function (e) { return authUsername ? _this.saveGistAs() : _this.signIn(); }, title: !authUsername ? "Sign-in to save gists" : "Save a copy in your Github gists"}, React.createElement("span", {className: "octicon octicon-repo-forked", style: { margin: "3px 3px 0 0" }}), React.createElement("p", null, authUsername ? "Save As" : "Sign-in to Save"))), meta && meta.owner_login === authUsername && this.props.activeFileName && this.props.activeFileName !== "main.cs" && this.props.activeFileName !== "packages.config"
+                        ? (React.createElement("div", {id: "delete-file", onClick: function (e) { return _this.deleteFile(_this.props.activeFileName); }}, React.createElement("i", {className: "material-icons"}, "delete"), React.createElement("p", null, "Delete File")))
+                        : null), React.createElement("div", {id: "more-menu", style: { position: "absolute", right: 5, bottom: 5, color: "#fff", cursor: "pointer" }}, React.createElement("i", {className: "material-icons", onClick: function (e) { return _this.showPopup(e, _this.morePopup); }}, "more_vert")), React.createElement("div", {id: "popup-more", className: "popup", ref: function (e) { return _this.morePopup = e; }, style: { position: "absolute", bottom: 42, right: 0 }}, MorePopup)), React.createElement("div", {id: "run", className: main == null ? "disabled" : "", onClick: function (e) { return !isScriptRunning ? _this.run() : _this.cancel(); }}, main != null
                         ? (!isScriptRunning
                             ? React.createElement("i", {className: "material-icons", title: "run"}, "play_circle_outline")
                             : React.createElement("i", {className: "material-icons", title: "cancel script", style: { color: "#FF5252" }}, "cancel"))
@@ -436,6 +529,7 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                         meta: state.meta,
                         files: state.files,
                         activeFileName: state.activeFileName,
+                        editingFileName: state.editingFileName,
                         logs: state.logs,
                         variables: state.variables,
                         inspectedVariables: state.inspectedVariables,
@@ -445,12 +539,13 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                         scriptStatus: state.scriptStatus,
                         dialog: state.dialog
                     }); }, function (dispatch) { return ({
-                        changeGist: function (gist, reload) {
-                            if (reload === void 0) { reload = false; }
-                            return dispatch({ type: 'GIST_CHANGE', gist: gist, reload: reload });
+                        changeGist: function (gist, options) {
+                            if (options === void 0) { options = {}; }
+                            return dispatch({ type: 'GIST_CHANGE', gist: gist, options: options });
                         },
                         updateSource: function (fileName, content) { return dispatch({ type: 'SOURCE_CHANGE', fileName: fileName, content: content }); },
                         selectFileName: function (activeFileName) { return dispatch({ type: 'FILE_SELECT', activeFileName: activeFileName }); },
+                        editFileName: function (fileName) { return dispatch({ type: 'FILENAME_EDIT', fileName: fileName }); },
                         raiseError: function (error) { return dispatch({ type: 'ERROR_RAISE', error: error }); },
                         clearError: function () { return dispatch({ type: 'ERROR_CLEAR' }); },
                         clearConsole: function () { return dispatch({ type: 'CONSOLE_CLEAR' }); },

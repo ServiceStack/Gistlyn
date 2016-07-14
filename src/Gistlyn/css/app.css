@@ -230,6 +230,10 @@ html,body,#app,#body {
     margin-bottom: -1px;
     cursor: auto;
 }
+#tabs .txtFileName {
+    border: none;
+    padding: 0 2px;
+}
 
 #actions {
     display: flex;
