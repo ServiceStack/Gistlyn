@@ -50,8 +50,9 @@ const updateGist = store => next => action => {
         updateHistory(state.meta);
     }
 
-    if (action.type === 'GIST_CHANGE' && action.gist && (action.reload || oldGist !== action.gist || !state.files || !state.meta)) {
-        const json = localStorage.getItem(GistCacheKey(state.gist));
+    const options = action.options || {};
+    if (action.type === 'GIST_CHANGE' && action.gist && (options.reload || oldGist !== action.gist || !state.files || !state.meta)) {
+        const json = !options.reload ? localStorage.getItem(GistCacheKey(state.gist)) : null;
         if (json) {
             const gist = JSON.parse(json);
             const meta = gist.meta as IGistMeta;
@@ -59,7 +60,17 @@ const updateGist = store => next => action => {
             updateHistory(meta);
             store.dispatch({ type: 'GIST_LOAD', meta, files, activeFileName: getSortedFileNames(files)[0] });
         } else {
-            fetch("https://api.github.com/gists/" + action.gist)
+            const authUsername = state.activeSub && parseInt(state.activeSub.userId) > 0 
+                ? state.activeSub.displayName 
+                : null;
+
+            const disableCache = "?t=" + new Date().getTime();
+
+            var urlPrefix = authUsername //Auth requests gets bigger quota
+                ? "/proxy/"
+                : "https://api.github.com/";
+
+            fetch(new Request(urlPrefix + "gists/" + action.gist + disableCache, { credentials: "include" }))
                 .then((res) => {
                     if (!res.ok) {
                         throw res;
@@ -77,7 +88,7 @@ const updateGist = store => next => action => {
                             };
                             updateHistory(meta);
                             localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: r.files, meta }));
-                            store.dispatch({ type: 'GIST_LOAD', meta, files: r.files, activeFileName: getSortedFileNames(r.files)[0] });
+                            store.dispatch({ type: 'GIST_LOAD', meta, files: r.files, activeFileName: options.activeFileName || getSortedFileNames(r.files)[0] });
                         });
                     }
                 })
