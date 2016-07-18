@@ -45,6 +45,12 @@ var options = {
 const ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
 const ScriptStatusError = ["Cancelled", "CompiledWithErrors", "ThrowedException"];
 
+const GistTemplates = {
+    NewGist: "4fab2fa13aade23c81cabe83314c3cd0",
+    NewPrivateGist: "7eaa8f65869fa6682913e3517bec0f7e",
+    Gists: ["4fab2fa13aade23c81cabe83314c3cd0", "7eaa8f65869fa6682913e3517bec0f7e"]
+};
+
 ReactGA.initialize("UA-80898009-1");
 
 var client = new JsonServiceClient("/");
@@ -314,6 +320,7 @@ class App extends React.Component<any, any> {
 
         const request = new StoreGist();
         request.gist = this.props.gist;
+        request.fork = opt.fork || this.shouldFork();
         request.ownerLogin = opt.ownerLogin || meta.owner_login;
         request.public = opt.public || meta.public;
         request.description = opt.description || meta.description;
@@ -504,6 +511,21 @@ class App extends React.Component<any, any> {
         }
     }
 
+    getAuthUsername() {
+        var activeSub = this.props.activeSub as ISseConnect;
+        return activeSub && parseInt(activeSub.userId) > 0 ? activeSub.displayName : null;
+    }
+
+    shouldFork() {
+        var authUsername = this.getAuthUsername();
+        var meta = this.props.meta as IGistMeta;
+        return authUsername != null
+            && meta != null
+            && meta.public
+            && authUsername != meta.owner_login
+            && GistTemplates.Gists.indexOf(this.props.gist) === -1;
+    }
+
     render() {
 
         let source = "";
@@ -511,8 +533,9 @@ class App extends React.Component<any, any> {
         const FileList = [];
         const MorePopup = [];
         var activeSub = this.props.activeSub as ISseConnect;
-        var authUsername = activeSub && parseInt(activeSub.userId) > 0 ? activeSub.displayName : null;
+        var authUsername = this.getAuthUsername();
         const meta = this.props.meta as IGistMeta;
+        const shouldFork = this.shouldFork();
         const files = this.props.files as { [index: string]: IGistFile };
         let description = meta != null ? meta.description : null;
 
@@ -671,31 +694,31 @@ class App extends React.Component<any, any> {
                 }
                 Dialog = (
                     <div id="dialog" onClick={e => this.props.showDialog(null) } onKeyDown={e => e.keyCode === 27 ? this.props.showDialog(null) : null }>
-                        <div className="dialog" ref={e => this.dialog = e } onClick={e => e.stopPropagation()}>
+                        <div className="dialog" ref={e => this.dialog = e } onClick={e => e.stopPropagation() }>
                             <div className="dialog-header">
                                 <i className="material-icons close" onClick={e => this.props.showDialog(null) }>close</i>
-                                {isPublic ? "Fork" : "Save"} Gist
+                                {shouldFork ? "Fork" : "Save"} Gist
                             </div>
                             <div className="dialog-body">
                                 <div className="row">
                                     <label htmlFor="txtDescription">Description</label>
                                     <input ref={e => this.txtDescription = e} type="text" id="txtDescription"
                                         defaultValue={ description }
-                                        onKeyUp={e => this.forceUpdate() } 
+                                        onKeyUp={e => this.forceUpdate() }
                                         onKeyDown={e => e.keyCode == 13 && description ? this.saveGist({ description }) : null }
                                         autoFocus />
                                 </div>
-                                <div className="row" style={{ color: isPublic ? "#4CAF50" : "#9C27B0" }} title={ "This gist is " + (isPublic ? "public" : "private")}>
+                                <div className="row" style={{ color: isPublic ? "#4CAF50" : "#9C27B0" }} title={ "This gist is " + (isPublic ? "public" : "private") }>
                                     <label></label>
-                                    <i className="material-icons" style={{ verticalAlign:"bottom", marginRight:5, fontSize:20}}>check</i>
+                                    <i className="material-icons" style={{ verticalAlign: "bottom", marginRight: 5, fontSize: 20 }}>check</i>
                                     Is {isPublic ? "public" : "private"}
                                 </div>
                             </div>
                             <div className="dialog-footer">
-                                <img className="loading" src="/img/ajax-loader.gif" style={{ margin:"5px 10px 0 0"}} />
+                                <img className="loading" src="/img/ajax-loader.gif" style={{ margin: "5px 10px 0 0" }} />
                                 <span className={"btn" + (description ? "" : " disabled") }
                                     onClick={e => description ? this.saveGist({ description }) : null }>
-                                    Create {isPublic ? "Fork" : "Gist"}
+                                    Create {shouldFork ? "Fork" : "Gist"}
                                 </span>
                             </div>
                         </div>
@@ -704,9 +727,9 @@ class App extends React.Component<any, any> {
         }
 
         MorePopup.push((
-            <div onClick={e => this.props.changeGist("4fab2fa13aade23c81cabe83314c3cd0") }>New Gist</div>));
+            <div onClick={e => this.props.changeGist(GistTemplates.NewGist) }>New Gist</div>));
         MorePopup.push((
-            <div onClick={e => this.props.changeGist("7eaa8f65869fa6682913e3517bec0f7e") }>New Private Gist</div>));
+            <div onClick={e => this.props.changeGist(GistTemplates.NewPrivateGist) }>New Private Gist</div>));
 
         const toggleEdit = () => {
             const inputWasHidden = this.txtGist.style.display !== "inline-block";
@@ -816,10 +839,10 @@ class App extends React.Component<any, any> {
                             : (<div id="saveas" onClick={e => authUsername ? this.saveGistAs() : this.signIn() } 
                                     title={!authUsername ? "Sign-in to save gists" : "Save a copy in your Github gists"}>
                                    <span className="octicon octicon-repo-forked" style={{ margin:"3px 3px 0 0" }}></span>
-                                   <p>{authUsername ? "Save As" : "Sign-in to Save"}</p>
+                                   <p>{authUsername ? (shouldFork ? "Fork As" : "Save As") : "Sign-in to save"}</p>
                                </div>)}
                         { meta && meta.owner_login === authUsername && this.props.activeFileName && this.props.activeFileName !== "main.cs" && this.props.activeFileName !== "packages.config"
-                            ? (<div id="delete-file" onClick={e => this.deleteFile(this.props.activeFileName) }>
+                            ? (<div id="delete-file" onClick={e => confirm(`Are you sure you want to delete '${this.props.activeFileName}?`) ? this.deleteFile(this.props.activeFileName) : null }>
                                    <i className="material-icons">delete</i>
                                    <p>Delete File</p>
                                </div>)
@@ -863,7 +886,7 @@ if (stateJson) {
     }
 } 
 
-var qsGist = queryString(location.href)["gist"] || "4fab2fa13aade23c81cabe83314c3cd0";
+var qsGist = queryString(location.href)["gist"] || GistTemplates.NewGist;
 if (qsGist != (state && state.gist)) {
     store.dispatch({ type: 'GIST_CHANGE', gist: qsGist });
 }

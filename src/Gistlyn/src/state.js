@@ -62,10 +62,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga'], funct
                         var urlPrefix = authUsername //Auth requests gets bigger quota
                             ? "/proxy/"
                             : "https://api.github.com/";
-                        var fetchOptions = authUsername
-                            ? { credentials: "include" }
-                            : null;
-                        fetch(new Request(urlPrefix + "gists/" + action.gist + disableCache, fetchOptions))
+                        fetch(new Request(urlPrefix + "gists/" + action.gist + disableCache, authUsername ? { credentials: "include" } : null))
                             .then(function (res) {
                             if (!res.ok) {
                                 throw res;

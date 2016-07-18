@@ -14,7 +14,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
     var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, react_codemirror_1, Gistlyn_dtos_1;
-    var options, ScriptStatusRunning, ScriptStatusError, client, sse, App, stateJson, state, e, qsGist;
+    var options, ScriptStatusRunning, ScriptStatusError, GistTemplates, client, sse, App, stateJson, state, e, qsGist;
     return {
         setters:[
             function (React_1) {
@@ -71,6 +71,11 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
             };
             ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
             ScriptStatusError = ["Cancelled", "CompiledWithErrors", "ThrowedException"];
+            GistTemplates = {
+                NewGist: "4fab2fa13aade23c81cabe83314c3cd0",
+                NewPrivateGist: "7eaa8f65869fa6682913e3517bec0f7e",
+                Gists: ["4fab2fa13aade23c81cabe83314c3cd0", "7eaa8f65869fa6682913e3517bec0f7e"]
+            };
             react_ga_1.default.initialize("UA-80898009-1");
             client = new servicestack_client_1.JsonServiceClient("/");
             sse = new servicestack_client_1.ServerEventsClient("/", ["gist"], {
@@ -271,6 +276,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     });
                     var request = new Gistlyn_dtos_1.StoreGist();
                     request.gist = this.props.gist;
+                    request.fork = opt.fork || this.shouldFork();
                     request.ownerLogin = opt.ownerLogin || meta.owner_login;
                     request.public = opt.public || meta.public;
                     request.description = opt.description || meta.description;
@@ -426,6 +432,19 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         this.props.selectFileName(keys[nextFileIndex]);
                     }
                 };
+                App.prototype.getAuthUsername = function () {
+                    var activeSub = this.props.activeSub;
+                    return activeSub && parseInt(activeSub.userId) > 0 ? activeSub.displayName : null;
+                };
+                App.prototype.shouldFork = function () {
+                    var authUsername = this.getAuthUsername();
+                    var meta = this.props.meta;
+                    return authUsername != null
+                        && meta != null
+                        && meta.public
+                        && authUsername != meta.owner_login
+                        && GistTemplates.Gists.indexOf(this.props.gist) === -1;
+                };
                 App.prototype.render = function () {
                     var _this = this;
                     var source = "";
@@ -433,8 +452,9 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     var FileList = [];
                     var MorePopup = [];
                     var activeSub = this.props.activeSub;
-                    var authUsername = activeSub && parseInt(activeSub.userId) > 0 ? activeSub.displayName : null;
+                    var authUsername = this.getAuthUsername();
                     var meta = this.props.meta;
+                    var shouldFork = this.shouldFork();
                     var files = this.props.files;
                     var description = meta != null ? meta.description : null;
                     if (files != null) {
@@ -503,11 +523,11 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                             else {
                                 setTimeout(function () { return _this.txtDescription.select(); }, 0);
                             }
-                            Dialog = (React.createElement("div", {id: "dialog", onClick: function (e) { return _this.props.showDialog(null); }, onKeyDown: function (e) { return e.keyCode === 27 ? _this.props.showDialog(null) : null; }}, React.createElement("div", {className: "dialog", ref: function (e) { return _this.dialog = e; }, onClick: function (e) { return e.stopPropagation(); }}, React.createElement("div", {className: "dialog-header"}, React.createElement("i", {className: "material-icons close", onClick: function (e) { return _this.props.showDialog(null); }}, "close"), isPublic ? "Fork" : "Save", " Gist"), React.createElement("div", {className: "dialog-body"}, React.createElement("div", {className: "row"}, React.createElement("label", {htmlFor: "txtDescription"}, "Description"), React.createElement("input", {ref: function (e) { return _this.txtDescription = e; }, type: "text", id: "txtDescription", defaultValue: description, onKeyUp: function (e) { return _this.forceUpdate(); }, onKeyDown: function (e) { return e.keyCode == 13 && description ? _this.saveGist({ description: description }) : null; }, autoFocus: true})), React.createElement("div", {className: "row", style: { color: isPublic ? "#4CAF50" : "#9C27B0" }, title: "This gist is " + (isPublic ? "public" : "private")}, React.createElement("label", null), React.createElement("i", {className: "material-icons", style: { verticalAlign: "bottom", marginRight: 5, fontSize: 20 }}, "check"), "Is ", isPublic ? "public" : "private")), React.createElement("div", {className: "dialog-footer"}, React.createElement("img", {className: "loading", src: "/img/ajax-loader.gif", style: { margin: "5px 10px 0 0" }}), React.createElement("span", {className: "btn" + (description ? "" : " disabled"), onClick: function (e) { return description ? _this.saveGist({ description: description }) : null; }}, "Create ", isPublic ? "Fork" : "Gist")))));
+                            Dialog = (React.createElement("div", {id: "dialog", onClick: function (e) { return _this.props.showDialog(null); }, onKeyDown: function (e) { return e.keyCode === 27 ? _this.props.showDialog(null) : null; }}, React.createElement("div", {className: "dialog", ref: function (e) { return _this.dialog = e; }, onClick: function (e) { return e.stopPropagation(); }}, React.createElement("div", {className: "dialog-header"}, React.createElement("i", {className: "material-icons close", onClick: function (e) { return _this.props.showDialog(null); }}, "close"), shouldFork ? "Fork" : "Save", " Gist"), React.createElement("div", {className: "dialog-body"}, React.createElement("div", {className: "row"}, React.createElement("label", {htmlFor: "txtDescription"}, "Description"), React.createElement("input", {ref: function (e) { return _this.txtDescription = e; }, type: "text", id: "txtDescription", defaultValue: description, onKeyUp: function (e) { return _this.forceUpdate(); }, onKeyDown: function (e) { return e.keyCode == 13 && description ? _this.saveGist({ description: description }) : null; }, autoFocus: true})), React.createElement("div", {className: "row", style: { color: isPublic ? "#4CAF50" : "#9C27B0" }, title: "This gist is " + (isPublic ? "public" : "private")}, React.createElement("label", null), React.createElement("i", {className: "material-icons", style: { verticalAlign: "bottom", marginRight: 5, fontSize: 20 }}, "check"), "Is ", isPublic ? "public" : "private")), React.createElement("div", {className: "dialog-footer"}, React.createElement("img", {className: "loading", src: "/img/ajax-loader.gif", style: { margin: "5px 10px 0 0" }}), React.createElement("span", {className: "btn" + (description ? "" : " disabled"), onClick: function (e) { return description ? _this.saveGist({ description: description }) : null; }}, "Create ", shouldFork ? "Fork" : "Gist")))));
                         }
                     }
-                    MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist("4fab2fa13aade23c81cabe83314c3cd0"); }}, "New Gist")));
-                    MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist("7eaa8f65869fa6682913e3517bec0f7e"); }}, "New Private Gist")));
+                    MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(GistTemplates.NewGist); }}, "New Gist")));
+                    MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(GistTemplates.NewPrivateGist); }}, "New Private Gist")));
                     var toggleEdit = function () {
                         var inputWasHidden = _this.txtGist.style.display !== "inline-block";
                         var showInput = !meta || !description || inputWasHidden;
@@ -535,8 +555,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         ]))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement("div", {id: "editor"}, React.createElement("div", {id: "tabs", style: { display: this.props.files ? 'flex' : 'none' }}, FileList.length > 0
                         ? React.createElement("i", {id: "files-menu", className: "material-icons", onClick: function (e) { return _this.showPopup(e, _this.filesPopup); }}, "arrow_drop_down") : null, Tabs), React.createElement("div", {id: "popup-files", className: "popup", ref: function (e) { return _this.filesPopup = e; }}, FileList), React.createElement(react_codemirror_1.default, {value: source, options: options, onChange: function (src) { return _this.updateSource(src); }})), React.createElement("div", {id: "preview"}, Preview))), React.createElement("div", {id: "footer-spacer"}), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "actions", style: { visibility: main ? "visible" : "hidden" }, className: "noselect"}, React.createElement("div", {id: "revert", onClick: function (e) { return _this.revertGist(e.shiftKey); }}, React.createElement("i", {className: "material-icons"}, "undo"), React.createElement("p", null, "Revert Changes")), meta && meta.owner_login == authUsername
                         ? (React.createElement("div", {id: "save", onClick: function (e) { return _this.saveGist({}); }}, React.createElement("i", {className: "material-icons"}, "save"), React.createElement("p", null, "Save Gist")))
-                        : (React.createElement("div", {id: "saveas", onClick: function (e) { return authUsername ? _this.saveGistAs() : _this.signIn(); }, title: !authUsername ? "Sign-in to save gists" : "Save a copy in your Github gists"}, React.createElement("span", {className: "octicon octicon-repo-forked", style: { margin: "3px 3px 0 0" }}), React.createElement("p", null, authUsername ? "Save As" : "Sign-in to Save"))), meta && meta.owner_login === authUsername && this.props.activeFileName && this.props.activeFileName !== "main.cs" && this.props.activeFileName !== "packages.config"
-                        ? (React.createElement("div", {id: "delete-file", onClick: function (e) { return _this.deleteFile(_this.props.activeFileName); }}, React.createElement("i", {className: "material-icons"}, "delete"), React.createElement("p", null, "Delete File")))
+                        : (React.createElement("div", {id: "saveas", onClick: function (e) { return authUsername ? _this.saveGistAs() : _this.signIn(); }, title: !authUsername ? "Sign-in to save gists" : "Save a copy in your Github gists"}, React.createElement("span", {className: "octicon octicon-repo-forked", style: { margin: "3px 3px 0 0" }}), React.createElement("p", null, authUsername ? (shouldFork ? "Fork As" : "Save As") : "Sign-in to save"))), meta && meta.owner_login === authUsername && this.props.activeFileName && this.props.activeFileName !== "main.cs" && this.props.activeFileName !== "packages.config"
+                        ? (React.createElement("div", {id: "delete-file", onClick: function (e) { return confirm("Are you sure you want to delete '" + _this.props.activeFileName + "?") ? _this.deleteFile(_this.props.activeFileName) : null; }}, React.createElement("i", {className: "material-icons"}, "delete"), React.createElement("p", null, "Delete File")))
                         : null), React.createElement("div", {id: "more-menu", style: { position: "absolute", right: 5, bottom: 5, color: "#fff", cursor: "pointer" }}, React.createElement("i", {className: "material-icons", onClick: function (e) { return _this.showPopup(e, _this.morePopup); }}, "more_vert")), React.createElement("div", {id: "popup-more", className: "popup", ref: function (e) { return _this.morePopup = e; }, style: { position: "absolute", bottom: 42, right: 0 }}, MorePopup)), React.createElement("div", {id: "run", className: main == null ? "disabled" : "", onClick: function (e) { return !isScriptRunning ? _this.run() : _this.cancel(); }}, main != null
                         ? (!isScriptRunning
                             ? React.createElement("i", {className: "material-icons", title: "run"}, "play_circle_outline")
@@ -598,7 +618,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     localStorage.removeItem(state_1.StateKey);
                 }
             }
-            qsGist = servicestack_client_1.queryString(location.href)["gist"] || "4fab2fa13aade23c81cabe83314c3cd0";
+            qsGist = servicestack_client_1.queryString(location.href)["gist"] || GistTemplates.NewGist;
             if (qsGist != (state && state.gist)) {
                 state_1.store.dispatch({ type: 'GIST_CHANGE', gist: qsGist });
             }

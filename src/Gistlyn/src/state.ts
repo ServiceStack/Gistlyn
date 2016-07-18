@@ -72,11 +72,7 @@ const updateGist = store => next => action => {
                 ? "/proxy/"
                 : "https://api.github.com/";
 
-            const fetchOptions = authUsername
-                ? { credentials: "include" }
-                : null;
-
-            fetch(new Request(urlPrefix + "gists/" + action.gist + disableCache, fetchOptions))
+            fetch(new Request(urlPrefix + "gists/" + action.gist + disableCache, authUsername ? { credentials: "include" } : null))
                 .then((res) => {
                     if (!res.ok) {
                         throw res;
