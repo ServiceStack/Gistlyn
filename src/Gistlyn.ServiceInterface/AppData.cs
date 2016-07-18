@@ -95,11 +95,11 @@ namespace Gistlyn.ServiceInterface
         {
             return new DictionarySettings(new Dictionary<string, string>
             {
-                {"oauth.RedirectUrl", "http://localhost:11001/"},
-                {"oauth.CallbackUrl", "http://localhost:11001/auth/{0}"},
+                {"oauth.RedirectUrl", "http://localhost:4000/"},
+                {"oauth.CallbackUrl", "http://localhost:4000/auth/{0}"},
                 {"oauth.github.Scopes", "user,gist"},
-                {"oauth.github.ClientId", "7e8a80ab55b757e7de05"},
-                {"oauth.github.ClientSecret", "122eb4d2762190d024dca6a319bc7c602ee942a2"},
+                {"oauth.github.ClientId", "8e66a75de4e62dd97696"},
+                {"oauth.github.ClientSecret", "fbdd3b95497295fc0776527206c8e40159d1da6d"},
             });
         }
 

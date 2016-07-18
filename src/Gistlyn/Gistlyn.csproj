@@ -218,7 +218,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>64025</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:11001/</IISUrl>
+          <IISUrl>http://localhost:4000/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
