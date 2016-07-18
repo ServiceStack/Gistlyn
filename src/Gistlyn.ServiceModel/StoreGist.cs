@@ -6,6 +6,7 @@ namespace Gistlyn.ServiceModel
     public class StoreGist : IReturn<StoreGistResponse>
     {
         public string Gist { get; set; }
+        public bool Fork { get; set; }
         public bool Public { get; set; }
         public string OwnerLogin { get; set; }
         public string Description { get; set; }

@@ -1,8 +1,8 @@
 /* Options:
-Date: 2016-07-12 03:36:15
+Date: 2016-07-18 16:32:33
 Version: 4.061
 Tip: To override a DTO option, remove "//" prefix before updating
-BaseUrl: http://localhost:11001
+BaseUrl: http://localhost:4000
 
 //GlobalNamespace: 
 ExportAsTypes: True
@@ -190,9 +190,18 @@ export class UnAssignRolesResponse
     responseStatus: ResponseStatus;
 }
 
+// @Route("/proxy/{PathInfo*}")
+export class GithubProxy implements IReturn<string>
+{
+    pathInfo: string;
+    createResponse() { return ""; }
+    getTypeName() { return "GithubProxy"; }
+}
+
 export class StoreGist implements IReturn<StoreGistResponse>
 {
     gist: string;
+    fork: boolean;
     public: boolean;
     ownerLogin: string;
     description: string;

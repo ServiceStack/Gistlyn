@@ -110,7 +110,7 @@ namespace Gistlyn.ServiceInterface
             var session = base.SessionAs<AuthUserSession>();
             var isOwner = session.UserName == request.OwnerLogin;
             var gist = request.Gist;
-            if (request.Public)
+            if (request.Fork && request.Public)
             {
                 if (!isOwner)
                 {
@@ -139,7 +139,7 @@ namespace Gistlyn.ServiceInterface
                         .PostJsonToUrl(new CreateGithubGist
                         {
                             description = request.Description,
-                            @public = false,
+                            @public = request.Public,
                             files = request.Files,
                         },
                         requestFilter: req => ConfigureWebRequest(req, session))

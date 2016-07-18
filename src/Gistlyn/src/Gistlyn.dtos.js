@@ -1,8 +1,8 @@
 /* Options:
-Date: 2016-07-12 03:36:15
+Date: 2016-07-18 16:32:33
 Version: 4.061
 Tip: To override a DTO option, remove "//" prefix before updating
-BaseUrl: http://localhost:11001
+BaseUrl: http://localhost:4000
 
 //GlobalNamespace:
 ExportAsTypes: True
@@ -18,7 +18,7 @@ ExportAsTypes: True
 System.register([], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var GithubFile, ResponseStatus, AssemblyReference, ScriptExecutionResult, VariableInfo, ResponseError, ErrorInfo, StoreGistResponse, HelloResponse, RunScriptResponse, ScriptStateVariables, EvaluateExpressionResponse, CancelScriptResponse, AuthenticateResponse, AssignRolesResponse, UnAssignRolesResponse, StoreGist, Hello, RunScript, GetScriptVariables, EvaluateExpression, CancelScript, Authenticate, AssignRoles, UnAssignRoles;
+    var GithubFile, ResponseStatus, AssemblyReference, ScriptExecutionResult, VariableInfo, ResponseError, ErrorInfo, StoreGistResponse, HelloResponse, RunScriptResponse, ScriptStateVariables, EvaluateExpressionResponse, CancelScriptResponse, AuthenticateResponse, AssignRolesResponse, UnAssignRolesResponse, GithubProxy, StoreGist, Hello, RunScript, GetScriptVariables, EvaluateExpression, CancelScript, Authenticate, AssignRoles, UnAssignRoles;
     return {
         setters:[],
         execute: function() {
@@ -123,6 +123,15 @@ System.register([], function(exports_1, context_1) {
                 return UnAssignRolesResponse;
             }());
             exports_1("UnAssignRolesResponse", UnAssignRolesResponse);
+            // @Route("/proxy/{PathInfo*}")
+            GithubProxy = (function () {
+                function GithubProxy() {
+                }
+                GithubProxy.prototype.createResponse = function () { return ""; };
+                GithubProxy.prototype.getTypeName = function () { return "GithubProxy"; };
+                return GithubProxy;
+            }());
+            exports_1("GithubProxy", GithubProxy);
             StoreGist = (function () {
                 function StoreGist() {
                 }
