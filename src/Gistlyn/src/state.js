@@ -1,7 +1,7 @@
-System.register(['redux', './utils', './servicestack-client'], function(exports_1, context_1) {
+System.register(['redux', './utils', './servicestack-client', 'react-ga'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var redux_1, utils_1, servicestack_client_1;
+    var redux_1, utils_1, servicestack_client_1, react_ga_1;
     var StateKey, GistCacheKey, updateHistory, updateGist, defaults, store;
     return {
         setters:[
@@ -13,6 +13,9 @@ System.register(['redux', './utils', './servicestack-client'], function(exports_
             },
             function (servicestack_client_1_1) {
                 servicestack_client_1 = servicestack_client_1_1;
+            },
+            function (react_ga_1_1) {
+                react_ga_1 = react_ga_1_1;
             }],
         execute: function() {
             exports_1("StateKey", StateKey = "/v1/state");
@@ -28,6 +31,7 @@ System.register(['redux', './utils', './servicestack-client'], function(exports_
                     qs["gist"] = meta.id;
                     url = servicestack_client_1.appendQueryString(url, qs);
                     history.pushState(meta, meta.description, url);
+                    react_ga_1.default.pageview(url);
                 }
             };
             updateGist = function (store) { return function (next) { return function (action) {
@@ -58,7 +62,10 @@ System.register(['redux', './utils', './servicestack-client'], function(exports_
                         var urlPrefix = authUsername //Auth requests gets bigger quota
                             ? "/proxy/"
                             : "https://api.github.com/";
-                        fetch(new Request(urlPrefix + "gists/" + action.gist + disableCache, { credentials: "include" }))
+                        var fetchOptions = authUsername
+                            ? { credentials: "include" }
+                            : null;
+                        fetch(new Request(urlPrefix + "gists/" + action.gist + disableCache, fetchOptions))
                             .then(function (res) {
                             if (!res.ok) {
                                 throw res;

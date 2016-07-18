@@ -1,6 +1,7 @@
 ﻿import { createStore, applyMiddleware } from 'redux';
 import { getSortedFileNames } from './utils';
 import { queryString, appendQueryString, splitOnFirst } from './servicestack-client';
+import ReactGA from 'react-ga';
 
 export const StateKey = "/v1/state";
 export const GistCacheKey = (gist) => `/v1/gists/${gist}`;
@@ -36,6 +37,7 @@ const updateHistory = (meta: IGistMeta) => {
         qs["gist"] = meta.id;
         url = appendQueryString(url, qs);
         history.pushState(meta, meta.description, url);
+        ReactGA.pageview(url);
     }
 };
 
@@ -70,7 +72,11 @@ const updateGist = store => next => action => {
                 ? "/proxy/"
                 : "https://api.github.com/";
 
-            fetch(new Request(urlPrefix + "gists/" + action.gist + disableCache, { credentials: "include" }))
+            const fetchOptions = authUsername
+                ? { credentials: "include" }
+                : null;
+
+            fetch(new Request(urlPrefix + "gists/" + action.gist + disableCache, fetchOptions))
                 .then((res) => {
                     if (!res.ok) {
                         throw res;
