@@ -404,7 +404,7 @@ class App extends React.Component<any, any> {
         const done = () => this.props.editFileName(null);
 
         const request = this.createStoreGist();
-        if (!newFileName || newFileName.trim().length == 0 || request == null) {
+        if (!newFileName || newFileName.trim().length == 0 || request == null || newFileName === oldFileName) {
             done();
             return Promise.resolve(null);
         }
