@@ -1,5 +1,5 @@
 /// <reference path='../typings/index.d.ts'/>
-System.register(['react', 'react-dom', 'react-redux', './utils', './state', './servicestack-client', './json-viewer', 'react-codemirror', "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js", "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js", "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js", "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js", "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js", "./codemirror.js", './Gistlyn.dtos'], function(exports_1, context_1) {
+System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './state', './servicestack-client', './json-viewer', 'react-codemirror', "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js", "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js", "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js", "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js", "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js", "./codemirror.js", './Gistlyn.dtos'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -13,7 +13,7 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
         else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
-    var React, ReactDOM, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, react_codemirror_1, Gistlyn_dtos_1;
+    var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, react_codemirror_1, Gistlyn_dtos_1;
     var options, ScriptStatusRunning, ScriptStatusError, client, sse, App, stateJson, state, e, qsGist;
     return {
         setters:[
@@ -22,6 +22,9 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
             },
             function (ReactDOM_1) {
                 ReactDOM = ReactDOM_1;
+            },
+            function (react_ga_1_1) {
+                react_ga_1 = react_ga_1_1;
             },
             function (react_redux_1_1) {
                 react_redux_1 = react_redux_1_1;
@@ -68,11 +71,13 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
             };
             ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
             ScriptStatusError = ["Cancelled", "CompiledWithErrors", "ThrowedException"];
+            react_ga_1.default.initialize("UA-80898009-1");
             client = new servicestack_client_1.JsonServiceClient("/");
             sse = new servicestack_client_1.ServerEventsClient("/", ["gist"], {
                 handlers: {
                     onConnect: function (activeSub) {
                         state_1.store.dispatch({ type: 'SSE_CONNECT', activeSub: activeSub });
+                        react_ga_1.default.set({ userId: activeSub.userId });
                     },
                     ConsoleMessage: function (m, e) {
                         state_1.store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: m.message }] });
@@ -115,6 +120,7 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                                 request.sources.push(_this.props.files[k].content);
                         }
                         _this.props.setScriptStatus("Started");
+                        react_ga_1.default.event({ category: 'gist', action: 'Run Gist', label: _this.props.gist });
                         client.post(request)
                             .then(function (r) {
                             _this.props.logConsoleMsgs(r.references.map(function (ref) { return ("loaded " + ref.name); }));
@@ -128,6 +134,7 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                         _this.props.clearError();
                         var request = new Gistlyn_dtos_1.CancelScript();
                         request.scriptId = _this.scriptId;
+                        react_ga_1.default.event({ category: 'gist', action: 'Cancel Gist', label: _this.props.gist });
                         client.post(request)
                             .then(function (r) {
                             _this.props.setScriptStatus("Cancelled");
@@ -179,6 +186,7 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                     var request = new Gistlyn_dtos_1.GetScriptVariables();
                     request.scriptId = this.scriptId;
                     request.variableName = v.name;
+                    react_ga_1.default.event({ category: 'preview', action: 'Inspect Variable', label: this.props.gist + ": " + v.name });
                     client.get(request)
                         .then(function (r) {
                         if (r.status !== "Completed") {
@@ -223,6 +231,7 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                     request.scriptId = this.scriptId;
                     request.expression = expr;
                     request.includeJson = true;
+                    react_ga_1.default.event({ category: 'preview', action: 'Evaluate Expression', label: this.props.gist + ": " + expr.substring(0, 50) });
                     client.post(request)
                         .then(function (r) {
                         if (r.result.errors && r.result.errors.length > 0) {
@@ -244,6 +253,7 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                     if (clearAll) {
                         localStorage.removeItem(state_1.StateKey);
                     }
+                    react_ga_1.default.event({ category: 'gist', action: 'Revert Gist', label: this.props.gist });
                     this.props.changeGist(this.props.gist, { reload: true });
                 };
                 App.prototype.createStoreGist = function (opt) {
@@ -276,6 +286,7 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                     if (request == null)
                         return;
                     var done = function () { return _this.dialog && _this.dialog.classList.remove("disabled"); };
+                    react_ga_1.default.event({ category: 'gist', action: 'Save Gist', label: this.props.gist });
                     client.post(request)
                         .then(function (r) {
                         if (_this.props.gist !== r.gist) {
@@ -309,6 +320,7 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                         fileName += ".cs";
                     request.files[fileName] = new Gistlyn_dtos_1.GithubFile();
                     request.files[fileName].content = "// " + fileName + "\n// Created by " + this.props.activeSub.displayName + " on " + servicestack_client_1.dateFmt() + "\n\n"; //Gist API requires non Whitespace content
+                    react_ga_1.default.event({ category: 'file', action: 'Create File', label: fileName });
                     return client.post(request)
                         .then(function (r) {
                         _this.props.changeGist(r.gist, { reload: true, activeFileName: fileName });
@@ -341,6 +353,7 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                     if (newFileName.indexOf('.') === -1)
                         newFileName += ".cs";
                     request.files[oldFileName].filename = newFileName;
+                    react_ga_1.default.event({ category: 'file', action: 'Rename File', label: newFileName });
                     return client.post(request)
                         .then(function (r) {
                         _this.props.changeGist(r.gist, { reload: true, activeFileName: newFileName });
@@ -354,6 +367,7 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                     if (!fileName)
                         return;
                     var json = JSON.stringify({ files: (_a = {}, _a[fileName] = null, _a) });
+                    react_ga_1.default.event({ category: 'file', action: 'Delete File', label: fileName });
                     fetch("/proxy/gists/" + this.props.gist, {
                         method: "PATCH",
                         credentials: "include",
@@ -368,9 +382,11 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                     var _a;
                 };
                 App.prototype.saveGistAs = function () {
+                    react_ga_1.default.event({ category: 'gist', action: 'Save As', label: this.props.gist });
                     this.props.showDialog("save-as");
                 };
                 App.prototype.signIn = function () {
+                    react_ga_1.default.event({ category: 'user', action: 'Sign In', label: this.props.gist });
                     location.href = '/auth/github';
                 };
                 App.prototype.componentDidUpdate = function () {
@@ -382,6 +398,7 @@ System.register(['react', 'react-dom', 'react-redux', './utils', './state', './s
                 App.prototype.showPopup = function (e, el) {
                     if (el === this.lastPopup)
                         return;
+                    react_ga_1.default.event({ category: 'app', action: 'Show Popup', label: el.id });
                     e.stopPropagation();
                     this.lastPopup = el;
                     el.style.display = "block";

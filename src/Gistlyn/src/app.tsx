@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import ReactGA from 'react-ga';
 import { Provider, connect } from 'react-redux';
 import { reduxify, getSortedFileNames } from './utils';
 import { store, StateKey, GistCacheKey, IGistMeta, IGistFile } from './state';
@@ -44,11 +45,14 @@ var options = {
 const ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
 const ScriptStatusError = ["Cancelled", "CompiledWithErrors", "ThrowedException"];
 
+ReactGA.initialize("UA-80898009-1");
+
 var client = new JsonServiceClient("/");
 var sse = new ServerEventsClient("/", ["gist"], {
     handlers: {
         onConnect(activeSub: ISseConnect) {
             store.dispatch({ type: 'SSE_CONNECT', activeSub });
+            ReactGA.set({ userId: activeSub.userId });
         },
         ConsoleMessage(m, e) {
             store.dispatch({ type: 'CONSOLE_LOG', logs: [{msg:m.message}] });
@@ -154,6 +158,8 @@ class App extends React.Component<any, any> {
 
         this.props.setScriptStatus("Started");
 
+        ReactGA.event({ category: 'gist', action: 'Run Gist', label: this.props.gist });
+
         client.post(request)
             .then(r => {
                 this.props.logConsoleMsgs(r.references.map(ref => `loaded ${ref.name}`));
@@ -168,6 +174,9 @@ class App extends React.Component<any, any> {
         this.props.clearError();
         const request = new CancelScript();
         request.scriptId = this.scriptId;
+
+        ReactGA.event({ category: 'gist', action: 'Cancel Gist', label: this.props.gist });
+
         client.post(request)
             .then(r => {
                 this.props.setScriptStatus("Cancelled");
@@ -194,6 +203,8 @@ class App extends React.Component<any, any> {
         const request = new GetScriptVariables();
         request.scriptId = this.scriptId;
         request.variableName = v.name;
+
+        ReactGA.event({ category: 'preview', action: 'Inspect Variable', label: this.props.gist + ": " + v.name });
 
         client.get(request)
             .then(r => {
@@ -260,6 +271,8 @@ class App extends React.Component<any, any> {
         request.expression = expr;
         request.includeJson = true;
 
+        ReactGA.event({ category: 'preview', action: 'Evaluate Expression', label: this.props.gist + ": " + expr.substring(0,50) });
+
         client.post(request)
             .then(r => {
                 if (r.result.errors && r.result.errors.length > 0) {
@@ -280,6 +293,9 @@ class App extends React.Component<any, any> {
         if (clearAll) {
             localStorage.removeItem(StateKey);
         }
+
+        ReactGA.event({ category: 'gist', action: 'Revert Gist', label: this.props.gist });
+
         this.props.changeGist(this.props.gist, { reload: true });
     }
 
@@ -314,6 +330,8 @@ class App extends React.Component<any, any> {
             return;
 
         const done = () => this.dialog && this.dialog.classList.remove("disabled");
+
+        ReactGA.event({ category: 'gist', action: 'Save Gist', label: this.props.gist });
 
         client.post(request)
             .then(r => {
@@ -354,6 +372,8 @@ class App extends React.Component<any, any> {
         request.files[fileName] = new GithubFile();
         request.files[fileName].content = `// ${fileName}\n// Created by ${this.props.activeSub.displayName} on ${dateFmt()}\n\n`; //Gist API requires non Whitespace content
 
+        ReactGA.event({ category: 'file', action: 'Create File', label: fileName });
+
         return client.post(request)
             .then(r => {
                 this.props.changeGist(r.gist, { reload: true, activeFileName:fileName });
@@ -392,6 +412,8 @@ class App extends React.Component<any, any> {
 
         request.files[oldFileName].filename = newFileName;
 
+        ReactGA.event({ category: 'file', action: 'Rename File', label: newFileName });
+
         return client.post(request)
             .then(r => {
                 this.props.changeGist(r.gist, { reload: true, activeFileName:newFileName });
@@ -406,7 +428,9 @@ class App extends React.Component<any, any> {
 
         var json = JSON.stringify({ files: { [fileName]: null } });
 
-        fetch("/proxy/gists/" + this.props.gist, { 
+        ReactGA.event({ category: 'file', action: 'Delete File', label: fileName });
+
+        fetch("/proxy/gists/" + this.props.gist, {
                 method: "PATCH",
                 credentials: "include",
                 body: json
@@ -420,10 +444,14 @@ class App extends React.Component<any, any> {
     }
 
     saveGistAs() {
+        ReactGA.event({ category: 'gist', action: 'Save As', label: this.props.gist });
+
         this.props.showDialog("save-as");
     }
 
     signIn() {
+        ReactGA.event({ category: 'user', action: 'Sign In', label: this.props.gist });
+
         location.href = '/auth/github';
     }
 
@@ -444,6 +472,9 @@ class App extends React.Component<any, any> {
 
     showPopup(e: React.MouseEvent, el: HTMLDivElement) {
         if (el === this.lastPopup) return;
+
+        ReactGA.event({ category: 'app', action: 'Show Popup', label: el.id });
+
         e.stopPropagation();
         this.lastPopup = el;
         el.style.display = "block";

@@ -16,9 +16,10 @@ System.config({
     "jquery": "npm:jquery@2.2.4",
     "jspm": "npm:jspm@0.16.39",
     "octicons": "npm:octicons@4.2.0",
-    "react": "npm:react@15.1.0",
+    "react": "npm:react@15.2.1",
     "react-codemirror": "npm:react-codemirror@0.2.6",
     "react-dom": "npm:react-dom@15.1.0",
+    "react-ga": "npm:react-ga@2.1.1",
     "react-redux": "npm:react-redux@4.4.5",
     "redux": "npm:redux@3.5.2",
     "ss-utils": "npm:ss-utils@0.1.4",
@@ -469,6 +470,12 @@ System.config({
       "process": "github:jspm/nodelibs-process@0.1.2",
       "systemjs-json": "github:systemjs/plugin-json@0.1.2"
     },
+    "npm:core-js@1.2.7": {
+      "fs": "github:jspm/nodelibs-fs@0.1.2",
+      "path": "github:jspm/nodelibs-path@0.1.0",
+      "process": "github:jspm/nodelibs-process@0.1.2",
+      "systemjs-json": "github:systemjs/plugin-json@0.1.2"
+    },
     "npm:core-js@2.4.0": {
       "fs": "github:jspm/nodelibs-fs@0.1.2",
       "path": "github:jspm/nodelibs-path@0.1.0",
@@ -625,7 +632,7 @@ System.config({
       "util": "github:jspm/nodelibs-util@0.1.0"
     },
     "npm:fbjs@0.8.3": {
-      "core-js": "npm:core-js@1.2.6",
+      "core-js": "npm:core-js@1.2.7",
       "immutable": "npm:immutable@3.8.1",
       "isomorphic-fetch": "npm:isomorphic-fetch@2.2.1",
       "loose-envify": "npm:loose-envify@1.2.0",
@@ -1216,10 +1223,15 @@ System.config({
       "codemirror": "npm:codemirror@5.16.0",
       "lodash.debounce": "npm:lodash.debounce@4.0.6",
       "process": "github:jspm/nodelibs-process@0.1.2",
-      "react": "npm:react@15.1.0"
+      "react": "npm:react@15.2.1"
     },
     "npm:react-dom@15.1.0": {
-      "react": "npm:react@15.1.0"
+      "react": "npm:react@15.2.1"
+    },
+    "npm:react-ga@2.1.1": {
+      "object-assign": "npm:object-assign@4.1.0",
+      "process": "github:jspm/nodelibs-process@0.1.2",
+      "react": "npm:react@15.2.1"
     },
     "npm:react-redux@4.4.5": {
       "hoist-non-react-statics": "npm:hoist-non-react-statics@1.2.0",
@@ -1227,10 +1239,10 @@ System.config({
       "lodash": "npm:lodash@4.13.1",
       "loose-envify": "npm:loose-envify@1.2.0",
       "process": "github:jspm/nodelibs-process@0.1.2",
-      "react": "npm:react@15.1.0",
+      "react": "npm:react@15.2.1",
       "redux": "npm:redux@3.5.2"
     },
-    "npm:react@15.1.0": {
+    "npm:react@15.2.1": {
       "fbjs": "npm:fbjs@0.8.3",
       "loose-envify": "npm:loose-envify@1.2.0",
       "object-assign": "npm:object-assign@4.1.0",
