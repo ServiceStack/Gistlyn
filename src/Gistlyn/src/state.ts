@@ -108,6 +108,8 @@ const updateGist = store => next => action => {
         const meta = state.meta as IGistMeta;
         if (meta)
             store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, description: meta.description, stat: "exec", step: 1 });
+    } else if (action.type === "GISTSTAT_INCR") {
+        console.log(state.gistStats);
     }
 
     return result;
@@ -169,17 +171,15 @@ export let store = createStore(
             case 'DIALOG_SHOW':
                 return Object.assign({}, state, { dialog: action.dialog });
             case 'GISTSTAT_INCR':
-                const existingStat = state.gistStats[action.gist];
+                const gistStats = state.gistStats;
+                const existingStat = gistStats[action.gist];
                 const step = state.step || 1;
-                if (!existingStat)
-                    return Object.assign({}, state.gistStats, {
-                        [action.gist]: { description: action.description, [action.stat]: step }
-                    });
-
                 return Object.assign({}, state, {
-                    gistStats: Object.assign({}, state.gistStats, {
-                        [action.gist]: Object.assign({}, existingStat, { [action.stat]: (existingStat[action.stat] || 0) + step })
-                    })
+                    gistStats: existingStat
+                        ? Object.assign({}, gistStats, {
+                            [action.gist]: Object.assign({}, existingStat, { [action.stat]: (existingStat[action.stat] || 0) + step, date: new Date().getTime() })
+                        })
+                        : Object.assign({}, gistStats, { [action.gist]: { description: action.description, [action.stat]: step, date:new Date().getTime() } })
                 });
             default:
                 return state;

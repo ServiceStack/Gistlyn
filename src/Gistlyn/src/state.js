@@ -103,6 +103,9 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga'], funct
                     if (meta)
                         store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, description: meta.description, stat: "exec", step: 1 });
                 }
+                else if (action.type === "GISTSTAT_INCR") {
+                    console.log(state.gistStats);
+                }
                 return result;
             }; }; };
             defaults = {
@@ -159,18 +162,16 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga'], funct
                     case 'DIALOG_SHOW':
                         return Object.assign({}, state, { dialog: action.dialog });
                     case 'GISTSTAT_INCR':
-                        var existingStat = state.gistStats[action.gist];
+                        var gistStats = state.gistStats;
+                        var existingStat = gistStats[action.gist];
                         var step = state.step || 1;
-                        if (!existingStat)
-                            return Object.assign({}, state.gistStats, (_c = {},
-                                _c[action.gist] = (_d = { description: action.description }, _d[action.stat] = step, _d),
-                                _c
-                            ));
                         return Object.assign({}, state, {
-                            gistStats: Object.assign({}, state.gistStats, (_e = {},
-                                _e[action.gist] = Object.assign({}, existingStat, (_f = {}, _f[action.stat] = (existingStat[action.stat] || 0) + step, _f)),
-                                _e
-                            ))
+                            gistStats: existingStat
+                                ? Object.assign({}, gistStats, (_c = {},
+                                    _c[action.gist] = Object.assign({}, existingStat, (_d = {}, _d[action.stat] = (existingStat[action.stat] || 0) + step, _d.date = new Date().getTime(), _d)),
+                                    _c
+                                ))
+                                : Object.assign({}, gistStats, (_e = {}, _e[action.gist] = (_f = { description: action.description }, _f[action.stat] = step, _f.date = new Date().getTime(), _f), _e))
                         });
                     default:
                         return state;
