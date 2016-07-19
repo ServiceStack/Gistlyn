@@ -90,22 +90,58 @@ html,body,#app,#body {
     padding: 0 0 0 0;
 }
 #txtGist {
-    width: 300px;
+    width: 320px;
     padding: 4px 8px;
     border: none;
     font-size: 14px;
-    line-height: 20px;
+    line-height: 22px;
     color: #f7f7f7;
-    background: #0488E4
+    background: #0488E4;
+    vertical-align: top;
 }
 #txtGist::-webkit-input-placeholder {
-    color: #f7f7f7 !important;
+    color: #cef !important;
 }
 #txtGist::-moz-placeholder {  /* Firefox 19+ */
-    color: #f7f7f7 !important;  
+    color: #cef !important;  
 }
  #txtGist:-ms-input-placeholder {  
-    color: #f7f7f7 !important;  
+    color: #cef !important;  
+}
+
+#desc-overlay {
+    display: inline-block;
+    background: #0488E4;
+    padding: 2px 2px;
+    vertical-align: top;
+    border: solid 1px #0488E4;
+}
+#desc-overlay .inner {
+    display: flex;
+    background: #0898EF;
+    border-radius: 10px;
+    cursor: text;
+    border: solid 1px #39f;
+}
+#desc-overlay .inner:hover {
+    color: #fff;
+    background: #099EF4;
+}
+#desc-overlay h2 {
+    padding: 0 4px;
+    line-height: 22px;
+    font-weight: normal;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    min-width: 300px;
+    max-width: 400px;
+}
+#desc-overlay i {
+    cursor: pointer;
+    float: right;
+    margin: 5px;
+    font-size: 11px;
 }
 
 #content {
@@ -157,7 +193,7 @@ html,body,#app,#body {
 #tabs #files-menu:hover {
     color: #ffc;
 }
-#files-list {
+.popup {
     display: none;
     position: absolute;
     z-index: 100;
@@ -165,11 +201,18 @@ html,body,#app,#body {
     color: #f7f7f7;
     margin: 2px 2px;
     font-size: 14px;
+
+    -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding-box;
+    background-clip: padding-box;
 }
-#files-list .file div {
+.popup div {
     padding: 8px 10px;
 }
-#files-list .file:hover {
+.popup div:hover {
     background: #0488E4;
     cursor: pointer;
 }
@@ -187,6 +230,10 @@ html,body,#app,#body {
     margin-bottom: -1px;
     cursor: auto;
 }
+#tabs .txtFileName {
+    border: none;
+    padding: 0 2px;
+}
 
 #actions {
     display: flex;
@@ -196,12 +243,31 @@ html,body,#app,#body {
 #actions div {
     display: flex;
     cursor: pointer;
+    margin: 0 30px 0 0;
 }
 #actions div:hover {
-    color: #ffc;
+    color: #ddd;
 }
 #actions p {
     padding: 4px 0 0 5px;
+}
+
+#actions .disabled, #actions .disabled p,
+#actions .disabled span, #actions .disabled:hover span, 
+#actions .disabled i, #actions .disabled:hover i
+ {
+    color: #ccc;
+}
+
+#more {
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+    color: #fff;
+    cursor: pointer;
+}
+#more i:hover {
+    color: #ddd;
 }
 
 #run {
@@ -249,6 +315,10 @@ html,body,#app,#body {
 }
 #console pre.error {
     color: red;
+}
+#console pre.success {
+    color: red;
+    color: #3c763d;
 }
 
 #preview {
@@ -300,6 +370,7 @@ html,body,#app,#body {
 #evaluate input {
     padding: 4px 8px;
     width: 80%;
+    max-width: 500px;
     margin: 10px 0 0 10px;
     font-size: 16px;
     border: solid 1px #A9A9A9;
@@ -312,6 +383,121 @@ html,body,#app,#body {
 }
 #evaluate i:hover {
     color: #0371BE;
+}
+
+#dialog {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background: rgba(0,0,0,.3);
+    z-index: 3;
+    top: 0;
+    text-align: center;
+}
+.dialog {
+    position: relative;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    transform: translateY(-50%);
+    text-align: left;
+    display: inline-block;
+    background: #fff;
+
+    -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding-box;
+    background-clip: padding-box;
+
+    /* vertical align */
+    -webkit-transform-style: preserve-3d;
+    -moz-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+}
+.dialog-header {
+    font-size: 18px;
+    background: #0371BE;
+    color: #fff;
+    padding: 12px;
+}
+.dialog-body {
+    padding: 24px;
+    min-height: 100px;
+    color: #444;
+}
+.dialog-footer {
+    text-align: right;
+    padding: 12px;
+}
+.dialog-header .close {
+    float: right;
+    font-size: 16px;
+    cursor: pointer;
+}
+.dialog-header .close:hover {
+    color: #ddd;
+}
+.dialog-body .row {
+    margin: 0 0 10px 0;
+}
+.dialog-body label {
+    display: inline-block;
+    padding: 0 20px 0 0;
+    width: 100px;
+}
+.dialog-body input[type=text] {
+    width: 350px;    
+    padding: 8px 12px;
+    font-size: 16px;
+    border: solid 1px #A9A9A9;
+}
+.dialog .loading {
+    visibility: hidden;
+}
+.dialog.disabled .loading {
+    visibility: visible;
+}
+
+.btn, .btn:focus {
+    text-transform: uppercase;
+    border-radius: 2px;
+    background: #03a9f4;
+    background: #0488E4;
+    transition: box-shadow .28s cubic-bezier(.4,0,.2,1);
+    outline: none !important;
+    border: none;
+    color: rgba(255,255,255,.84);
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    padding: 8px 12px;
+    font-size: 16px;
+    line-height: 1.42857143;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none
+}
+.btn:hover {
+    background: #29B6F6;
+    background: #03a9f4;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.26);
+    color: #fff;
+}
+.disabled .btn, .btn.disabled, .btn[disabled], fieldset[disabled] .btn {
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: .65;
+    filter: alpha(opacity=65);
+    -webkit-box-shadow: none;
+    box-shadow: none;
 }
 
 /* Custom */
@@ -349,7 +535,7 @@ html,body,#app,#body {
 
 /*jsonviewer*/
 #expression-result {
-    padding: 12px 14px 12px 50px;
+    padding: 12px 0 12px 10px;
 }
 #expression-result table {
     width: auto;
@@ -367,7 +553,7 @@ html,body,#app,#body {
 .jsonviewer .ib { display: inline-block; }
 .jsonviewer TABLE { border-collapse:collapse; border: solid 1px #ccc; clear: left; }
 .jsonviewer TH { text-align: left; padding: 4px 8px; text-shadow: #fff 1px 1px -1px; background: #f1f1f1; white-space:nowrap; font-weight: bold; }
-.jsonviewer TD { padding: 8px 8px 0 8px; vertical-align: top; }
+.jsonviewer TD { padding: 8px 8px 0 8px; vertical-align: top; line-height: 18px; }
 .jsonviewer DL { margin: 0; clear: left; }
 .jsonviewer DT { font-weight: bold; width: 160px; clear: left; float: left; display:block; white-space:nowrap; line-height: 26px; }
 .jsonviewer DD { display: block; float: left; line-height: 26px; max-width: 600px; }

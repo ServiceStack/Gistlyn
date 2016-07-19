@@ -93,6 +93,16 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga'], funct
                 else if (action.type === "SOURCE_CHANGE") {
                     localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: state.files, meta: state.meta }));
                 }
+                else if (action.type === "GIST_LOAD") {
+                    var meta = state.meta;
+                    if (meta)
+                        store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, description: meta.description, stat: "load", step: 1 });
+                }
+                else if (action.type === "VARS_LOAD") {
+                    var meta = state.meta;
+                    if (meta)
+                        store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, description: meta.description, stat: "exec", step: 1 });
+                }
                 return result;
             }; }; };
             defaults = {
@@ -110,7 +120,8 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga'], funct
                 inspectedVariables: {},
                 expression: null,
                 expressionResult: null,
-                dialog: null
+                dialog: null,
+                gistStats: {}
             };
             exports_1("store", store = redux_1.createStore(function (state, action) {
                 switch (action.type) {
@@ -119,7 +130,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga'], funct
                     case 'SSE_CONNECT':
                         return Object.assign({}, state, { activeSub: action.activeSub });
                     case 'GIST_CHANGE':
-                        return Object.assign({}, defaults, { activeSub: state.activeSub }, { gist: action.gist });
+                        return Object.assign({}, defaults, { activeSub: state.activeSub, gistStats: state.gistStats }, { gist: action.gist });
                     case 'GIST_LOAD':
                         return Object.assign({}, state, { meta: action.meta, files: action.files, activeFileName: action.activeFileName, variables: [], logs: [], hasLoaded: true });
                     case 'FILE_SELECT':
@@ -147,10 +158,24 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga'], funct
                         return Object.assign({}, state, { expressionResult: action.expressionResult });
                     case 'DIALOG_SHOW':
                         return Object.assign({}, state, { dialog: action.dialog });
+                    case 'GISTSTAT_INCR':
+                        var existingStat = state.gistStats[action.gist];
+                        var step = state.step || 1;
+                        if (!existingStat)
+                            return Object.assign({}, state.gistStats, (_c = {},
+                                _c[action.gist] = (_d = { description: action.description }, _d[action.stat] = step, _d),
+                                _c
+                            ));
+                        return Object.assign({}, state, {
+                            gistStats: Object.assign({}, state.gistStats, (_e = {},
+                                _e[action.gist] = Object.assign({}, existingStat, (_f = {}, _f[action.stat] = (existingStat[action.stat] || 0) + step, _f)),
+                                _e
+                            ))
+                        });
                     default:
                         return state;
                 }
-                var _a, _b;
+                var _a, _b, _c, _d, _e, _f;
             }, defaults, redux_1.applyMiddleware(updateGist)));
         }
     }

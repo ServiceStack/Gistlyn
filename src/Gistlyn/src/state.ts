@@ -62,8 +62,8 @@ const updateGist = store => next => action => {
             updateHistory(meta);
             store.dispatch({ type: 'GIST_LOAD', meta, files, activeFileName: getSortedFileNames(files)[0] });
         } else {
-            const authUsername = state.activeSub && parseInt(state.activeSub.userId) > 0 
-                ? state.activeSub.displayName 
+            const authUsername = state.activeSub && parseInt(state.activeSub.userId) > 0
+                ? state.activeSub.displayName
                 : null;
 
             const disableCache = "?t=" + new Date().getTime();
@@ -100,6 +100,14 @@ const updateGist = store => next => action => {
         }
     } else if (action.type === "SOURCE_CHANGE") {
         localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: state.files, meta: state.meta }));
+    } else if (action.type === "GIST_LOAD") {
+        const meta = state.meta as IGistMeta;
+        if (meta)
+            store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, description: meta.description, stat: "load", step: 1 });
+    } else if (action.type === "VARS_LOAD") {
+        const meta = state.meta as IGistMeta;
+        if (meta)
+            store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, description: meta.description, stat: "exec", step: 1 });
     }
 
     return result;
@@ -120,7 +128,8 @@ const defaults = {
     inspectedVariables: {},
     expression: null,
     expressionResult: null,
-    dialog: null
+    dialog: null,
+    gistStats: {}
 };
 
 export let store = createStore(
@@ -131,7 +140,7 @@ export let store = createStore(
             case 'SSE_CONNECT':
                 return Object.assign({}, state, { activeSub: action.activeSub });
             case 'GIST_CHANGE':
-                return Object.assign({}, defaults, { activeSub: state.activeSub }, { gist: action.gist });
+                return Object.assign({}, defaults, { activeSub: state.activeSub, gistStats: state.gistStats }, { gist: action.gist });
             case 'GIST_LOAD':
                 return Object.assign({}, state, { meta: action.meta, files: action.files, activeFileName: action.activeFileName, variables: [], logs: [], hasLoaded: true });
             case 'FILE_SELECT':
@@ -159,6 +168,19 @@ export let store = createStore(
                 return Object.assign({}, state, { expressionResult: action.expressionResult });
             case 'DIALOG_SHOW':
                 return Object.assign({}, state, { dialog: action.dialog });
+            case 'GISTSTAT_INCR':
+                const existingStat = state.gistStats[action.gist];
+                const step = state.step || 1;
+                if (!existingStat)
+                    return Object.assign({}, state.gistStats, {
+                        [action.gist]: { description: action.description, [action.stat]: step }
+                    });
+
+                return Object.assign({}, state, {
+                    gistStats: Object.assign({}, state.gistStats, {
+                        [action.gist]: Object.assign({}, existingStat, { [action.stat]: (existingStat[action.stat] || 0) + step })
+                    })
+                });
             default:
                 return state;
         }
