@@ -67,7 +67,29 @@ const createGistMeta = (r:any): IGistMeta => ({
         owner_login: r.owner && r.owner.login,
         owner_id: r.owner && r.owner.id,
         owner_avatar_url: r.owner && r.owner.avatar_url
-    });
+});
+
+const parseMarkdownMeta = (markdown: string): any => {
+    var meta = null;
+    if (markdown) {
+        markdown = markdown.trim();
+        if (markdown.startsWith("---")) {
+            var endPos = markdown.indexOf("---", "---".length);
+            if (endPos >= 0) {
+                var metaStr = markdown.substring(0, endPos);
+                markdown = markdown.substring(endPos + "---".length);
+                var lines = metaStr.split(/\r?\n/);
+                meta = {};
+                lines.forEach(line => {
+                    var parts = splitOnFirst(line, ":");
+                    if (parts.length !== 2) return;
+                    meta[parts[0].trim()] = parts[1].trim();
+                });
+            }
+        }
+    }
+    return { meta, markdown };
+}
 
 const updateGist = store => next => action => {
     var oldGist = store.getState().gist;
@@ -124,6 +146,9 @@ const updateGist = store => next => action => {
         if (collection) {
             store.dispatch({ type: 'COLLECTION_LOAD', collection: collection });
             store.dispatch({ type: "GISTSTAT_INCR", gist: collection.id, collection: true, description: collection.description, stat: "load", step: 1 });
+            if (collection.meta["gist"]) {
+                store.dispatch({ type: "GIST_CHANGE", gist: collection.meta["gist"] });
+            }
         } else {
             fetch(createGistRequest(state, action.collection.id))
                 .then((res) => {
@@ -139,14 +164,20 @@ const updateGist = store => next => action => {
                                 return;
                             }
 
+                            var md = parseMarkdownMeta(file.content);
+
                             collection = {
                                 id: action.collection.id,
                                 description: meta.description,
-                                html: marked(file.content)
+                                html: marked(md.markdown),
+                                meta: md.meta || {}
                             };
                             collectionsCache[collection.id] = collection;
                             store.dispatch({ type: 'COLLECTION_LOAD', collection });
-                            store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, collection:true, description: meta.description, stat: "load", step: 1 });
+                            store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, collection: true, description: meta.description, stat: "load", step: 1 });
+                            if (collection.meta["gist"]) {
+                                store.dispatch({ type: "GIST_CHANGE", gist: collection.meta["gist"] });
+                            }
                         });
                     }
                 })

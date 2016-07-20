@@ -2,7 +2,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var redux_1, utils_1, servicestack_client_1, react_ga_1, marked_1;
-    var StateKey, GistCacheKey, updateHistory, collectionsCache, createGistRequest, createGistMeta, updateGist, defaults, preserveDefaults, store;
+    var StateKey, GistCacheKey, updateHistory, collectionsCache, createGistRequest, createGistMeta, parseMarkdownMeta, updateGist, defaults, preserveDefaults, store;
     return {
         setters:[
             function (redux_1_1) {
@@ -58,6 +58,28 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                 owner_id: r.owner && r.owner.id,
                 owner_avatar_url: r.owner && r.owner.avatar_url
             }); };
+            parseMarkdownMeta = function (markdown) {
+                var meta = null;
+                if (markdown) {
+                    markdown = markdown.trim();
+                    if (markdown.startsWith("---")) {
+                        var endPos = markdown.indexOf("---", "---".length);
+                        if (endPos >= 0) {
+                            var metaStr = markdown.substring(0, endPos);
+                            markdown = markdown.substring(endPos + "---".length);
+                            var lines = metaStr.split(/\r?\n/);
+                            meta = {};
+                            lines.forEach(function (line) {
+                                var parts = servicestack_client_1.splitOnFirst(line, ":");
+                                if (parts.length !== 2)
+                                    return;
+                                meta[parts[0].trim()] = parts[1].trim();
+                            });
+                        }
+                    }
+                }
+                return { meta: meta, markdown: markdown };
+            };
             updateGist = function (store) { return function (next) { return function (action) {
                 var oldGist = store.getState().gist;
                 var result = next(action);
@@ -118,6 +140,9 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                     if (collection) {
                         store.dispatch({ type: 'COLLECTION_LOAD', collection: collection });
                         store.dispatch({ type: "GISTSTAT_INCR", gist: collection.id, collection: true, description: collection.description, stat: "load", step: 1 });
+                        if (collection.meta["gist"]) {
+                            store.dispatch({ type: "GIST_CHANGE", gist: collection.meta["gist"] });
+                        }
                     }
                     else {
                         fetch(createGistRequest(state, action.collection.id))
@@ -134,14 +159,19 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                                         store.dispatch({ type: 'ERROR_RAISE', error: { message: "Collection has no 'index.md'" } });
                                         return;
                                     }
+                                    var md = parseMarkdownMeta(file.content);
                                     collection = {
                                         id: action.collection.id,
                                         description: meta.description,
-                                        html: marked_1.default(file.content)
+                                        html: marked_1.default(md.markdown),
+                                        meta: md.meta || {}
                                     };
                                     collectionsCache[collection.id] = collection;
                                     store.dispatch({ type: 'COLLECTION_LOAD', collection: collection });
                                     store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, collection: true, description: meta.description, stat: "load", step: 1 });
+                                    if (collection.meta["gist"]) {
+                                        store.dispatch({ type: "GIST_CHANGE", gist: collection.meta["gist"] });
+                                    }
                                 });
                             }
                         })
