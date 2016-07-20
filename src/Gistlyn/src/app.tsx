@@ -670,6 +670,9 @@ class App extends React.Component<any, any> {
                         <img src="/img/ajax-loader.gif" style={{ float: "right", margin: "5px 0 0 0" }} />
                         <i className="material-icons" style={{ position: "absolute" }}>build</i>
                         <p style={{ padding: "0 0 0 30px", fontSize: "22px" }}>Executing Script</p>
+                        <div id="splash" style={{ padding:30 }}>
+                            <img src="/img/compiling.png" />
+                        </div>
                     </div>
                 </div>));
         }

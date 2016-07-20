@@ -140,7 +140,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                     if (collection) {
                         store.dispatch({ type: 'COLLECTION_LOAD', collection: collection });
                         store.dispatch({ type: "GISTSTAT_INCR", gist: collection.id, collection: true, description: collection.description, stat: "load", step: 1 });
-                        if (collection.meta["gist"]) {
+                        if (collection.meta["gist"] && collection.meta["gist"] !== state.gist) {
                             store.dispatch({ type: "GIST_CHANGE", gist: collection.meta["gist"] });
                         }
                     }
@@ -169,7 +169,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                                     collectionsCache[collection.id] = collection;
                                     store.dispatch({ type: 'COLLECTION_LOAD', collection: collection });
                                     store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, collection: true, description: meta.description, stat: "load", step: 1 });
-                                    if (collection.meta["gist"]) {
+                                    if (collection.meta["gist"] && collection.meta["gist"] !== state.gist) {
                                         store.dispatch({ type: "GIST_CHANGE", gist: collection.meta["gist"] });
                                     }
                                 });
