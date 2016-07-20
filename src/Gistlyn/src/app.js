@@ -299,6 +299,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                             _this.props.changeGist(r.gist);
                         }
                         _this.props.logConsole([{ msg: "[" + servicestack_client_1.timeFmt12() + "] Gist was saved.", cls: "success" }]);
+                        _this.props.setDirty(false);
                         done();
                     })
                         .catch(function (e) {
@@ -503,7 +504,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         var vars = this.props.variables;
                         var exprResult = this.props.expressionResult;
                         var exprVar = exprResult != null && exprResult.variables.length > 0 ? exprResult.variables[0] : null;
-                        Preview.push((React.createElement("div", {id: "vars", className: "section"}, React.createElement("table", {style: { width: "100%" }}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", {className: "name"}, "name"), React.createElement("th", {className: "value"}, "value"), React.createElement("th", {className: "type"}, "type"))), React.createElement("tbody", null, vars.map(function (v) { return _this.getVariableRows(v); }), React.createElement("tr", null, React.createElement("td", {id: "evaluate", colSpan: 3}, React.createElement("input", {type: "text", placeholder: "Evaluate Expression", value: this.props.expression, onChange: function (e) { return _this.props.setExpression(e.target.value); }, onKeyPress: function (e) { return e.which === 13 ? _this.evaluateExpression(_this.props.expression) : null; }, autocomplete: "off", autocorrect: "off", autocapitalize: "off", spellcheck: "false"}), React.createElement("i", {className: "material-icons", title: "run", onClick: function (e) { return _this.evaluateExpression(_this.props.expression); }}, "play_arrow"), exprVar
+                        Preview.push((React.createElement("div", {id: "vars", className: "section"}, React.createElement("table", {style: { width: "100%" }}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", {className: "name"}, "name"), React.createElement("th", {className: "value"}, "value"), React.createElement("th", {className: "type"}, "type "))), React.createElement("tbody", null, vars.map(function (v) { return _this.getVariableRows(v); }), React.createElement("tr", null, React.createElement("td", {id: "evaluate", colSpan: 3}, React.createElement("input", {type: "text", placeholder: "Evaluate Expression", value: this.props.expression, onChange: function (e) { return _this.props.setExpression(e.target.value); }, onKeyPress: function (e) { return e.which === 13 ? _this.evaluateExpression(_this.props.expression) : null; }, autocomplete: "off", autocorrect: "off", autocapitalize: "off", spellcheck: "false"}), React.createElement("i", {className: "material-icons", title: "run", onClick: function (e) { return _this.evaluateExpression(_this.props.expression); }}, "play_arrow"), exprVar
                             ? (React.createElement("div", {id: "expression-result"}, React.createElement(json_viewer_1.JsonViewer, {json: exprVar.json})))
                             : null)))))));
                     }
@@ -554,9 +555,9 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                             React.createElement("div", {id: "popup-user", className: "popup", ref: function (e) { return _this.userPopup = e; }, style: { position: "absolute", top: 42, right: 0 }}, React.createElement("div", {onClick: function (e) { return location.href = "/auth/logout"; }}, "Sign out"))
                         ]))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement("div", {id: "editor"}, React.createElement("div", {id: "tabs", style: { display: this.props.files ? 'flex' : 'none' }}, FileList.length > 0
                         ? React.createElement("i", {id: "files-menu", className: "material-icons", onClick: function (e) { return _this.showPopup(e, _this.filesPopup); }}, "arrow_drop_down") : null, Tabs), React.createElement("div", {id: "popup-files", className: "popup", ref: function (e) { return _this.filesPopup = e; }}, FileList), React.createElement(react_codemirror_1.default, {value: source, options: options, onChange: function (src) { return _this.updateSource(src); }})), React.createElement("div", {id: "preview"}, Preview))), React.createElement("div", {id: "footer-spacer"}), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "actions", style: { visibility: main ? "visible" : "hidden" }, className: "noselect"}, React.createElement("div", {id: "revert", onClick: function (e) { return _this.revertGist(e.shiftKey); }}, React.createElement("i", {className: "material-icons"}, "undo"), React.createElement("p", null, "Revert Changes")), meta && meta.owner_login == authUsername
-                        ? (React.createElement("div", {id: "save", onClick: function (e) { return _this.saveGist({}); }}, React.createElement("i", {className: "material-icons"}, "save"), React.createElement("p", null, "Save Gist")))
+                        ? (React.createElement("div", {id: "save", onClick: function (e) { return _this.saveGist({}); }, className: this.props.dirty ? "" : "disabled"}, React.createElement("i", {className: "material-icons"}, "save"), React.createElement("p", null, "Save Gist")))
                         : (React.createElement("div", {id: "saveas", onClick: function (e) { return authUsername ? _this.saveGistAs() : _this.signIn(); }, title: !authUsername ? "Sign-in to save gists" : "Save a copy in your Github gists"}, React.createElement("span", {className: "octicon octicon-repo-forked", style: { margin: "3px 3px 0 0" }}), React.createElement("p", null, authUsername ? (shouldFork ? "Fork As" : "Save As") : "Sign-in to save"))), meta && meta.owner_login === authUsername && this.props.activeFileName && this.props.activeFileName !== "main.cs" && this.props.activeFileName !== "packages.config"
-                        ? (React.createElement("div", {id: "delete-file", onClick: function (e) { return confirm("Are you sure you want to delete '" + _this.props.activeFileName + "?") ? _this.deleteFile(_this.props.activeFileName) : null; }}, React.createElement("i", {className: "material-icons"}, "delete"), React.createElement("p", null, "Delete File")))
+                        ? (React.createElement("div", {id: "delete-file", onClick: function (e) { return confirm("Are you sure you want to delete '" + _this.props.activeFileName + "?") ? _this.deleteFile(_this.props.activeFileName) : null; }}, React.createElement("i", {className: "material-icons"}, "delete "), React.createElement("p", null, "Delete File")))
                         : null), React.createElement("div", {id: "more-menu", style: { position: "absolute", right: 5, bottom: 5, color: "#fff", cursor: "pointer" }}, React.createElement("i", {className: "material-icons", onClick: function (e) { return _this.showPopup(e, _this.morePopup); }}, "more_vert")), React.createElement("div", {id: "popup-more", className: "popup", ref: function (e) { return _this.morePopup = e; }, style: { position: "absolute", bottom: 42, right: 0 }}, MorePopup)), React.createElement("div", {id: "run", className: main == null ? "disabled" : "", onClick: function (e) { return !isScriptRunning ? _this.run() : _this.cancel(); }}, main != null
                         ? (!isScriptRunning
                             ? React.createElement("i", {className: "material-icons", title: "run"}, "play_circle_outline")
@@ -579,7 +580,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         expressionResult: state.expressionResult,
                         error: state.error,
                         scriptStatus: state.scriptStatus,
-                        dialog: state.dialog
+                        dialog: state.dialog,
+                        dirty: state.dirty
                     }); }, function (dispatch) { return ({
                         changeGist: function (gist, options) {
                             if (options === void 0) { options = {}; }
@@ -598,7 +600,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         inspectVariable: function (name, variables) { return dispatch({ type: 'VARS_INSPECT', name: name, variables: variables }); },
                         setExpression: function (expression) { return dispatch({ type: 'EXPRESSION_SET', expression: expression }); },
                         setExpressionResult: function (expressionResult) { return dispatch({ type: 'EXPRESSION_LOAD', expressionResult: expressionResult }); },
-                        showDialog: function (dialog) { return dispatch({ type: 'DIALOG_SHOW', dialog: dialog }); }
+                        showDialog: function (dialog) { return dispatch({ type: 'DIALOG_SHOW', dialog: dialog }); },
+                        setDirty: function (dirty) { return dispatch({ type: 'DIRTY_SET', dirty: dirty }); }
                     }); })
                 ], App);
                 return App;

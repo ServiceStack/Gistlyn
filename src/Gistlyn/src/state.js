@@ -124,7 +124,8 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga'], funct
                 expression: null,
                 expressionResult: null,
                 dialog: null,
-                gistStats: {}
+                gistStats: {},
+                dirty: false
             };
             exports_1("store", store = redux_1.createStore(function (state, action) {
                 switch (action.type) {
@@ -150,7 +151,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga'], funct
                         return Object.assign({}, state, { scriptStatus: action.scriptStatus });
                     case 'SOURCE_CHANGE':
                         var file = Object.assign({}, state.files[action.fileName], { content: action.content });
-                        return Object.assign({}, state, { files: Object.assign({}, state.files, (_a = {}, _a[action.fileName] = file, _a)) });
+                        return Object.assign({}, state, { files: Object.assign({}, state.files, (_a = {}, _a[action.fileName] = file, _a)), dirty: true });
                     case 'VARS_LOAD':
                         return Object.assign({}, state, { variables: action.variables, inspectedVariables: {} });
                     case 'VARS_INSPECT':
@@ -161,6 +162,8 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga'], funct
                         return Object.assign({}, state, { expressionResult: action.expressionResult });
                     case 'DIALOG_SHOW':
                         return Object.assign({}, state, { dialog: action.dialog });
+                    case 'DIRTY_SET':
+                        return Object.assign({}, state, { dirty: action.dirty });
                     case 'GISTSTAT_INCR':
                         var gistStats = state.gistStats;
                         var existingStat = gistStats[action.gist];

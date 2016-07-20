@@ -131,7 +131,8 @@ const defaults = {
     expression: null,
     expressionResult: null,
     dialog: null,
-    gistStats: {}
+    gistStats: {},
+    dirty: false
 };
 
 export let store = createStore(
@@ -159,7 +160,7 @@ export let store = createStore(
                 return Object.assign({}, state, { scriptStatus: action.scriptStatus });
             case 'SOURCE_CHANGE':
                 const file = Object.assign({}, state.files[action.fileName], { content: action.content });
-                return Object.assign({}, state, { files: Object.assign({}, state.files, { [action.fileName]: file }) });
+                return Object.assign({}, state, { files: Object.assign({}, state.files, { [action.fileName]: file }), dirty: true });
             case 'VARS_LOAD':
                 return Object.assign({}, state, { variables: action.variables, inspectedVariables: {} });
             case 'VARS_INSPECT':
@@ -170,6 +171,8 @@ export let store = createStore(
                 return Object.assign({}, state, { expressionResult: action.expressionResult });
             case 'DIALOG_SHOW':
                 return Object.assign({}, state, { dialog: action.dialog });
+            case 'DIRTY_SET':
+                return Object.assign({}, state, { dirty: action.dirty });
             case 'GISTSTAT_INCR':
                 const gistStats = state.gistStats;
                 const existingStat = gistStats[action.gist];

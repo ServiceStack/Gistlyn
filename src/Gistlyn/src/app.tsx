@@ -32,10 +32,10 @@ var options = {
     indentUnit: 4,
     mode: "text/x-csharp",
     extraKeys: {
-        "F11" (cm) {
+        "F11"(cm) {
             cm.setOption("fullScreen", !cm.getOption("fullScreen"));
         },
-        "Esc" (cm) {
+        "Esc"(cm) {
             if (cm.getOption("fullScreen"))
                 cm.setOption("fullScreen", false);
         }
@@ -61,9 +61,9 @@ var sse = new ServerEventsClient("/", ["gist"], {
             ReactGA.set({ userId: activeSub.userId });
         },
         ConsoleMessage(m, e) {
-            store.dispatch({ type: 'CONSOLE_LOG', logs: [{msg:m.message}] });
+            store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: m.message }] });
         },
-        ScriptExecutionResult(m:ScriptExecutionResult, e) {
+        ScriptExecutionResult(m: ScriptExecutionResult, e) {
             if (m.status === store.getState().scriptStatus) return;
 
             const cls = ScriptStatusError.indexOf(m.status) >= 0 ? "error" : "";
@@ -71,7 +71,7 @@ var sse = new ServerEventsClient("/", ["gist"], {
             store.dispatch({ type: 'SCRIPT_STATUS', scriptStatus: m.status });
 
             if (m.status === "CompiledWithErrors" && m.errors) {
-                const errorMsgs = m.errors.map(e => ({ msg:e.info, cls:"error"}));
+                const errorMsgs = m.errors.map(e => ({ msg: e.info, cls: "error" }));
                 store.dispatch({ type: 'CONSOLE_LOG', logs: errorMsgs });
             }
             else if (m.status === "Completed") {
@@ -102,24 +102,26 @@ var sse = new ServerEventsClient("/", ["gist"], {
         expressionResult: state.expressionResult,
         error: state.error,
         scriptStatus: state.scriptStatus,
-        dialog: state.dialog
+        dialog: state.dialog,
+        dirty: state.dirty
     }),
     (dispatch) => ({
-        changeGist: (gist, options={}) => dispatch({ type: 'GIST_CHANGE', gist, options }),
-        updateSource: (fileName, content) => dispatch({ type: 'SOURCE_CHANGE', fileName, content }),
-        selectFileName: (activeFileName) => dispatch({ type: 'FILE_SELECT', activeFileName }),
-        editFileName: (fileName) => dispatch({ type: 'FILENAME_EDIT', fileName }),
-        raiseError: (error) => dispatch({ type: 'ERROR_RAISE', error }),
+        changeGist: (gist: string, options = {}) => dispatch({ type: 'GIST_CHANGE', gist, options }),
+        updateSource: (fileName: string, content: string) => dispatch({ type: 'SOURCE_CHANGE', fileName, content }),
+        selectFileName: (activeFileName: string) => dispatch({ type: 'FILE_SELECT', activeFileName }),
+        editFileName: (fileName: string) => dispatch({ type: 'FILENAME_EDIT', fileName }),
+        raiseError: (error: string) => dispatch({ type: 'ERROR_RAISE', error }),
         clearError: () => dispatch({ type: 'ERROR_CLEAR' }),
         clearConsole: () => dispatch({ type: 'CONSOLE_CLEAR' }),
-        logConsole: (logs) => dispatch({ type:'CONSOLE_LOG', logs }),
-        logConsoleError: (status) => dispatch({ type:'CONSOLE_LOG', logs:[Object.assign({ msg:status.message, cls:"error"}, status)] }),
-        logConsoleMsgs: (txtMessages) => dispatch({ type:'CONSOLE_LOG', logs:txtMessages.map(msg => ({ msg })) }),
-        setScriptStatus: (scriptStatus) => dispatch({ type:'SCRIPT_STATUS', scriptStatus }),
-        inspectVariable: (name, variables) => dispatch({ type:'VARS_INSPECT', name, variables }),
-        setExpression: (expression) => dispatch({ type: 'EXPRESSION_SET', expression }),
-        setExpressionResult: (expressionResult) => dispatch({ type: 'EXPRESSION_LOAD', expressionResult }),
-        showDialog: (dialog) => dispatch({ type: 'DIALOG_SHOW', dialog })
+        logConsole: (logs: any[]) => dispatch({ type: 'CONSOLE_LOG', logs }),
+        logConsoleError: (status: any) => dispatch({ type: 'CONSOLE_LOG', logs: [Object.assign({ msg: status.message, cls: "error" }, status)] }),
+        logConsoleMsgs: (txtMessages: any[]) => dispatch({ type: 'CONSOLE_LOG', logs: txtMessages.map(msg => ({ msg })) }),
+        setScriptStatus: (scriptStatus: ScriptStatus) => dispatch({ type: 'SCRIPT_STATUS', scriptStatus }),
+        inspectVariable: (name: string, variables: any) => dispatch({ type: 'VARS_INSPECT', name, variables }),
+        setExpression: (expression: string) => dispatch({ type: 'EXPRESSION_SET', expression }),
+        setExpressionResult: (expressionResult: any) => dispatch({ type: 'EXPRESSION_LOAD', expressionResult }),
+        showDialog: (dialog: string) => dispatch({ type: 'DIALOG_SHOW', dialog }),
+        setDirty: (dirty: boolean) => dispatch({ type: 'DIRTY_SET', dirty })
     })
 )
 class App extends React.Component<any, any> {
@@ -135,7 +137,7 @@ class App extends React.Component<any, any> {
         return null;
     }
 
-    getFileContents(fileName:string):string {
+    getFileContents(fileName: string): string {
         const file = this.getFile(fileName);
         return file != null
             ? file.content
@@ -229,13 +231,13 @@ class App extends React.Component<any, any> {
         var varProps = this.props.inspectedVariables[v.name] as VariableInfo[];
         var rows = [(
             <tr>
-                <td className="name" style={{whiteSpace:"nowrap"}}>
+                <td className="name" style={{ whiteSpace: "nowrap" }}>
                     {v.isBrowseable
-                        ? (varProps 
-                            ? <span className="octicon octicon-triangle-down" style={{ margin: "0 10px 0 0" }} onClick={e => this.props.inspectVariable(v.name, null)}></span>
-                            : <span className="octicon octicon-triangle-right" style={{ margin: "0 10px 0 0" }} onClick={e => this.inspectVariable(v)}></span>)
+                        ? (varProps
+                            ? <span className="octicon octicon-triangle-down" style={{ margin: "0 10px 0 0" }} onClick={e => this.props.inspectVariable(v.name, null) }></span>
+                            : <span className="octicon octicon-triangle-right" style={{ margin: "0 10px 0 0" }} onClick={e => this.inspectVariable(v) }></span>)
                         : <span className="octicon octicon-triangle-right" style={{ margin: "0 10px 0 0", color: "#f7f7f7" }}></span>}
-                    <a onClick={e => this.setAndEvaluateExpression(v.name)}>{v.name}</a>
+                    <a onClick={e => this.setAndEvaluateExpression(v.name) }>{v.name}</a>
                 </td>
                 <td className="value">{v.value}</td>
                 <td className="type">{v.type}</td>
@@ -249,7 +251,7 @@ class App extends React.Component<any, any> {
                         <td className="name" style={{ padding: "0 0 0 50px" }}>
                             {p.canInspect
                                 ? <a onClick={e => this.setAndEvaluateExpression(v.name + (p.name[0] != "[" ? "." : "") + p.name) }>{p.name}</a>
-                                : <span style={{color:"#999"}}>{p.name}</span>}
+                                : <span style={{ color: "#999" }}>{p.name}</span>}
                         </td>
                         <td className="value">{p.value}</td>
                         <td className="type">{p.type}</td>
@@ -277,13 +279,13 @@ class App extends React.Component<any, any> {
         request.expression = expr;
         request.includeJson = true;
 
-        ReactGA.event({ category: 'preview', action: 'Evaluate Expression', label: this.props.gist + ": " + expr.substring(0,50) });
+        ReactGA.event({ category: 'preview', action: 'Evaluate Expression', label: this.props.gist + ": " + expr.substring(0, 50) });
 
         client.post(request)
             .then(r => {
                 if (r.result.errors && r.result.errors.length > 0) {
                     r.result.errors.forEach(x => {
-                        this.props.logConsole({ msg: x.info, cls:"error" });
+                        this.props.logConsole({ msg: x.info, cls: "error" });
                     });
                 } else {
                     this.props.setExpressionResult(r.result);
@@ -294,7 +296,7 @@ class App extends React.Component<any, any> {
             });
     }
 
-    revertGist(clearAll:boolean=false) {
+    revertGist(clearAll: boolean = false) {
         localStorage.removeItem(GistCacheKey(this.props.gist));
         if (clearAll) {
             localStorage.removeItem(StateKey);
@@ -305,7 +307,7 @@ class App extends React.Component<any, any> {
         this.props.changeGist(this.props.gist, { reload: true });
     }
 
-    createStoreGist(opt: any = {}):StoreGist {
+    createStoreGist(opt: any = {}): StoreGist {
         const meta = this.props.meta as IGistMeta;
         const files = this.props.files as { [index: string]: IGistFile };
         if (!meta || !files) return null;
@@ -345,7 +347,8 @@ class App extends React.Component<any, any> {
                 if (this.props.gist !== r.gist) {
                     this.props.changeGist(r.gist);
                 }
-                this.props.logConsole([{msg:`[${timeFmt12()}] Gist was saved.`, cls:"success"}]);
+                this.props.logConsole([{ msg: `[${timeFmt12()}] Gist was saved.`, cls: "success" }]);
+                this.props.setDirty(false);
                 done();
             })
             .catch(e => {
@@ -354,7 +357,7 @@ class App extends React.Component<any, any> {
             });
     }
 
-    handleCreateFile(e:React.SyntheticEvent) {
+    handleCreateFile(e: React.SyntheticEvent) {
         var txt = e.target as HTMLInputElement;
         if (txt == null)
             return;
@@ -364,7 +367,7 @@ class App extends React.Component<any, any> {
             .then(r => txt.disabled = false);
     }
 
-    createFile(fileName:string) {
+    createFile(fileName: string) {
         const done = () => this.props.editFileName(null);
 
         const request = this.createStoreGist();
@@ -383,14 +386,14 @@ class App extends React.Component<any, any> {
 
         return client.post(request)
             .then(r => {
-                this.props.changeGist(r.gist, { reload: true, activeFileName:fileName });
+                this.props.changeGist(r.gist, { reload: true, activeFileName: fileName });
             })
             .catch(e => {
                 this.props.logConsoleError(e.responseStatus || e);
             });
     }
 
-    handleRenameFile(oldFileName:string, e:React.SyntheticEvent) {
+    handleRenameFile(oldFileName: string, e: React.SyntheticEvent) {
         var txt = e.target as HTMLInputElement;
         if (txt == null)
             return;
@@ -400,7 +403,7 @@ class App extends React.Component<any, any> {
             .then(r => txt.disabled = false);
     }
 
-    renameFile(oldFileName:string, newFileName:string) {
+    renameFile(oldFileName: string, newFileName: string) {
         const done = () => this.props.editFileName(null);
 
         const request = this.createStoreGist();
@@ -423,14 +426,14 @@ class App extends React.Component<any, any> {
 
         return client.post(request)
             .then(r => {
-                this.props.changeGist(r.gist, { reload: true, activeFileName:newFileName });
+                this.props.changeGist(r.gist, { reload: true, activeFileName: newFileName });
             })
             .catch(e => {
                 this.props.logConsoleError(e.responseStatus || e);
             });
     }
 
-    deleteFile(fileName:string) {
+    deleteFile(fileName: string) {
         if (!fileName) return;
 
         var json = JSON.stringify({ files: { [fileName]: null } });
@@ -438,10 +441,10 @@ class App extends React.Component<any, any> {
         ReactGA.event({ category: 'file', action: 'Delete File', label: fileName });
 
         fetch("/proxy/gists/" + this.props.gist, {
-                method: "PATCH",
-                credentials: "include",
-                body: json
-            })
+            method: "PATCH",
+            credentials: "include",
+            body: json
+        })
             .then((res) => {
                 this.props.changeGist(this.props.gist, { reload: true });
             })
@@ -487,7 +490,7 @@ class App extends React.Component<any, any> {
         el.style.display = "block";
     }
 
-    handleBodyClick(e:React.MouseEvent) {
+    handleBodyClick(e: React.MouseEvent) {
         if (this.lastPopup != null) {
             this.lastPopup.style.display = "none";
             this.lastPopup = null;
@@ -542,7 +545,7 @@ class App extends React.Component<any, any> {
         if (files != null) {
             var keys = getSortedFileNames(files);
 
-            const sizeToFit = (e:React.KeyboardEvent) => {
+            const sizeToFit = (e: React.KeyboardEvent) => {
                 var txt = e.target as HTMLInputElement;
                 txt.size = Math.max(txt.value.length - 3, 1);
             };
@@ -557,11 +560,11 @@ class App extends React.Component<any, any> {
                         onClick={e => !active ? this.props.selectFileName(fileName) : this.props.editFileName(fileName) }>
                         {this.props.editingFileName !== fileName
                             ? <b>{fileName}</b>
-                            : <input type="text" className="txtFileName" 
-                                onBlur={e => this.handleRenameFile(fileName, e)} 
-                                onKeyDown={e => e.keyCode === 13 ? (e.target as HTMLElement).blur() : null } 
-                                defaultValue={fileName} 
-                                onKeyUp={sizeToFit} size={Math.max(fileName.length - 3, 1)}
+                            : <input type="text" className="txtFileName"
+                                onBlur={e => this.handleRenameFile(fileName, e) }
+                                onKeyDown={e => e.keyCode === 13 ? (e.target as HTMLElement).blur() : null }
+                                defaultValue={fileName}
+                                onKeyUp={sizeToFit} size={Math.max(fileName.length - 3, 1) }
                                 autoFocus /> }
                     </div>
                 ));
@@ -583,12 +586,12 @@ class App extends React.Component<any, any> {
             if (authUsername && meta && meta.owner_login === authUsername) {
                 Tabs.push((
                     <div title="Add new file" onClick={e => this.props.editFileName("+") }
-                         className={this.props.editingFileName === "+" ? "active" : ""}>
+                        className={this.props.editingFileName === "+" ? "active" : ""}>
                         {this.props.editingFileName !== "+"
-                            ? <i className="material-icons" style={{fontSize:13}}>add</i>
-                            : <input type="text"className="txtFileName" 
-                                onBlur={e => this.handleCreateFile(e)} 
-                                onKeyDown={e => e.keyCode === 13 ? (e.target as HTMLElement).blur() : null } 
+                            ? <i className="material-icons" style={{ fontSize: 13 }}>add</i>
+                            : <input type="text"className="txtFileName"
+                                onBlur={e => this.handleCreateFile(e) }
+                                onKeyDown={e => e.keyCode === 13 ? (e.target as HTMLElement).blur() : null }
                                 onKeyUp={sizeToFit} size="1" autoFocus /> }
                     </div>
                 ));
@@ -605,7 +608,7 @@ class App extends React.Component<any, any> {
         var Preview = [];
 
         if (this.props.error != null) {
-            var code = this.props.error.errorCode ? `(${this.props.error.errorCode}) ` : ""; 
+            var code = this.props.error.errorCode ? `(${this.props.error.errorCode}) ` : "";
             Preview.push((
                 <div id="errors" className="section">
                     <div style={{ margin: "25px 25px 40px 25px", color: "#a94442" }}>
@@ -618,8 +621,8 @@ class App extends React.Component<any, any> {
         } else if (isScriptRunning) {
             Preview.push((
                 <div id="status" className="section">
-                    <div style={{ margin: '40px', color:"#444", width: "215px" }} title="executing...">
-                        <img src="/img/ajax-loader.gif" style={{float:"right", margin:"5px 0 0 0"}} />
+                    <div style={{ margin: '40px', color: "#444", width: "215px" }} title="executing...">
+                        <img src="/img/ajax-loader.gif" style={{ float: "right", margin: "5px 0 0 0" }} />
                         <i className="material-icons" style={{ position: "absolute" }}>build</i>
                         <p style={{ padding: "0 0 0 30px", fontSize: "22px" }}>Executing Script</p>
                     </div>
@@ -636,7 +639,7 @@ class App extends React.Component<any, any> {
                             <tr>
                                 <th className="name">name</th>
                                 <th className="value">value</th>
-                                <th className="type">type</th>
+                                <th className="type">type </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -666,17 +669,17 @@ class App extends React.Component<any, any> {
 
         if (this.props.logs.length > 0) {
             Preview.push((
-                <div id="console" className="section" style={{ borderTop: "solid 1px #ddd", borderBottom: "solid 1px #ddd", font: "14px/20px arial", height:"350px" }}>
-                    <b style={{ background: "#444", color: "#fff", padding: "1px 8px", position: "absolute", right: "3px", margin:"-22px 0" }}>console</b>
+                <div id="console" className="section" style={{ borderTop: "solid 1px #ddd", borderBottom: "solid 1px #ddd", font: "14px/20px arial", height: "350px" }}>
+                    <b style={{ background: "#444", color: "#fff", padding: "1px 8px", position: "absolute", right: "3px", margin: "-22px 0" }}>console</b>
                     <i className="material-icons clear-btn" title="clear console" onClick={e => this.props.clearConsole() }>clear</i>
-                    <div className="scroll" style={{overflow:"auto", maxHeight:"350px"}} ref={(el) => this.consoleScroll = el}>
-                        <table style={{width:"100%"}}>
-                            <tbody style={{font:"13px/18px monospace", color:"#444"}}>
+                    <div className="scroll" style={{ overflow: "auto", maxHeight: "350px" }} ref={(el) => this.consoleScroll = el}>
+                        <table style={{ width: "100%" }}>
+                            <tbody style={{ font: "13px/18px monospace", color: "#444" }}>
                                 {this.props.logs.map(log => (
                                     <tr>
-                                        <td style={{ padding: "2px 8px", tabSize:4 }}><pre className={log.cls}>{log.msg}</pre></td>
+                                        <td style={{ padding: "2px 8px", tabSize: 4 }}><pre className={log.cls}>{log.msg}</pre></td>
                                     </tr>
-                                ))}
+                                )) }
                             </tbody>
                         </table>
                     </div>
@@ -735,7 +738,7 @@ class App extends React.Component<any, any> {
             const inputWasHidden = this.txtGist.style.display !== "inline-block";
             const showInput = !meta || !description || inputWasHidden;
             this.txtGist.style.display = showInput ? "inline-block" : "none";
-            document.getElementById("desc-overlay").style.display = showInput ? "none" : "inline-block"; 
+            document.getElementById("desc-overlay").style.display = showInput ? "none" : "inline-block";
 
             if (inputWasHidden) {
                 this.txtGist.focus();
@@ -746,30 +749,30 @@ class App extends React.Component<any, any> {
         const showGistInput = !meta || !description || (this.txtGist && this.txtGist == document.activeElement);
 
         return (
-            <div id="body" onClick={e => this.handleBodyClick(e)}>
+            <div id="body" onClick={e => this.handleBodyClick(e) }>
                 <div className="titlebar">
                     <div className="container">
                         <a href="https://servicestack.net" title="servicestack.net" target="_blank"><img id="logo" src="img/logo-32-inverted.png" /></a>
                         <h3>Gistlyn</h3> <sup style={{ padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}>BETA</sup>
                         <div id="gist">
                             { meta
-                                ? <img src={ meta.owner_avatar_url } title={meta.owner_login} style={{ verticalAlign: "bottom", margin:"0 5px 2px 0" }} />
-                                : <span className="octicon octicon-logo-gist" style={{ verticalAlign: "bottom", margin:"0 6px 6px 0" }}></span> } 
+                                ? <img src={ meta.owner_avatar_url } title={meta.owner_login} style={{ verticalAlign: "bottom", margin: "0 5px 2px 0" }} />
+                                : <span className="octicon octicon-logo-gist" style={{ verticalAlign: "bottom", margin: "0 6px 6px 0" }}></span> }
 
-                            <input ref={e => this.txtGist = e} type="text" id="txtGist" placeholder="gist hash or url" 
-                                   style={{display: showGistInput ? "inline-block": "none"}} onBlur={toggleEdit}
-                                   value={this.props.gist}
-                                   onFocus={e => (e.target as HTMLInputElement).select() }
-                                   onChange={e => this.handleGistUpdate(e) } />
+                            <input ref={e => this.txtGist = e} type="text" id="txtGist" placeholder="gist hash or url"
+                                style={{ display: showGistInput ? "inline-block" : "none" }} onBlur={toggleEdit}
+                                value={this.props.gist}
+                                onFocus={e => (e.target as HTMLInputElement).select() }
+                                onChange={e => this.handleGistUpdate(e) } />
 
-                            <div id="desc-overlay" style={{display: showGistInput ? "none" : "inline-block"}}  onClick={toggleEdit}>
+                            <div id="desc-overlay" style={{ display: showGistInput ? "none" : "inline-block" }}  onClick={toggleEdit}>
                                 <div className="inner">
                                     <h2>
                                         {description}
                                     </h2>
 
                                     { meta && !meta.public
-                                        ? (<span style={{ position:"absolute", margin:"3px 0px 3px -40px", fontSize: 12, background: "#ffefc6", color: "#888", padding: "2px 4px", borderRadius: 3 }}
+                                        ? (<span style={{ position: "absolute", margin: "3px 0px 3px -40px", fontSize: 12, background: "#ffefc6", color: "#888", padding: "2px 4px", borderRadius: 3 }}
                                             title="This gist is private">secret</span>)
                                         : null }
 
@@ -778,9 +781,9 @@ class App extends React.Component<any, any> {
                             </div>
 
                             { main != null
-                                ? <i className="material-icons" style={{ color: "#0f9", fontSize: "30px", position:"absolute", margin: "-2px 0 0 7px"}}>check</i>
+                                ? <i className="material-icons" style={{ color: "#0f9", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}>check</i>
                                 : this.props.error
-                                    ? <i className="material-icons" style={{ color: "#CE93D8", fontSize: "30px", position: "absolute", margin:"-2px 0 0 7px" }}>error</i>
+                                    ? <i className="material-icons" style={{ color: "#CE93D8", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}>error</i>
                                     : null }
                         </div>
                         { !authUsername
@@ -793,21 +796,21 @@ class App extends React.Component<any, any> {
                                 </div>
                             )
                             : ([
-                                <div id="signed-in" style={{ position: "absolute", right: 5, cursor:"pointer" }} onClick={e => this.showPopup(e, this.userPopup) }>
+                                <div id="signed-in" style={{ position: "absolute", right: 5, cursor: "pointer" }} onClick={e => this.showPopup(e, this.userPopup) }>
                                     <span style={{ whiteSpace: "nowrap", fontSize: 14 }}>{activeSub.displayName}</span>
-                                    <img src={activeSub.profileUrl} style={{ verticalAlign: "middle", marginLeft:5, borderRadius:"50%" }} />
+                                    <img src={activeSub.profileUrl} style={{ verticalAlign: "middle", marginLeft: 5, borderRadius: "50%" }} />
                                 </div>,
-                                <div id="popup-user" className="popup" ref={e => this.userPopup = e } style={{ position:"absolute", top:42, right:0 }}>
+                                <div id="popup-user" className="popup" ref={e => this.userPopup = e } style={{ position: "absolute", top: 42, right: 0 }}>
                                     <div onClick={e => location.href = "/auth/logout" }>Sign out</div>
                                 </div>
-                            ])}
+                            ]) }
                     </div>
                 </div>
 
                 <div id="content">
                     <div id="ide">
                         <div id="editor">
-                            <div id="tabs" style={{display: this.props.files ? 'flex' : 'none'}}>
+                            <div id="tabs" style={{ display: this.props.files ? 'flex' : 'none' }}>
                                 {FileList.length > 0
                                     ? <i id="files-menu" className="material-icons" onClick={e => this.showPopup(e, this.filesPopup) }>arrow_drop_down</i> : null }
                                 {Tabs}
@@ -815,7 +818,7 @@ class App extends React.Component<any, any> {
                             <div id="popup-files" className="popup" ref={e => this.filesPopup = e }>
                                 {FileList}
                             </div>
-                            <CodeMirror value={source} options={options} onChange={src => this.updateSource(src)} />
+                            <CodeMirror value={source} options={options} onChange={src => this.updateSource(src) } />
                         </div>
                         <div id="preview">
                             {Preview}
@@ -826,37 +829,37 @@ class App extends React.Component<any, any> {
                 <div id="footer-spacer"></div>
 
                 <div id="footer">
-                    <div id="actions" style={{visibility:main ? "visible": "hidden"}} className="noselect">
-                        <div id="revert" onClick={e => this.revertGist(e.shiftKey)}>
+                    <div id="actions" style={{ visibility: main ? "visible" : "hidden" }} className="noselect">
+                        <div id="revert" onClick={e => this.revertGist(e.shiftKey) }>
                             <i className="material-icons">undo</i>
                             <p>Revert Changes</p>
                         </div>
                         { meta && meta.owner_login == authUsername
-                            ? (<div id="save" onClick={e => this.saveGist({}) }>
-                                   <i className="material-icons">save</i>
-                                   <p>Save Gist</p>
-                               </div>)
-                            : (<div id="saveas" onClick={e => authUsername ? this.saveGistAs() : this.signIn() } 
-                                    title={!authUsername ? "Sign-in to save gists" : "Save a copy in your Github gists"}>
-                                   <span className="octicon octicon-repo-forked" style={{ margin:"3px 3px 0 0" }}></span>
-                                   <p>{authUsername ? (shouldFork ? "Fork As" : "Save As") : "Sign-in to save"}</p>
-                               </div>)}
+                            ? (<div id="save" onClick={e => this.saveGist({}) } className={this.props.dirty ? "": "disabled"}>
+                                <i className="material-icons">save</i>
+                                <p>Save Gist</p>
+                            </div>)
+                            : (<div id="saveas" onClick={e => authUsername ? this.saveGistAs() : this.signIn() }
+                                title={!authUsername ? "Sign-in to save gists" : "Save a copy in your Github gists"}>
+                                <span className="octicon octicon-repo-forked" style={{ margin: "3px 3px 0 0" }}></span>
+                                <p>{authUsername ? (shouldFork ? "Fork As" : "Save As") : "Sign-in to save"}</p>
+                            </div>) }
                         { meta && meta.owner_login === authUsername && this.props.activeFileName && this.props.activeFileName !== "main.cs" && this.props.activeFileName !== "packages.config"
                             ? (<div id="delete-file" onClick={e => confirm(`Are you sure you want to delete '${this.props.activeFileName}?`) ? this.deleteFile(this.props.activeFileName) : null }>
-                                   <i className="material-icons">delete</i>
-                                   <p>Delete File</p>
-                               </div>)
+                                <i className="material-icons">delete </i>
+                                <p>Delete File</p>
+                            </div>)
                             : null }
                     </div>
-                    <div id="more-menu" style={{ position:"absolute", right: 5, bottom: 5, color:"#fff", cursor: "pointer" }}>
+                    <div id="more-menu" style={{ position: "absolute", right: 5, bottom: 5, color: "#fff", cursor: "pointer" }}>
                         <i className="material-icons" onClick={e => this.showPopup(e, this.morePopup) }>more_vert</i>
                     </div>
-                    <div id="popup-more" className="popup" ref={e => this.morePopup = e } style={{ position:"absolute", bottom:42, right:0 }}>
+                    <div id="popup-more" className="popup" ref={e => this.morePopup = e } style={{ position: "absolute", bottom: 42, right: 0 }}>
                         {MorePopup}
                     </div>
                 </div>
 
-                <div id="run" className={main == null ? "disabled" : ""} onClick={e => !isScriptRunning ? this.run() : this.cancel()}>
+                <div id="run" className={main == null ? "disabled" : ""} onClick={e => !isScriptRunning ? this.run() : this.cancel() }>
                     {main != null
                         ? (!isScriptRunning
                             ? <i className="material-icons" title="run">play_circle_outline</i>
@@ -884,7 +887,7 @@ if (stateJson) {
         console.log('ERROR loading state:', e, stateJson);
         localStorage.removeItem(StateKey);
     }
-} 
+}
 
 var qsGist = queryString(location.href)["gist"] || GistTemplates.NewGist;
 if (qsGist != (state && state.gist)) {
