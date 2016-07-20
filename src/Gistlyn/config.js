@@ -15,6 +15,7 @@ System.config({
     "isomorphic-fetch": "npm:isomorphic-fetch@2.2.1",
     "jquery": "npm:jquery@2.2.4",
     "jspm": "npm:jspm@0.16.39",
+    "marked": "npm:marked@0.3.5",
     "octicons": "npm:octicons@4.2.0",
     "react": "npm:react@15.2.1",
     "react-codemirror": "npm:react-codemirror@0.2.6",
