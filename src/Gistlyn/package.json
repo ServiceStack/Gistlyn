@@ -13,6 +13,7 @@
       "es6-shim": "github:es-shims/es6-shim@^0.35.0",
       "isomorphic-fetch": "^2.2.1",
       "jquery": "^2.2.2",
+      "marked": "^0.3.5",
       "octicons": "^4.2.0",
       "react": "^15.0.1",
       "react-codemirror": "^0.2.6",

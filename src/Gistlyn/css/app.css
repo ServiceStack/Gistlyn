@@ -144,6 +144,23 @@ html,body,#app,#body {
     font-size: 11px;
 }
 
+#btnCollections {
+    position: absolute;
+    margin: 0px 0 0 45px;
+    padding: 0 5px;
+    color: #6ab5e8;
+    font-size: 30px;
+    height: 37px;
+    cursor: pointer;
+}
+#btnCollections:hover {
+    color: #cef;
+}
+#btnCollections.active {
+    color: #f7f7f7;
+    background: #01215A;
+}
+
 #content {
     background: #fff;
     height: 100%;
@@ -317,7 +334,6 @@ html,body,#app,#body {
     color: red;
 }
 #console pre.success {
-    color: red;
     color: #3c763d;
 }
 
@@ -327,12 +343,11 @@ html,body,#app,#body {
     overflow: hidden;
 }
 
-#status, #vars, #errors, #placeholder {
+#status, #vars, #errors, #placeholder, #collections {
     flex: 1;
     overflow: auto;
 }
-#console {
-}
+
 #console .clear-btn {
     position: absolute;
     right: 4px;
@@ -345,16 +360,24 @@ html,body,#app,#body {
     color: #444;
 }
 
-#vars thead, #vars thead tr {
+#collections {
+    background: #fff;
+}
+#collections .markdown {
+    line-height: 20px;
+}
+
+#vars thead, #vars thead tr, 
+#collections thead, #collections thead tr {
     background: #01215A;
 }
-#vars th {
+#vars th, #collections th {
     text-align: left;
     color: #fff;
     padding: 4px 12px;
     line-height: 24px;
 }
-#vars td {
+#vars td, #collections td {
     padding: 4px 12px;
     font-size: 14px;
 }

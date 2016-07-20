@@ -48,6 +48,7 @@ const ScriptStatusError = ["Cancelled", "CompiledWithErrors", "ThrowedException"
 const GistTemplates = {
     NewGist: "4fab2fa13aade23c81cabe83314c3cd0",
     NewPrivateGist: "7eaa8f65869fa6682913e3517bec0f7e",
+    HomeCollection: "2cc6b5db6afd3ccb0d0149e55fdb3a6a",
     Gists: ["4fab2fa13aade23c81cabe83314c3cd0", "7eaa8f65869fa6682913e3517bec0f7e"]
 };
 
@@ -103,7 +104,10 @@ var sse = new ServerEventsClient("/", ["gist"], {
         error: state.error,
         scriptStatus: state.scriptStatus,
         dialog: state.dialog,
-        dirty: state.dirty
+        dirty: state.dirty,
+        collection: state.collection,
+        collectionHtml: state.collectionHtml,
+        showCollection: state.showCollection
     }),
     (dispatch) => ({
         changeGist: (gist: string, options = {}) => dispatch({ type: 'GIST_CHANGE', gist, options }),
@@ -121,7 +125,8 @@ var sse = new ServerEventsClient("/", ["gist"], {
         setExpression: (expression: string) => dispatch({ type: 'EXPRESSION_SET', expression }),
         setExpressionResult: (expressionResult: any) => dispatch({ type: 'EXPRESSION_LOAD', expressionResult }),
         showDialog: (dialog: string) => dispatch({ type: 'DIALOG_SHOW', dialog }),
-        setDirty: (dirty: boolean) => dispatch({ type: 'DIRTY_SET', dirty })
+        setDirty: (dirty: boolean) => dispatch({ type: 'DIRTY_SET', dirty }),
+        changeCollection: (id: string, showCollection: boolean) => dispatch({ type: 'COLLECTION_CHANGE', collection: { id }, showCollection })
     })
 )
 class App extends React.Component<any, any> {
@@ -586,7 +591,8 @@ class App extends React.Component<any, any> {
             if (authUsername && meta && meta.owner_login === authUsername) {
                 Tabs.push((
                     <div title="Add new file" onClick={e => this.props.editFileName("+") }
-                        className={this.props.editingFileName === "+" ? "active" : ""}>
+                        className={this.props.editingFileName === "+" ? "active" : ""}
+                        style={{padding:"4px 6px"}}>
                         {this.props.editingFileName !== "+"
                             ? <i className="material-icons" style={{ fontSize: 13 }}>add</i>
                             : <input type="text"className="txtFileName"
@@ -607,7 +613,46 @@ class App extends React.Component<any, any> {
 
         var Preview = [];
 
-        if (this.props.error != null) {
+        const showCollection = this.props.showCollection && this.props.collection && this.props.collection.html != null;
+        if (showCollection) {
+            Preview.push((
+                <div id="collections" className="section">
+                    <table style={{ width: "100%" }}>
+                        <thead>
+                            <tr><th>{this.props.collection.description || "Collections"}</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div className="markdown"
+                                        onClick={e => {
+                                            var a = e.target as HTMLAnchorElement;
+                                            if (a && a.href) {
+                                                const qs = queryString(a.href);
+                                                if (qs["gist"] || qs["collection"]) {
+                                                    e.preventDefault();
+                                                    if (qs["gist"])
+                                                        this.props.changeGist(qs["gist"]);
+                                                    else if (qs["collection"])
+                                                        this.props.changeCollection(qs["collection"], true);
+                                                }
+                                            }
+                                        }}
+                                        dangerouslySetInnerHTML={{ __html: this.props.collection.html }} />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>));
+
+            if (this.props.collection.id === GistTemplates.HomeCollection) {
+                Preview.push((
+                    <div id="livelist" style={{ position:"absolute", top:80, right:5 }}>
+                        <h3>History</h3>
+                    </div>));
+            }
+
+        } else if (this.props.error != null) {
             var code = this.props.error.errorCode ? `(${this.props.error.errorCode}) ` : "";
             Preview.push((
                 <div id="errors" className="section">
@@ -785,6 +830,11 @@ class App extends React.Component<any, any> {
                                 : this.props.error
                                     ? <i className="material-icons" style={{ color: "#CE93D8", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}>error</i>
                                     : null }
+
+                            <i id="btnCollections"
+                                onClick={e => this.props.changeCollection((this.props.collection && this.props.collection.id) || GistTemplates.HomeCollection, !showCollection) }
+                                className={"material-icons" + (showCollection ? " active" : "")}>apps</i>
+
                         </div>
                         { !authUsername
                             ? (
@@ -889,9 +939,19 @@ if (stateJson) {
     }
 }
 
-var qsGist = queryString(location.href)["gist"] || GistTemplates.NewGist;
+const qs = queryString(location.href);
+var qsGist = qs["gist"] || GistTemplates.NewGist;
 if (qsGist != (state && state.gist)) {
     store.dispatch({ type: 'GIST_CHANGE', gist: qsGist });
+}
+
+const qsCollection = qs["collection"];
+if (qsCollection) {
+    store.dispatch({
+        type: 'COLLECTION_CHANGE',
+        collection: { id: qsCollection },
+        showCollection: state.showCollection || qsCollection != (state && state.collection && state.collection.id)
+    });
 }
 
 window.onpopstate = e => {

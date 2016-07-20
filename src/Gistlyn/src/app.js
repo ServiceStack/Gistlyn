@@ -14,7 +14,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
     var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, react_codemirror_1, Gistlyn_dtos_1;
-    var options, ScriptStatusRunning, ScriptStatusError, GistTemplates, client, sse, App, stateJson, state, e, qsGist;
+    var options, ScriptStatusRunning, ScriptStatusError, GistTemplates, client, sse, App, stateJson, state, e, qs, qsGist, qsCollection;
     return {
         setters:[
             function (React_1) {
@@ -74,6 +74,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
             GistTemplates = {
                 NewGist: "4fab2fa13aade23c81cabe83314c3cd0",
                 NewPrivateGist: "7eaa8f65869fa6682913e3517bec0f7e",
+                HomeCollection: "2cc6b5db6afd3ccb0d0149e55fdb3a6a",
                 Gists: ["4fab2fa13aade23c81cabe83314c3cd0", "7eaa8f65869fa6682913e3517bec0f7e"]
             };
             react_ga_1.default.initialize("UA-80898009-1");
@@ -480,7 +481,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                             }
                         });
                         if (authUsername && meta && meta.owner_login === authUsername) {
-                            Tabs.push((React.createElement("div", {title: "Add new file", onClick: function (e) { return _this.props.editFileName("+"); }, className: this.props.editingFileName === "+" ? "active" : ""}, this.props.editingFileName !== "+"
+                            Tabs.push((React.createElement("div", {title: "Add new file", onClick: function (e) { return _this.props.editFileName("+"); }, className: this.props.editingFileName === "+" ? "active" : "", style: { padding: "4px 6px" }}, this.props.editingFileName !== "+"
                                 ? React.createElement("i", {className: "material-icons", style: { fontSize: 13 }}, "add")
                                 : React.createElement("input", {type: "text", className: "txtFileName", onBlur: function (e) { return _this.handleCreateFile(e); }, onKeyDown: function (e) { return e.keyCode === 13 ? e.target.blur() : null; }, onKeyUp: sizeToFit_1, size: "1", autoFocus: true}))));
                         }
@@ -491,7 +492,26 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     }
                     var isScriptRunning = ScriptStatusRunning.indexOf(this.props.scriptStatus) >= 0;
                     var Preview = [];
-                    if (this.props.error != null) {
+                    var showCollection = this.props.showCollection && this.props.collection && this.props.collection.html != null;
+                    if (showCollection) {
+                        Preview.push((React.createElement("div", {id: "collections", className: "section"}, React.createElement("table", {style: { width: "100%" }}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", null, this.props.collection.description || "Collections"))), React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("div", {className: "markdown", onClick: function (e) {
+                            var a = e.target;
+                            if (a && a.href) {
+                                var qs_1 = servicestack_client_1.queryString(a.href);
+                                if (qs_1["gist"] || qs_1["collection"]) {
+                                    e.preventDefault();
+                                    if (qs_1["gist"])
+                                        _this.props.changeGist(qs_1["gist"]);
+                                    else if (qs_1["collection"])
+                                        _this.props.changeCollection(qs_1["collection"], true);
+                                }
+                            }
+                        }, dangerouslySetInnerHTML: { __html: this.props.collection.html }}))))))));
+                        if (this.props.collection.id === GistTemplates.HomeCollection) {
+                            Preview.push((React.createElement("div", {id: "livelist", style: { position: "absolute", top: 80, right: 5 }}, React.createElement("h3", null, "History"))));
+                        }
+                    }
+                    else if (this.props.error != null) {
                         var code = this.props.error.errorCode ? "(" + this.props.error.errorCode + ") " : "";
                         Preview.push((React.createElement("div", {id: "errors", className: "section"}, React.createElement("div", {style: { margin: "25px 25px 40px 25px", color: "#a94442" }}, code, this.props.error.message), this.props.error.stackTrace != null
                             ? React.createElement("pre", {style: { color: "red", padding: "5px 30px" }}, this.props.error.stackTrace)
@@ -548,7 +568,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         ? React.createElement("i", {className: "material-icons", style: { color: "#0f9", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "check")
                         : this.props.error
                             ? React.createElement("i", {className: "material-icons", style: { color: "#CE93D8", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "error")
-                            : null), !authUsername
+                            : null, React.createElement("i", {id: "btnCollections", onClick: function (e) { return _this.props.changeCollection((_this.props.collection && _this.props.collection.id) || GistTemplates.HomeCollection, !showCollection); }, className: "material-icons" + (showCollection ? " active" : "")}, "apps")), !authUsername
                         ? (React.createElement("div", {id: "sign-in", style: { position: "absolute", right: 5 }}, React.createElement("a", {href: "/auth/github", style: { color: "#fff", textDecoration: "none" }}, React.createElement("span", {style: { whiteSpace: "nowrap", fontSize: 14 }}, "sign-in"), React.createElement("span", {style: { verticalAlign: "sub", margin: "0 0 0 10px" }, className: "mega-octicon octicon-mark-github", title: "Sign in with GitHub"}))))
                         : ([
                             React.createElement("div", {id: "signed-in", style: { position: "absolute", right: 5, cursor: "pointer" }, onClick: function (e) { return _this.showPopup(e, _this.userPopup); }}, React.createElement("span", {style: { whiteSpace: "nowrap", fontSize: 14 }}, activeSub.displayName), React.createElement("img", {src: activeSub.profileUrl, style: { verticalAlign: "middle", marginLeft: 5, borderRadius: "50%" }})),
@@ -581,7 +601,10 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         error: state.error,
                         scriptStatus: state.scriptStatus,
                         dialog: state.dialog,
-                        dirty: state.dirty
+                        dirty: state.dirty,
+                        collection: state.collection,
+                        collectionHtml: state.collectionHtml,
+                        showCollection: state.showCollection
                     }); }, function (dispatch) { return ({
                         changeGist: function (gist, options) {
                             if (options === void 0) { options = {}; }
@@ -601,7 +624,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         setExpression: function (expression) { return dispatch({ type: 'EXPRESSION_SET', expression: expression }); },
                         setExpressionResult: function (expressionResult) { return dispatch({ type: 'EXPRESSION_LOAD', expressionResult: expressionResult }); },
                         showDialog: function (dialog) { return dispatch({ type: 'DIALOG_SHOW', dialog: dialog }); },
-                        setDirty: function (dirty) { return dispatch({ type: 'DIRTY_SET', dirty: dirty }); }
+                        setDirty: function (dirty) { return dispatch({ type: 'DIRTY_SET', dirty: dirty }); },
+                        changeCollection: function (id, showCollection) { return dispatch({ type: 'COLLECTION_CHANGE', collection: { id: id }, showCollection: showCollection }); }
                     }); })
                 ], App);
                 return App;
@@ -621,9 +645,18 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     localStorage.removeItem(state_1.StateKey);
                 }
             }
-            qsGist = servicestack_client_1.queryString(location.href)["gist"] || GistTemplates.NewGist;
+            qs = servicestack_client_1.queryString(location.href);
+            qsGist = qs["gist"] || GistTemplates.NewGist;
             if (qsGist != (state && state.gist)) {
                 state_1.store.dispatch({ type: 'GIST_CHANGE', gist: qsGist });
+            }
+            qsCollection = qs["collection"];
+            if (qsCollection) {
+                state_1.store.dispatch({
+                    type: 'COLLECTION_CHANGE',
+                    collection: { id: qsCollection },
+                    showCollection: state.showCollection || qsCollection != (state && state.collection && state.collection.id)
+                });
             }
             window.onpopstate = function (e) {
                 if (!(e.state && e.state.id))

@@ -2,6 +2,7 @@
 import { getSortedFileNames } from './utils';
 import { queryString, appendQueryString, splitOnFirst } from './servicestack-client';
 import ReactGA from 'react-ga';
+import marked from 'marked';
 
 export const StateKey = "/v1/state";
 export const GistCacheKey = (gist) => `/v1/gists/${gist}`;
@@ -26,20 +27,47 @@ export interface IGistFile {
     content: string;
 }
 
-const updateHistory = (meta: IGistMeta) => {
+const updateHistory = (meta: IGistMeta, key:string) => {
     if (!meta) return;
     document.title = meta.description;
 
     if (history.pushState && (!history.state || history.state.id != meta.id)) {
         let qs = queryString(location.href);
-        let cleanUrl = splitOnFirst(location.href, '#')[0];
         var url = splitOnFirst(location.href, '?')[0];
-        qs["gist"] = meta.id;
+        qs[key] = meta.id;
         url = appendQueryString(url, qs);
         history.pushState(meta, meta.description, url);
         ReactGA.pageview(url);
     }
 };
+
+var collectionsCache = {};
+
+const createGistRequest = (state, gist) => {
+    const authUsername = state.activeSub && parseInt(state.activeSub.userId) > 0
+        ? state.activeSub.displayName
+        : null;
+
+    const disableCache = "?t=" + new Date().getTime();
+
+    var urlPrefix = authUsername //Auth requests gets bigger quota
+        ? "/proxy/"
+        : "https://api.github.com/";
+
+    const req = new Request(urlPrefix + "gists/" + gist + disableCache, authUsername ? { credentials: "include" } : null);
+    return req;
+};
+
+const createGistMeta = (r:any): IGistMeta => ({
+        id: r.id,
+        description: r.description,
+        public: r.public,
+        created_at: r.created_at,
+        updated_at: r.updated_at,
+        owner_login: r.owner && r.owner.login,
+        owner_id: r.owner && r.owner.id,
+        owner_avatar_url: r.owner && r.owner.avatar_url
+    });
 
 const updateGist = store => next => action => {
     var oldGist = store.getState().gist;
@@ -49,7 +77,7 @@ const updateGist = store => next => action => {
     if (action.type !== "LOAD") {
         localStorage.setItem(StateKey, JSON.stringify(state));
     } else {
-        updateHistory(state.meta);
+        updateHistory(state.meta, "gist");
     }
 
     const options = action.options || {};
@@ -59,36 +87,17 @@ const updateGist = store => next => action => {
             const gist = JSON.parse(json);
             const meta = gist.meta as IGistMeta;
             const files = gist.files;
-            updateHistory(meta);
+            updateHistory(meta, "gist");
             store.dispatch({ type: 'GIST_LOAD', meta, files, activeFileName: getSortedFileNames(files)[0] });
         } else {
-            const authUsername = state.activeSub && parseInt(state.activeSub.userId) > 0
-                ? state.activeSub.displayName
-                : null;
-
-            const disableCache = "?t=" + new Date().getTime();
-
-            var urlPrefix = authUsername //Auth requests gets bigger quota
-                ? "/proxy/"
-                : "https://api.github.com/";
-
-            fetch(new Request(urlPrefix + "gists/" + action.gist + disableCache, authUsername ? { credentials: "include" } : null))
+            fetch(createGistRequest(state, action.gist))
                 .then((res) => {
                     if (!res.ok) {
                         throw res;
                     } else {
                         return res.json().then((r) => {
-                            const meta: IGistMeta = {
-                                id: r.id,
-                                description: r.description,
-                                public: r.public,
-                                created_at: r.created_at,
-                                updated_at: r.updated_at,
-                                owner_login: r.owner && r.owner.login,
-                                owner_id: r.owner && r.owner.id,
-                                owner_avatar_url: r.owner && r.owner.avatar_url
-                            };
-                            updateHistory(meta);
+                            const meta = createGistMeta(r);
+                            updateHistory(meta, "gist");
                             localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: r.files, meta }));
                             store.dispatch({ type: 'GIST_LOAD', meta, files: r.files, activeFileName: options.activeFileName || getSortedFileNames(r.files)[0] });
                         });
@@ -109,7 +118,42 @@ const updateGist = store => next => action => {
         if (meta)
             store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, description: meta.description, stat: "exec", step: 1 });
     } else if (action.type === "GISTSTAT_INCR") {
-        console.log(state.gistStats);
+        //console.log(state.gistStats);
+    } else if (action.type === "COLLECTION_CHANGE" && action.collection && action.showCollection) {
+        var collection = collectionsCache[action.collection.id];
+        if (collection) {
+            store.dispatch({ type: 'COLLECTION_LOAD', collection: collection });
+            store.dispatch({ type: "GISTSTAT_INCR", gist: collection.id, collection: true, description: collection.description, stat: "load", step: 1 });
+        } else {
+            fetch(createGistRequest(state, action.collection.id))
+                .then((res) => {
+                    if (!res.ok) {
+                        throw res;
+                    } else {
+                        return res.json().then((r) => {
+                            const meta = createGistMeta(r);
+                            updateHistory(meta, "collection");
+                            const file = r.files["index.md"];
+                            if (!file) {
+                                store.dispatch({ type: 'ERROR_RAISE', error: { message: "Collection has no 'index.md'" } });
+                                return;
+                            }
+
+                            collection = {
+                                id: action.collection.id,
+                                description: meta.description,
+                                html: marked(file.content)
+                            };
+                            collectionsCache[collection.id] = collection;
+                            store.dispatch({ type: 'COLLECTION_LOAD', collection });
+                            store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, collection:true, description: meta.description, stat: "load", step: 1 });
+                        });
+                    }
+                })
+                .catch(res => {
+                    store.dispatch({ type: 'ERROR_RAISE', error: { code: res.status, message: `Collection with hash '${action.gist}' was ${res.statusText}` } });
+                });
+        }
     }
 
     return result;
@@ -132,8 +176,17 @@ const defaults = {
     expressionResult: null,
     dialog: null,
     gistStats: {},
-    dirty: false
+    dirty: false,
+    collection: null,
+    showCollection: false
 };
+
+const preserveDefaults = (state) => ({
+    activeSub: state.activeSub,
+    gistStats: state.gistStats,
+    collection: state.collection,
+    showCollection: state.showCollection
+});
 
 export let store = createStore(
     (state, action) => {
@@ -143,7 +196,7 @@ export let store = createStore(
             case 'SSE_CONNECT':
                 return Object.assign({}, state, { activeSub: action.activeSub });
             case 'GIST_CHANGE':
-                return Object.assign({}, defaults, { activeSub: state.activeSub, gistStats: state.gistStats }, { gist: action.gist });
+                return Object.assign({}, defaults, preserveDefaults(state), { gist: action.gist });
             case 'GIST_LOAD':
                 return Object.assign({}, state, { meta: action.meta, files: action.files, activeFileName: action.activeFileName, variables: [], logs: [], hasLoaded: true });
             case 'FILE_SELECT':
@@ -157,7 +210,7 @@ export let store = createStore(
             case 'CONSOLE_CLEAR':
                 return Object.assign({}, state, { logs: [{ msg: "" }] });
             case 'SCRIPT_STATUS':
-                return Object.assign({}, state, { scriptStatus: action.scriptStatus });
+                return Object.assign({}, state, { scriptStatus: action.scriptStatus, showCollection: false });
             case 'SOURCE_CHANGE':
                 const file = Object.assign({}, state.files[action.fileName], { content: action.content });
                 return Object.assign({}, state, { files: Object.assign({}, state.files, { [action.fileName]: file }), dirty: true });
@@ -173,6 +226,10 @@ export let store = createStore(
                 return Object.assign({}, state, { dialog: action.dialog });
             case 'DIRTY_SET':
                 return Object.assign({}, state, { dirty: action.dirty });
+            case 'COLLECTION_CHANGE':
+                return Object.assign({}, state, { collection: action.collection, showCollection: action.showCollection });
+            case 'COLLECTION_LOAD':
+                return Object.assign({}, state, { collection: action.collection, showCollection: true });
             case 'GISTSTAT_INCR':
                 const gistStats = state.gistStats;
                 const existingStat = gistStats[action.gist];
@@ -182,7 +239,7 @@ export let store = createStore(
                         ? Object.assign({}, gistStats, {
                             [action.gist]: Object.assign({}, existingStat, { [action.stat]: (existingStat[action.stat] || 0) + step, date: new Date().getTime() })
                         })
-                        : Object.assign({}, gistStats, { [action.gist]: { description: action.description, [action.stat]: step, date:new Date().getTime() } })
+                        : Object.assign({}, gistStats, { [action.gist]: { description: action.description, collection:action.collection, [action.stat]: step, date:new Date().getTime() } })
                 });
             default:
                 return state;
