@@ -677,6 +677,9 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     showCollection: (state && state.showCollection) || qsCollection != (state && state.collection && state.collection.id)
                 });
             }
+            else if (!state) {
+                state_1.store.dispatch({ type: 'COLLECTION_CHANGE', collection: { id: GistTemplates.HomeCollection }, showCollection: true });
+            }
             window.onpopstate = function (e) {
                 if (!(e.state && e.state.id))
                     return;

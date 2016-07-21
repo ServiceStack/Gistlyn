@@ -992,6 +992,8 @@ if (qsCollection) {
         collection: { id: qsCollection },
         showCollection: (state && state.showCollection) || qsCollection != (state && state.collection && state.collection.id)
     });
+} else if (!state) {
+    store.dispatch({ type: 'COLLECTION_CHANGE', collection: { id: GistTemplates.HomeCollection }, showCollection: true });
 }
 
 window.onpopstate = e => {
