@@ -349,6 +349,28 @@ html,body,#app,#body {
     overflow: auto;
 }
 
+#livelist {
+    font-size: 14px;
+    line-height: 22px;
+    background: #f7f7f7;
+}
+#livelist h3 {
+    font-size: 14px;
+    line-height: 24px;
+    background: #0371BE;
+    color: #f7f7f7;
+    padding: 2px 8px;
+}
+#livelist a {
+    padding: 2px 8px;
+    display: block;
+    text-decoration: none;
+    color: #444;
+}
+#livelist a:hover {
+    text-decoration: underline;
+}
+
 #console .clear-btn {
     position: absolute;
     right: 4px;

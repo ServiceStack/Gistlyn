@@ -134,18 +134,18 @@ const updateGist = store => next => action => {
     } else if (action.type === "GIST_LOAD") {
         const meta = state.meta as IGistMeta;
         if (meta)
-            store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, description: meta.description, stat: "load", step: 1 });
+            store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, description: meta.description, stat: "load", step: 1, owner_login: meta.owner_login });
     } else if (action.type === "VARS_LOAD") {
         const meta = state.meta as IGistMeta;
         if (meta)
-            store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, description: meta.description, stat: "exec", step: 1 });
+            store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, description: meta.description, stat: "exec", step: 1, owner_login: meta.owner_login });
     } else if (action.type === "GISTSTAT_INCR") {
         //console.log(state.gistStats);
     } else if (action.type === "COLLECTION_CHANGE" && action.collection && action.showCollection) {
         var collection = collectionsCache[action.collection.id];
         if (collection) {
             store.dispatch({ type: 'COLLECTION_LOAD', collection: collection });
-            store.dispatch({ type: "GISTSTAT_INCR", gist: collection.id, collection: true, description: collection.description, stat: "load", step: 1 });
+            store.dispatch({ type: "GISTSTAT_INCR", gist: collection.id, collection: true, description: collection.description, stat: "load", step: 1, owner_login: collection.owner_login });
             if (collection.meta["gist"] && collection.meta["gist"] !== state.gist) {
                 store.dispatch({ type: "GIST_CHANGE", gist: collection.meta["gist"] });
             }
@@ -168,13 +168,14 @@ const updateGist = store => next => action => {
 
                             collection = {
                                 id: action.collection.id,
+                                owner_login: meta.owner_login,
                                 description: meta.description,
                                 html: marked(md.markdown),
                                 meta: md.meta || {}
                             };
                             collectionsCache[collection.id] = collection;
                             store.dispatch({ type: 'COLLECTION_LOAD', collection });
-                            store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, collection: true, description: meta.description, stat: "load", step: 1 });
+                            store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, collection: true, description: meta.description, stat: "load", step: 1, owner_login: collection.owner_login });
                             if (collection.meta["gist"] && collection.meta["gist"] !== state.gist) {
                                 store.dispatch({ type: "GIST_CHANGE", gist: collection.meta["gist"] });
                             }
@@ -270,7 +271,7 @@ export let store = createStore(
                         ? Object.assign({}, gistStats, {
                             [action.gist]: Object.assign({}, existingStat, { [action.stat]: (existingStat[action.stat] || 0) + step, date: new Date().getTime() })
                         })
-                        : Object.assign({}, gistStats, { [action.gist]: { description: action.description, collection:action.collection, [action.stat]: step, date:new Date().getTime() } })
+                        : Object.assign({}, gistStats, { [action.gist]: { id:action.gist, description: action.description, collection:action.collection, [action.stat]: step, owner_login:action.owner_login, date:new Date().getTime() } })
                 });
             default:
                 return state;

@@ -49,7 +49,7 @@ const GistTemplates = {
     NewGist: "4fab2fa13aade23c81cabe83314c3cd0",
     NewPrivateGist: "7eaa8f65869fa6682913e3517bec0f7e",
     HomeCollection: "2cc6b5db6afd3ccb0d0149e55fdb3a6a",
-    Gists: ["4fab2fa13aade23c81cabe83314c3cd0", "7eaa8f65869fa6682913e3517bec0f7e"]
+    Gists: ["4fab2fa13aade23c81cabe83314c3cd0", "7eaa8f65869fa6682913e3517bec0f7e", "2cc6b5db6afd3ccb0d0149e55fdb3a6a"]
 };
 
 ReactGA.initialize("UA-80898009-1");
@@ -105,8 +105,8 @@ var sse = new ServerEventsClient("/", ["gist"], {
         scriptStatus: state.scriptStatus,
         dialog: state.dialog,
         dirty: state.dirty,
+        gistStats: state.gistStats,
         collection: state.collection,
-        collectionHtml: state.collectionHtml,
         showCollection: state.showCollection
     }),
     (dispatch) => ({
@@ -592,7 +592,7 @@ class App extends React.Component<any, any> {
                 Tabs.push((
                     <div title="Add new file" onClick={e => this.props.editFileName("+") }
                         className={this.props.editingFileName === "+" ? "active" : ""}
-                        style={{padding:"4px 6px"}}>
+                        style={{ padding: "4px 6px" }}>
                         {this.props.editingFileName !== "+"
                             ? <i className="material-icons" style={{ fontSize: 13 }}>add</i>
                             : <input type="text"className="txtFileName"
@@ -615,8 +615,62 @@ class App extends React.Component<any, any> {
 
         const showCollection = this.props.showCollection && this.props.collection && this.props.collection.html != null;
         if (showCollection) {
+
+            var LiveLists = null;
+            if (this.props.collection.id === GistTemplates.HomeCollection) {
+                const allGists = Object.keys(this.props.gistStats)
+                    .map(k => this.props.gistStats[k])
+                    .filter(x => GistTemplates.Gists.indexOf(x.id) === -1);
+                const sortByRecent = gists => {
+                    gists.sort((a, b) => b.date - a.date);
+                    return gists;
+                };
+                var recentGists = sortByRecent(allGists.filter(x => !x.collection));
+                var recentCollections = sortByRecent(allGists.filter(x => x.collection));
+                var myGists = recentGists.filter(x => x.owner_login === authUsername);
+
+                if (recentGists.length > 0 || recentCollections.length > 0) {
+                    LiveLists = (
+                        <div id="livelist" style={{ float: "right", margin:"-4px -12px 0 0" }}>
+                            {recentGists.length > 0
+                                ? (<div>
+                                    <h3>Recent Gists</h3>
+                                    { recentGists.slice(0, 10).map(x => <a href={`?gist=${x.id}`}>{x.description}</a>) }
+                                </div>)
+                                : null}
+
+                            {recentCollections.length > 0
+                                ? (<div>
+                                    <h3>Recent Collections</h3>
+                                    { recentCollections.slice(0, 10).map(x => <a href={`?collection=${x.id}`}>{x.description}</a>) }
+                                </div>)
+                                : null}
+
+                            {myGists.length > 0
+                                ? (<div>
+                                    <h3>My Gists</h3>
+                                    { myGists.slice(0, 30).map(x => <a href={`?gist=${x.id}`}>{x.description}</a>) }
+                                </div>)
+                                : null}
+                        </div>);
+                }
+            }
+
             Preview.push((
-                <div id="collections" className="section">
+                <div id="collections" className="section"
+                    onClick={e => {
+                        var a = e.target as HTMLAnchorElement;
+                        if (a && a.href) {
+                            const qs = queryString(a.href);
+                            if (qs["gist"] || qs["collection"]) {
+                                e.preventDefault();
+                                if (qs["gist"])
+                                    this.props.changeGist(qs["gist"]);
+                                else if (qs["collection"])
+                                    this.props.changeCollection(qs["collection"], true);
+                            }
+                        }
+                    }}>
                     <table style={{ width: "100%" }}>
                         <thead>
                             <tr><th>{this.props.collection.description || "Collections"}</th></tr>
@@ -624,33 +678,14 @@ class App extends React.Component<any, any> {
                         <tbody>
                             <tr>
                                 <td>
+                                    {LiveLists}
                                     <div className="markdown"
-                                        onClick={e => {
-                                            var a = e.target as HTMLAnchorElement;
-                                            if (a && a.href) {
-                                                const qs = queryString(a.href);
-                                                if (qs["gist"] || qs["collection"]) {
-                                                    e.preventDefault();
-                                                    if (qs["gist"])
-                                                        this.props.changeGist(qs["gist"]);
-                                                    else if (qs["collection"])
-                                                        this.props.changeCollection(qs["collection"], true);
-                                                }
-                                            }
-                                        }}
                                         dangerouslySetInnerHTML={{ __html: this.props.collection.html }} />
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>));
-
-            if (this.props.collection.id === GistTemplates.HomeCollection) {
-                Preview.push((
-                    <div id="livelist" style={{ position:"absolute", top:80, right:5 }}>
-                        <h3>History</h3>
-                    </div>));
-            }
 
         } else if (this.props.error != null) {
             var code = this.props.error.errorCode ? `(${this.props.error.errorCode}) ` : "";
@@ -670,7 +705,7 @@ class App extends React.Component<any, any> {
                         <img src="/img/ajax-loader.gif" style={{ float: "right", margin: "5px 0 0 0" }} />
                         <i className="material-icons" style={{ position: "absolute" }}>build</i>
                         <p style={{ padding: "0 0 0 30px", fontSize: "22px" }}>Executing Script</p>
-                        <div id="splash" style={{ padding:30 }}>
+                        <div id="splash" style={{ padding: 30 }}>
                             <img src="/img/compiling.png" />
                         </div>
                     </div>
@@ -836,7 +871,7 @@ class App extends React.Component<any, any> {
 
                             <i id="btnCollections"
                                 onClick={e => this.props.changeCollection((this.props.collection && this.props.collection.id) || GistTemplates.HomeCollection, !showCollection) }
-                                className={"material-icons" + (showCollection ? " active" : "")}>apps</i>
+                                className={"material-icons" + (showCollection ? " active" : "") }>apps</i>
 
                         </div>
                         { !authUsername
@@ -888,7 +923,7 @@ class App extends React.Component<any, any> {
                             <p>Revert Changes</p>
                         </div>
                         { meta && meta.owner_login == authUsername
-                            ? (<div id="save" onClick={e => this.saveGist({}) } className={this.props.dirty ? "": "disabled"}>
+                            ? (<div id="save" onClick={e => this.saveGist({}) } className={this.props.dirty ? "" : "disabled"}>
                                 <i className="material-icons">save</i>
                                 <p>Save Gist</p>
                             </div>)
@@ -953,7 +988,7 @@ if (qsCollection) {
     store.dispatch({
         type: 'COLLECTION_CHANGE',
         collection: { id: qsCollection },
-        showCollection: state.showCollection || qsCollection != (state && state.collection && state.collection.id)
+        showCollection: (state && state.showCollection) || qsCollection != (state && state.collection && state.collection.id)
     });
 }
 

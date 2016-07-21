@@ -75,7 +75,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                 NewGist: "4fab2fa13aade23c81cabe83314c3cd0",
                 NewPrivateGist: "7eaa8f65869fa6682913e3517bec0f7e",
                 HomeCollection: "2cc6b5db6afd3ccb0d0149e55fdb3a6a",
-                Gists: ["4fab2fa13aade23c81cabe83314c3cd0", "7eaa8f65869fa6682913e3517bec0f7e"]
+                Gists: ["4fab2fa13aade23c81cabe83314c3cd0", "7eaa8f65869fa6682913e3517bec0f7e", "2cc6b5db6afd3ccb0d0149e55fdb3a6a"]
             };
             react_ga_1.default.initialize("UA-80898009-1");
             client = new servicestack_client_1.JsonServiceClient("/");
@@ -494,7 +494,29 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     var Preview = [];
                     var showCollection = this.props.showCollection && this.props.collection && this.props.collection.html != null;
                     if (showCollection) {
-                        Preview.push((React.createElement("div", {id: "collections", className: "section"}, React.createElement("table", {style: { width: "100%" }}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", null, this.props.collection.description || "Collections"))), React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("div", {className: "markdown", onClick: function (e) {
+                        var LiveLists = null;
+                        if (this.props.collection.id === GistTemplates.HomeCollection) {
+                            var allGists = Object.keys(this.props.gistStats)
+                                .map(function (k) { return _this.props.gistStats[k]; })
+                                .filter(function (x) { return GistTemplates.Gists.indexOf(x.id) === -1; });
+                            var sortByRecent = function (gists) {
+                                gists.sort(function (a, b) { return b.date - a.date; });
+                                return gists;
+                            };
+                            var recentGists = sortByRecent(allGists.filter(function (x) { return !x.collection; }));
+                            var recentCollections = sortByRecent(allGists.filter(function (x) { return x.collection; }));
+                            var myGists = recentGists.filter(function (x) { return x.owner_login === authUsername; });
+                            if (recentGists.length > 0 || recentCollections.length > 0) {
+                                LiveLists = (React.createElement("div", {id: "livelist", style: { float: "right", margin: "-4px -12px 0 0" }}, recentGists.length > 0
+                                    ? (React.createElement("div", null, React.createElement("h3", null, "Recent Gists"), recentGists.slice(0, 10).map(function (x) { return React.createElement("a", {href: "?gist=" + x.id}, x.description); })))
+                                    : null, recentCollections.length > 0
+                                    ? (React.createElement("div", null, React.createElement("h3", null, "Recent Collections"), recentCollections.slice(0, 10).map(function (x) { return React.createElement("a", {href: "?collection=" + x.id}, x.description); })))
+                                    : null, myGists.length > 0
+                                    ? (React.createElement("div", null, React.createElement("h3", null, "My Gists"), myGists.slice(0, 30).map(function (x) { return React.createElement("a", {href: "?gist=" + x.id}, x.description); })))
+                                    : null));
+                            }
+                        }
+                        Preview.push((React.createElement("div", {id: "collections", className: "section", onClick: function (e) {
                             var a = e.target;
                             if (a && a.href) {
                                 var qs_1 = servicestack_client_1.queryString(a.href);
@@ -506,10 +528,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                                         _this.props.changeCollection(qs_1["collection"], true);
                                 }
                             }
-                        }, dangerouslySetInnerHTML: { __html: this.props.collection.html }}))))))));
-                        if (this.props.collection.id === GistTemplates.HomeCollection) {
-                            Preview.push((React.createElement("div", {id: "livelist", style: { position: "absolute", top: 80, right: 5 }}, React.createElement("h3", null, "History"))));
-                        }
+                        }}, React.createElement("table", {style: { width: "100%" }}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", null, this.props.collection.description || "Collections"))), React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, LiveLists, React.createElement("div", {className: "markdown", dangerouslySetInnerHTML: { __html: this.props.collection.html }}))))))));
                     }
                     else if (this.props.error != null) {
                         var code = this.props.error.errorCode ? "(" + this.props.error.errorCode + ") " : "";
@@ -602,8 +621,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         scriptStatus: state.scriptStatus,
                         dialog: state.dialog,
                         dirty: state.dirty,
+                        gistStats: state.gistStats,
                         collection: state.collection,
-                        collectionHtml: state.collectionHtml,
                         showCollection: state.showCollection
                     }); }, function (dispatch) { return ({
                         changeGist: function (gist, options) {
@@ -655,7 +674,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                 state_1.store.dispatch({
                     type: 'COLLECTION_CHANGE',
                     collection: { id: qsCollection },
-                    showCollection: state.showCollection || qsCollection != (state && state.collection && state.collection.id)
+                    showCollection: (state && state.showCollection) || qsCollection != (state && state.collection && state.collection.id)
                 });
             }
             window.onpopstate = function (e) {

@@ -126,12 +126,12 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                 else if (action.type === "GIST_LOAD") {
                     var meta = state.meta;
                     if (meta)
-                        store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, description: meta.description, stat: "load", step: 1 });
+                        store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, description: meta.description, stat: "load", step: 1, owner_login: meta.owner_login });
                 }
                 else if (action.type === "VARS_LOAD") {
                     var meta = state.meta;
                     if (meta)
-                        store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, description: meta.description, stat: "exec", step: 1 });
+                        store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, description: meta.description, stat: "exec", step: 1, owner_login: meta.owner_login });
                 }
                 else if (action.type === "GISTSTAT_INCR") {
                 }
@@ -139,7 +139,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                     var collection = collectionsCache[action.collection.id];
                     if (collection) {
                         store.dispatch({ type: 'COLLECTION_LOAD', collection: collection });
-                        store.dispatch({ type: "GISTSTAT_INCR", gist: collection.id, collection: true, description: collection.description, stat: "load", step: 1 });
+                        store.dispatch({ type: "GISTSTAT_INCR", gist: collection.id, collection: true, description: collection.description, stat: "load", step: 1, owner_login: collection.owner_login });
                         if (collection.meta["gist"] && collection.meta["gist"] !== state.gist) {
                             store.dispatch({ type: "GIST_CHANGE", gist: collection.meta["gist"] });
                         }
@@ -162,13 +162,14 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                                     var md = parseMarkdownMeta(file.content);
                                     collection = {
                                         id: action.collection.id,
+                                        owner_login: meta.owner_login,
                                         description: meta.description,
                                         html: marked_1.default(md.markdown),
                                         meta: md.meta || {}
                                     };
                                     collectionsCache[collection.id] = collection;
                                     store.dispatch({ type: 'COLLECTION_LOAD', collection: collection });
-                                    store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, collection: true, description: meta.description, stat: "load", step: 1 });
+                                    store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, collection: true, description: meta.description, stat: "load", step: 1, owner_login: collection.owner_login });
                                     if (collection.meta["gist"] && collection.meta["gist"] !== state.gist) {
                                         store.dispatch({ type: "GIST_CHANGE", gist: collection.meta["gist"] });
                                     }
@@ -260,7 +261,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                                     _c[action.gist] = Object.assign({}, existingStat, (_d = {}, _d[action.stat] = (existingStat[action.stat] || 0) + step, _d.date = new Date().getTime(), _d)),
                                     _c
                                 ))
-                                : Object.assign({}, gistStats, (_e = {}, _e[action.gist] = (_f = { description: action.description, collection: action.collection }, _f[action.stat] = step, _f.date = new Date().getTime(), _f), _e))
+                                : Object.assign({}, gistStats, (_e = {}, _e[action.gist] = (_f = { id: action.gist, description: action.description, collection: action.collection }, _f[action.stat] = step, _f.owner_login = action.owner_login, _f.date = new Date().getTime(), _f), _e))
                         });
                     default:
                         return state;
