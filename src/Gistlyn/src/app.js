@@ -1,5 +1,5 @@
 /// <reference path='../typings/index.d.ts'/>
-System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './state', './servicestack-client', './json-viewer', 'react-codemirror', "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js", "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js", "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js", "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js", "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js", "./codemirror.js", './Gistlyn.dtos'], function(exports_1, context_1) {
+System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './state', './servicestack-client', './json-viewer', './components/SaveAsDialog', 'react-codemirror', "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js", "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js", "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js", "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js", "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js", "./codemirror.js", './Gistlyn.dtos'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -13,7 +13,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
         else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
-    var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, react_codemirror_1, Gistlyn_dtos_1;
+    var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, SaveAsDialog_1, react_codemirror_1, Gistlyn_dtos_1;
     var options, ScriptStatusRunning, ScriptStatusError, GistTemplates, client, sse, App, stateJson, state, e, qs, qsGist, qsCollection;
     return {
         setters:[
@@ -40,6 +40,9 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
             },
             function (json_viewer_1_1) {
                 json_viewer_1 = json_viewer_1_1;
+            },
+            function (SaveAsDialog_1_1) {
+                SaveAsDialog_1 = SaveAsDialog_1_1;
             },
             function (react_codemirror_1_1) {
                 react_codemirror_1 = react_codemirror_1_1;
@@ -493,7 +496,13 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     var isScriptRunning = ScriptStatusRunning.indexOf(this.props.scriptStatus) >= 0;
                     var Preview = [];
                     var showCollection = this.props.showCollection && this.props.collection && this.props.collection.html != null;
-                    if (showCollection) {
+                    if (this.props.error != null) {
+                        var code = this.props.error.errorCode ? "(" + this.props.error.errorCode + ") " : "";
+                        Preview.push((React.createElement("div", {id: "errors", className: "section"}, React.createElement("div", {style: { margin: "25px 25px 40px 25px", color: "#a94442" }}, code, this.props.error.message), this.props.error.stackTrace != null
+                            ? React.createElement("pre", {style: { color: "red", padding: "5px 30px" }}, this.props.error.stackTrace)
+                            : null)));
+                    }
+                    else if (showCollection) {
                         var LiveLists = null;
                         if (this.props.collection.id === GistTemplates.HomeCollection) {
                             var allGists = Object.keys(this.props.gistStats)
@@ -530,12 +539,6 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                             }
                         }}, React.createElement("table", {style: { width: "100%" }}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", null, this.props.collection.description || "Collections"))), React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, LiveLists, React.createElement("div", {id: "markdown", dangerouslySetInnerHTML: { __html: this.props.collection.html }}))))))));
                     }
-                    else if (this.props.error != null) {
-                        var code = this.props.error.errorCode ? "(" + this.props.error.errorCode + ") " : "";
-                        Preview.push((React.createElement("div", {id: "errors", className: "section"}, React.createElement("div", {style: { margin: "25px 25px 40px 25px", color: "#a94442" }}, code, this.props.error.message), this.props.error.stackTrace != null
-                            ? React.createElement("pre", {style: { color: "red", padding: "5px 30px" }}, this.props.error.stackTrace)
-                            : null)));
-                    }
                     else if (isScriptRunning) {
                         Preview.push((React.createElement("div", {id: "status", className: "section"}, React.createElement("div", {style: { margin: '40px', color: "#444", width: "215px" }, title: "executing..."}, React.createElement("img", {src: "/img/ajax-loader.gif", style: { float: "right", margin: "5px 0 0 0" }}), React.createElement("i", {className: "material-icons", style: { position: "absolute" }}, "build"), React.createElement("p", {style: { padding: "0 0 0 30px", fontSize: "22px" }}, "Executing Script"), React.createElement("div", {id: "splash", style: { padding: 30 }}, React.createElement("img", {src: "/img/compiling.png"}))))));
                     }
@@ -552,19 +555,6 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     }
                     if (this.props.logs.length > 0 && !this.props.showCollection) {
                         Preview.push((React.createElement("div", {id: "console", className: "section", style: { borderTop: "solid 1px #ddd", borderBottom: "solid 1px #ddd", font: "14px/20px arial", height: "350px" }}, React.createElement("b", {style: { background: "#444", color: "#fff", padding: "1px 8px", position: "absolute", right: "3px", margin: "-22px 0" }}, "console"), React.createElement("i", {className: "material-icons clear-btn", title: "clear console", onClick: function (e) { return _this.props.clearConsole(); }}, "clear"), React.createElement("div", {className: "scroll", style: { overflow: "auto", maxHeight: "350px" }, ref: function (el) { return _this.consoleScroll = el; }}, React.createElement("table", {style: { width: "100%" }}, React.createElement("tbody", {style: { font: "13px/18px monospace", color: "#444" }}, this.props.logs.map(function (log) { return (React.createElement("tr", null, React.createElement("td", {style: { padding: "2px 8px", tabSize: 4 }}, React.createElement("pre", {className: log.cls}, log.msg)))); })))))));
-                    }
-                    var Dialog = null;
-                    if (this.props.dialog != null && meta != null) {
-                        if (this.props.dialog === "save-as") {
-                            var isPublic = meta.public;
-                            if (this.txtDescription) {
-                                description = this.txtDescription.value;
-                            }
-                            else {
-                                setTimeout(function () { return _this.txtDescription.select(); }, 0);
-                            }
-                            Dialog = (React.createElement("div", {id: "dialog", onClick: function (e) { return _this.props.showDialog(null); }, onKeyDown: function (e) { return e.keyCode === 27 ? _this.props.showDialog(null) : null; }}, React.createElement("div", {className: "dialog", ref: function (e) { return _this.dialog = e; }, onClick: function (e) { return e.stopPropagation(); }}, React.createElement("div", {className: "dialog-header"}, React.createElement("i", {className: "material-icons close", onClick: function (e) { return _this.props.showDialog(null); }}, "close"), shouldFork ? "Fork" : "Save", " Gist"), React.createElement("div", {className: "dialog-body"}, React.createElement("div", {className: "row"}, React.createElement("label", {htmlFor: "txtDescription"}, "Description"), React.createElement("input", {ref: function (e) { return _this.txtDescription = e; }, type: "text", id: "txtDescription", defaultValue: description, onKeyUp: function (e) { return _this.forceUpdate(); }, onKeyDown: function (e) { return e.keyCode == 13 && description ? _this.saveGist({ description: description }) : null; }, autoFocus: true})), React.createElement("div", {className: "row", style: { color: isPublic ? "#4CAF50" : "#9C27B0" }, title: "This gist is " + (isPublic ? "public" : "private")}, React.createElement("label", null), React.createElement("i", {className: "material-icons", style: { verticalAlign: "bottom", marginRight: 5, fontSize: 20 }}, "check"), "Is ", isPublic ? "public" : "private")), React.createElement("div", {className: "dialog-footer"}, React.createElement("img", {className: "loading", src: "/img/ajax-loader.gif", style: { margin: "5px 10px 0 0" }}), React.createElement("span", {className: "btn" + (description ? "" : " disabled"), onClick: function (e) { return description ? _this.saveGist({ description: description }) : null; }}, "Create ", shouldFork ? "Fork" : "Gist")))));
-                        }
                     }
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(GistTemplates.NewGist); }}, "New Gist")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(GistTemplates.NewPrivateGist); }}, "New Private Gist")));
@@ -587,7 +577,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         ? React.createElement("i", {className: "material-icons", style: { color: "#0f9", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "check")
                         : this.props.error
                             ? React.createElement("i", {className: "material-icons", style: { color: "#CE93D8", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "error")
-                            : null, React.createElement("i", {id: "btnCollections", onClick: function (e) { return _this.props.changeCollection((_this.props.collection && _this.props.collection.id) || GistTemplates.HomeCollection, !showCollection); }, className: "material-icons" + (showCollection ? " active" : "")}, "apps")), !authUsername
+                            : null, React.createElement("i", {id: "btnCollections", style: { visibility: main ? "visible" : "hidden" }, onClick: function (e) { return _this.props.changeCollection((_this.props.collection && _this.props.collection.id) || GistTemplates.HomeCollection, !showCollection); }, className: "material-icons" + (showCollection ? " active" : "")}, "apps")), !authUsername
                         ? (React.createElement("div", {id: "sign-in", style: { position: "absolute", right: 5 }}, React.createElement("a", {href: "/auth/github", style: { color: "#fff", textDecoration: "none" }}, React.createElement("span", {style: { whiteSpace: "nowrap", fontSize: 14 }}, "sign-in"), React.createElement("span", {style: { verticalAlign: "sub", margin: "0 0 0 10px" }, className: "mega-octicon octicon-mark-github", title: "Sign in with GitHub"}))))
                         : ([
                             React.createElement("div", {id: "signed-in", style: { position: "absolute", right: 5, cursor: "pointer" }, onClick: function (e) { return _this.showPopup(e, _this.userPopup); }}, React.createElement("span", {style: { whiteSpace: "nowrap", fontSize: 14 }}, activeSub.displayName), React.createElement("img", {src: activeSub.profileUrl, style: { verticalAlign: "middle", marginLeft: 5, borderRadius: "50%" }})),
@@ -601,7 +591,9 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         ? (!isScriptRunning
                             ? React.createElement("i", {className: "material-icons", title: "run"}, "play_circle_outline")
                             : React.createElement("i", {className: "material-icons", title: "cancel script", style: { color: "#FF5252" }}, "cancel"))
-                        : React.createElement("i", {className: "material-icons", title: "disabled"}, "play_circle_outline")), Dialog));
+                        : React.createElement("i", {className: "material-icons", title: "disabled"}, "play_circle_outline")), meta && this.props.dialog === "save-as"
+                        ? React.createElement(SaveAsDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, description: description, isPublic: meta.public, shouldFork: shouldFork, onSave: function (opt) { return _this.saveGist(opt); }, onHide: function () { return _this.props.showDialog(null); }})
+                        : null));
                 };
                 App = __decorate([
                     utils_1.reduxify(function (state) { return ({
@@ -685,12 +677,6 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     return;
                 state_1.store.dispatch({ type: 'GIST_CHANGE', gist: e.state.id });
             };
-            /* Example gists:
-            5b0435641091841a5eacff44946a22c0
-            3f7cd9cbe863747a904bba10ce34ee8f
-            efc71477cee60916ef71d839084d1afd
-            6831799881c92434f80e141c8a2699eb
-            */
             ReactDOM.render(React.createElement(react_redux_1.Provider, {store: state_1.store}, React.createElement(App, null)), document.getElementById("app"));
         }
     }

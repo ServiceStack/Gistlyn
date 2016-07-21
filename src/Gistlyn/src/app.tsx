@@ -9,6 +9,8 @@ import { store, StateKey, GistCacheKey, IGistMeta, IGistFile } from './state';
 import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnLast, humanize, dateFmt, timeFmt12 } from './servicestack-client';
 import { JsonViewer } from './json-viewer';
 
+import SaveAsDialog from './components/SaveAsDialog';
+
 import CodeMirror from 'react-codemirror';
 import "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js";
 import "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js";
@@ -446,10 +448,10 @@ class App extends React.Component<any, any> {
         ReactGA.event({ category: 'file', action: 'Delete File', label: fileName });
 
         fetch("/proxy/gists/" + this.props.gist, {
-            method: "PATCH",
-            credentials: "include",
-            body: json
-        })
+                method: "PATCH",
+                credentials: "include",
+                body: json
+            })
             .then((res) => {
                 this.props.changeGist(this.props.gist, { reload: true });
             })
@@ -614,8 +616,19 @@ class App extends React.Component<any, any> {
         var Preview = [];
 
         const showCollection = this.props.showCollection && this.props.collection && this.props.collection.html != null;
-        if (showCollection) {
 
+        if (this.props.error != null) {
+            var code = this.props.error.errorCode ? `(${this.props.error.errorCode}) ` : "";
+            Preview.push((
+                <div id="errors" className="section">
+                    <div style={{ margin: "25px 25px 40px 25px", color: "#a94442" }}>
+                        {code}{this.props.error.message}
+                    </div>
+                    { this.props.error.stackTrace != null
+                        ? <pre style={{ color: "red", padding: "5px 30px" }}>{this.props.error.stackTrace}</pre>
+                        : null}
+                </div>));
+        } else if (showCollection) {
             var LiveLists = null;
             if (this.props.collection.id === GistTemplates.HomeCollection) {
                 const allGists = Object.keys(this.props.gistStats)
@@ -672,7 +685,7 @@ class App extends React.Component<any, any> {
                                     this.props.changeCollection(qs["collection"], true);
                             }
                         }
-                    }}>
+                    } }>
                     <table style={{ width: "100%" }}>
                         <thead>
                             <tr><th>{this.props.collection.description || "Collections"}</th></tr>
@@ -687,18 +700,6 @@ class App extends React.Component<any, any> {
                             </tr>
                         </tbody>
                     </table>
-                </div>));
-
-        } else if (this.props.error != null) {
-            var code = this.props.error.errorCode ? `(${this.props.error.errorCode}) ` : "";
-            Preview.push((
-                <div id="errors" className="section">
-                    <div style={{ margin: "25px 25px 40px 25px", color: "#a94442" }}>
-                        {code}{this.props.error.message}
-                    </div>
-                    { this.props.error.stackTrace != null
-                        ? <pre style={{ color: "red", padding: "5px 30px" }}>{this.props.error.stackTrace}</pre>
-                        : null}
                 </div>));
         } else if (isScriptRunning) {
             Preview.push((
@@ -771,49 +772,6 @@ class App extends React.Component<any, any> {
                 </div>));
         }
 
-        var Dialog = null;
-        if (this.props.dialog != null && meta != null) {
-            if (this.props.dialog === "save-as") {
-                const isPublic = meta.public;
-                if (this.txtDescription) {
-                    description = this.txtDescription.value;
-                } else {
-                    setTimeout(() => this.txtDescription.select(), 0);
-                }
-                Dialog = (
-                    <div id="dialog" onClick={e => this.props.showDialog(null) } onKeyDown={e => e.keyCode === 27 ? this.props.showDialog(null) : null }>
-                        <div className="dialog" ref={e => this.dialog = e } onClick={e => e.stopPropagation() }>
-                            <div className="dialog-header">
-                                <i className="material-icons close" onClick={e => this.props.showDialog(null) }>close</i>
-                                {shouldFork ? "Fork" : "Save"} Gist
-                            </div>
-                            <div className="dialog-body">
-                                <div className="row">
-                                    <label htmlFor="txtDescription">Description</label>
-                                    <input ref={e => this.txtDescription = e} type="text" id="txtDescription"
-                                        defaultValue={ description }
-                                        onKeyUp={e => this.forceUpdate() }
-                                        onKeyDown={e => e.keyCode == 13 && description ? this.saveGist({ description }) : null }
-                                        autoFocus />
-                                </div>
-                                <div className="row" style={{ color: isPublic ? "#4CAF50" : "#9C27B0" }} title={ "This gist is " + (isPublic ? "public" : "private") }>
-                                    <label></label>
-                                    <i className="material-icons" style={{ verticalAlign: "bottom", marginRight: 5, fontSize: 20 }}>check</i>
-                                    Is {isPublic ? "public" : "private"}
-                                </div>
-                            </div>
-                            <div className="dialog-footer">
-                                <img className="loading" src="/img/ajax-loader.gif" style={{ margin: "5px 10px 0 0" }} />
-                                <span className={"btn" + (description ? "" : " disabled") }
-                                    onClick={e => description ? this.saveGist({ description }) : null }>
-                                    Create {shouldFork ? "Fork" : "Gist"}
-                                </span>
-                            </div>
-                        </div>
-                    </div>);
-            }
-        }
-
         MorePopup.push((
             <div onClick={e => this.props.changeGist(GistTemplates.NewGist) }>New Gist</div>));
         MorePopup.push((
@@ -871,7 +829,7 @@ class App extends React.Component<any, any> {
                                     ? <i className="material-icons" style={{ color: "#CE93D8", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}>error</i>
                                     : null }
 
-                            <i id="btnCollections"
+                            <i id="btnCollections" style={{ visibility: main ? "visible" : "hidden" }} 
                                 onClick={e => this.props.changeCollection((this.props.collection && this.props.collection.id) || GistTemplates.HomeCollection, !showCollection) }
                                 className={"material-icons" + (showCollection ? " active" : "") }>apps</i>
 
@@ -956,7 +914,11 @@ class App extends React.Component<any, any> {
                             : <i className="material-icons" title="cancel script" style={{ color: "#FF5252" }}>cancel</i>)
                         : <i className="material-icons" title="disabled">play_circle_outline</i>}
                 </div>
-                {Dialog}
+
+                {meta && this.props.dialog === "save-as"
+                    ? <SaveAsDialog dialogRef={e => this.dialog = e} description={description} isPublic={meta.public} shouldFork={shouldFork}
+                                    onSave={opt => this.saveGist(opt) } onHide={() => this.props.showDialog(null) } />
+                    : null}
             </div>
         );
     }
@@ -1000,14 +962,6 @@ window.onpopstate = e => {
     if (!(e.state && e.state.id)) return;
     store.dispatch({ type: 'GIST_CHANGE', gist: e.state.id });
 };
-
-/* Example gists:
-5b0435641091841a5eacff44946a22c0
-3f7cd9cbe863747a904bba10ce34ee8f
-efc71477cee60916ef71d839084d1afd
-6831799881c92434f80e141c8a2699eb
-*/
-
 
 ReactDOM.render(
     <Provider store={store}>
