@@ -1,10 +1,10 @@
-/// <reference path='../typings/index.d.ts'/>
-System.register([], function(exports_1, context_1) {
+System.register(['isomorphic-fetch'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var ResponseStatus, ResponseError, ErrorResponse, ReadyState, ServerEventsClient, HttpMethods, JsonServiceClient, createErrorResponse, toCamelCase, sanitize, nameOf, css, splitOnFirst, splitOnLast, splitCase, humanize, queryString, combinePaths, createPath, createUrl, appendQueryString, toDate, toDateFmt, padInt, dateFmt, dateFmtHM, timeFmt12;
     return {
-        setters:[],
+        setters:[
+            function (_1) {}],
         execute: function() {
             ResponseStatus = (function () {
                 function ResponseStatus() {
@@ -224,12 +224,16 @@ System.register([], function(exports_1, context_1) {
                     var hasRequestBody = HttpMethods.hasRequestBody(method);
                     if (!hasRequestBody)
                         url = appendQueryString(url, request);
-                    var req = new Request(url, {
+                    // Set `compress` false due to common error
+                    // https://github.com/bitinn/node-fetch/issues/93#issuecomment-200791658
+                    var reqOptions = {
                         method: method,
                         mode: this.mode,
                         credentials: this.credentials,
-                        headers: this.headers
-                    });
+                        headers: this.headers,
+                        compress: false
+                    };
+                    var req = new Request(url, reqOptions);
                     if (hasRequestBody)
                         req.body = JSON.stringify(request);
                     return fetch(url, req)
@@ -277,18 +281,20 @@ System.register([], function(exports_1, context_1) {
                 return !key ? key : key.charAt(0).toLowerCase() + key.substring(1);
             });
             exports_1("sanitize", sanitize = function (status) {
-                if (status["errors"])
+                if (status.responseStatus)
+                    return status;
+                if (status.errors)
                     return status;
                 var to = {};
-                for (var k in status)
-                    to[toCamelCase(k)] = status[k];
+                for (var k in status) {
+                    if (status.hasOwnProperty(k)) {
+                        if (status[k] instanceof Object)
+                            to[toCamelCase(k)] = sanitize(status[k]);
+                        else
+                            to[toCamelCase(k)] = status[k];
+                    }
+                }
                 to.errors = [];
-                (status.Errors || []).forEach(function (o) {
-                    var err = {};
-                    for (var k in o)
-                        err[toCamelCase(k)] = o[k];
-                    to.errors.push(err);
-                });
                 return to;
             });
             exports_1("nameOf", nameOf = function (o) {
