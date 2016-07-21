@@ -27,16 +27,16 @@ export interface IGistFile {
     content: string;
 }
 
-const updateHistory = (meta: IGistMeta, key:string) => {
-    if (!meta) return;
-    document.title = meta.description;
+const updateHistory = (id:string, description:string, key:string) => {
+    if (!id) return;
+    document.title = description;
 
-    if (history.pushState && (!history.state || history.state.id != meta.id)) {
+    if (history.pushState && (!history.state || history.state.id != id)) {
         let qs = queryString(location.href);
         var url = splitOnFirst(location.href, '?')[0];
-        qs[key] = meta.id;
+        qs[key] = id;
         url = appendQueryString(url, qs);
-        history.pushState(meta, meta.description, url);
+        history.pushState({ id, description }, description, url);
         ReactGA.pageview(url);
     }
 };
@@ -99,7 +99,7 @@ const updateGist = store => next => action => {
     if (action.type !== "LOAD") {
         localStorage.setItem(StateKey, JSON.stringify(state));
     } else {
-        updateHistory(state.meta, "gist");
+        updateHistory(state.meta.id, state.meta.description, "gist");
     }
 
     const options = action.options || {};
@@ -109,7 +109,7 @@ const updateGist = store => next => action => {
             const gist = JSON.parse(json);
             const meta = gist.meta as IGistMeta;
             const files = gist.files;
-            updateHistory(meta, "gist");
+            updateHistory(meta.id, meta.description, "gist");
             store.dispatch({ type: 'GIST_LOAD', meta, files, activeFileName: getSortedFileNames(files)[0] });
         } else {
             fetch(createGistRequest(state, action.gist))
@@ -119,7 +119,7 @@ const updateGist = store => next => action => {
                     } else {
                         return res.json().then((r) => {
                             const meta = createGistMeta(r);
-                            updateHistory(meta, "gist");
+                            updateHistory(meta.id, meta.description, "gist");
                             localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: r.files, meta }));
                             store.dispatch({ type: 'GIST_LOAD', meta, files: r.files, activeFileName: options.activeFileName || getSortedFileNames(r.files)[0] });
                         });
@@ -144,6 +144,7 @@ const updateGist = store => next => action => {
     } else if (action.type === "COLLECTION_CHANGE" && action.collection && action.showCollection) {
         var collection = collectionsCache[action.collection.id];
         if (collection) {
+            updateHistory(collection.id, collection.description, "collection");
             store.dispatch({ type: 'COLLECTION_LOAD', collection: collection });
             store.dispatch({ type: "GISTSTAT_INCR", gist: collection.id, collection: true, description: collection.description, stat: "load", step: 1, owner_login: collection.owner_login });
             if (collection.meta["gist"] && collection.meta["gist"] !== state.gist) {
@@ -157,7 +158,7 @@ const updateGist = store => next => action => {
                     } else {
                         return res.json().then((r) => {
                             const meta = createGistMeta(r);
-                            updateHistory(meta, "collection");
+                            updateHistory(meta.id, meta.description, "collection");
                             const file = r.files["index.md"];
                             if (!file) {
                                 store.dispatch({ type: 'ERROR_RAISE', error: { message: "Collection has no 'index.md'" } });
