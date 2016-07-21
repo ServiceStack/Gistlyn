@@ -149,6 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="src\app.tsx" />
+    <TypeScriptCompile Include="src\components\SaveAsDialog.tsx" />
     <TypeScriptCompile Include="src\deps.tsx" />
     <TypeScriptCompile Include="platform.ts" />
     <TypeScriptCompile Include="src\Gistlyn.dtos.ts" />
@@ -209,6 +210,9 @@
     <None Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
+    <Content Include="wwwroot_build\Gistlyn.command" />
+    <Content Include="wwwroot_build\Gistlyn.sh" />
+    <None Include="wwwroot_build\Gistlyn.bat" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />

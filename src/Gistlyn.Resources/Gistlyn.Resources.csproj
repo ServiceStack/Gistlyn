@@ -108,7 +108,7 @@
     <EmbeddedResource Include="img\ajax-loader.gif" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="css\app.min.css" />
+    <EmbeddedResource Include="css\app.min.css" />
     <EmbeddedResource Include="img\compiling.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

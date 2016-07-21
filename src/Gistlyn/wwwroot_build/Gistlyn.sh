@@ -1,2 +1,2 @@
 #!/bin/bash
-mono ./Gistlyn.exe
+mono ./bin/Gistlyn.AppConsole.exe

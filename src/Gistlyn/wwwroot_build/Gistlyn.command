@@ -1,3 +1,3 @@
 #!/bin/bash
 cd "$(dirname "$0")"
-mono ./Gistlyn.exe
+mono ./bin/Gistlyn.AppConsole.exe

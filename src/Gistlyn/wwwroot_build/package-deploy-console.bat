@@ -38,13 +38,16 @@ SET INPUT=%INPUT% %RELEASE%\System.IO.FileSystem.dll
 SET INPUT=%INPUT% %RELEASE%\System.IO.FileSystem.Primitives.dll
 SET INPUT=%INPUT% %RELEASE%\System.Reflection.Metadata.dll
 
-%ILMERGE% /target:exe /targetplatform:v4,"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6" /out:%STAGING%\%OUTPUTNAME% /ndebug /copyattrs %INPUT% /lib:%RELEASE%
+REM %ILMERGE% /target:exe /targetplatform:v4,"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6" /out:%STAGING%\%OUTPUTNAME% /ndebug /copyattrs %INPUT% /lib:%RELEASE%
 
-
-IF NOT EXIST apps (
-MD apps
+IF NOT EXIST apps\console\bin (
+MD apps\console\bin
 )
 
-COPY /Y .\%STAGING%\%OUTPUTNAME% .\apps\
+REM COPY /Y .\%STAGING%\%OUTPUTNAME% .\apps\
+COPY /Y .\%RELEASE%\*.* .\apps\console\bin\
+COPY .\Gistlyn.sh .\apps\console\
+COPY .\Gistlyn.bat .\apps\console\
+COPY .\Gistlyn.command .\apps\console\
 
-echo ------------- && echo  deployed to: .\wwwroot_build\apps\%OUTPUTNAME% && echo -------------
+echo ------------- && echo  deployed to: .\wwwroot_build\apps\console && echo -------------
