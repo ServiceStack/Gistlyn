@@ -2,7 +2,7 @@
 System.register([], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var ResponseStatus, ResponseError, ErrorResponse, ReadyState, ServerEventsClient, HttpMethods, JsonServiceClient, toCamelCase, sanitize, nameOf, css, splitOnFirst, splitOnLast, splitCase, humanize, queryString, combinePaths, createPath, createUrl, appendQueryString, toDate, toDateFmt, padInt, dateFmt, dateFmtHM, timeFmt12;
+    var ResponseStatus, ResponseError, ErrorResponse, ReadyState, ServerEventsClient, HttpMethods, JsonServiceClient, createErrorResponse, toCamelCase, sanitize, nameOf, css, splitOnFirst, splitOnLast, splitCase, humanize, queryString, combinePaths, createPath, createUrl, appendQueryString, toDate, toDateFmt, padInt, dateFmt, dateFmtHM, timeFmt12;
     return {
         setters:[],
         execute: function() {
@@ -242,22 +242,37 @@ System.register([], function(exports_1, context_1) {
                         });
                     })
                         .catch(function (res) {
+                        if (res instanceof Error) {
+                            throw res;
+                        }
+                        // res.json can only be called once.
+                        if (res.bodyUsed) {
+                            throw createErrorResponse(res.status, res.statusText);
+                        }
                         return res.json().then(function (o) {
                             var errorDto = sanitize(o);
-                            if (!errorDto["responseStatus"]) {
-                                var error = new ErrorResponse();
-                                error.responseStatus = new ResponseStatus();
-                                error.responseStatus.errorCode = res.statusCode;
-                                error.responseStatus.message = res.statusText;
-                                throw error;
+                            if (!errorDto.responseStatus) {
+                                throw createErrorResponse(res.status, res.statusText);
                             }
-                            throw o;
+                            throw errorDto;
+                        }).catch(function (responseStatusError) {
+                            if (responseStatusError instanceof Error) {
+                                // No responseStatus body, set from `res` Body object
+                                throw createErrorResponse(res.status, res.statusText);
+                            }
                         });
                     });
                 };
                 return JsonServiceClient;
             }());
             exports_1("JsonServiceClient", JsonServiceClient);
+            createErrorResponse = function (errorCode, message) {
+                var error = new ErrorResponse();
+                error.responseStatus = new ResponseStatus();
+                error.responseStatus.errorCode = errorCode;
+                error.responseStatus.message = message;
+                return error;
+            };
             exports_1("toCamelCase", toCamelCase = function (key) {
                 return !key ? key : key.charAt(0).toLowerCase() + key.substring(1);
             });
@@ -388,8 +403,10 @@ System.register([], function(exports_1, context_1) {
             });
             exports_1("appendQueryString", appendQueryString = function (url, args) {
                 for (var k in args) {
-                    url += url.indexOf("?") >= 0 ? "&" : "?";
-                    url += k + "=" + encodeURIComponent(args[k]);
+                    if (args.hasOwnProperty(k)) {
+                        url += url.indexOf("?") >= 0 ? "&" : "?";
+                        url += k + "=" + encodeURIComponent(args[k]);
+                    }
                 }
                 return url;
             });

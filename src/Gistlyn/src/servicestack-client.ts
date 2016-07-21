@@ -324,20 +324,38 @@ export class JsonServiceClient
                 });
             })
             .catch(res => {
+                if (res instanceof Error) {
+                    throw res;
+                }
+
+                // res.json can only be called once.
+                if (res.bodyUsed) {
+                    throw createErrorResponse(res.status, res.statusText);
+                }
+
                 return res.json().then(o => {
                     var errorDto = sanitize(o);
-                    if (!errorDto["responseStatus"]) {
-                        const error = new ErrorResponse();
-                        error.responseStatus = new ResponseStatus();
-                        error.responseStatus.errorCode = res.statusCode;
-                        error.responseStatus.message = res.statusText;
-                        throw error;
+                    if (!errorDto.responseStatus) {
+                        throw createErrorResponse(res.status, res.statusText);
                     }
-                    throw o;
+                    throw errorDto;
+                }).catch(responseStatusError => {
+                    if (responseStatusError instanceof Error) {
+                        // No responseStatus body, set from `res` Body object
+                        throw createErrorResponse(res.status, res.statusText);
+                    }
                 });
             });
     }
 }
+
+const createErrorResponse = (errorCode: string, message: string) => {
+    const error = new ErrorResponse();
+    error.responseStatus = new ResponseStatus();
+    error.responseStatus.errorCode = errorCode;
+    error.responseStatus.message = message;
+    return error;
+};
 
 export const toCamelCase = (key:string) => {
     return !key ? key : key.charAt(0).toLowerCase() + key.substring(1);
@@ -379,7 +397,6 @@ export const nameOf = (o: any) => {
 };
 
 /* utils */
-
 export const css = (selector: string | NodeListOf<Element>, name: string, value:string) => {
     const els = typeof selector == "string"
         ? document.querySelectorAll(selector as string)
@@ -444,7 +461,6 @@ export const combinePaths = (...paths:string[]) : string => {
     return combinedPaths.join("/") || (combinedPaths.length ? "/" : ".");
 };
 
-
 export const createPath = (route: string, args: any) => {
     var argKeys = {};
     for (let k in args) {
@@ -475,12 +491,13 @@ export const createUrl = (route: string, args: any) => {
 
 export const appendQueryString = (url: string, args: any): string => {
     for (let k in args) {
-        url += url.indexOf("?") >= 0 ? "&" : "?";
-        url += k + "=" + encodeURIComponent(args[k]);
+        if (args.hasOwnProperty(k)) {
+            url += url.indexOf("?") >= 0 ? "&" : "?";
+            url += k + "=" + encodeURIComponent(args[k]);
+        }
     }
     return url;
-}
-
+};
 
 export const toDate = (s:string) => new Date(parseFloat(/Date\(([^)]+)\)/.exec(s)[1]));
 export const toDateFmt = (s:string) => dateFmt(toDate(s));
