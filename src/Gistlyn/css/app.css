@@ -344,7 +344,7 @@ html,body,#app,#body {
     overflow: hidden;
 }
 
-#status, #vars, #errors, #placeholder, #collections {
+#status, #vars, #errors, #placeholder, #collection {
     flex: 1;
     overflow: auto;
 }
@@ -383,24 +383,90 @@ html,body,#app,#body {
     color: #444;
 }
 
-#collections {
+#collection {
     background: #fff;
 }
-#collections .markdown {
+#markdown {
     line-height: 20px;
+    font-size: 16px;
+    color: #444;
+    padding: 5px 0 0 15px;
+    max-width: 750px;
+}
+#markdown h1, #markdown h2, #markdown h3, #markdown h4, #markdown h5, #markdown h6 {
+    margin-top: 24px;
+    margin-bottom: 16px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+#markdown h1, #markdown h2 {
+    padding-bottom: 0.3em;
+    font-size: 1.5em;
+    border-bottom: 1px solid #eee;
+}
+#markdown h3 { font-size: 1.25em; }
+#markdown h4 { font-size: 1em; }
+#markdown h5 { font-size: 0.875em; }
+#markdown h6 { font-size: 0.85em; color: #777; }
+#markdown p {
+    margin: 0 0 16px 0; 
+}
+#markdown ul, #markdown ol {
+    padding-left: 2em;
+    margin: 0 0 16px 0; 
+}
+#markdown ul {
+    list-style-type: disc;
+}
+#markdown ol {
+    list-style-type: decimal;
+}
+#markdown a {
+    color: #428bca;
+    text-decoration: none;
+}
+#markdown a:hover {
+    color: #2a6496;
+}
+#markdown pre {
+    padding: 16px;
+    overflow: auto;
+    font-size: 85%;
+    line-height: 1.45;
+    background-color: #f7f7f7;
+    border-radius: 3px;
+    margin-bottom: 16px;
+    color: #333;
+}
+#markdown code {
+    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    background-color: #f7f7f7;
+    font-size: 13px;
+    padding: 0 2px;
+}
+#markdown pre>code {
+    padding: 0;
+}
+#markdown code::before, #markdown code::after {
+    letter-spacing: -0.2em;
+    content: "\00a0";
+}
+#markdown pre>code::before, #markdown pre>code::after {
+    letter-spacing: 0;
+    content: "";
 }
 
 #vars thead, #vars thead tr, 
-#collections thead, #collections thead tr {
+#collection thead, #collection thead tr {
     background: #01215A;
 }
-#vars th, #collections th {
+#vars th, #collection th {
     text-align: left;
     color: #fff;
     padding: 4px 12px;
     line-height: 24px;
 }
-#vars td, #collections td {
+#vars td, #collection td {
     padding: 4px 12px;
     font-size: 14px;
 }

@@ -631,33 +631,35 @@ class App extends React.Component<any, any> {
 
                 if (recentGists.length > 0 || recentCollections.length > 0) {
                     LiveLists = (
-                        <div id="livelist" style={{ float: "right", margin:"-4px -12px 0 0" }}>
-                            {recentGists.length > 0
-                                ? (<div>
-                                    <h3>Recent Gists</h3>
-                                    { recentGists.slice(0, 10).map(x => <a href={`?gist=${x.id}`}>{x.description}</a>) }
-                                </div>)
-                                : null}
+                        <div  style={{ float: "right", margin: "0px -8px 0px 0px", padding: "0 0 5px 10px" }}>
+                            <div id="livelist" style={{ boxShadow: "1px 2px 3px rgba(0, 0, 0, 0.3)" }}>
+                                {recentCollections.length > 0
+                                    ? (<div>
+                                        <h3>Recent Collections</h3>
+                                        { recentCollections.slice(0, 10).map(x => <a href={`?collection=${x.id}`}>{x.description}</a>) }
+                                    </div>)
+                                    : null}
 
-                            {recentCollections.length > 0
-                                ? (<div>
-                                    <h3>Recent Collections</h3>
-                                    { recentCollections.slice(0, 10).map(x => <a href={`?collection=${x.id}`}>{x.description}</a>) }
-                                </div>)
-                                : null}
+                                {recentGists.length > 0
+                                    ? (<div>
+                                        <h3>Recent Gists</h3>
+                                        { recentGists.slice(0, 10).map(x => <a href={`?gist=${x.id}`}>{x.description}</a>) }
+                                    </div>)
+                                    : null}
 
-                            {myGists.length > 0
-                                ? (<div>
-                                    <h3>My Gists</h3>
-                                    { myGists.slice(0, 30).map(x => <a href={`?gist=${x.id}`}>{x.description}</a>) }
-                                </div>)
-                                : null}
+                                {myGists.length > 0
+                                    ? (<div>
+                                        <h3>My Gists</h3>
+                                        { myGists.slice(0, 30).map(x => <a href={`?gist=${x.id}`}>{x.description}</a>) }
+                                    </div>)
+                                    : null}
+                            </div>
                         </div>);
                 }
             }
 
             Preview.push((
-                <div id="collections" className="section"
+                <div id="collection" className="section"
                     onClick={e => {
                         var a = e.target as HTMLAnchorElement;
                         if (a && a.href) {
@@ -679,7 +681,7 @@ class App extends React.Component<any, any> {
                             <tr>
                                 <td>
                                     {LiveLists}
-                                    <div className="markdown"
+                                    <div id="markdown"
                                         dangerouslySetInnerHTML={{ __html: this.props.collection.html }} />
                                 </td>
                             </tr>
@@ -750,7 +752,7 @@ class App extends React.Component<any, any> {
             Preview.push(<div id="placeholder"></div>);
         }
 
-        if (this.props.logs.length > 0) {
+        if (this.props.logs.length > 0 && !this.props.showCollection) {
             Preview.push((
                 <div id="console" className="section" style={{ borderTop: "solid 1px #ddd", borderBottom: "solid 1px #ddd", font: "14px/20px arial", height: "350px" }}>
                     <b style={{ background: "#444", color: "#fff", padding: "1px 8px", position: "absolute", right: "3px", margin: "-22px 0" }}>console</b>

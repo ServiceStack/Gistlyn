@@ -507,16 +507,16 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                             var recentCollections = sortByRecent(allGists.filter(function (x) { return x.collection; }));
                             var myGists = recentGists.filter(function (x) { return x.owner_login === authUsername; });
                             if (recentGists.length > 0 || recentCollections.length > 0) {
-                                LiveLists = (React.createElement("div", {id: "livelist", style: { float: "right", margin: "-4px -12px 0 0" }}, recentGists.length > 0
-                                    ? (React.createElement("div", null, React.createElement("h3", null, "Recent Gists"), recentGists.slice(0, 10).map(function (x) { return React.createElement("a", {href: "?gist=" + x.id}, x.description); })))
-                                    : null, recentCollections.length > 0
+                                LiveLists = (React.createElement("div", {style: { float: "right", margin: "0px -8px 0px 0px", padding: "0 0 5px 10px" }}, React.createElement("div", {id: "livelist", style: { boxShadow: "1px 2px 3px rgba(0, 0, 0, 0.3)" }}, recentCollections.length > 0
                                     ? (React.createElement("div", null, React.createElement("h3", null, "Recent Collections"), recentCollections.slice(0, 10).map(function (x) { return React.createElement("a", {href: "?collection=" + x.id}, x.description); })))
+                                    : null, recentGists.length > 0
+                                    ? (React.createElement("div", null, React.createElement("h3", null, "Recent Gists"), recentGists.slice(0, 10).map(function (x) { return React.createElement("a", {href: "?gist=" + x.id}, x.description); })))
                                     : null, myGists.length > 0
                                     ? (React.createElement("div", null, React.createElement("h3", null, "My Gists"), myGists.slice(0, 30).map(function (x) { return React.createElement("a", {href: "?gist=" + x.id}, x.description); })))
-                                    : null));
+                                    : null)));
                             }
                         }
-                        Preview.push((React.createElement("div", {id: "collections", className: "section", onClick: function (e) {
+                        Preview.push((React.createElement("div", {id: "collection", className: "section", onClick: function (e) {
                             var a = e.target;
                             if (a && a.href) {
                                 var qs_1 = servicestack_client_1.queryString(a.href);
@@ -528,7 +528,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                                         _this.props.changeCollection(qs_1["collection"], true);
                                 }
                             }
-                        }}, React.createElement("table", {style: { width: "100%" }}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", null, this.props.collection.description || "Collections"))), React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, LiveLists, React.createElement("div", {className: "markdown", dangerouslySetInnerHTML: { __html: this.props.collection.html }}))))))));
+                        }}, React.createElement("table", {style: { width: "100%" }}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", null, this.props.collection.description || "Collections"))), React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, LiveLists, React.createElement("div", {id: "markdown", dangerouslySetInnerHTML: { __html: this.props.collection.html }}))))))));
                     }
                     else if (this.props.error != null) {
                         var code = this.props.error.errorCode ? "(" + this.props.error.errorCode + ") " : "";
@@ -550,7 +550,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     else {
                         Preview.push(React.createElement("div", {id: "placeholder"}));
                     }
-                    if (this.props.logs.length > 0) {
+                    if (this.props.logs.length > 0 && !this.props.showCollection) {
                         Preview.push((React.createElement("div", {id: "console", className: "section", style: { borderTop: "solid 1px #ddd", borderBottom: "solid 1px #ddd", font: "14px/20px arial", height: "350px" }}, React.createElement("b", {style: { background: "#444", color: "#fff", padding: "1px 8px", position: "absolute", right: "3px", margin: "-22px 0" }}, "console"), React.createElement("i", {className: "material-icons clear-btn", title: "clear console", onClick: function (e) { return _this.props.clearConsole(); }}, "clear"), React.createElement("div", {className: "scroll", style: { overflow: "auto", maxHeight: "350px" }, ref: function (el) { return _this.consoleScroll = el; }}, React.createElement("table", {style: { width: "100%" }}, React.createElement("tbody", {style: { font: "13px/18px monospace", color: "#444" }}, this.props.logs.map(function (log) { return (React.createElement("tr", null, React.createElement("td", {style: { padding: "2px 8px", tabSize: 4 }}, React.createElement("pre", {className: log.cls}, log.msg)))); })))))));
                     }
                     var Dialog = null;
