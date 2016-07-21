@@ -69,6 +69,11 @@ const createGistMeta = (r:any): IGistMeta => ({
         owner_avatar_url: r.owner && r.owner.avatar_url
 });
 
+const clearGistCache = (store: any, gist: string) => {
+    localStorage.removeItem(GistCacheKey(gist));
+    store.dispatch({ type: "GISTSTAT_REMOVE", gist });
+}
+
 const parseMarkdownMeta = (markdown: string): any => {
     var meta = null;
     if (markdown) {
@@ -98,7 +103,7 @@ const updateGist = store => next => action => {
 
     if (action.type !== "LOAD") {
         localStorage.setItem(StateKey, JSON.stringify(state));
-    } else {
+    } else if (state.meta) {
         updateHistory(state.meta.id, state.meta.description, "gist");
     }
 
@@ -127,6 +132,9 @@ const updateGist = store => next => action => {
                 })
                 .catch(res => {
                     store.dispatch({ type: 'ERROR_RAISE', error: { code: res.status, message: `Gist with hash '${action.gist}' was ${res.statusText}` } });
+                    if (res.status === 404) {
+                        clearGistCache(store, action.gist);
+                    }
                 });
         }
     } else if (action.type === "SOURCE_CHANGE") {
@@ -185,6 +193,9 @@ const updateGist = store => next => action => {
                 })
                 .catch(res => {
                     store.dispatch({ type: 'ERROR_RAISE', error: { code: res.status, message: `Collection with hash '${action.gist}' was ${res.statusText}` } });
+                    if (res.status === 404) {
+                        clearGistCache(store, action.collection.id);
+                    }
                 });
         }
     }
@@ -274,6 +285,10 @@ export let store = createStore(
                         })
                         : Object.assign({}, gistStats, { [action.gist]: { id:action.gist, description: action.description, collection:action.collection, [action.stat]: step, owner_login:action.owner_login, date:new Date().getTime() } })
                 });
+            case 'GISTSTAT_REMOVE':
+                var clone = Object.assign({}, state.gistStats);
+                delete clone[action.gist];
+                return Object.assign({}, state, { gistStats: clone });
             default:
                 return state;
         }

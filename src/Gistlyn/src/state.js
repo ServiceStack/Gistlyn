@@ -2,7 +2,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var redux_1, utils_1, servicestack_client_1, react_ga_1, marked_1;
-    var StateKey, GistCacheKey, updateHistory, collectionsCache, createGistRequest, createGistMeta, parseMarkdownMeta, updateGist, defaults, preserveDefaults, store;
+    var StateKey, GistCacheKey, updateHistory, collectionsCache, createGistRequest, createGistMeta, clearGistCache, parseMarkdownMeta, updateGist, defaults, preserveDefaults, store;
     return {
         setters:[
             function (redux_1_1) {
@@ -58,6 +58,10 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                 owner_id: r.owner && r.owner.id,
                 owner_avatar_url: r.owner && r.owner.avatar_url
             }); };
+            clearGistCache = function (store, gist) {
+                localStorage.removeItem(GistCacheKey(gist));
+                store.dispatch({ type: "GISTSTAT_REMOVE", gist: gist });
+            };
             parseMarkdownMeta = function (markdown) {
                 var meta = null;
                 if (markdown) {
@@ -87,7 +91,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                 if (action.type !== "LOAD") {
                     localStorage.setItem(StateKey, JSON.stringify(state));
                 }
-                else {
+                else if (state.meta) {
                     updateHistory(state.meta.id, state.meta.description, "gist");
                 }
                 var options = action.options || {};
@@ -117,6 +121,9 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                         })
                             .catch(function (res) {
                             store.dispatch({ type: 'ERROR_RAISE', error: { code: res.status, message: "Gist with hash '" + action.gist + "' was " + res.statusText } });
+                            if (res.status === 404) {
+                                clearGistCache(store, action.gist);
+                            }
                         });
                     }
                 }
@@ -179,6 +186,9 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                         })
                             .catch(function (res) {
                             store.dispatch({ type: 'ERROR_RAISE', error: { code: res.status, message: "Collection with hash '" + action.gist + "' was " + res.statusText } });
+                            if (res.status === 404) {
+                                clearGistCache(store, action.collection.id);
+                            }
                         });
                     }
                 }
@@ -264,6 +274,10 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                                 ))
                                 : Object.assign({}, gistStats, (_e = {}, _e[action.gist] = (_f = { id: action.gist, description: action.description, collection: action.collection }, _f[action.stat] = step, _f.owner_login = action.owner_login, _f.date = new Date().getTime(), _f), _e))
                         });
+                    case 'GISTSTAT_REMOVE':
+                        var clone = Object.assign({}, state.gistStats);
+                        delete clone[action.gist];
+                        return Object.assign({}, state, { gistStats: clone });
                     default:
                         return state;
                 }
