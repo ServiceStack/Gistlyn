@@ -89,11 +89,7 @@ System.register(['isomorphic-fetch'], function(exports_1, context_1) {
                                         _this.reconnectServerEvents({ errorArgs: { error: "CLOSED" } });
                                         return;
                                     }
-                                    fetch(new Request(opt.heartbeatUrl, {
-                                        method: "POST",
-                                        mode: "cors",
-                                        headers: headers
-                                    }))
+                                    fetch(new Request(opt.heartbeatUrl, { method: "POST", mode: "cors", headers: headers }))
                                         .then(function (res) {
                                         if (!res.ok)
                                             throw res;
@@ -105,11 +101,7 @@ System.register(['isomorphic-fetch'], function(exports_1, context_1) {
                             }
                             if (opt.unRegisterUrl) {
                                 window.onunload = function () {
-                                    fetch(new Request(opt.unRegisterUrl, {
-                                        method: "POST",
-                                        mode: "cors",
-                                        headers: headers
-                                    }))
+                                    fetch(new Request(opt.unRegisterUrl, { method: "POST", mode: "cors", headers: headers }))
                                         .then(function (res) {
                                         if (!res.ok)
                                             throw res;
@@ -411,7 +403,7 @@ System.register(['isomorphic-fetch'], function(exports_1, context_1) {
                 for (var k in args) {
                     if (args.hasOwnProperty(k)) {
                         url += url.indexOf("?") >= 0 ? "&" : "?";
-                        url += k + "=" + encodeURIComponent(args[k]);
+                        url += k + "=" + (args[k] && encodeURIComponent(args[k]) || "");
                     }
                 }
                 return url;
