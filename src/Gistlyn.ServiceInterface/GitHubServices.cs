@@ -31,6 +31,7 @@ namespace Gistlyn.ServiceInterface
 
     public class GithubGistFileRef
     {
+        public string Content { get; set; }
         public int Size { get; set; }
         public string Raw_Url { get; set; }
         public string Type { get; set; }

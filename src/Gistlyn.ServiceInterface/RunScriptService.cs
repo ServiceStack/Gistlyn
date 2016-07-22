@@ -219,7 +219,6 @@ namespace Gistlyn.ServiceInterface
                 }
 
                 return tmpReferences;
-
             }
             catch (Exception ex)
             {
@@ -284,5 +283,61 @@ namespace Gistlyn.ServiceInterface
 
             return hash;
         }
+
+        public object Any(FriendlyLinks request)
+        {
+            var slugsMap = base.LocalCache.Get<Dictionary<string, string>>("friendly-links");
+            if (slugsMap == null || request.Reload)
+            {
+                var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                var gistUrl = GitHubServices.GithubApiBaseUrl.CombineWith("gists", "59e45270e41c1bd550b53436707eec21");
+                var response = gistUrl.GetJsonFromUrl(req => req.UserAgent = "Gistlyn")
+                    .FromJson<GithubGist>();
+
+                GithubGistFileRef linksFile;
+                if (!response.Files.TryGetValue("links.md", out linksFile))
+                    throw new Exception("links.md is missing");
+
+                var md = linksFile.Content ?? "";
+                foreach (var line in md.ReadLines())
+                {
+                    if (!line.TrimStart().StartsWith("-"))
+                        continue;
+
+                    var startNamePos = line.IndexOf('[');
+                    var endNamePos = line.IndexOf(']');
+                    var startLinkPos = line.IndexOf('(');
+                    var endLinkPos = line.LastIndexOf(')');
+
+                    if (startNamePos < 0 || endNamePos < 0 || startLinkPos < 0 || endLinkPos < 0)
+                        continue;
+
+                    var name = line.Substring(startNamePos + 1, endNamePos - startNamePos - 1).Trim();
+                    var link = line.Substring(startLinkPos + 1, endLinkPos - startLinkPos - 1).Trim();
+
+                    map[name] = link;
+                }
+
+                if (map.Count > 0 || slugsMap == null)
+                {
+                    slugsMap = map;
+                    LocalCache.Set("friendly-links", slugsMap);
+                }
+            }
+
+            string url = null;
+            if (string.IsNullOrEmpty(request.Name) || !slugsMap.TryGetValue(request.Name, out url))
+                throw HttpError.NotFound(request.Name + " does not exist");
+
+            var absoluteUrl = base.Request.ResolveAbsoluteUrl("~/" + url);
+            return HttpResult.Redirect(absoluteUrl);
+        }
+    }
+
+    [FallbackRoute("/{Name}")]
+    public class FriendlyLinks
+    {
+        public string Name { get; set; }
+        public bool Reload { get; set; }
     }
 }
