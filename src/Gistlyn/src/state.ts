@@ -1,11 +1,24 @@
 ﻿import { createStore, applyMiddleware } from 'redux';
 import { getSortedFileNames } from './utils';
-import { queryString, appendQueryString, splitOnFirst } from './servicestack-client';
+import { queryString, appendQueryString, splitOnFirst, splitOnLast } from './servicestack-client';
 import ReactGA from 'react-ga';
 import marked from 'marked';
 
 export const StateKey = "/v1/state";
 export const GistCacheKey = (gist) => `/v1/gists/${gist}`;
+
+export const GistTemplates = {
+    NewGist: "4fab2fa13aade23c81cabe83314c3cd0",
+    NewPrivateGist: "7eaa8f65869fa6682913e3517bec0f7e",
+    HomeCollection: "2cc6b5db6afd3ccb0d0149e55fdb3a6a",
+    Gists: ["4fab2fa13aade23c81cabe83314c3cd0", "7eaa8f65869fa6682913e3517bec0f7e", "2cc6b5db6afd3ccb0d0149e55fdb3a6a"]
+};
+
+export const FileNames = {
+    GistMain: "main.cs",
+    GistPackages: "packages.config",
+    CollectionIndex: "index.md"
+};
 
 export interface IGistMeta {
     id: string;
@@ -35,6 +48,7 @@ const updateHistory = (id:string, description:string, key:string) => {
         let qs = queryString(location.href);
         var url = splitOnFirst(location.href, '?')[0];
         qs[key] = id;
+        delete qs["s"]; //remove ?s=1 from /auth
         url = appendQueryString(url, qs);
         history.pushState({ id, description }, description, url);
         ReactGA.pageview(url);
@@ -69,10 +83,19 @@ const createGistMeta = (r:any): IGistMeta => ({
         owner_avatar_url: r.owner && r.owner.avatar_url
 });
 
-const clearGistCache = (store: any, gist: string) => {
-    localStorage.removeItem(GistCacheKey(gist));
-    store.dispatch({ type: "GISTSTAT_REMOVE", gist });
-}
+const handleGistErrorResponse = (res: any, store: any, id: string) => {
+    if (res.status === 403) {
+        store.dispatch({ type: 'ERROR_RAISE', error: { message: `Github's public API quota has been exceeded, sign-in to continue for more.` } });
+        return;
+    }
+
+    if (res.status === 404) {
+        localStorage.removeItem(GistCacheKey(id));
+        store.dispatch({ type: "GISTSTAT_REMOVE", gist: id });
+    } 
+
+    store.dispatch({ type: 'ERROR_RAISE', error: { code: res.status, message: `Gist with hash '${id}' was ${res.statusText}` } });
+}; 
 
 const parseMarkdownMeta = (markdown: string): any => {
     var meta = null;
@@ -96,7 +119,25 @@ const parseMarkdownMeta = (markdown: string): any => {
     return { meta, markdown };
 }
 
-const updateGist = store => next => action => {
+const serializeGist = (meta: IGistMeta, files) => JSON.stringify({ files, meta });
+
+const createCollection = (store, meta: IGistMeta, indexFile:IGistFile) => {
+    if (!indexFile) {
+        store.dispatch({ type: 'ERROR_RAISE', error: { message: `Collection has no '${FileNames.CollectionIndex}'` } });
+        return;
+    }
+
+    var md = parseMarkdownMeta(indexFile.content);
+    return {
+        id: meta.id,
+        owner_login: meta.owner_login,
+        description: meta.description,
+        html: marked(md.markdown),
+        meta: md.meta || {}
+    };
+};
+
+const stateSideEffects = store => next => action => {
     var oldGist = store.getState().gist;
     var result = next(action);
     var state = store.getState();
@@ -105,6 +146,40 @@ const updateGist = store => next => action => {
         localStorage.setItem(StateKey, JSON.stringify(state));
     } else if (state.meta) {
         updateHistory(state.meta.id, state.meta.description, "gist");
+    }
+
+    if (action.type === "URL_CHANGE" && action.url) {
+        const parts = splitOnLast(action.url, '/');
+        const id = parts[parts.length - 1];
+
+        //If it's cached we already know what it is: 
+        if (localStorage.getItem(GistCacheKey(id))) {
+            store.dispatch({ type: "GIST_CHANGE", gist: id });
+        } else if (collectionsCache[id]) {
+            store.dispatch({ type: "COLLECTION_CHANGE", collection: { id }, showCollection:true });
+        } else {
+            fetch(createGistRequest(state, id))
+                .then((res) => {
+                    if (!res.ok) {
+                        throw res;
+                    } else {
+                        return res.json().then((r) => {
+                            const meta = createGistMeta(r);
+                            //Populate cache and dispatch appropriate action:
+                            if (r.files[FileNames.GistMain]) {
+                                localStorage.setItem(GistCacheKey(id), serializeGist(meta, r.files));
+                                store.dispatch({ type: "GIST_CHANGE", gist: id });
+                            } else if (r.files[FileNames.CollectionIndex]) {
+                                collectionsCache[meta.id] = createCollection(store, meta, r.files[FileNames.CollectionIndex]);
+                                store.dispatch({ type: "COLLECTION_CHANGE", collection: { id }, showCollection: true });
+                            } else {
+                                store.dispatch({ type: 'ERROR_RAISE', error: { message: `Gist with hash '${id}' has no ${FileNames.GistMain} or ${FileNames.CollectionIndex}` } });
+                            }
+                        });
+                    }
+                })
+                .catch(res => handleGistErrorResponse(res, store, id));
+        }
     }
 
     const options = action.options || {};
@@ -125,17 +200,12 @@ const updateGist = store => next => action => {
                         return res.json().then((r) => {
                             const meta = createGistMeta(r);
                             updateHistory(meta.id, meta.description, "gist");
-                            localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: r.files, meta }));
+                            localStorage.setItem(GistCacheKey(state.gist), serializeGist(meta, r.files));
                             store.dispatch({ type: 'GIST_LOAD', meta, files: r.files, activeFileName: options.activeFileName || getSortedFileNames(r.files)[0] });
                         });
                     }
                 })
-                .catch(res => {
-                    store.dispatch({ type: 'ERROR_RAISE', error: { code: res.status, message: `Gist with hash '${action.gist}' was ${res.statusText}` } });
-                    if (res.status === 404) {
-                        clearGistCache(store, action.gist);
-                    }
-                });
+                .catch(res => handleGistErrorResponse(res, store, action.gist));
         }
     } else if (action.type === "SOURCE_CHANGE") {
         localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: state.files, meta: state.meta }));
@@ -167,22 +237,10 @@ const updateGist = store => next => action => {
                         return res.json().then((r) => {
                             const meta = createGistMeta(r);
                             updateHistory(meta.id, meta.description, "collection");
-                            const file = r.files["index.md"];
-                            if (!file) {
-                                store.dispatch({ type: 'ERROR_RAISE', error: { message: "Collection has no 'index.md'" } });
-                                return;
-                            }
 
-                            var md = parseMarkdownMeta(file.content);
-
-                            collection = {
-                                id: action.collection.id,
-                                owner_login: meta.owner_login,
-                                description: meta.description,
-                                html: marked(md.markdown),
-                                meta: md.meta || {}
-                            };
+                            collection = createCollection(store, meta, r.files[FileNames.CollectionIndex]);
                             collectionsCache[collection.id] = collection;
+
                             store.dispatch({ type: 'COLLECTION_LOAD', collection });
                             store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, collection: true, description: meta.description, stat: "load", step: 1, owner_login: collection.owner_login });
                             if (collection.meta["gist"] && collection.meta["gist"] !== state.gist) {
@@ -191,12 +249,7 @@ const updateGist = store => next => action => {
                         });
                     }
                 })
-                .catch(res => {
-                    store.dispatch({ type: 'ERROR_RAISE', error: { code: res.status, message: `Collection with hash '${action.gist}' was ${res.statusText}` } });
-                    if (res.status === 404) {
-                        clearGistCache(store, action.collection.id);
-                    }
-                });
+                .catch(res => handleGistErrorResponse(res, store, action.collection.id));
         }
     }
 
@@ -238,10 +291,14 @@ export let store = createStore(
         switch (action.type) {
             case 'LOAD':
                 return action.state;
+            case 'RESET':
+                return Object.assign({}, defaults, { activeSub: state.activeSub });
             case 'SSE_CONNECT':
-                return Object.assign({}, state, { activeSub: action.activeSub });
+                return Object.assign({}, state, { activeSub: action.activeSub, error: null });
+            case 'URL_CHANGE':
+                return Object.assign({}, state, { url: action.url });
             case 'GIST_CHANGE':
-                return Object.assign({}, defaults, preserveDefaults(state), { gist: action.gist });
+                return Object.assign({}, defaults, preserveDefaults(state), { gist: action.gist, url: action.gist });
             case 'GIST_LOAD':
                 return Object.assign({}, state, { meta: action.meta, files: action.files, activeFileName: action.activeFileName, variables: [], logs: [], hasLoaded: true });
             case 'FILE_SELECT':
@@ -272,7 +329,7 @@ export let store = createStore(
             case 'DIRTY_SET':
                 return Object.assign({}, state, { dirty: action.dirty });
             case 'COLLECTION_CHANGE':
-                return Object.assign({}, state, { collection: action.collection, showCollection: action.showCollection });
+                return Object.assign({}, state, { collection: action.collection, showCollection: action.showCollection, url: action.collection && action.collection.id });
             case 'COLLECTION_LOAD':
                 return Object.assign({}, state, { collection: action.collection, showCollection: true });
             case 'GISTSTAT_INCR':
@@ -295,4 +352,4 @@ export let store = createStore(
         }
     },
     defaults,
-    applyMiddleware(updateGist));
+    applyMiddleware(stateSideEffects));

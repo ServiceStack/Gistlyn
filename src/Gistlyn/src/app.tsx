@@ -5,7 +5,7 @@ import * as ReactDOM from 'react-dom';
 import ReactGA from 'react-ga';
 import { Provider, connect } from 'react-redux';
 import { reduxify, getSortedFileNames } from './utils';
-import { store, StateKey, GistCacheKey, IGistMeta, IGistFile } from './state';
+import { store, StateKey, GistCacheKey, GistTemplates, FileNames, IGistMeta, IGistFile } from './state';
 import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnLast, humanize, dateFmt, timeFmt12 } from './servicestack-client';
 import { JsonViewer } from './json-viewer';
 
@@ -25,13 +25,6 @@ import {
 
 const ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
 const ScriptStatusError = ["Cancelled", "CompiledWithErrors", "ThrowedException"];
-
-const GistTemplates = {
-    NewGist: "4fab2fa13aade23c81cabe83314c3cd0",
-    NewPrivateGist: "7eaa8f65869fa6682913e3517bec0f7e",
-    HomeCollection: "2cc6b5db6afd3ccb0d0149e55fdb3a6a",
-    Gists: ["4fab2fa13aade23c81cabe83314c3cd0", "7eaa8f65869fa6682913e3517bec0f7e", "2cc6b5db6afd3ccb0d0149e55fdb3a6a"]
-};
 
 ReactGA.initialize("UA-80898009-1");
 
@@ -70,6 +63,7 @@ var sse = new ServerEventsClient("/", ["gist"], {
 
 @reduxify(
     (state) => ({
+        url: state.url,
         gist: state.gist,
         hasLoaded: state.hasLoaded,
         activeSub: state.activeSub,
@@ -91,6 +85,8 @@ var sse = new ServerEventsClient("/", ["gist"], {
         showCollection: state.showCollection
     }),
     (dispatch) => ({
+        reset: () => dispatch({ type:'RESET' }),
+        urlChanged: (url: string) => dispatch({ type:'URL_CHANGE', url }),
         changeGist: (gist: string, options = {}) => dispatch({ type: 'GIST_CHANGE', gist, options }),
         updateSource: (fileName: string, content: string) => dispatch({ type: 'SOURCE_CHANGE', fileName, content }),
         selectFileName: (activeFileName: string) => dispatch({ type: 'FILE_SELECT', activeFileName }),
@@ -131,7 +127,7 @@ class App extends React.Component<any, any> {
     }
 
     getMainFile() {
-        return this.getFile("main.cs");
+        return this.getFile(FileNames.GistMain);
     }
 
     get scriptId(): string {
@@ -143,10 +139,10 @@ class App extends React.Component<any, any> {
         var request = new RunScript();
         request.scriptId = this.scriptId;
         request.mainSource = this.getMainFile().content;
-        request.packagesConfig = this.getFileContents("packages.config");
+        request.packagesConfig = this.getFileContents(FileNames.GistPackages);
         request.sources = [];
         for (var k in this.props.files || []) {
-            if (k.endsWith(".cs") && k.toLowerCase() !== "main.cs")
+            if (k.endsWith(".cs") && k.toLowerCase() !== FileNames.GistMain)
                 request.sources.push(this.props.files[k].content);
         }
 
@@ -180,13 +176,6 @@ class App extends React.Component<any, any> {
                 this.props.raiseError(r.responseStatus);
                 this.props.setScriptStatus("Failed");
             });
-    }
-
-    handleGistUpdate(e: React.FormEvent) {
-        const target = e.target as HTMLInputElement;
-        const parts = splitOnLast(target.value, '/');
-        const hash = parts[parts.length - 1];
-        this.props.changeGist(hash);
     }
 
     inspectVariable(v: VariableInfo) {
@@ -278,15 +267,23 @@ class App extends React.Component<any, any> {
             });
     }
 
-    revertGist(clearAll: boolean = false) {
+    revertGist(shiftKey: boolean = false, ctrlKey:boolean = false) {
         localStorage.removeItem(GistCacheKey(this.props.gist));
-        if (clearAll) {
-            localStorage.removeItem(StateKey);
-        }
 
         ReactGA.event({ category: 'gist', action: 'Revert Gist', label: this.props.gist });
 
-        this.props.changeGist(this.props.gist, { reload: true });
+        var gist = this.props.gist;
+        const resetAll = shiftKey && ctrlKey;
+        if (resetAll) {
+            localStorage.clear();
+            history.replaceState(null, "Gistlyn", "/");
+            gist = GistTemplates.NewGist;
+            this.props.reset();
+        } else if (shiftKey) {
+            localStorage.removeItem(StateKey);
+        }
+
+        this.props.changeGist(gist, { reload: true });
     }
 
     createStoreGist(opt: any = {}): StoreGist {
@@ -393,7 +390,7 @@ class App extends React.Component<any, any> {
             done();
             return Promise.resolve(null);
         }
-        else if (oldFileName === "main.cs" || oldFileName === "packages.config") {
+        else if (oldFileName === FileNames.GistMain || oldFileName === FileNames.GistPackages) {
             done();
             this.props.logConsoleError({ message: "Cannot rename " + oldFileName });
             return Promise.resolve(null);
@@ -446,7 +443,7 @@ class App extends React.Component<any, any> {
     morePopup: HTMLDivElement;
     userPopup: HTMLDivElement;
     lastPopup: HTMLDivElement;
-    txtGist: HTMLInputElement;
+    txtUrl: HTMLInputElement;
     txtDescription: HTMLInputElement;
     dialog: HTMLDivElement;
 
@@ -515,7 +512,7 @@ class App extends React.Component<any, any> {
 
         const main = this.getMainFile();
         if (this.props.hasLoaded && this.props.gist && this.props.files && main == null && this.props.error == null) {
-            this.props.error = { message: "main.cs is missing" };
+            this.props.error = { message: FileNames.GistMain + " is missing" };
         }
 
         const isScriptRunning = ScriptStatusRunning.indexOf(this.props.scriptStatus) >= 0;
@@ -603,18 +600,18 @@ class App extends React.Component<any, any> {
             <div onClick={e => this.props.changeGist(GistTemplates.NewPrivateGist) }>New Private Gist</div>));
 
         const toggleEdit = () => {
-            const inputWasHidden = this.txtGist.style.display !== "inline-block";
+            const inputWasHidden = this.txtUrl.style.display !== "inline-block";
             const showInput = !meta || !description || inputWasHidden;
-            this.txtGist.style.display = showInput ? "inline-block" : "none";
+            this.txtUrl.style.display = showInput ? "inline-block" : "none";
             document.getElementById("desc-overlay").style.display = showInput ? "none" : "inline-block";
 
             if (inputWasHidden) {
-                this.txtGist.focus();
-                this.txtGist.select();
+                this.txtUrl.focus();
+                this.txtUrl.select();
             }
         };
 
-        const showGistInput = !meta || !description || (this.txtGist && this.txtGist == document.activeElement);
+        const showGistInput = !meta || !description || (this.txtUrl && this.txtUrl == document.activeElement);
 
         return (
             <div id="body" onClick={e => this.handleBodyClick(e) }>
@@ -627,11 +624,11 @@ class App extends React.Component<any, any> {
                                 ? <img src={ meta.owner_avatar_url } title={meta.owner_login} style={{ verticalAlign: "bottom", margin: "0 5px 2px 0" }} />
                                 : <span className="octicon octicon-logo-gist" style={{ verticalAlign: "bottom", margin: "0 6px 6px 0" }}></span> }
 
-                            <input ref={e => this.txtGist = e} type="text" id="txtGist" placeholder="gist hash or url"
+                            <input ref={e => this.txtUrl = e} type="text" id="txtGist" placeholder="gist hash or url"
                                 style={{ display: showGistInput ? "inline-block" : "none" }} onBlur={toggleEdit}
-                                value={this.props.gist}
-                                onFocus={e => (e.target as HTMLInputElement).select() }
-                                onChange={e => this.handleGistUpdate(e) } />
+                                value={this.props.url}
+                                onFocus={e => (e.target as HTMLInputElement).select()}
+                                onChange={e => this.props.urlChanged((e.target as HTMLInputElement).value)} />
 
                             <div id="desc-overlay" style={{ display: showGistInput ? "none" : "inline-block" }}  onClick={toggleEdit}>
                                 <div className="inner">
@@ -702,7 +699,7 @@ class App extends React.Component<any, any> {
 
                 <div id="footer">
                     <div id="actions" style={{ visibility: main ? "visible" : "hidden" }} className="noselect">
-                        <div id="revert" onClick={e => this.revertGist(e.shiftKey) }>
+                        <div id="revert" onClick={e => this.revertGist(e.shiftKey, e.ctrlKey) }>
                             <i className="material-icons">undo</i>
                             <p>Revert Changes</p>
                         </div>
@@ -716,7 +713,9 @@ class App extends React.Component<any, any> {
                                 <span className="octicon octicon-repo-forked" style={{ margin: "3px 3px 0 0" }}></span>
                                 <p>{authUsername ? (shouldFork ? "Fork As" : "Save As") : "Sign-in to save"}</p>
                             </div>) }
-                        { meta && meta.owner_login === authUsername && this.props.activeFileName && this.props.activeFileName !== "main.cs" && this.props.activeFileName !== "packages.config"
+                        { meta && meta.owner_login === authUsername && this.props.activeFileName &&
+                            this.props.activeFileName !== FileNames.GistMain &&
+                            this.props.activeFileName !== FileNames.GistPackages
                             ? (<div id="delete-file" onClick={e => confirm(`Are you sure you want to delete '${this.props.activeFileName}?`) ? this.deleteFile(this.props.activeFileName) : null }>
                                 <i className="material-icons">delete </i>
                                 <p>Delete File</p>
@@ -748,6 +747,8 @@ class App extends React.Component<any, any> {
     }
 }
 
+const qs = queryString(location.href);
+
 var stateJson = localStorage.getItem(StateKey);
 var state = null;
 if (stateJson) {
@@ -755,7 +756,7 @@ if (stateJson) {
         state = JSON.parse(stateJson);
         store.dispatch({ type: 'LOAD', state });
 
-        if (state.gist != null && !(state.files || state.meta)) {
+        if (!qs["gist"] && state.gist != null && !(state.files || state.meta)) {
             store.dispatch({ type: 'GIST_CHANGE', gist: state.gist });
         }
 
@@ -765,9 +766,8 @@ if (stateJson) {
     }
 }
 
-const qs = queryString(location.href);
 var qsGist = qs["gist"] || GistTemplates.NewGist;
-if (qsGist != (state && state.gist)) {
+if (qsGist != (state && state.gist) || (state && !state.meta)) {
     store.dispatch({ type: 'GIST_CHANGE', gist: qsGist });
 }
 
@@ -784,7 +784,7 @@ if (qsCollection) {
 
 window.onpopstate = e => {
     if (!(e.state && e.state.id)) return;
-    store.dispatch({ type: 'GIST_CHANGE', gist: e.state.id });
+    store.dispatch({ type: 'URL_CHANGE', url: e.state.id });
 };
 
 ReactDOM.render(

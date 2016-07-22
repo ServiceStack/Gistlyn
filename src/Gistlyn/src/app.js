@@ -14,7 +14,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
     var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, SaveAsDialog_1, Console_1, Collections_1, Editor_1, Gistlyn_dtos_1;
-    var ScriptStatusRunning, ScriptStatusError, GistTemplates, client, sse, App, stateJson, state, e, qs, qsGist, qsCollection;
+    var ScriptStatusRunning, ScriptStatusError, client, sse, App, qs, stateJson, state, e, qsGist, qsCollection;
     return {
         setters:[
             function (React_1) {
@@ -59,12 +59,6 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
         execute: function() {
             ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
             ScriptStatusError = ["Cancelled", "CompiledWithErrors", "ThrowedException"];
-            GistTemplates = {
-                NewGist: "4fab2fa13aade23c81cabe83314c3cd0",
-                NewPrivateGist: "7eaa8f65869fa6682913e3517bec0f7e",
-                HomeCollection: "2cc6b5db6afd3ccb0d0149e55fdb3a6a",
-                Gists: ["4fab2fa13aade23c81cabe83314c3cd0", "7eaa8f65869fa6682913e3517bec0f7e", "2cc6b5db6afd3ccb0d0149e55fdb3a6a"]
-            };
             react_ga_1.default.initialize("UA-80898009-1");
             client = new servicestack_client_1.JsonServiceClient("/");
             sse = new servicestack_client_1.ServerEventsClient("/", ["gist"], {
@@ -107,10 +101,10 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         var request = new Gistlyn_dtos_1.RunScript();
                         request.scriptId = _this.scriptId;
                         request.mainSource = _this.getMainFile().content;
-                        request.packagesConfig = _this.getFileContents("packages.config");
+                        request.packagesConfig = _this.getFileContents(state_1.FileNames.GistPackages);
                         request.sources = [];
                         for (var k in _this.props.files || []) {
-                            if (k.endsWith(".cs") && k.toLowerCase() !== "main.cs")
+                            if (k.endsWith(".cs") && k.toLowerCase() !== state_1.FileNames.GistMain)
                                 request.sources.push(_this.props.files[k].content);
                         }
                         _this.props.setScriptStatus("Started");
@@ -157,7 +151,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         : null;
                 };
                 App.prototype.getMainFile = function () {
-                    return this.getFile("main.cs");
+                    return this.getFile(state_1.FileNames.GistMain);
                 };
                 Object.defineProperty(App.prototype, "scriptId", {
                     get: function () {
@@ -166,12 +160,6 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     enumerable: true,
                     configurable: true
                 });
-                App.prototype.handleGistUpdate = function (e) {
-                    var target = e.target;
-                    var parts = servicestack_client_1.splitOnLast(target.value, '/');
-                    var hash = parts[parts.length - 1];
-                    this.props.changeGist(hash);
-                };
                 App.prototype.inspectVariable = function (v) {
                     var _this = this;
                     var request = new Gistlyn_dtos_1.GetScriptVariables();
@@ -238,14 +226,23 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         _this.props.logConsoleError(e.responseStatus || e); //both have schema `{ message }`
                     });
                 };
-                App.prototype.revertGist = function (clearAll) {
-                    if (clearAll === void 0) { clearAll = false; }
+                App.prototype.revertGist = function (shiftKey, ctrlKey) {
+                    if (shiftKey === void 0) { shiftKey = false; }
+                    if (ctrlKey === void 0) { ctrlKey = false; }
                     localStorage.removeItem(state_1.GistCacheKey(this.props.gist));
-                    if (clearAll) {
+                    react_ga_1.default.event({ category: 'gist', action: 'Revert Gist', label: this.props.gist });
+                    var gist = this.props.gist;
+                    var resetAll = shiftKey && ctrlKey;
+                    if (resetAll) {
+                        localStorage.clear();
+                        history.replaceState(null, "Gistlyn", "/");
+                        gist = state_1.GistTemplates.NewGist;
+                        this.props.reset();
+                    }
+                    else if (shiftKey) {
                         localStorage.removeItem(state_1.StateKey);
                     }
-                    react_ga_1.default.event({ category: 'gist', action: 'Revert Gist', label: this.props.gist });
-                    this.props.changeGist(this.props.gist, { reload: true });
+                    this.props.changeGist(gist, { reload: true });
                 };
                 App.prototype.createStoreGist = function (opt) {
                     if (opt === void 0) { opt = {}; }
@@ -338,7 +335,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         done();
                         return Promise.resolve(null);
                     }
-                    else if (oldFileName === "main.cs" || oldFileName === "packages.config") {
+                    else if (oldFileName === state_1.FileNames.GistMain || oldFileName === state_1.FileNames.GistPackages) {
                         done();
                         this.props.logConsoleError({ message: "Cannot rename " + oldFileName });
                         return Promise.resolve(null);
@@ -423,7 +420,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         && meta != null
                         && meta.public
                         && authUsername != meta.owner_login
-                        && GistTemplates.Gists.indexOf(this.props.gist) === -1;
+                        && state_1.GistTemplates.Gists.indexOf(this.props.gist) === -1;
                 };
                 App.prototype.render = function () {
                     var _this = this;
@@ -436,7 +433,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     var description = meta != null ? meta.description : null;
                     var main = this.getMainFile();
                     if (this.props.hasLoaded && this.props.gist && this.props.files && main == null && this.props.error == null) {
-                        this.props.error = { message: "main.cs is missing" };
+                        this.props.error = { message: state_1.FileNames.GistMain + " is missing" };
                     }
                     var isScriptRunning = ScriptStatusRunning.indexOf(this.props.scriptStatus) >= 0;
                     var Preview = [];
@@ -448,7 +445,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                             : null)));
                     }
                     else if (showCollection) {
-                        Preview.push(React.createElement(Collections_1.default, {gistStats: this.props.gistStats, excludeGists: GistTemplates.Gists, collection: this.props.collection, showLiveLists: this.props.collection.id === GistTemplates.HomeCollection, authUsername: authUsername, changeGist: function (id) { return _this.props.changeGist(id); }, changeCollection: function (id, reload) { return _this.props.changeCollection(id, reload); }}));
+                        Preview.push(React.createElement(Collections_1.default, {gistStats: this.props.gistStats, excludeGists: state_1.GistTemplates.Gists, collection: this.props.collection, showLiveLists: this.props.collection.id === state_1.GistTemplates.HomeCollection, authUsername: authUsername, changeGist: function (id) { return _this.props.changeGist(id); }, changeCollection: function (id, reload) { return _this.props.changeCollection(id, reload); }}));
                     }
                     else if (isScriptRunning) {
                         Preview.push((React.createElement("div", {id: "status", className: "section"}, React.createElement("div", {style: { margin: '40px', color: "#444", width: "215px" }, title: "executing..."}, React.createElement("img", {src: "/img/ajax-loader.gif", style: { float: "right", margin: "5px 0 0 0" }}), React.createElement("i", {className: "material-icons", style: { position: "absolute" }}, "build"), React.createElement("p", {style: { padding: "0 0 0 30px", fontSize: "22px" }}, "Executing Script"), React.createElement("div", {id: "splash", style: { padding: 30 }}, React.createElement("img", {src: "/img/compiling.png"}))))));
@@ -467,35 +464,37 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     if (this.props.logs.length > 0 && !this.props.showCollection) {
                         Preview.push(React.createElement(Console_1.default, {logs: this.props.logs, onClear: function () { return _this.props.clearConsole(); }}));
                     }
-                    MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(GistTemplates.NewGist); }}, "New Gist")));
-                    MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(GistTemplates.NewPrivateGist); }}, "New Private Gist")));
+                    MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(state_1.GistTemplates.NewGist); }}, "New Gist")));
+                    MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(state_1.GistTemplates.NewPrivateGist); }}, "New Private Gist")));
                     var toggleEdit = function () {
-                        var inputWasHidden = _this.txtGist.style.display !== "inline-block";
+                        var inputWasHidden = _this.txtUrl.style.display !== "inline-block";
                         var showInput = !meta || !description || inputWasHidden;
-                        _this.txtGist.style.display = showInput ? "inline-block" : "none";
+                        _this.txtUrl.style.display = showInput ? "inline-block" : "none";
                         document.getElementById("desc-overlay").style.display = showInput ? "none" : "inline-block";
                         if (inputWasHidden) {
-                            _this.txtGist.focus();
-                            _this.txtGist.select();
+                            _this.txtUrl.focus();
+                            _this.txtUrl.select();
                         }
                     };
-                    var showGistInput = !meta || !description || (this.txtGist && this.txtGist == document.activeElement);
+                    var showGistInput = !meta || !description || (this.txtUrl && this.txtUrl == document.activeElement);
                     return (React.createElement("div", {id: "body", onClick: function (e) { return _this.handleBodyClick(e); }}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("a", {href: "https://servicestack.net", title: "servicestack.net", target: "_blank"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png"})), React.createElement("h3", null, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, meta
                         ? React.createElement("img", {src: meta.owner_avatar_url, title: meta.owner_login, style: { verticalAlign: "bottom", margin: "0 5px 2px 0" }})
-                        : React.createElement("span", {className: "octicon octicon-logo-gist", style: { verticalAlign: "bottom", margin: "0 6px 6px 0" }}), React.createElement("input", {ref: function (e) { return _this.txtGist = e; }, type: "text", id: "txtGist", placeholder: "gist hash or url", style: { display: showGistInput ? "inline-block" : "none" }, onBlur: toggleEdit, value: this.props.gist, onFocus: function (e) { return e.target.select(); }, onChange: function (e) { return _this.handleGistUpdate(e); }}), React.createElement("div", {id: "desc-overlay", style: { display: showGistInput ? "none" : "inline-block" }, onClick: toggleEdit}, React.createElement("div", {className: "inner"}, React.createElement("h2", null, description), meta && !meta.public
+                        : React.createElement("span", {className: "octicon octicon-logo-gist", style: { verticalAlign: "bottom", margin: "0 6px 6px 0" }}), React.createElement("input", {ref: function (e) { return _this.txtUrl = e; }, type: "text", id: "txtGist", placeholder: "gist hash or url", style: { display: showGistInput ? "inline-block" : "none" }, onBlur: toggleEdit, value: this.props.url, onFocus: function (e) { return e.target.select(); }, onChange: function (e) { return _this.props.urlChanged(e.target.value); }}), React.createElement("div", {id: "desc-overlay", style: { display: showGistInput ? "none" : "inline-block" }, onClick: toggleEdit}, React.createElement("div", {className: "inner"}, React.createElement("h2", null, description), meta && !meta.public
                         ? (React.createElement("span", {style: { position: "absolute", margin: "3px 0px 3px -40px", fontSize: 12, background: "#ffefc6", color: "#888", padding: "2px 4px", borderRadius: 3 }, title: "This gist is private"}, "secret"))
                         : null, React.createElement("i", {className: "material-icons"}, "close"))), main != null
                         ? React.createElement("i", {className: "material-icons", style: { color: "#0f9", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "check")
                         : this.props.error
                             ? React.createElement("i", {className: "material-icons", style: { color: "#CE93D8", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "error")
-                            : null, React.createElement("i", {id: "btnCollections", style: { visibility: main ? "visible" : "hidden" }, onClick: function (e) { return _this.props.changeCollection((_this.props.collection && _this.props.collection.id) || GistTemplates.HomeCollection, !showCollection); }, className: "material-icons" + (showCollection ? " active" : "")}, "apps")), !authUsername
+                            : null, React.createElement("i", {id: "btnCollections", style: { visibility: main ? "visible" : "hidden" }, onClick: function (e) { return _this.props.changeCollection((_this.props.collection && _this.props.collection.id) || state_1.GistTemplates.HomeCollection, !showCollection); }, className: "material-icons" + (showCollection ? " active" : "")}, "apps")), !authUsername
                         ? (React.createElement("div", {id: "sign-in", style: { position: "absolute", right: 5 }}, React.createElement("a", {href: "/auth/github", style: { color: "#fff", textDecoration: "none" }}, React.createElement("span", {style: { whiteSpace: "nowrap", fontSize: 14 }}, "sign-in"), React.createElement("span", {style: { verticalAlign: "sub", margin: "0 0 0 10px" }, className: "mega-octicon octicon-mark-github", title: "Sign in with GitHub"}))))
                         : ([
                             React.createElement("div", {id: "signed-in", style: { position: "absolute", right: 5, cursor: "pointer" }, onClick: function (e) { return _this.showPopup(e, _this.userPopup); }}, React.createElement("span", {style: { whiteSpace: "nowrap", fontSize: 14 }}, activeSub.displayName), React.createElement("img", {src: activeSub.profileUrl, style: { verticalAlign: "middle", marginLeft: 5, borderRadius: "50%" }})),
                             React.createElement("div", {id: "popup-user", className: "popup", ref: function (e) { return _this.userPopup = e; }, style: { position: "absolute", top: 42, right: 0 }}, React.createElement("div", {onClick: function (e) { return location.href = "/auth/logout"; }}, "Sign out"))
-                        ]))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement(Editor_1.default, {files: files, isOwner: authUsername && meta && meta.owner_login === authUsername, activeFileName: this.props.activeFileName, editingFileName: this.props.editingFileName, selectFileName: function (fileName) { return _this.props.selectFileName(fileName); }, editFileName: function (fileName) { return _this.props.editFileName(fileName); }, showPopup: function (e, filesPopup) { return _this.showPopup(e, filesPopup); }, updateSource: function (fileName, src) { return _this.props.updateSource(fileName, src); }, onRenameFile: function (fileName, e) { return _this.handleRenameFile(fileName, e); }, onCreateFile: function (e) { return _this.handleCreateFile(e); }}), React.createElement("div", {id: "preview"}, Preview))), React.createElement("div", {id: "footer-spacer"}), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "actions", style: { visibility: main ? "visible" : "hidden" }, className: "noselect"}, React.createElement("div", {id: "revert", onClick: function (e) { return _this.revertGist(e.shiftKey); }}, React.createElement("i", {className: "material-icons"}, "undo"), React.createElement("p", null, "Revert Changes")), meta && meta.owner_login == authUsername
+                        ]))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement(Editor_1.default, {files: files, isOwner: authUsername && meta && meta.owner_login === authUsername, activeFileName: this.props.activeFileName, editingFileName: this.props.editingFileName, selectFileName: function (fileName) { return _this.props.selectFileName(fileName); }, editFileName: function (fileName) { return _this.props.editFileName(fileName); }, showPopup: function (e, filesPopup) { return _this.showPopup(e, filesPopup); }, updateSource: function (fileName, src) { return _this.props.updateSource(fileName, src); }, onRenameFile: function (fileName, e) { return _this.handleRenameFile(fileName, e); }, onCreateFile: function (e) { return _this.handleCreateFile(e); }}), React.createElement("div", {id: "preview"}, Preview))), React.createElement("div", {id: "footer-spacer"}), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "actions", style: { visibility: main ? "visible" : "hidden" }, className: "noselect"}, React.createElement("div", {id: "revert", onClick: function (e) { return _this.revertGist(e.shiftKey, e.ctrlKey); }}, React.createElement("i", {className: "material-icons"}, "undo"), React.createElement("p", null, "Revert Changes")), meta && meta.owner_login == authUsername
                         ? (React.createElement("div", {id: "save", onClick: function (e) { return _this.saveGist({}); }, className: this.props.dirty ? "" : "disabled"}, React.createElement("i", {className: "material-icons"}, "save"), React.createElement("p", null, "Save Gist")))
-                        : (React.createElement("div", {id: "saveas", onClick: function (e) { return authUsername ? _this.saveGistAs() : _this.signIn(); }, title: !authUsername ? "Sign-in to save gists" : "Save a copy in your Github gists"}, React.createElement("span", {className: "octicon octicon-repo-forked", style: { margin: "3px 3px 0 0" }}), React.createElement("p", null, authUsername ? (shouldFork ? "Fork As" : "Save As") : "Sign-in to save"))), meta && meta.owner_login === authUsername && this.props.activeFileName && this.props.activeFileName !== "main.cs" && this.props.activeFileName !== "packages.config"
+                        : (React.createElement("div", {id: "saveas", onClick: function (e) { return authUsername ? _this.saveGistAs() : _this.signIn(); }, title: !authUsername ? "Sign-in to save gists" : "Save a copy in your Github gists"}, React.createElement("span", {className: "octicon octicon-repo-forked", style: { margin: "3px 3px 0 0" }}), React.createElement("p", null, authUsername ? (shouldFork ? "Fork As" : "Save As") : "Sign-in to save"))), meta && meta.owner_login === authUsername && this.props.activeFileName &&
+                        this.props.activeFileName !== state_1.FileNames.GistMain &&
+                        this.props.activeFileName !== state_1.FileNames.GistPackages
                         ? (React.createElement("div", {id: "delete-file", onClick: function (e) { return confirm("Are you sure you want to delete '" + _this.props.activeFileName + "?") ? _this.deleteFile(_this.props.activeFileName) : null; }}, React.createElement("i", {className: "material-icons"}, "delete "), React.createElement("p", null, "Delete File")))
                         : null), React.createElement("div", {id: "more-menu", style: { position: "absolute", right: 5, bottom: 5, color: "#fff", cursor: "pointer" }}, React.createElement("i", {className: "material-icons", onClick: function (e) { return _this.showPopup(e, _this.morePopup); }}, "more_vert")), React.createElement("div", {id: "popup-more", className: "popup", ref: function (e) { return _this.morePopup = e; }, style: { position: "absolute", bottom: 42, right: 0 }}, MorePopup)), React.createElement("div", {id: "run", className: main == null ? "disabled" : "", onClick: function (e) { return !isScriptRunning ? _this.run() : _this.cancel(); }}, main != null
                         ? (!isScriptRunning
@@ -507,6 +506,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                 };
                 App = __decorate([
                     utils_1.reduxify(function (state) { return ({
+                        url: state.url,
                         gist: state.gist,
                         hasLoaded: state.hasLoaded,
                         activeSub: state.activeSub,
@@ -527,6 +527,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         collection: state.collection,
                         showCollection: state.showCollection
                     }); }, function (dispatch) { return ({
+                        reset: function () { return dispatch({ type: 'RESET' }); },
+                        urlChanged: function (url) { return dispatch({ type: 'URL_CHANGE', url: url }); },
                         changeGist: function (gist, options) {
                             if (options === void 0) { options = {}; }
                             return dispatch({ type: 'GIST_CHANGE', gist: gist, options: options });
@@ -551,13 +553,14 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                 ], App);
                 return App;
             }(React.Component));
+            qs = servicestack_client_1.queryString(location.href);
             stateJson = localStorage.getItem(state_1.StateKey);
             state = null;
             if (stateJson) {
                 try {
                     state = JSON.parse(stateJson);
                     state_1.store.dispatch({ type: 'LOAD', state: state });
-                    if (state.gist != null && !(state.files || state.meta)) {
+                    if (!qs["gist"] && state.gist != null && !(state.files || state.meta)) {
                         state_1.store.dispatch({ type: 'GIST_CHANGE', gist: state.gist });
                     }
                 }
@@ -566,9 +569,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     localStorage.removeItem(state_1.StateKey);
                 }
             }
-            qs = servicestack_client_1.queryString(location.href);
-            qsGist = qs["gist"] || GistTemplates.NewGist;
-            if (qsGist != (state && state.gist)) {
+            qsGist = qs["gist"] || state_1.GistTemplates.NewGist;
+            if (qsGist != (state && state.gist) || (state && !state.meta)) {
                 state_1.store.dispatch({ type: 'GIST_CHANGE', gist: qsGist });
             }
             qsCollection = qs["collection"];
@@ -580,12 +582,12 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                 });
             }
             else if (!state) {
-                state_1.store.dispatch({ type: 'COLLECTION_CHANGE', collection: { id: GistTemplates.HomeCollection }, showCollection: true });
+                state_1.store.dispatch({ type: 'COLLECTION_CHANGE', collection: { id: state_1.GistTemplates.HomeCollection }, showCollection: true });
             }
             window.onpopstate = function (e) {
                 if (!(e.state && e.state.id))
                     return;
-                state_1.store.dispatch({ type: 'GIST_CHANGE', gist: e.state.id });
+                state_1.store.dispatch({ type: 'URL_CHANGE', url: e.state.id });
             };
             ReactDOM.render(React.createElement(react_redux_1.Provider, {store: state_1.store}, React.createElement(App, null)), document.getElementById("app"));
         }
