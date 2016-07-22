@@ -10,14 +10,9 @@ import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitO
 import { JsonViewer } from './json-viewer';
 
 import SaveAsDialog from './components/SaveAsDialog';
-
-import CodeMirror from 'react-codemirror';
-import "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js";
-import "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js";
-import "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js";
-import "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js";
-import "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js";
-import "./codemirror.js";
+import Console from './components/Console';
+import Collections from './components/Collections';
+import Editor from './components/Editor';
 
 import {
     RunScript,
@@ -27,22 +22,6 @@ import {
     ScriptExecutionResult, ScriptStatus,
     StoreGist, GithubFile
 } from './Gistlyn.dtos';
-
-var options = {
-    lineNumbers: true,
-    matchBrackets: true,
-    indentUnit: 4,
-    mode: "text/x-csharp",
-    extraKeys: {
-        "F11"(cm) {
-            cm.setOption("fullScreen", !cm.getOption("fullScreen"));
-        },
-        "Esc"(cm) {
-            if (cm.getOption("fullScreen"))
-                cm.setOption("fullScreen", false);
-        }
-    }
-};
 
 const ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
 const ScriptStatusError = ["Cancelled", "CompiledWithErrors", "ThrowedException"];
@@ -208,10 +187,6 @@ class App extends React.Component<any, any> {
         const parts = splitOnLast(target.value, '/');
         const hash = parts[parts.length - 1];
         this.props.changeGist(hash);
-    }
-
-    updateSource(src: string) {
-        this.props.updateSource(this.props.activeFileName, src);
     }
 
     inspectVariable(v: VariableInfo) {
@@ -447,11 +422,7 @@ class App extends React.Component<any, any> {
 
         ReactGA.event({ category: 'file', action: 'Delete File', label: fileName });
 
-        fetch("/proxy/gists/" + this.props.gist, {
-                method: "PATCH",
-                credentials: "include",
-                body: json
-            })
+        fetch("/proxy/gists/" + this.props.gist, { method: "PATCH", credentials: "include", body: json })
             .then((res) => {
                 this.props.changeGist(this.props.gist, { reload: true });
             })
@@ -472,8 +443,6 @@ class App extends React.Component<any, any> {
         location.href = '/auth/github';
     }
 
-    consoleScroll: HTMLDivElement;
-    filesPopup: HTMLDivElement;
     morePopup: HTMLDivElement;
     userPopup: HTMLDivElement;
     lastPopup: HTMLDivElement;
@@ -482,8 +451,6 @@ class App extends React.Component<any, any> {
     dialog: HTMLDivElement;
 
     componentDidUpdate() {
-        if (!this.consoleScroll) return;
-        this.consoleScroll.scrollTop = this.consoleScroll.scrollHeight;
         window.onkeydown = this.handleWindowKeyDown.bind(this);
     }
 
@@ -538,9 +505,6 @@ class App extends React.Component<any, any> {
 
     render() {
 
-        let source = "";
-        const Tabs = [];
-        const FileList = [];
         const MorePopup = [];
         var activeSub = this.props.activeSub as ISseConnect;
         var authUsername = this.getAuthUsername();
@@ -548,63 +512,6 @@ class App extends React.Component<any, any> {
         const shouldFork = this.shouldFork();
         const files = this.props.files as { [index: string]: IGistFile };
         let description = meta != null ? meta.description : null;
-
-        if (files != null) {
-            var keys = getSortedFileNames(files);
-
-            const sizeToFit = (e: React.KeyboardEvent) => {
-                var txt = e.target as HTMLInputElement;
-                txt.size = Math.max(txt.value.length - 3, 1);
-            };
-
-            keys.forEach(fileName => {
-                const file = files[fileName];
-                const active = fileName === this.props.activeFileName ||
-                    (this.props.activeFileName == null && fileName.toLowerCase() === "main.cs");
-
-                Tabs.push((
-                    <div className={active ? 'active' : null}
-                        onClick={e => !active ? this.props.selectFileName(fileName) : this.props.editFileName(fileName) }>
-                        {this.props.editingFileName !== fileName
-                            ? <b>{fileName}</b>
-                            : <input type="text" className="txtFileName"
-                                onBlur={e => this.handleRenameFile(fileName, e) }
-                                onKeyDown={e => e.keyCode === 13 ? (e.target as HTMLElement).blur() : null }
-                                defaultValue={fileName}
-                                onKeyUp={sizeToFit} size={Math.max(fileName.length - 3, 1) }
-                                autoFocus /> }
-                    </div>
-                ));
-
-                FileList.push((
-                    <div className="file" onClick={e => this.props.selectFileName(fileName) }>
-                        {fileName}
-                    </div>
-                ));
-
-                if (active) {
-                    source = file.content;
-                    options["mode"] = fileName.endsWith('.config')
-                        ? "application/xml"
-                        : "text/x-csharp";
-                }
-            });
-
-            if (authUsername && meta && meta.owner_login === authUsername) {
-                Tabs.push((
-                    <div title="Add new file" onClick={e => this.props.editFileName("+") }
-                        className={this.props.editingFileName === "+" ? "active" : ""}
-                        style={{ padding: "4px 6px" }}>
-                        {this.props.editingFileName !== "+"
-                            ? <i className="material-icons" style={{ fontSize: 13 }}>add</i>
-                            : <input type="text"className="txtFileName"
-                                onBlur={e => this.handleCreateFile(e) }
-                                onKeyDown={e => e.keyCode === 13 ? (e.target as HTMLElement).blur() : null }
-                                onKeyUp={sizeToFit} size="1" autoFocus /> }
-                    </div>
-                ));
-            }
-        }
 
         const main = this.getMainFile();
         if (this.props.hasLoaded && this.props.gist && this.props.files && main == null && this.props.error == null) {
@@ -629,78 +536,11 @@ class App extends React.Component<any, any> {
                         : null}
                 </div>));
         } else if (showCollection) {
-            var LiveLists = null;
-            if (this.props.collection.id === GistTemplates.HomeCollection) {
-                const allGists = Object.keys(this.props.gistStats)
-                    .map(k => this.props.gistStats[k])
-                    .filter(x => GistTemplates.Gists.indexOf(x.id) === -1);
-                const sortByRecent = gists => {
-                    gists.sort((a, b) => b.date - a.date);
-                    return gists;
-                };
-                var recentGists = sortByRecent(allGists.filter(x => !x.collection));
-                var recentCollections = sortByRecent(allGists.filter(x => x.collection));
-                var myGists = recentGists.filter(x => x.owner_login === authUsername);
-
-                if (recentGists.length > 0 || recentCollections.length > 0) {
-                    LiveLists = (
-                        <div  style={{ float: "right", margin: "0px -8px 0px 0px", padding: "0 0 5px 10px" }}>
-                            <div id="livelist" style={{ boxShadow: "1px 2px 3px rgba(0, 0, 0, 0.3)" }}>
-                                {recentCollections.length > 0
-                                    ? (<div>
-                                        <h3>Recent Collections</h3>
-                                        { recentCollections.slice(0, 10).map(x => <a href={`?collection=${x.id}`}>{x.description}</a>) }
-                                    </div>)
-                                    : null}
-
-                                {recentGists.length > 0
-                                    ? (<div>
-                                        <h3>Recent Gists</h3>
-                                        { recentGists.slice(0, 10).map(x => <a href={`?gist=${x.id}`}>{x.description}</a>) }
-                                    </div>)
-                                    : null}
-
-                                {myGists.length > 0
-                                    ? (<div>
-                                        <h3>My Gists</h3>
-                                        { myGists.slice(0, 30).map(x => <a href={`?gist=${x.id}`}>{x.description}</a>) }
-                                    </div>)
-                                    : null}
-                            </div>
-                        </div>);
-                }
-            }
-
-            Preview.push((
-                <div id="collection" className="section"
-                    onClick={e => {
-                        var a = e.target as HTMLAnchorElement;
-                        if (a && a.href) {
-                            const qs = queryString(a.href);
-                            if (qs["gist"] || qs["collection"]) {
-                                e.preventDefault();
-                                if (qs["gist"])
-                                    this.props.changeGist(qs["gist"]);
-                                else if (qs["collection"])
-                                    this.props.changeCollection(qs["collection"], true);
-                            }
-                        }
-                    } }>
-                    <table style={{ width: "100%" }}>
-                        <thead>
-                            <tr><th>{this.props.collection.description || "Collections"}</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    {LiveLists}
-                                    <div id="markdown"
-                                        dangerouslySetInnerHTML={{ __html: this.props.collection.html }} />
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>));
+            Preview.push(<Collections gistStats={this.props.gistStats} excludeGists={GistTemplates.Gists} collection={this.props.collection}
+                showLiveLists={this.props.collection.id === GistTemplates.HomeCollection} authUsername={authUsername}
+                changeGist={id => this.props.changeGist(id) }
+                changeCollection={(id, reload) => this.props.changeCollection(id, reload) } />
+            );
         } else if (isScriptRunning) {
             Preview.push((
                 <div id="status" className="section">
@@ -754,22 +594,7 @@ class App extends React.Component<any, any> {
         }
 
         if (this.props.logs.length > 0 && !this.props.showCollection) {
-            Preview.push((
-                <div id="console" className="section" style={{ borderTop: "solid 1px #ddd", borderBottom: "solid 1px #ddd", font: "14px/20px arial", height: "350px" }}>
-                    <b style={{ background: "#444", color: "#fff", padding: "1px 8px", position: "absolute", right: "3px", margin: "-22px 0" }}>console</b>
-                    <i className="material-icons clear-btn" title="clear console" onClick={e => this.props.clearConsole() }>clear</i>
-                    <div className="scroll" style={{ overflow: "auto", maxHeight: "350px" }} ref={(el) => this.consoleScroll = el}>
-                        <table style={{ width: "100%" }}>
-                            <tbody style={{ font: "13px/18px monospace", color: "#444" }}>
-                                {this.props.logs.map(log => (
-                                    <tr>
-                                        <td style={{ padding: "2px 8px", tabSize: 4 }}><pre className={log.cls}>{log.msg}</pre></td>
-                                    </tr>
-                                )) }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>));
+            Preview.push(<Console logs={this.props.logs} onClear={() => this.props.clearConsole() } />);
         }
 
         MorePopup.push((
@@ -829,7 +654,7 @@ class App extends React.Component<any, any> {
                                     ? <i className="material-icons" style={{ color: "#CE93D8", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}>error</i>
                                     : null }
 
-                            <i id="btnCollections" style={{ visibility: main ? "visible" : "hidden" }} 
+                            <i id="btnCollections" style={{ visibility: main ? "visible" : "hidden" }}
                                 onClick={e => this.props.changeCollection((this.props.collection && this.props.collection.id) || GistTemplates.HomeCollection, !showCollection) }
                                 className={"material-icons" + (showCollection ? " active" : "") }>apps</i>
 
@@ -857,17 +682,16 @@ class App extends React.Component<any, any> {
 
                 <div id="content">
                     <div id="ide">
-                        <div id="editor">
-                            <div id="tabs" style={{ display: this.props.files ? 'flex' : 'none' }}>
-                                {FileList.length > 0
-                                    ? <i id="files-menu" className="material-icons" onClick={e => this.showPopup(e, this.filesPopup) }>arrow_drop_down</i> : null }
-                                {Tabs}
-                            </div>
-                            <div id="popup-files" className="popup" ref={e => this.filesPopup = e }>
-                                {FileList}
-                            </div>
-                            <CodeMirror value={source} options={options} onChange={src => this.updateSource(src) } />
-                        </div>
+                        <Editor files={files}
+                            isOwner={authUsername && meta && meta.owner_login === authUsername}
+                            activeFileName={this.props.activeFileName}
+                            editingFileName={this.props.editingFileName}
+                            selectFileName={fileName => this.props.selectFileName(fileName) }
+                            editFileName={fileName => this.props.editFileName(fileName) }
+                            showPopup={(e, filesPopup) => this.showPopup(e, filesPopup) }
+                            updateSource={(fileName, src) => this.props.updateSource(fileName, src) }
+                            onRenameFile={(fileName, e) => this.handleRenameFile(fileName, e) }
+                            onCreateFile={e => this.handleCreateFile(e) } />
                         <div id="preview">
                             {Preview}
                         </div>
@@ -917,7 +741,7 @@ class App extends React.Component<any, any> {
 
                 {meta && this.props.dialog === "save-as"
                     ? <SaveAsDialog dialogRef={e => this.dialog = e} description={description} isPublic={meta.public} shouldFork={shouldFork}
-                                    onSave={opt => this.saveGist(opt) } onHide={() => this.props.showDialog(null) } />
+                        onSave={opt => this.saveGist(opt) } onHide={() => this.props.showDialog(null) } />
                     : null}
             </div>
         );

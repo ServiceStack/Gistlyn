@@ -149,6 +149,9 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="src\app.tsx" />
+    <TypeScriptCompile Include="src\components\Console.tsx" />
+    <TypeScriptCompile Include="src\components\Collections.tsx" />
+    <TypeScriptCompile Include="src\components\Editor.tsx" />
     <TypeScriptCompile Include="src\components\SaveAsDialog.tsx" />
     <TypeScriptCompile Include="src\deps.tsx" />
     <TypeScriptCompile Include="platform.ts" />
@@ -164,6 +167,10 @@
       <Link>sqlite3.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="css\reset.css" />
+    <Content Include="css\editor.css" />
+    <Content Include="css\dialogs.css" />
+    <Content Include="css\collections.css" />
     <Content Include="css\app.css" />
     <Content Include="css\codemirror.css" />
     <Content Include="css\iconfont\material-icons.css" />

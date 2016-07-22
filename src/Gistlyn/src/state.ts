@@ -234,6 +234,7 @@ const preserveDefaults = (state) => ({
 
 export let store = createStore(
     (state, action) => {
+        //console.log(action);
         switch (action.type) {
             case 'LOAD':
                 return action.state;

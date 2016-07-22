@@ -1,0 +1,114 @@
+﻿#dialog {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background: rgba(0,0,0,.3);
+    z-index: 3;
+    top: 0;
+    text-align: center;
+}
+.dialog {
+    position: relative;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    transform: translateY(-50%);
+    text-align: left;
+    display: inline-block;
+    background: #fff;
+
+    -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding-box;
+    background-clip: padding-box;
+
+    /* vertical align */
+    -webkit-transform-style: preserve-3d;
+    -moz-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+}
+.dialog-header {
+    font-size: 18px;
+    background: #0371BE;
+    color: #fff;
+    padding: 12px;
+}
+.dialog-body {
+    padding: 24px;
+    min-height: 100px;
+    color: #444;
+}
+.dialog-footer {
+    text-align: right;
+    padding: 12px;
+}
+.dialog-header .close {
+    float: right;
+    font-size: 16px;
+    cursor: pointer;
+}
+.dialog-header .close:hover {
+    color: #ddd;
+}
+.dialog-body .row {
+    margin: 0 0 10px 0;
+}
+.dialog-body label {
+    display: inline-block;
+    padding: 0 20px 0 0;
+    width: 100px;
+}
+.dialog-body input[type=text] {
+    width: 350px;    
+    padding: 8px 12px;
+    font-size: 16px;
+    border: solid 1px #A9A9A9;
+}
+.dialog .loading {
+    visibility: hidden;
+}
+.dialog.disabled .loading {
+    visibility: visible;
+}
+
+.btn, .btn:focus {
+    text-transform: uppercase;
+    border-radius: 2px;
+    background: #03a9f4;
+    background: #0488E4;
+    transition: box-shadow .28s cubic-bezier(.4,0,.2,1);
+    outline: none !important;
+    border: none;
+    color: rgba(255,255,255,.84);
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    padding: 8px 12px;
+    font-size: 16px;
+    line-height: 1.42857143;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none
+}
+.btn:hover {
+    background: #29B6F6;
+    background: #03a9f4;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.26);
+    color: #fff;
+}
+.disabled .btn, .btn.disabled, .btn[disabled], fieldset[disabled] .btn {
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: .65;
+    filter: alpha(opacity=65);
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}

@@ -222,6 +222,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                 showCollection: state.showCollection
             }); };
             exports_1("store", store = redux_1.createStore(function (state, action) {
+                //console.log(action);
                 switch (action.type) {
                     case 'LOAD':
                         return action.state;
