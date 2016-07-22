@@ -1,5 +1,5 @@
 ﻿import * as React from 'react';
-import { queryString } from '../servicestack-client';
+import { queryString } from './servicestack-client';
 
 export default class Collections extends React.Component<any, any> {
     render() {

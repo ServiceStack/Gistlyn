@@ -9,10 +9,10 @@ import { store, StateKey, GistCacheKey, GistTemplates, FileNames, IGistMeta, IGi
 import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnLast, humanize, dateFmt, timeFmt12 } from './servicestack-client';
 import { JsonViewer } from './json-viewer';
 
-import SaveAsDialog from './components/SaveAsDialog';
-import Console from './components/Console';
-import Collections from './components/Collections';
-import Editor from './components/Editor';
+import SaveAsDialog from './SaveAsDialog';
+import Console from './Console';
+import Collections from './Collections';
+import Editor from './Editor';
 
 import {
     RunScript,

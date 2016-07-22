@@ -1,0 +1,65 @@
+
+#editor {
+    display: flex;
+    flex-flow: column;
+    flex: 1;
+    overflow: auto;
+    color: #000;
+    background: url(../img/editor-bg.png); /* needed in CEF */
+}
+
+#tabs {
+    display: flex;
+    flex-flow: row;
+    background: #01215A;
+    padding: 8px 0 0 6px;
+    min-height: 22px;
+}
+#tabs #files-menu {
+    color: #ddd;
+    cursor: pointer;
+}
+#tabs #files-menu:hover {
+    color: #ffc;
+}
+.popup {
+    display: none;
+    position: absolute;
+    z-index: 100;
+    background: #0371BE;
+    color: #f7f7f7;
+    margin: 2px 2px;
+    font-size: 14px;
+
+    -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding-box;
+    background-clip: padding-box;
+}
+.popup div {
+    padding: 8px 10px;
+}
+.popup div:hover {
+    background: #0488E4;
+    cursor: pointer;
+}
+#tabs div {
+    padding: 5px 8px;
+    margin: 0 4px 0 0;
+    background: #0371BE;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+}
+#tabs div.active {
+    background: #fff;
+    color: #444;
+    margin-bottom: -1px;
+    cursor: auto;
+}
+#tabs .txtFileName {
+    border: none;
+    padding: 0 2px;
+}

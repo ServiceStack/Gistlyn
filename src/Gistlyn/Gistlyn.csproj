@@ -149,10 +149,10 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="src\app.tsx" />
-    <TypeScriptCompile Include="src\components\Console.tsx" />
-    <TypeScriptCompile Include="src\components\Collections.tsx" />
-    <TypeScriptCompile Include="src\components\Editor.tsx" />
-    <TypeScriptCompile Include="src\components\SaveAsDialog.tsx" />
+    <TypeScriptCompile Include="src\Console.tsx" />
+    <TypeScriptCompile Include="src\Collections.tsx" />
+    <TypeScriptCompile Include="src\Editor.tsx" />
+    <TypeScriptCompile Include="src\SaveAsDialog.tsx" />
     <TypeScriptCompile Include="src\deps.tsx" />
     <TypeScriptCompile Include="platform.ts" />
     <TypeScriptCompile Include="src\Gistlyn.dtos.ts" />

@@ -1,4 +1,4 @@
-System.register(['react', '../utils', 'react-codemirror', "/jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js", "/jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js", "/jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js", "/jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js", "/jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js", "../codemirror.js"], function(exports_1, context_1) {
+System.register(['react', './utils', 'react-codemirror', "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js", "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js", "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js", "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js", "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js", "./codemirror.js"], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {

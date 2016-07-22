@@ -1,15 +1,15 @@
 ﻿import * as React from 'react';
-import { queryString } from '../servicestack-client';
-import { getSortedFileNames } from '../utils';
-import { IGistFile } from '../state';
+import { queryString } from './servicestack-client';
+import { getSortedFileNames } from './utils';
+import { IGistFile } from './state';
 
 import CodeMirror from 'react-codemirror';
-import "/jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js";
-import "/jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js";
-import "/jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js";
-import "/jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js";
-import "/jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js";
-import "../codemirror.js";
+import "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js";
+import "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js";
+import "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js";
+import "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js";
+import "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js";
+import "./codemirror.js";
 
 export default class Editor extends React.Component<any, any> {
     filesPopup: HTMLDivElement;
