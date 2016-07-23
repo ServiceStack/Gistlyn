@@ -10,6 +10,7 @@ import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitO
 import { JsonViewer } from './json-viewer';
 
 import SaveAsDialog from './SaveAsDialog';
+import ShortcutsDialog from './ShortcutsDialog';
 import Console from './Console';
 import Collections from './Collections';
 import Editor from './Editor';
@@ -483,16 +484,25 @@ class App extends React.Component<any, any> {
         const target = e.target as Element;
         if (target.tagName === "TEXTAREA" || target.tagName === "INPUT") return;
 
-        if (e.ctrlKey && (e.keyCode === 37 || e.keyCode === 39)) { //ctrl + left/right
-            if (!this.props.files || this.props.files.length === 0) return;
-            e.stopPropagation();
-            const keys = getSortedFileNames(this.props.files);
-            const activeIndex = Math.max(0, keys.indexOf(this.props.activeFileName));
-            let nextFileIndex = activeIndex + (e.keyCode === 37 ? -1 : 1);
-            nextFileIndex = nextFileIndex < 0
-                ? keys.length - 1
-                : nextFileIndex % keys.length;
-            this.props.selectFileName(keys[nextFileIndex]);
+        if (e.ctrlKey) {
+            if (e.keyCode === 37 || e.keyCode === 39) { //ctrl + left/right
+                if (!this.props.files || this.props.files.length === 0) return;
+                e.stopPropagation();
+                const keys = getSortedFileNames(this.props.files);
+                const activeIndex = Math.max(0, keys.indexOf(this.props.activeFileName));
+                let nextFileIndex = activeIndex + (e.keyCode === 37 ? -1 : 1);
+                nextFileIndex = nextFileIndex < 0
+                    ? keys.length - 1
+                    : nextFileIndex % keys.length;
+                this.props.selectFileName(keys[nextFileIndex]);
+            }
+        }
+
+        if (e.key === "?") {
+            this.props.showDialog("shortcuts");
+        }
+        else if (e.keyCode == 27) { //ESC
+            this.props.showDialog(null);
         }
     }
 
@@ -609,6 +619,8 @@ class App extends React.Component<any, any> {
             <div onClick={e => this.props.changeGist(GistTemplates.NewGist) }>New Gist</div>));
         MorePopup.push((
             <div onClick={e => this.props.changeGist(GistTemplates.NewPrivateGist) }>New Private Gist</div>));
+        MorePopup.push((
+            <div onClick={e => this.props.showDialog("shortcuts") }>Shortcuts</div>));
 
         const toggleEdit = () => {
             const inputWasHidden = this.txtUrl.style.display !== "inline-block";
@@ -764,6 +776,9 @@ class App extends React.Component<any, any> {
                 {meta && this.props.dialog === "save-as"
                     ? <SaveAsDialog dialogRef={e => this.dialog = e} description={description} isPublic={meta.public} shouldFork={shouldFork}
                         onSave={opt => this.saveGist(opt) } onHide={() => this.props.showDialog(null) } />
+                    : null}
+                {meta && this.props.dialog === "shortcuts"
+                    ? <ShortcutsDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null) } />
                     : null}
             </div>
         );

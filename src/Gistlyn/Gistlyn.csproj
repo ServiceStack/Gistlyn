@@ -152,6 +152,7 @@
     <TypeScriptCompile Include="src\Console.tsx" />
     <TypeScriptCompile Include="src\Collections.tsx" />
     <TypeScriptCompile Include="src\Editor.tsx" />
+    <TypeScriptCompile Include="src\KeyShortcutsDialog.tsx" />
     <TypeScriptCompile Include="src\SaveAsDialog.tsx" />
     <TypeScriptCompile Include="src\deps.tsx" />
     <TypeScriptCompile Include="platform.ts" />

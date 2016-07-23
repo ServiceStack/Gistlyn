@@ -1,5 +1,5 @@
 /// <reference path='../typings/index.d.ts'/>
-System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './state', './servicestack-client', './json-viewer', './SaveAsDialog', './Console', './Collections', './Editor', './Gistlyn.dtos'], function(exports_1, context_1) {
+System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './state', './servicestack-client', './json-viewer', './SaveAsDialog', './ShortcutsDialog', './Console', './Collections', './Editor', './Gistlyn.dtos'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -13,7 +13,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
         else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
-    var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, SaveAsDialog_1, Console_1, Collections_1, Editor_1, Gistlyn_dtos_1;
+    var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, SaveAsDialog_1, ShortcutsDialog_1, Console_1, Collections_1, Editor_1, Gistlyn_dtos_1;
     var ScriptStatusRunning, ScriptStatusError, client, sse, App, qs, stateJson, state, e, qsGist, qsCollection;
     function evalExpression(gist, scriptId, expr) {
         if (!expr)
@@ -67,6 +67,9 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
             },
             function (SaveAsDialog_1_1) {
                 SaveAsDialog_1 = SaveAsDialog_1_1;
+            },
+            function (ShortcutsDialog_1_1) {
+                ShortcutsDialog_1 = ShortcutsDialog_1_1;
             },
             function (Console_1_1) {
                 Console_1 = Console_1_1;
@@ -407,17 +410,25 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     var target = e.target;
                     if (target.tagName === "TEXTAREA" || target.tagName === "INPUT")
                         return;
-                    if (e.ctrlKey && (e.keyCode === 37 || e.keyCode === 39)) {
-                        if (!this.props.files || this.props.files.length === 0)
-                            return;
-                        e.stopPropagation();
-                        var keys = utils_1.getSortedFileNames(this.props.files);
-                        var activeIndex = Math.max(0, keys.indexOf(this.props.activeFileName));
-                        var nextFileIndex = activeIndex + (e.keyCode === 37 ? -1 : 1);
-                        nextFileIndex = nextFileIndex < 0
-                            ? keys.length - 1
-                            : nextFileIndex % keys.length;
-                        this.props.selectFileName(keys[nextFileIndex]);
+                    if (e.ctrlKey) {
+                        if (e.keyCode === 37 || e.keyCode === 39) {
+                            if (!this.props.files || this.props.files.length === 0)
+                                return;
+                            e.stopPropagation();
+                            var keys = utils_1.getSortedFileNames(this.props.files);
+                            var activeIndex = Math.max(0, keys.indexOf(this.props.activeFileName));
+                            var nextFileIndex = activeIndex + (e.keyCode === 37 ? -1 : 1);
+                            nextFileIndex = nextFileIndex < 0
+                                ? keys.length - 1
+                                : nextFileIndex % keys.length;
+                            this.props.selectFileName(keys[nextFileIndex]);
+                        }
+                    }
+                    if (e.key === "?") {
+                        this.props.showDialog("shortcuts");
+                    }
+                    else if (e.keyCode == 27) {
+                        this.props.showDialog(null);
                     }
                 };
                 App.prototype.getAuthUsername = function () {
@@ -477,6 +488,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     }
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(state_1.GistTemplates.NewGist); }}, "New Gist")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(state_1.GistTemplates.NewPrivateGist); }}, "New Private Gist")));
+                    MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.showDialog("shortcuts"); }}, "Shortcuts")));
                     var toggleEdit = function () {
                         var inputWasHidden = _this.txtUrl.style.display !== "inline-block";
                         var showInput = !meta || !description || inputWasHidden;
@@ -526,6 +538,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                             : React.createElement("i", {className: "material-icons", title: "cancel script", style: { color: "#FF5252" }}, "cancel"))
                         : React.createElement("i", {className: "material-icons", title: "disabled"}, "play_circle_outline")), meta && this.props.dialog === "save-as"
                         ? React.createElement(SaveAsDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, description: description, isPublic: meta.public, shouldFork: shouldFork, onSave: function (opt) { return _this.saveGist(opt); }, onHide: function () { return _this.props.showDialog(null); }})
+                        : null, meta && this.props.dialog === "shortcuts"
+                        ? React.createElement(ShortcutsDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }})
                         : null));
                 };
                 App = __decorate([
