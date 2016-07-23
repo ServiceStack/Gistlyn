@@ -50,16 +50,48 @@ var sse = new ServerEventsClient("/", ["gist"], {
                 store.dispatch({ type: 'CONSOLE_LOG', logs: errorMsgs });
             }
             else if (m.status === "Completed") {
-                var request = new GetScriptVariables();
-                request.scriptId = store.getState().activeSub.id;
+                const request = new GetScriptVariables();
+                const state = store.getState();
+                request.scriptId = state.activeSub.id;
                 client.get(request)
                     .then(r => {
                         store.dispatch({ type: "VARS_LOAD", variables: r.variables });
                     });
+
+                if (state.expression) {
+                    evalExpression(state.gist, state.activeSub.id, state.expression);
+                }
             }
         }
     }
 });
+
+function evalExpression(gist: string, scriptId: string, expr: string) {
+    if (!expr)
+        return;
+
+    const request = new EvaluateExpression();
+    request.scriptId = scriptId;
+    request.expression = expr;
+    request.includeJson = true;
+
+    ReactGA.event({ category: 'preview', action: 'Evaluate Expression', label: gist + ": " + expr.substring(0, 50) });
+
+    client.post(request)
+        .then(r => {
+            if (r.result.errors && r.result.errors.length > 0) {
+                r.result.errors.forEach(x => {
+                    store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: x.info, cls: "error" }] });
+                });
+            } else {
+                store.dispatch({ type: 'EXPRESSION_LOAD', expressionResult: r.result });
+            }
+        })
+        .catch(e => {
+            var status = e.responseStatus || e; //both have schema `{ message }`
+            store.dispatch({ type: 'CONSOLE_LOG', logs: [Object.assign({ msg: status.message, cls: "error" }, status)] });
+        });
+};
 
 @reduxify(
     (state) => ({
@@ -100,7 +132,6 @@ var sse = new ServerEventsClient("/", ["gist"], {
         setScriptStatus: (scriptStatus: ScriptStatus) => dispatch({ type: 'SCRIPT_STATUS', scriptStatus }),
         inspectVariable: (name: string, variables: any) => dispatch({ type: 'VARS_INSPECT', name, variables }),
         setExpression: (expression: string) => dispatch({ type: 'EXPRESSION_SET', expression }),
-        setExpressionResult: (expressionResult: any) => dispatch({ type: 'EXPRESSION_LOAD', expressionResult }),
         showDialog: (dialog: string) => dispatch({ type: 'DIALOG_SHOW', dialog }),
         setDirty: (dirty: boolean) => dispatch({ type: 'DIRTY_SET', dirty }),
         changeCollection: (id: string, showCollection: boolean) => dispatch({ type: 'COLLECTION_CHANGE', collection: { id }, showCollection })
@@ -242,29 +273,9 @@ class App extends React.Component<any, any> {
     evaluateExpression(expr: string) {
         if (!expr) {
             this.props.setExpression(expr);
-            return;
+        } else {
+            evalExpression(this.props.gist, this.scriptId, expr);
         }
-
-        const request = new EvaluateExpression();
-        request.scriptId = this.scriptId;
-        request.expression = expr;
-        request.includeJson = true;
-
-        ReactGA.event({ category: 'preview', action: 'Evaluate Expression', label: this.props.gist + ": " + expr.substring(0, 50) });
-
-        client.post(request)
-            .then(r => {
-                if (r.result.errors && r.result.errors.length > 0) {
-                    r.result.errors.forEach(x => {
-                        this.props.logConsole({ msg: x.info, cls: "error" });
-                    });
-                } else {
-                    this.props.setExpressionResult(r.result);
-                }
-            })
-            .catch(e => {
-                this.props.logConsoleError(e.responseStatus || e); //both have schema `{ message }`
-            });
     }
 
     revertGist(shiftKey: boolean = false, ctrlKey:boolean = false) {

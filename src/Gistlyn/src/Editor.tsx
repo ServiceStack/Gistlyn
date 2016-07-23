@@ -41,7 +41,7 @@ export default class Editor extends React.Component<any, any> {
 
             const sizeToFit = (e: React.KeyboardEvent) => {
                 var txt = e.target as HTMLInputElement;
-                txt.size = Math.max(txt.value.length - 3, 1);
+                txt.size = Math.max(txt.value.length - 2, 1); //Note: Spacing is different on OSX
             };
 
             keys.forEach(fileName => {

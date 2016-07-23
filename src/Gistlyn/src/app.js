@@ -15,6 +15,30 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
     };
     var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, SaveAsDialog_1, Console_1, Collections_1, Editor_1, Gistlyn_dtos_1;
     var ScriptStatusRunning, ScriptStatusError, client, sse, App, qs, stateJson, state, e, qsGist, qsCollection;
+    function evalExpression(gist, scriptId, expr) {
+        if (!expr)
+            return;
+        var request = new Gistlyn_dtos_1.EvaluateExpression();
+        request.scriptId = scriptId;
+        request.expression = expr;
+        request.includeJson = true;
+        react_ga_1.default.event({ category: 'preview', action: 'Evaluate Expression', label: gist + ": " + expr.substring(0, 50) });
+        client.post(request)
+            .then(function (r) {
+            if (r.result.errors && r.result.errors.length > 0) {
+                r.result.errors.forEach(function (x) {
+                    state_1.store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: x.info, cls: "error" }] });
+                });
+            }
+            else {
+                state_1.store.dispatch({ type: 'EXPRESSION_LOAD', expressionResult: r.result });
+            }
+        })
+            .catch(function (e) {
+            var status = e.responseStatus || e; //both have schema `{ message }`
+            state_1.store.dispatch({ type: 'CONSOLE_LOG', logs: [Object.assign({ msg: status.message, cls: "error" }, status)] });
+        });
+    }
     return {
         setters:[
             function (React_1) {
@@ -82,15 +106,20 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         }
                         else if (m.status === "Completed") {
                             var request = new Gistlyn_dtos_1.GetScriptVariables();
-                            request.scriptId = state_1.store.getState().activeSub.id;
+                            var state_2 = state_1.store.getState();
+                            request.scriptId = state_2.activeSub.id;
                             client.get(request)
                                 .then(function (r) {
                                 state_1.store.dispatch({ type: "VARS_LOAD", variables: r.variables });
                             });
+                            if (state_2.expression) {
+                                evalExpression(state_2.gist, state_2.activeSub.id, state_2.expression);
+                            }
                         }
                     }
                 }
             });
+            ;
             App = (function (_super) {
                 __extends(App, _super);
                 function App() {
@@ -201,30 +230,12 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     this.evaluateExpression(expr);
                 };
                 App.prototype.evaluateExpression = function (expr) {
-                    var _this = this;
                     if (!expr) {
                         this.props.setExpression(expr);
-                        return;
                     }
-                    var request = new Gistlyn_dtos_1.EvaluateExpression();
-                    request.scriptId = this.scriptId;
-                    request.expression = expr;
-                    request.includeJson = true;
-                    react_ga_1.default.event({ category: 'preview', action: 'Evaluate Expression', label: this.props.gist + ": " + expr.substring(0, 50) });
-                    client.post(request)
-                        .then(function (r) {
-                        if (r.result.errors && r.result.errors.length > 0) {
-                            r.result.errors.forEach(function (x) {
-                                _this.props.logConsole({ msg: x.info, cls: "error" });
-                            });
-                        }
-                        else {
-                            _this.props.setExpressionResult(r.result);
-                        }
-                    })
-                        .catch(function (e) {
-                        _this.props.logConsoleError(e.responseStatus || e); //both have schema `{ message }`
-                    });
+                    else {
+                        evalExpression(this.props.gist, this.scriptId, expr);
+                    }
                 };
                 App.prototype.revertGist = function (shiftKey, ctrlKey) {
                     if (shiftKey === void 0) { shiftKey = false; }
@@ -545,7 +556,6 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         setScriptStatus: function (scriptStatus) { return dispatch({ type: 'SCRIPT_STATUS', scriptStatus: scriptStatus }); },
                         inspectVariable: function (name, variables) { return dispatch({ type: 'VARS_INSPECT', name: name, variables: variables }); },
                         setExpression: function (expression) { return dispatch({ type: 'EXPRESSION_SET', expression: expression }); },
-                        setExpressionResult: function (expressionResult) { return dispatch({ type: 'EXPRESSION_LOAD', expressionResult: expressionResult }); },
                         showDialog: function (dialog) { return dispatch({ type: 'DIALOG_SHOW', dialog: dialog }); },
                         setDirty: function (dirty) { return dispatch({ type: 'DIRTY_SET', dirty: dirty }); },
                         changeCollection: function (id, showCollection) { return dispatch({ type: 'COLLECTION_CHANGE', collection: { id: id }, showCollection: showCollection }); }
