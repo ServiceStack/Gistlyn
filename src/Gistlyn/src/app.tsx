@@ -699,7 +699,19 @@ class App extends React.Component<any, any> {
                             showPopup={(e, filesPopup) => this.showPopup(e, filesPopup) }
                             updateSource={(fileName, src) => this.props.updateSource(fileName, src) }
                             onRenameFile={(fileName, e) => this.handleRenameFile(fileName, e) }
-                            onCreateFile={e => this.handleCreateFile(e) } />
+                            onCreateFile={e => this.handleCreateFile(e) }
+                            onRun={() => this.run() }
+                            onSave={() => {
+                                if (!meta) {
+                                    this.props.logConsoleError({ message: "There is nothing to save." });
+                                } else if (!authUsername) {
+                                    this.signIn();
+                                } else if (meta.owner_login !== authUsername) {
+                                    this.saveGistAs();
+                                } else {
+                                    this.saveGist();
+                                }
+                            }}/>
                         <div id="preview">
                             {Preview}
                         </div>
@@ -715,7 +727,7 @@ class App extends React.Component<any, any> {
                             <p>Revert Changes</p>
                         </div>
                         { meta && meta.owner_login == authUsername
-                            ? (<div id="save" onClick={e => this.saveGist({}) } className={this.props.dirty ? "" : "disabled"}>
+                            ? (<div id="save" onClick={e => this.saveGist() } className={this.props.dirty ? "" : "disabled"}>
                                 <i className="material-icons">save</i>
                                 <p>Save Gist</p>
                             </div>)

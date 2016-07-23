@@ -45,6 +45,12 @@ System.register(['react', './utils', 'react-codemirror', "jspm_packages/npm/code
                             "Esc": function (cm) {
                                 if (cm.getOption("fullScreen"))
                                     cm.setOption("fullScreen", false);
+                            },
+                            "Ctrl-Enter": function (cm) {
+                                _this.props.onRun();
+                            },
+                            "Ctrl-S": function (cm) {
+                                _this.props.onSave();
                             }
                         }
                     };

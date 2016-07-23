@@ -27,6 +27,12 @@ export default class Editor extends React.Component<any, any> {
                 "Esc"(cm) {
                     if (cm.getOption("fullScreen"))
                         cm.setOption("fullScreen", false);
+                },
+                "Ctrl-Enter": (cm) => {
+                    this.props.onRun();
+                },
+                "Ctrl-S": (cm) => {
+                    this.props.onSave();
                 }
             }
         };
