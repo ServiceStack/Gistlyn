@@ -356,6 +356,7 @@ span.CodeMirror-selectedtext { background: none; }
 
 .ReactCodeMirror {
     flex: 1;
+    overflow: auto;
 }
 
 .CodeMirror {
