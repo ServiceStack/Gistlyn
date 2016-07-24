@@ -238,24 +238,21 @@ System.register(['isomorphic-fetch'], function(exports_1, context_1) {
                         });
                     })
                         .catch(function (res) {
-                        if (res instanceof Error) {
+                        if (res instanceof Error)
                             throw res;
-                        }
                         // res.json can only be called once.
-                        if (res.bodyUsed) {
+                        if (res.bodyUsed)
                             throw createErrorResponse(res.status, res.statusText);
-                        }
                         return res.json().then(function (o) {
                             var errorDto = sanitize(o);
-                            if (!errorDto.responseStatus) {
+                            if (!errorDto.responseStatus)
                                 throw createErrorResponse(res.status, res.statusText);
-                            }
                             throw errorDto;
                         }).catch(function (responseStatusError) {
-                            if (responseStatusError instanceof Error) {
-                                // No responseStatus body, set from `res` Body object
+                            // No responseStatus body, set from `res` Body object
+                            if (responseStatusError instanceof Error)
                                 throw createErrorResponse(res.status, res.statusText);
-                            }
+                            throw responseStatusError;
                         });
                     });
                 };

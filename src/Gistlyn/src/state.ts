@@ -311,7 +311,7 @@ export let store = createStore(
             case 'FILENAME_EDIT':
                 return Object.assign({}, state, { editingFileName: action.fileName });
             case 'ERROR_RAISE':
-                return Object.assign({}, state, { error: action.error });
+                return Object.assign({}, state, { error: action.error, showCollection:false });
             case 'CONSOLE_LOG':
                 return Object.assign({}, state, { logs: [...state.logs, ...action.logs] });
             case 'CONSOLE_CLEAR':

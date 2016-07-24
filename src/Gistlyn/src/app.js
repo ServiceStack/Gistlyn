@@ -14,7 +14,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
     var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, SaveAsDialog_1, ShortcutsDialog_1, AddServiceStackReferenceDialog_1, Console_1, Collections_1, Editor_1, Gistlyn_dtos_1;
-    var ScriptStatusRunning, ScriptStatusError, client, sse, App, qs, stateJson, state, e, qsGist, qsCollection;
+    var ScriptStatusRunning, ScriptStatusError, statusToError, client, sse, App, qs, stateJson, state, e, qsGist, qsCollection;
     function evalExpression(gist, scriptId, expr) {
         if (!expr)
             return;
@@ -36,7 +36,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
         })
             .catch(function (e) {
             var status = e.responseStatus || e; //both have schema `{ message }`
-            state_1.store.dispatch({ type: 'CONSOLE_LOG', logs: [Object.assign({ msg: status.message, cls: "error" }, status)] });
+            state_1.store.dispatch({ type: 'CONSOLE_LOG', logs: [statusToError(status)] });
         });
     }
     return {
@@ -90,6 +90,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
             ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
             ScriptStatusError = ["Cancelled", "CompiledWithErrors", "ThrowedException"];
             react_ga_1.default.initialize("UA-80898009-1");
+            statusToError = function (status) { return ({ errorCode: status.errorCode, msg: status.message, cls: "error" }); };
             client = new servicestack_client_1.JsonServiceClient("/");
             sse = new servicestack_client_1.ServerEventsClient("/", ["gist"], {
                 handlers: {
@@ -103,8 +104,12 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     ScriptExecutionResult: function (m, e) {
                         if (m.status === state_1.store.getState().scriptStatus)
                             return;
-                        var cls = ScriptStatusError.indexOf(m.status) >= 0 ? "error" : "";
-                        state_1.store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: servicestack_client_1.humanize(m.status), cls: cls }] });
+                        if (ScriptStatusError.indexOf(m.status) >= 0 && m.errorResponseStatus) {
+                            state_1.store.dispatch({ type: 'CONSOLE_LOG', logs: [statusToError(m.errorResponseStatus)] });
+                        }
+                        else {
+                            state_1.store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: servicestack_client_1.humanize(m.status) }] });
+                        }
                         state_1.store.dispatch({ type: 'SCRIPT_STATUS', scriptStatus: m.status });
                         if (m.status === "CompiledWithErrors" && m.errors) {
                             var errorMsgs = m.errors.map(function (e) { return ({ msg: e.info, cls: "error" }); });
@@ -148,8 +153,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                             .then(function (r) {
                             _this.props.logConsoleMsgs(r.references.map(function (ref) { return ("loaded " + ref.name); }));
                         })
-                            .catch(function (r) {
-                            _this.props.raiseError(r.responseStatus);
+                            .catch(function (e) {
+                            _this.props.raiseError(e.responseStatus || e);
                             _this.props.setScriptStatus("Failed");
                         });
                     };
@@ -494,14 +499,14 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     var isScriptRunning = ScriptStatusRunning.indexOf(this.props.scriptStatus) >= 0;
                     var Preview = [];
                     var showCollection = this.props.showCollection && this.props.collection && this.props.collection.html != null;
-                    if (this.props.error != null) {
+                    if (showCollection) {
+                        Preview.push(React.createElement(Collections_1.default, {gistStats: this.props.gistStats, excludeGists: state_1.GistTemplates.Gists, collection: this.props.collection, showLiveLists: this.props.collection.id === state_1.GistTemplates.HomeCollection, authUsername: authUsername, changeGist: function (id) { return _this.props.changeGist(id); }, changeCollection: function (id, reload) { return _this.props.changeCollection(id, reload); }}));
+                    }
+                    else if (this.props.error != null) {
                         var code = this.props.error.errorCode ? "(" + this.props.error.errorCode + ") " : "";
                         Preview.push((React.createElement("div", {id: "errors", className: "section"}, React.createElement("div", {style: { margin: "25px 25px 40px 25px", color: "#a94442" }}, code, this.props.error.message), this.props.error.stackTrace != null
                             ? React.createElement("pre", {style: { color: "red", padding: "5px 30px" }}, this.props.error.stackTrace)
                             : null)));
-                    }
-                    else if (showCollection) {
-                        Preview.push(React.createElement(Collections_1.default, {gistStats: this.props.gistStats, excludeGists: state_1.GistTemplates.Gists, collection: this.props.collection, showLiveLists: this.props.collection.id === state_1.GistTemplates.HomeCollection, authUsername: authUsername, changeGist: function (id) { return _this.props.changeGist(id); }, changeCollection: function (id, reload) { return _this.props.changeCollection(id, reload); }}));
                     }
                     else if (isScriptRunning) {
                         Preview.push((React.createElement("div", {id: "status", className: "section"}, React.createElement("div", {style: { margin: '40px', color: "#444", width: "215px" }, title: "executing..."}, React.createElement("img", {src: "/img/ajax-loader.gif", style: { float: "right", margin: "5px 0 0 0" }}), React.createElement("i", {className: "material-icons", style: { position: "absolute" }}, "build"), React.createElement("p", {style: { padding: "0 0 0 30px", fontSize: "22px" }}, "Executing Script"), React.createElement("div", {id: "splash", style: { padding: 30 }}, React.createElement("img", {src: "/img/compiling.png"}))))));

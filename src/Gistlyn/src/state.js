@@ -295,7 +295,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                     case 'FILENAME_EDIT':
                         return Object.assign({}, state, { editingFileName: action.fileName });
                     case 'ERROR_RAISE':
-                        return Object.assign({}, state, { error: action.error });
+                        return Object.assign({}, state, { error: action.error, showCollection: false });
                     case 'CONSOLE_LOG':
                         return Object.assign({}, state, { logs: state.logs.concat(action.logs) });
                     case 'CONSOLE_CLEAR':

@@ -30,6 +30,8 @@ const ScriptStatusError = ["Cancelled", "CompiledWithErrors", "ThrowedException"
 
 ReactGA.initialize("UA-80898009-1");
 
+const statusToError = status => ({ errorCode: status.errorCode, msg: status.message, cls: "error" });
+
 var client = new JsonServiceClient("/");
 var sse = new ServerEventsClient("/", ["gist"], {
     handlers: {
@@ -43,15 +45,18 @@ var sse = new ServerEventsClient("/", ["gist"], {
         ScriptExecutionResult(m: ScriptExecutionResult, e) {
             if (m.status === store.getState().scriptStatus) return;
 
-            const cls = ScriptStatusError.indexOf(m.status) >= 0 ? "error" : "";
-            store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: humanize(m.status), cls }] });
+            if (ScriptStatusError.indexOf(m.status) >= 0 && m.errorResponseStatus) {
+                store.dispatch({ type: 'CONSOLE_LOG', logs: [statusToError(m.errorResponseStatus)] });
+            } else {
+                store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: humanize(m.status) }] });
+            }
+
             store.dispatch({ type: 'SCRIPT_STATUS', scriptStatus: m.status });
 
             if (m.status === "CompiledWithErrors" && m.errors) {
                 const errorMsgs = m.errors.map(e => ({ msg: e.info, cls: "error" }));
                 store.dispatch({ type: 'CONSOLE_LOG', logs: errorMsgs });
-            }
-            else if (m.status === "Completed") {
+            } else if (m.status === "Completed") {
                 const request = new GetScriptVariables();
                 const state = store.getState();
                 request.scriptId = state.activeSub.id;
@@ -91,7 +96,7 @@ function evalExpression(gist: string, scriptId: string, expr: string) {
         })
         .catch(e => {
             var status = e.responseStatus || e; //both have schema `{ message }`
-            store.dispatch({ type: 'CONSOLE_LOG', logs: [Object.assign({ msg: status.message, cls: "error" }, status)] });
+            store.dispatch({ type: 'CONSOLE_LOG', logs: [statusToError(status)] });
         });
 };
 
@@ -187,8 +192,8 @@ class App extends React.Component<any, any> {
             .then(r => {
                 this.props.logConsoleMsgs(r.references.map(ref => `loaded ${ref.name}`));
             })
-            .catch(r => {
-                this.props.raiseError(r.responseStatus);
+            .catch(e => {
+                this.props.raiseError(e.responseStatus || e);
                 this.props.setScriptStatus("Failed");
             });
     }
@@ -576,8 +581,13 @@ class App extends React.Component<any, any> {
         var Preview = [];
 
         const showCollection = this.props.showCollection && this.props.collection && this.props.collection.html != null;
-
-        if (this.props.error != null) {
+        if (showCollection) {
+            Preview.push(<Collections gistStats={this.props.gistStats} excludeGists={GistTemplates.Gists} collection={this.props.collection}
+                showLiveLists={this.props.collection.id === GistTemplates.HomeCollection} authUsername={authUsername}
+                changeGist={id => this.props.changeGist(id) }
+                changeCollection={(id, reload) => this.props.changeCollection(id, reload) } />
+            );
+        } else if (this.props.error != null) {
             var code = this.props.error.errorCode ? `(${this.props.error.errorCode}) ` : "";
             Preview.push((
                 <div id="errors" className="section">
@@ -588,12 +598,6 @@ class App extends React.Component<any, any> {
                         ? <pre style={{ color: "red", padding: "5px 30px" }}>{this.props.error.stackTrace}</pre>
                         : null}
                 </div>));
-        } else if (showCollection) {
-            Preview.push(<Collections gistStats={this.props.gistStats} excludeGists={GistTemplates.Gists} collection={this.props.collection}
-                showLiveLists={this.props.collection.id === GistTemplates.HomeCollection} authUsername={authUsername}
-                changeGist={id => this.props.changeGist(id) }
-                changeCollection={(id, reload) => this.props.changeCollection(id, reload) } />
-            );
         } else if (isScriptRunning) {
             Preview.push((
                 <div id="status" className="section">
@@ -722,23 +726,21 @@ class App extends React.Component<any, any> {
 
                         </div>
                         { !authUsername
-                            ? (
-                                <div id="sign-in" style={{ position: "absolute", right: 5 }}>
-                                    <a href="/auth/github" style={{ color: "#fff", textDecoration: "none" }}>
-                                        <span style={{ whiteSpace: "nowrap", fontSize: 14 }}>sign-in</span>
-                                        <span style={{ verticalAlign: "sub", margin: "0 0 0 10px" }} className="mega-octicon octicon-mark-github" title="Sign in with GitHub"></span>
-                                    </a>
-                                </div>
-                            )
+                            ? (<div id="sign-in" style={{ position: "absolute", right: 5 }}>
+                                   <a href="/auth/github" style={{ color: "#fff", textDecoration: "none" }}>
+                                       <span style={{ whiteSpace: "nowrap", fontSize: 14 }}>sign-in</span>
+                                       <span style={{ verticalAlign: "sub", margin: "0 0 0 10px" }} className="mega-octicon octicon-mark-github" title="Sign in with GitHub"></span>
+                                   </a>
+                               </div>)
                             : ([
-                                <div id="signed-in" style={{ position: "absolute", right: 5, cursor: "pointer" }} onClick={e => this.showPopup(e, this.userPopup) }>
-                                    <span style={{ whiteSpace: "nowrap", fontSize: 14 }}>{activeSub.displayName}</span>
-                                    <img src={activeSub.profileUrl} style={{ verticalAlign: "middle", marginLeft: 5, borderRadius: "50%" }} />
-                                </div>,
-                                <div id="popup-user" className="popup" ref={e => this.userPopup = e } style={{ position: "absolute", top: 42, right: 0 }}>
-                                    <div onClick={e => location.href = "/auth/logout" }>Sign out</div>
-                                </div>
-                            ]) }
+                               <div id="signed-in" style={{ position: "absolute", right: 5, cursor: "pointer" }} onClick={e => this.showPopup(e, this.userPopup) }>
+                                   <span style={{ whiteSpace: "nowrap", fontSize: 14 }}>{activeSub.displayName}</span>
+                                   <img src={activeSub.profileUrl} style={{ verticalAlign: "middle", marginLeft: 5, borderRadius: "50%" }} />
+                               </div>,
+                               <div id="popup-user" className="popup" ref={e => this.userPopup = e } style={{ position: "absolute", top: 42, right: 0 }}>
+                                   <div onClick={e => location.href = "/auth/logout" }>Sign out</div>
+                               </div>
+                            ])}
                     </div>
                 </div>
 
