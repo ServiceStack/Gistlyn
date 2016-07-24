@@ -11,6 +11,7 @@ import { JsonViewer } from './json-viewer';
 
 import SaveAsDialog from './SaveAsDialog';
 import ShortcutsDialog from './ShortcutsDialog';
+import AddServiceStackReferenceDialog from './AddServiceStackReferenceDialog';
 import Console from './Console';
 import Collections from './Collections';
 import Editor from './Editor';
@@ -431,7 +432,7 @@ class App extends React.Component<any, any> {
 
         ReactGA.event({ category: 'file', action: 'Delete File', label: fileName });
 
-        fetch("/proxy/gists/" + this.props.gist, { method: "PATCH", credentials: "include", body: json })
+        fetch("/github-proxy/gists/" + this.props.gist, { method: "PATCH", credentials: "include", body: json })
             .then((res) => {
                 this.props.changeGist(this.props.gist, { reload: true });
             })
@@ -453,6 +454,7 @@ class App extends React.Component<any, any> {
     }
 
     morePopup: HTMLDivElement;
+    editorPopup: HTMLDivElement;
     userPopup: HTMLDivElement;
     lastPopup: HTMLDivElement;
     txtUrl: HTMLInputElement;
@@ -524,6 +526,7 @@ class App extends React.Component<any, any> {
     render() {
 
         const MorePopup = [];
+        const EditorPopup = [];
         var activeSub = this.props.activeSub as ISseConnect;
         var authUsername = this.getAuthUsername();
         const meta = this.props.meta as IGistMeta;
@@ -616,11 +619,18 @@ class App extends React.Component<any, any> {
         }
 
         MorePopup.push((
+            <div onClick={e => this.props.changeCollection(GistTemplates.HomeCollection, true) }>Home</div>));
+        MorePopup.push((
             <div onClick={e => this.props.changeGist(GistTemplates.NewGist) }>New Gist</div>));
         MorePopup.push((
             <div onClick={e => this.props.changeGist(GistTemplates.NewPrivateGist) }>New Private Gist</div>));
         MorePopup.push((
             <div onClick={e => this.props.showDialog("shortcuts") }>Shortcuts</div>));
+        MorePopup.push((
+            <div onClick={e => location.href = "https://github.com/ServiceStack/Gistlyn/issues"}>Send Feedback</div>));
+
+        EditorPopup.push((
+            <div onClick={e => this.props.showDialog("add-ss-ref") }>Add ServiceStack Reference</div>));
 
         const toggleEdit = () => {
             const inputWasHidden = this.txtUrl.style.display !== "inline-block";
@@ -702,6 +712,17 @@ class App extends React.Component<any, any> {
 
                 <div id="content">
                     <div id="ide">
+                        { authUsername
+                            ? (<div id="editor-menu" style={{ position: "absolute", top: 46, left: "50%", margin: "0 0 0 -23px", color: "#fff", cursor: "pointer", zIndex: 3 }}>
+                                <i className="material-icons" onClick={e => this.showPopup(e, this.editorPopup) }>more_vert</i>
+                               </div>)
+                            : null }
+                        { authUsername
+                            ? (<div id="popup-editor" className="popup" ref={e => this.editorPopup = e } style={{ position: "absolute", top: 76, left: "50%", margin: "0 0 0 -197px" }}>
+                                    {EditorPopup}
+                                </div>)
+                            : null }
+                        
                         <Editor files={files}
                             isOwner={authUsername && meta && meta.owner_login === authUsername}
                             activeFileName={this.props.activeFileName}
@@ -779,6 +800,9 @@ class App extends React.Component<any, any> {
                     : null}
                 {meta && this.props.dialog === "shortcuts"
                     ? <ShortcutsDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null) } />
+                    : null}
+                {meta && this.props.dialog === "add-ss-ref"
+                    ? <AddServiceStackReferenceDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null) } />
                     : null}
             </div>
         );

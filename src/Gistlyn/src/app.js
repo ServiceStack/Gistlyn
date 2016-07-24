@@ -1,5 +1,5 @@
 /// <reference path='../typings/index.d.ts'/>
-System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './state', './servicestack-client', './json-viewer', './SaveAsDialog', './ShortcutsDialog', './Console', './Collections', './Editor', './Gistlyn.dtos'], function(exports_1, context_1) {
+System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './state', './servicestack-client', './json-viewer', './SaveAsDialog', './ShortcutsDialog', './AddServiceStackReferenceDialog', './Console', './Collections', './Editor', './Gistlyn.dtos'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -13,7 +13,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
         else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
-    var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, SaveAsDialog_1, ShortcutsDialog_1, Console_1, Collections_1, Editor_1, Gistlyn_dtos_1;
+    var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, SaveAsDialog_1, ShortcutsDialog_1, AddServiceStackReferenceDialog_1, Console_1, Collections_1, Editor_1, Gistlyn_dtos_1;
     var ScriptStatusRunning, ScriptStatusError, client, sse, App, qs, stateJson, state, e, qsGist, qsCollection;
     function evalExpression(gist, scriptId, expr) {
         if (!expr)
@@ -70,6 +70,9 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
             },
             function (ShortcutsDialog_1_1) {
                 ShortcutsDialog_1 = ShortcutsDialog_1_1;
+            },
+            function (AddServiceStackReferenceDialog_1_1) {
+                AddServiceStackReferenceDialog_1 = AddServiceStackReferenceDialog_1_1;
             },
             function (Console_1_1) {
                 Console_1 = Console_1_1;
@@ -372,7 +375,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         return;
                     var json = JSON.stringify({ files: (_a = {}, _a[fileName] = null, _a) });
                     react_ga_1.default.event({ category: 'file', action: 'Delete File', label: fileName });
-                    fetch("/proxy/gists/" + this.props.gist, { method: "PATCH", credentials: "include", body: json })
+                    fetch("/github-proxy/gists/" + this.props.gist, { method: "PATCH", credentials: "include", body: json })
                         .then(function (res) {
                         _this.props.changeGist(_this.props.gist, { reload: true });
                     })
@@ -447,6 +450,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                 App.prototype.render = function () {
                     var _this = this;
                     var MorePopup = [];
+                    var EditorPopup = [];
                     var activeSub = this.props.activeSub;
                     var authUsername = this.getAuthUsername();
                     var meta = this.props.meta;
@@ -486,9 +490,12 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     if (this.props.logs.length > 0 && !this.props.showCollection) {
                         Preview.push(React.createElement(Console_1.default, {logs: this.props.logs, onClear: function () { return _this.props.clearConsole(); }}));
                     }
+                    MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeCollection(state_1.GistTemplates.HomeCollection, true); }}, "Home")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(state_1.GistTemplates.NewGist); }}, "New Gist")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(state_1.GistTemplates.NewPrivateGist); }}, "New Private Gist")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.showDialog("shortcuts"); }}, "Shortcuts")));
+                    MorePopup.push((React.createElement("div", {onClick: function (e) { return location.href = "https://github.com/ServiceStack/Gistlyn/issues"; }}, "Send Feedback")));
+                    EditorPopup.push((React.createElement("div", {onClick: function (e) { return _this.props.showDialog("add-ss-ref"); }}, "Add ServiceStack Reference")));
                     var toggleEdit = function () {
                         var inputWasHidden = _this.txtUrl.style.display !== "inline-block";
                         var showInput = !meta || !description || inputWasHidden;
@@ -513,7 +520,11 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         : ([
                             React.createElement("div", {id: "signed-in", style: { position: "absolute", right: 5, cursor: "pointer" }, onClick: function (e) { return _this.showPopup(e, _this.userPopup); }}, React.createElement("span", {style: { whiteSpace: "nowrap", fontSize: 14 }}, activeSub.displayName), React.createElement("img", {src: activeSub.profileUrl, style: { verticalAlign: "middle", marginLeft: 5, borderRadius: "50%" }})),
                             React.createElement("div", {id: "popup-user", className: "popup", ref: function (e) { return _this.userPopup = e; }, style: { position: "absolute", top: 42, right: 0 }}, React.createElement("div", {onClick: function (e) { return location.href = "/auth/logout"; }}, "Sign out"))
-                        ]))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, React.createElement(Editor_1.default, {files: files, isOwner: authUsername && meta && meta.owner_login === authUsername, activeFileName: this.props.activeFileName, editingFileName: this.props.editingFileName, selectFileName: function (fileName) { return _this.props.selectFileName(fileName); }, editFileName: function (fileName) { return _this.props.editFileName(fileName); }, showPopup: function (e, filesPopup) { return _this.showPopup(e, filesPopup); }, updateSource: function (fileName, src) { return _this.props.updateSource(fileName, src); }, onRenameFile: function (fileName, e) { return _this.handleRenameFile(fileName, e); }, onCreateFile: function (e) { return _this.handleCreateFile(e); }, onRun: function () { return _this.run(); }, onSave: function () {
+                        ]))), React.createElement("div", {id: "content"}, React.createElement("div", {id: "ide"}, authUsername
+                        ? (React.createElement("div", {id: "editor-menu", style: { position: "absolute", top: 46, left: "50%", margin: "0 0 0 -23px", color: "#fff", cursor: "pointer", zIndex: 3 }}, React.createElement("i", {className: "material-icons", onClick: function (e) { return _this.showPopup(e, _this.editorPopup); }}, "more_vert")))
+                        : null, authUsername
+                        ? (React.createElement("div", {id: "popup-editor", className: "popup", ref: function (e) { return _this.editorPopup = e; }, style: { position: "absolute", top: 76, left: "50%", margin: "0 0 0 -197px" }}, EditorPopup))
+                        : null, React.createElement(Editor_1.default, {files: files, isOwner: authUsername && meta && meta.owner_login === authUsername, activeFileName: this.props.activeFileName, editingFileName: this.props.editingFileName, selectFileName: function (fileName) { return _this.props.selectFileName(fileName); }, editFileName: function (fileName) { return _this.props.editFileName(fileName); }, showPopup: function (e, filesPopup) { return _this.showPopup(e, filesPopup); }, updateSource: function (fileName, src) { return _this.props.updateSource(fileName, src); }, onRenameFile: function (fileName, e) { return _this.handleRenameFile(fileName, e); }, onCreateFile: function (e) { return _this.handleCreateFile(e); }, onRun: function () { return _this.run(); }, onSave: function () {
                         if (!meta) {
                             _this.props.logConsoleError({ message: "There is nothing to save." });
                         }
@@ -540,6 +551,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         ? React.createElement(SaveAsDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, description: description, isPublic: meta.public, shouldFork: shouldFork, onSave: function (opt) { return _this.saveGist(opt); }, onHide: function () { return _this.props.showDialog(null); }})
                         : null, meta && this.props.dialog === "shortcuts"
                         ? React.createElement(ShortcutsDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }})
+                        : null, meta && this.props.dialog === "add-ss-ref"
+                        ? React.createElement(AddServiceStackReferenceDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }})
                         : null));
                 };
                 App = __decorate([
