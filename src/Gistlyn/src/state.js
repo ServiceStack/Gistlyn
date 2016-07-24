@@ -2,7 +2,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var redux_1, utils_1, servicestack_client_1, react_ga_1, marked_1;
-    var StateKey, GistCacheKey, GistTemplates, FileNames, updateHistory, collectionsCache, createGistRequest, createGistMeta, handleGistErrorResponse, parseMarkdownMeta, serializeGist, createCollection, stateSideEffects, defaults, preserveDefaults, store;
+    var Config, StateKey, GistCacheKey, GistTemplates, FileNames, updateHistory, collectionsCache, createGistRequest, createGistMeta, handleGistErrorResponse, parseMarkdownMeta, serializeGist, createCollection, stateSideEffects, defaults, preserveDefaults, store;
     return {
         setters:[
             function (redux_1_1) {
@@ -21,6 +21,9 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                 marked_1 = marked_1_1;
             }],
         execute: function() {
+            exports_1("Config", Config = {
+                LatestVersion: "4.0.60",
+            });
             exports_1("StateKey", StateKey = "/v1/state");
             exports_1("GistCacheKey", GistCacheKey = function (gist) { return ("/v1/gists/" + gist); });
             exports_1("GistTemplates", GistTemplates = {

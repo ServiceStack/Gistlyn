@@ -315,8 +315,9 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     this.createFile(txt.value)
                         .then(function (r) { return txt.disabled = false; });
                 };
-                App.prototype.createFile = function (fileName) {
+                App.prototype.createFile = function (fileName, opt) {
                     var _this = this;
+                    if (opt === void 0) { opt = {}; }
                     var done = function () { return _this.props.editFileName(null); };
                     var request = this.createStoreGist();
                     if (!fileName || fileName.trim().length == 0 || request == null) {
@@ -326,7 +327,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     if (fileName.indexOf('.') === -1)
                         fileName += ".cs";
                     request.files[fileName] = new Gistlyn_dtos_1.GithubFile();
-                    request.files[fileName].content = "// " + fileName + "\n// Created by " + this.props.activeSub.displayName + " on " + servicestack_client_1.dateFmt() + "\n\n"; //Gist API requires non Whitespace content
+                    request.files[fileName].content = opt.content || "// " + fileName + "\n// Created by " + this.props.activeSub.displayName + " on " + servicestack_client_1.dateFmt() + "\n\n"; //Gist API requires non Whitespace content
                     react_ga_1.default.event({ category: 'file', action: 'Create File', label: fileName });
                     return client.post(request)
                         .then(function (r) {
@@ -432,6 +433,35 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     }
                     else if (e.keyCode == 27) {
                         this.props.showDialog(null);
+                    }
+                };
+                App.prototype.addPackages = function (packagesConfig, pkgs) {
+                    var xml = "";
+                    pkgs.forEach(function (pkg) {
+                        if (!pkg.id || packagesConfig.indexOf("\"" + pkg.id + "\"") >= 0)
+                            return;
+                        var attrs = Object.keys(pkg).map(function (k) { return (k + "=\"" + pkg[k] + "\""); });
+                        xml += "  <package " + attrs.join(" ") + " />\n";
+                    });
+                    return xml
+                        ? packagesConfig.replace("</packages>", "") + xml + "</packages>"
+                        : packagesConfig;
+                };
+                App.prototype.handleAddReference = function (baseUrl, fileName, content) {
+                    var _this = this;
+                    var authUsername = this.getAuthUsername();
+                    if (authUsername != null) {
+                        var packagesConfig = this.getFileContents(state_1.FileNames.GistPackages);
+                        if (packagesConfig) {
+                            packagesConfig = this.addPackages(packagesConfig, [
+                                { id: "ServiceStack.Client", version: state_1.Config.LatestVersion, targetFramework: "net45" },
+                                { id: "ServiceStack.Text", version: state_1.Config.LatestVersion, targetFramework: "net45" },
+                                { id: "ServiceStack.Interfaces", version: state_1.Config.LatestVersion, targetFramework: "net45" },
+                            ]);
+                            this.props.updateSource(state_1.FileNames.GistPackages, packagesConfig);
+                        }
+                        //props need to refresh before createFile
+                        setTimeout(function () { return _this.createFile(fileName, { content: content }); }, 0);
                     }
                 };
                 App.prototype.getAuthUsername = function () {
@@ -552,7 +582,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         : null, meta && this.props.dialog === "shortcuts"
                         ? React.createElement(ShortcutsDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }})
                         : null, meta && this.props.dialog === "add-ss-ref"
-                        ? React.createElement(AddServiceStackReferenceDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }})
+                        ? React.createElement(AddServiceStackReferenceDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }, onAddReference: function (baseUrl, fileName, content) { return _this.handleAddReference(baseUrl, fileName, content); }})
                         : null));
                 };
                 App = __decorate([

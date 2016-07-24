@@ -4,6 +4,9 @@ import { queryString, appendQueryString, splitOnFirst, splitOnLast } from './ser
 import ReactGA from 'react-ga';
 import marked from 'marked';
 
+export const Config = {
+    LatestVersion: "4.0.60",
+};
 export const StateKey = "/v1/state";
 export const GistCacheKey = (gist) => `/v1/gists/${gist}`;
 

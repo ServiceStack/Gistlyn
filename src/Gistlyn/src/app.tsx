@@ -5,7 +5,7 @@ import * as ReactDOM from 'react-dom';
 import ReactGA from 'react-ga';
 import { Provider, connect } from 'react-redux';
 import { reduxify, getSortedFileNames } from './utils';
-import { store, StateKey, GistCacheKey, GistTemplates, FileNames, IGistMeta, IGistFile } from './state';
+import { store, Config, StateKey, GistCacheKey, GistTemplates, FileNames, IGistMeta, IGistFile } from './state';
 import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnLast, humanize, dateFmt, timeFmt12 } from './servicestack-client';
 import { JsonViewer } from './json-viewer';
 
@@ -359,7 +359,7 @@ class App extends React.Component<any, any> {
             .then(r => txt.disabled = false);
     }
 
-    createFile(fileName: string) {
+    createFile(fileName: string, opt:any = {}) {
         const done = () => this.props.editFileName(null);
 
         const request = this.createStoreGist();
@@ -372,7 +372,7 @@ class App extends React.Component<any, any> {
             fileName += ".cs";
 
         request.files[fileName] = new GithubFile();
-        request.files[fileName].content = `// ${fileName}\n// Created by ${this.props.activeSub.displayName} on ${dateFmt()}\n\n`; //Gist API requires non Whitespace content
+        request.files[fileName].content = opt.content || `// ${fileName}\n// Created by ${this.props.activeSub.displayName} on ${dateFmt()}\n\n`; //Gist API requires non Whitespace content
 
         ReactGA.event({ category: 'file', action: 'Create File', label: fileName });
 
@@ -505,6 +505,38 @@ class App extends React.Component<any, any> {
         }
         else if (e.keyCode == 27) { //ESC
             this.props.showDialog(null);
+        }
+    }
+
+    addPackages(packagesConfig: string, pkgs: any[]) {
+        var xml = "";
+        pkgs.forEach(pkg => {
+            if (!pkg.id || packagesConfig.indexOf(`"${pkg.id}"`) >= 0)
+                return;
+
+            var attrs = Object.keys(pkg).map(k => `${k}="${pkg[k]}"`);
+            xml += "  <package " + attrs.join(" ") + " />\n";
+        });
+
+        return xml
+            ? packagesConfig.replace("</packages>", "") + xml + "</packages>"
+            : packagesConfig;
+    }
+
+    handleAddReference(baseUrl, fileName, content) {
+        var authUsername = this.getAuthUsername();
+        if (authUsername != null) {
+            var packagesConfig = this.getFileContents(FileNames.GistPackages);
+            if (packagesConfig) {
+                packagesConfig = this.addPackages(packagesConfig, [
+                    { id: "ServiceStack.Client", version: Config.LatestVersion, targetFramework: "net45" },
+                    { id: "ServiceStack.Text", version: Config.LatestVersion, targetFramework: "net45" },
+                    { id: "ServiceStack.Interfaces", version: Config.LatestVersion, targetFramework: "net45" },
+                ]);
+                this.props.updateSource(FileNames.GistPackages, packagesConfig);
+            } 
+            //props need to refresh before createFile
+            setTimeout(() => this.createFile(fileName, { content }), 0);
         }
     }
 
@@ -802,7 +834,8 @@ class App extends React.Component<any, any> {
                     ? <ShortcutsDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null) } />
                     : null}
                 {meta && this.props.dialog === "add-ss-ref"
-                    ? <AddServiceStackReferenceDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null) } />
+                    ? <AddServiceStackReferenceDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null) }
+                            onAddReference={(baseUrl, fileName, content) => this.handleAddReference(baseUrl, fileName, content) } />
                     : null}
             </div>
         );
