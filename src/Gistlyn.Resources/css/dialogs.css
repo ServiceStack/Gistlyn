@@ -3,7 +3,7 @@
     height: 100%;
     width: 100%;
     background: rgba(0,0,0,.3);
-    z-index: 3;
+    z-index: 10;
     top: 0;
     text-align: center;
 }
@@ -111,4 +111,54 @@
     filter: alpha(opacity=65);
     -webkit-box-shadow: none;
     box-shadow: none;
+}
+
+#dialog.dark {
+    background: none;
+}
+#dialog.dark .dialog {
+    background: rgba(0,0,0,.85);
+    border-radius: 20px;
+}
+#dialog.dark .dialog-header {
+    background: none;
+    margin: 0 0 0 10px;
+    font-weight: bold;
+}
+#dialog.dark .dialog-body {
+    color: #fff;
+    min-width: 400px;
+    line-height: 20px;
+}
+#dialog.dark .dialog-body>table {
+    margin: 0 0 20px 10px;
+}
+#dialog.dark .dialog-body h4 {
+    padding: 15px 0 5px 0;
+    color: #dd0;
+    font-weight: bold;
+}
+#dialog.dark .dialog-body th {
+    text-align: right;
+}
+#dialog.dark .dialog-body th b {
+    font-family: "Courier New";
+    font-size: 13px;
+    color: #dd0;
+    font-weight: bold;
+}
+#dialog.dark .dialog-body th i {
+    font-family: arial;
+    font-style: normal;
+    font-weight: bold;
+    padding: 0 10px 0 3px;
+}
+
+#dialog a, #dialog .lnk {
+    color: #428bca;
+    text-decoration: none;
+    cursor: pointer;
+}
+#dialog a:hover, #dialog .lnk:hover {
+    color: #2a6496;
 }

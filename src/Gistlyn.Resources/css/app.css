@@ -169,7 +169,7 @@ html,body,#app,#body {
 }
 
 #run {
-    z-index: 2; /* code-mirror */
+    z-index: 6; /* code-mirror */
     position: absolute;
     left: 50%;
     top: 50%;
