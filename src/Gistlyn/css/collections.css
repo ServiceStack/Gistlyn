@@ -47,7 +47,7 @@
     line-height: 20px;
     font-size: 16px;
     color: #444;
-    padding: 5px 0 0 15px;
+    padding: 15px 0 0 15px;
     max-width: 750px;
 }
 #markdown h1, #markdown h2, #markdown h3, #markdown h4, #markdown h5, #markdown h6 {
@@ -67,6 +67,9 @@
 #markdown h6 { font-size: 0.85em; color: #777; }
 #markdown p {
     margin: 0 0 16px 0; 
+}
+#markdown strong, #markdown b {
+    font-weight: bold; 
 }
 #markdown ul, #markdown ol {
     padding-left: 2em;
@@ -111,4 +114,9 @@
 #markdown pre>code::before, #markdown pre>code::after {
     letter-spacing: 0;
     content: "";
+}
+#markdown blockquote {
+    padding: 0 1em;
+    color: #777;
+    border-left: 0.25em solid #ddd;
 }

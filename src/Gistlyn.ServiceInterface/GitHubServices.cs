@@ -52,7 +52,7 @@ namespace Gistlyn.ServiceInterface
         public Dictionary<string, GithubFile> files { get; set; }
     }
 
-    [Route("/proxy/{PathInfo*}")]
+    [Route("/github-proxy/{PathInfo*}")]
     public class GithubProxy : IRequiresRequestStream, IReturn<string>
     {
         public string PathInfo { get; set; }

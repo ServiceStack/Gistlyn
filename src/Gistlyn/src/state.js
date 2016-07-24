@@ -26,8 +26,10 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
             exports_1("GistTemplates", GistTemplates = {
                 NewGist: "4fab2fa13aade23c81cabe83314c3cd0",
                 NewPrivateGist: "7eaa8f65869fa6682913e3517bec0f7e",
+                AddServiceStackReferenceGist: "eefea9cece5419f5d5dc24492d01c07c",
                 HomeCollection: "2cc6b5db6afd3ccb0d0149e55fdb3a6a",
-                Gists: ["4fab2fa13aade23c81cabe83314c3cd0", "7eaa8f65869fa6682913e3517bec0f7e", "2cc6b5db6afd3ccb0d0149e55fdb3a6a"]
+                Gists: ["4fab2fa13aade23c81cabe83314c3cd0", "7eaa8f65869fa6682913e3517bec0f7e",
+                    "eefea9cece5419f5d5dc24492d01c07c", "2cc6b5db6afd3ccb0d0149e55fdb3a6a"]
             });
             exports_1("FileNames", FileNames = {
                 GistMain: "main.cs",
@@ -55,7 +57,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                     : null;
                 var disableCache = "?t=" + new Date().getTime();
                 var urlPrefix = authUsername //Auth requests gets bigger quota
-                    ? "/proxy/"
+                    ? "/github-proxy/"
                     : "https://api.github.com/";
                 var req = new Request(urlPrefix + "gists/" + gist + disableCache, authUsername ? { credentials: "include" } : null);
                 return req;

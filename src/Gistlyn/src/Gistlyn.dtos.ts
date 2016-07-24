@@ -190,7 +190,7 @@ export class UnAssignRolesResponse
     responseStatus: ResponseStatus;
 }
 
-// @Route("/proxy/{PathInfo*}")
+// @Route("/github-proxy/{PathInfo*}")
 export class GithubProxy implements IReturn<string>
 {
     pathInfo: string;

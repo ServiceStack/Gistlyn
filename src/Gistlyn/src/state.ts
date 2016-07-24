@@ -10,8 +10,10 @@ export const GistCacheKey = (gist) => `/v1/gists/${gist}`;
 export const GistTemplates = {
     NewGist: "4fab2fa13aade23c81cabe83314c3cd0",
     NewPrivateGist: "7eaa8f65869fa6682913e3517bec0f7e",
+    AddServiceStackReferenceGist: "eefea9cece5419f5d5dc24492d01c07c",
     HomeCollection: "2cc6b5db6afd3ccb0d0149e55fdb3a6a",
-    Gists: ["4fab2fa13aade23c81cabe83314c3cd0", "7eaa8f65869fa6682913e3517bec0f7e", "2cc6b5db6afd3ccb0d0149e55fdb3a6a"]
+    Gists: ["4fab2fa13aade23c81cabe83314c3cd0", "7eaa8f65869fa6682913e3517bec0f7e",
+            "eefea9cece5419f5d5dc24492d01c07c", "2cc6b5db6afd3ccb0d0149e55fdb3a6a"]
 };
 
 export const FileNames = {
@@ -65,7 +67,7 @@ const createGistRequest = (state, gist) => {
     const disableCache = "?t=" + new Date().getTime();
 
     var urlPrefix = authUsername //Auth requests gets bigger quota
-        ? "/proxy/"
+        ? "/github-proxy/"
         : "https://api.github.com/";
 
     const req = new Request(urlPrefix + "gists/" + gist + disableCache, authUsername ? { credentials: "include" } : null);

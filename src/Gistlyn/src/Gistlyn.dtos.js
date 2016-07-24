@@ -123,7 +123,7 @@ System.register([], function(exports_1, context_1) {
                 return UnAssignRolesResponse;
             }());
             exports_1("UnAssignRolesResponse", UnAssignRolesResponse);
-            // @Route("/proxy/{PathInfo*}")
+            // @Route("/github-proxy/{PathInfo*}")
             GithubProxy = (function () {
                 function GithubProxy() {
                 }
