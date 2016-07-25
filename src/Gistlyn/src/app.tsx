@@ -10,6 +10,7 @@ import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitO
 import { JsonViewer } from './json-viewer';
 
 import SaveAsDialog from './SaveAsDialog';
+import EditGistDialog from './EditGistDialog';
 import ShortcutsDialog from './ShortcutsDialog';
 import AddServiceStackReferenceDialog from './AddServiceStackReferenceDialog';
 import Console from './Console';
@@ -127,6 +128,7 @@ function evalExpression(gist: string, scriptId: string, expr: string) {
         reset: () => dispatch({ type:'RESET' }),
         urlChanged: (url: string) => dispatch({ type:'URL_CHANGE', url }),
         changeGist: (gist: string, options = {}) => dispatch({ type: 'GIST_CHANGE', gist, options }),
+        updateDescription: (description: string) => dispatch({ type: 'META_UPDATE', description }),
         updateSource: (fileName: string, content: string) => dispatch({ type: 'SOURCE_CHANGE', fileName, content }),
         addFile: (fileName: string, content: string) => dispatch({ type: 'FILE_ADD', fileName, file: { fileName, content } }),
         selectFileName: (activeFileName: string) => dispatch({ type: 'FILE_SELECT', activeFileName }),
@@ -697,6 +699,10 @@ class App extends React.Component<any, any> {
             <div onClick={e => location.href = "https://github.com/ServiceStack/Gistlyn/issues"}>Send Feedback</div>));
 
         EditorPopup.push((
+            <div onClick={e => this.props.showDialog("edit-gist") }>Edit Gist</div>));
+        EditorPopup.push((
+            <div><a href={"https://gist.github.com/" + this.props.gist} target="_blank">View on Github</a></div>));
+        EditorPopup.push((
             <div onClick={e => this.props.showDialog("add-ss-ref") }>Add ServiceStack Reference</div>));
 
         const toggleEdit = () => {
@@ -852,6 +858,10 @@ class App extends React.Component<any, any> {
 
                 {meta && this.props.dialog === "save-as"
                     ? <SaveAsDialog dialogRef={e => this.dialog = e} description={description} isPublic={meta.public} shouldFork={shouldFork}
+                        onSave={opt => this.saveGist(opt) } onHide={() => this.props.showDialog(null) } />
+                    : null}
+                {meta && this.props.dialog === "edit-gist"
+                    ? <EditGistDialog dialogRef={e => this.dialog = e} description={description}
                         onSave={opt => this.saveGist(opt) } onHide={() => this.props.showDialog(null) } />
                     : null}
                 {meta && this.props.dialog === "shortcuts"

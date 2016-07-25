@@ -287,6 +287,8 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                         return Object.assign({}, state, { logs: [{ msg: "" }] });
                     case 'SCRIPT_STATUS':
                         return Object.assign({}, state, { scriptStatus: action.scriptStatus, showCollection: false });
+                    case 'META_UPDATE':
+                        return Object.assign({}, state, { meta: Object.assign({}, state.meta, { description: action.description }), dirty: true });
                     case 'SOURCE_CHANGE':
                         var file = Object.assign({}, state.files[action.fileName], { content: action.content });
                         return Object.assign({}, state, { files: Object.assign({}, state.files, (_a = {}, _a[action.fileName] = file, _a)), dirty: true });

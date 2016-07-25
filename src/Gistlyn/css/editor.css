@@ -45,6 +45,11 @@
     background: #0488E4;
     cursor: pointer;
 }
+.popup a {
+    display: block;
+    color: #f7f7f7;
+    text-decoration: none;
+}
 #tabs div {
     padding: 5px 8px;
     margin: 0 4px 0 0;

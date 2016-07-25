@@ -1,5 +1,5 @@
 /// <reference path='../typings/index.d.ts'/>
-System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './state', './servicestack-client', './json-viewer', './SaveAsDialog', './ShortcutsDialog', './AddServiceStackReferenceDialog', './Console', './Collections', './Editor', './Gistlyn.dtos'], function(exports_1, context_1) {
+System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './state', './servicestack-client', './json-viewer', './SaveAsDialog', './EditGistDialog', './ShortcutsDialog', './AddServiceStackReferenceDialog', './Console', './Collections', './Editor', './Gistlyn.dtos'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -13,7 +13,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
         else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
-    var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, SaveAsDialog_1, ShortcutsDialog_1, AddServiceStackReferenceDialog_1, Console_1, Collections_1, Editor_1, Gistlyn_dtos_1;
+    var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, SaveAsDialog_1, EditGistDialog_1, ShortcutsDialog_1, AddServiceStackReferenceDialog_1, Console_1, Collections_1, Editor_1, Gistlyn_dtos_1;
     var ScriptStatusRunning, ScriptStatusError, statusToError, client, sse, App, qs, stateJson, state, e, qsAddRef, qsGist, qsCollection, qsExpression;
     function evalExpression(gist, scriptId, expr) {
         if (!expr)
@@ -67,6 +67,9 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
             },
             function (SaveAsDialog_1_1) {
                 SaveAsDialog_1 = SaveAsDialog_1_1;
+            },
+            function (EditGistDialog_1_1) {
+                EditGistDialog_1 = EditGistDialog_1_1;
             },
             function (ShortcutsDialog_1_1) {
                 ShortcutsDialog_1 = ShortcutsDialog_1_1;
@@ -317,18 +320,35 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         return;
                     var done = function () { return _this.dialog && _this.dialog.classList.remove("disabled"); };
                     react_ga_1.default.event({ category: 'gist', action: 'Save Gist', label: this.props.gist });
-                    client.post(request)
-                        .then(function (r) {
+                    var complete = function (r) {
                         if (_this.props.gist !== r.gist) {
                             _this.props.changeGist(r.gist);
                         }
-                        _this.props.logConsole([{ msg: "[" + servicestack_client_1.timeFmt12() + "] Gist was saved.", cls: "success" }]);
+                        else {
+                            _this.props.updateDescription(document.title = request.description);
+                        }
+                        _this.props.showDialog(null);
                         _this.props.setDirty(false);
+                        _this.props.logConsole([{ msg: "[" + servicestack_client_1.timeFmt12() + "] Gist was saved.", cls: "success" }]);
                         done();
-                    })
+                    };
+                    client.post(request)
+                        .then(complete)
                         .catch(function (e) {
                         _this.props.logConsoleError(e.responseStatus || e);
-                        done();
+                        if (e.responseStatus && (e.responseStatus.message || "").indexOf("404") >= 0) {
+                            request.ownerLogin = null;
+                            _this.props.logConsole([{ msg: "[" + servicestack_client_1.timeFmt12() + "] Gist no longer exists. Attempting to Save as new Gist..." }]);
+                            client.post(request)
+                                .then(complete)
+                                .catch(function (retryError) {
+                                _this.props.logConsoleError(retryError.responseStatus || retryError);
+                                done();
+                            });
+                        }
+                        else {
+                            done();
+                        }
                     });
                 };
                 App.prototype.handleCreateFile = function (e) {
@@ -565,6 +585,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(utils_1.GistTemplates.NewPrivateGist); }}, "New Private Gist")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.showDialog("shortcuts"); }}, "Shortcuts")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return location.href = "https://github.com/ServiceStack/Gistlyn/issues"; }}, "Send Feedback")));
+                    EditorPopup.push((React.createElement("div", {onClick: function (e) { return _this.props.showDialog("edit-gist"); }}, "Edit Gist")));
+                    EditorPopup.push((React.createElement("div", null, React.createElement("a", {href: "https://gist.github.com/" + this.props.gist, target: "_blank"}, "View on Github"))));
                     EditorPopup.push((React.createElement("div", {onClick: function (e) { return _this.props.showDialog("add-ss-ref"); }}, "Add ServiceStack Reference")));
                     var toggleEdit = function () {
                         var inputWasHidden = _this.txtUrl.style.display !== "inline-block";
@@ -607,6 +629,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                             : React.createElement("i", {className: "material-icons", title: "cancel script", style: { color: "#FF5252" }}, "cancel"))
                         : React.createElement("i", {className: "material-icons", title: "disabled"}, "play_circle_outline")), meta && this.props.dialog === "save-as"
                         ? React.createElement(SaveAsDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, description: description, isPublic: meta.public, shouldFork: shouldFork, onSave: function (opt) { return _this.saveGist(opt); }, onHide: function () { return _this.props.showDialog(null); }})
+                        : null, meta && this.props.dialog === "edit-gist"
+                        ? React.createElement(EditGistDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, description: description, onSave: function (opt) { return _this.saveGist(opt); }, onHide: function () { return _this.props.showDialog(null); }})
                         : null, meta && this.props.dialog === "shortcuts"
                         ? React.createElement(ShortcutsDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }})
                         : null, meta && this.props.dialog === "add-ss-ref"
@@ -642,6 +666,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                             if (options === void 0) { options = {}; }
                             return dispatch({ type: 'GIST_CHANGE', gist: gist, options: options });
                         },
+                        updateDescription: function (description) { return dispatch({ type: 'META_UPDATE', description: description }); },
                         updateSource: function (fileName, content) { return dispatch({ type: 'SOURCE_CHANGE', fileName: fileName, content: content }); },
                         addFile: function (fileName, content) { return dispatch({ type: 'FILE_ADD', fileName: fileName, file: { fileName: fileName, content: content } }); },
                         selectFileName: function (activeFileName) { return dispatch({ type: 'FILE_SELECT', activeFileName: activeFileName }); },
