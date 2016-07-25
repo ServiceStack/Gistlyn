@@ -558,38 +558,23 @@ class App extends React.Component<any, any> {
     handleAddReference(baseUrl, fileName, content, requestDto, autorun) {
         var main = this.getMainFile();
         if (!main) return;
-        if (main.content.indexOf("{BaseUrl}") >= 0) {
+
+        if (main.content.indexOf("{BaseUrl}") >= 0) { //Add ServiceStack Reference Gist
             var updated = main.content.replace("{BaseUrl}", baseUrl)
                 .replace("{Domain}", splitOnFirst(baseUrl.split("://")[1], "/")[0])
                 .replace("RequestDto", requestDto);
             this.props.updateSource(FileNames.GistMain, updated);
         }
 
-        var authUsername = this.getAuthUsername();
-        if (authUsername != null) {
-            var packagesConfig = this.getFileContents(FileNames.GistPackages);
-            if (packagesConfig) {
-                this.props.updateSource(FileNames.GistPackages, addClientPackages(packagesConfig));
-            }
+        var packagesConfig = this.getFileContents(FileNames.GistPackages);
+        if (packagesConfig) {
+            this.props.updateSource(FileNames.GistPackages, addClientPackages(packagesConfig));
+        }
 
-            const capture = this.props.expression;
-
-            //props need to refresh before createFile
-            setTimeout(() => this.createFile(fileName, { content })
-                .then(_ => {
-                    if (capture) {
-                        this.props.setExpression(capture);
-                    }
-                    if (autorun) {
-                        setTimeout(() => this.run(), 1000);
-                    }
-                }), 0);
-        } else {
-            this.props.addFile(fileName, content);
-            if (autorun) {
-                this.props.selectFileName(FileNames.GistMain); // Show what's running
-                setTimeout(() => this.run(), 0);
-            }
+        this.props.addFile(fileName, content);
+        if (autorun) {
+            this.props.selectFileName(FileNames.GistMain); // Show what's running
+            setTimeout(() => this.run(), 0);
         }
 
         this.props.showDialog(null);

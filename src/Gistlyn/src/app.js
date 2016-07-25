@@ -497,30 +497,14 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                             .replace("RequestDto", requestDto);
                         this.props.updateSource(utils_1.FileNames.GistMain, updated);
                     }
-                    var authUsername = this.getAuthUsername();
-                    if (authUsername != null) {
-                        var packagesConfig = this.getFileContents(utils_1.FileNames.GistPackages);
-                        if (packagesConfig) {
-                            this.props.updateSource(utils_1.FileNames.GistPackages, utils_1.addClientPackages(packagesConfig));
-                        }
-                        var capture_1 = this.props.expression;
-                        //props need to refresh before createFile
-                        setTimeout(function () { return _this.createFile(fileName, { content: content })
-                            .then(function (_) {
-                            if (capture_1) {
-                                _this.props.setExpression(capture_1);
-                            }
-                            if (autorun) {
-                                setTimeout(function () { return _this.run(); }, 1000);
-                            }
-                        }); }, 0);
+                    var packagesConfig = this.getFileContents(utils_1.FileNames.GistPackages);
+                    if (packagesConfig) {
+                        this.props.updateSource(utils_1.FileNames.GistPackages, utils_1.addClientPackages(packagesConfig));
                     }
-                    else {
-                        this.props.addFile(fileName, content);
-                        if (autorun) {
-                            this.props.selectFileName(utils_1.FileNames.GistMain); // Show what's running
-                            setTimeout(function () { return _this.run(); }, 0);
-                        }
+                    this.props.addFile(fileName, content);
+                    if (autorun) {
+                        this.props.selectFileName(utils_1.FileNames.GistMain); // Show what's running
+                        setTimeout(function () { return _this.run(); }, 0);
                     }
                     this.props.showDialog(null);
                 };
