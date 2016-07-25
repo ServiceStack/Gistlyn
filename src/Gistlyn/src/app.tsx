@@ -667,7 +667,7 @@ class App extends React.Component<any, any> {
                                     <input type="text" placeholder="Evaluate Expression" value={this.props.expression}
                                         onChange={e => this.props.setExpression((e.target as HTMLInputElement).value) }
                                         onKeyPress={e => e.which === 13 ? this.evaluateExpression(this.props.expression) : null }
-                                        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+                                        autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck="false" />
                                     <i className="material-icons" title="run" onClick={e => this.evaluateExpression(this.props.expression) }>play_arrow</i>
                                     {exprVar
                                         ? (
@@ -735,9 +735,9 @@ class App extends React.Component<any, any> {
 
                             <input ref={e => this.txtUrl = e} type="text" id="txtUrl" placeholder="gist hash or url"
                                 style={{ display: showGistInput ? "inline-block" : "none" }} onBlur={toggleEdit}
-                                value={this.props.url}
-                                onFocus={e => (e.target as HTMLInputElement).select()}
-                                onChange={e => this.props.urlChanged((e.target as HTMLInputElement).value)} />
+                                value={this.props.url} onFocus={e => (e.target as HTMLInputElement).select()}
+                                onChange={e => this.props.urlChanged((e.target as HTMLInputElement).value) }
+                                autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck="false" />
 
                             <div id="desc-overlay" style={{ display: showGistInput ? "none" : "inline-block" }}  onClick={toggleEdit}>
                                 <div className="inner">
