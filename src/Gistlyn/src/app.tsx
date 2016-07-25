@@ -655,7 +655,7 @@ class App extends React.Component<any, any> {
         }
 
         MorePopup.push((
-            <div onClick={e => this.props.changeCollection(GistTemplates.HomeCollection, true) }>Home</div>));
+            <div onClick={e => this.props.urlChanged(GistTemplates.HomeCollection) }>Home</div>));
         MorePopup.push((
             <div onClick={e => this.props.changeGist(GistTemplates.NewGist) }>New Gist</div>));
         MorePopup.push((
@@ -681,19 +681,20 @@ class App extends React.Component<any, any> {
         };
 
         const showGistInput = !meta || !description || (this.txtUrl && this.txtUrl == document.activeElement);
+        const goHome = () => this.props.urlChanged(GistTemplates.HomeCollection);
 
         return (
             <div id="body" onClick={e => this.handleBodyClick(e) }>
                 <div className="titlebar">
                     <div className="container">
-                        <a href="https://servicestack.net" title="servicestack.net" target="_blank"><img id="logo" src="img/logo-32-inverted.png" /></a>
-                        <h3>Gistlyn</h3> <sup style={{ padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}>BETA</sup>
+                        <img id="logo" src="img/logo-32-inverted.png" title="Hello" onClick={goHome} style={{ cursor: "pointer" }} />
+                        <h3 onClick={goHome} style={{ cursor:"pointer" }}>Gistlyn</h3> <sup style={{ padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}>BETA</sup>
                         <div id="gist">
                             { meta
                                 ? <img src={ meta.owner_avatar_url } title={meta.owner_login} style={{ verticalAlign: "bottom", margin: "0 5px 2px 0" }} />
                                 : <span className="octicon octicon-logo-gist" style={{ verticalAlign: "bottom", margin: "0 6px 6px 0" }}></span> }
 
-                            <input ref={e => this.txtUrl = e} type="text" id="txtGist" placeholder="gist hash or url"
+                            <input ref={e => this.txtUrl = e} type="text" id="txtUrl" placeholder="gist hash or url"
                                 style={{ display: showGistInput ? "inline-block" : "none" }} onBlur={toggleEdit}
                                 value={this.props.url}
                                 onFocus={e => (e.target as HTMLInputElement).select()}
@@ -714,10 +715,10 @@ class App extends React.Component<any, any> {
                                 </div>
                             </div>
 
-                            { main != null
-                                ? <i className="material-icons" style={{ color: "#0f9", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}>check</i>
-                                : this.props.error
-                                    ? <i className="material-icons" style={{ color: "#CE93D8", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}>error</i>
+                            { this.props.error
+                                ? <i className="material-icons" style={{ color: "#FF5252", fontSize: 26, position: "absolute", margin: "2px 0 0 7px", background:"#f1f1f1", borderRadius:14 }}>error</i>
+                                : main != null
+                                    ? <i className="material-icons" style={{ color: "#0f9", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}>check</i>
                                     : null }
 
                             <i id="btnCollections" style={{ visibility: main ? "visible" : "hidden" }}
@@ -839,6 +840,8 @@ class App extends React.Component<any, any> {
                     ? <AddServiceStackReferenceDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null) }
                             onAddReference={(baseUrl, fileName, content) => this.handleAddReference(baseUrl, fileName, content) } />
                     : null}
+
+                <div id="sig">made with <span>{String.fromCharCode(10084)}</span> by <a target="_blank" href="https://servicestack.net">ServiceStack</a></div>
             </div>
         );
     }

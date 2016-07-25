@@ -72,11 +72,11 @@ export default class AddServiceStackReferenceDialog extends React.Component<any,
                             autoFocus placeholder="Url of remote ServiceStack Instance" />
 
                         <i className="material-icons"
-                            style={{ visibility: value && !this.state.valid ? "visible" : "hidden", position: "absolute", color: "#c66", fontSize: 32, verticalAlign: "middle", margin: "0 0 0 5px" }}
+                            style={{ visibility: value && !this.state.valid && !this.state.loading ? "visible" : "hidden", position: "absolute", color: "#c66", fontSize: 32, verticalAlign: "middle", margin: "0 0 0 5px" }}
                             title="Not a valid ServiceStack instance">close</i>
 
                         <i className="material-icons"
-                            style={{ visibility: this.state.valid ? "visible" : "hidden", color: "#4CAF50", fontSize: 32, verticalAlign: "middle", margin: "0 0 0 5px" }}
+                            style={{ visibility: this.state.valid && !this.state.loading ? "visible" : "hidden", color: "#4CAF50", fontSize: 32, verticalAlign: "middle", margin: "0 0 0 5px" }}
                             title="Valid ServiceStack instance">check</i>
 
                         <img src="/img/ajax-loader.gif" style={{ display: this.state.loading ? "inline-block" : "none", margin: "0 0 0 -20px" }} />

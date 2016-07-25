@@ -51,7 +51,7 @@ html,body,#app,#body {
     margin: 0 0 0 -145px;
     padding: 0 0 0 0;
 }
-#txtGist {
+#txtUrl {
     width: 320px;
     padding: 4px 8px;
     border: none;
@@ -60,14 +60,15 @@ html,body,#app,#body {
     color: #f7f7f7;
     background: #0488E4;
     vertical-align: top;
+    margin: 0 1px 0 0;
 }
-#txtGist::-webkit-input-placeholder {
+#txtUrl::-webkit-input-placeholder {
     color: #cef !important;
 }
-#txtGist::-moz-placeholder {  /* Firefox 19+ */
+#txtUrl::-moz-placeholder {  /* Firefox 19+ */
     color: #cef !important;  
 }
- #txtGist:-ms-input-placeholder {  
+ #txtUrl:-ms-input-placeholder {  
     color: #cef !important;  
 }
 
@@ -117,6 +118,21 @@ html,body,#app,#body {
     background: #0371BE;
     /*background: #01215A;*/
     min-height: 40px;
+}
+
+#sig {
+    position: absolute;
+    left: 50%;
+    bottom: 11px;
+    font: 12px arial;
+    color: #ddd;
+    margin: 0 0 0 -65px;
+}
+#sig a, #sig span {
+    font-size: 13px;
+    color: #f7f7f7;
+    font-weight: bold;
+    text-decoration: none;
 }
 
 

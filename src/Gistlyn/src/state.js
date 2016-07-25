@@ -285,7 +285,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                     case 'SSE_CONNECT':
                         return Object.assign({}, state, { activeSub: action.activeSub, error: null });
                     case 'URL_CHANGE':
-                        return Object.assign({}, state, { url: action.url });
+                        return Object.assign({}, state, { url: action.url, error: null });
                     case 'GIST_CHANGE':
                         return Object.assign({}, defaults, preserveDefaults(state), { gist: action.gist, url: action.gist });
                     case 'GIST_LOAD':

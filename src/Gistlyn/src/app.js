@@ -525,7 +525,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     if (this.props.logs.length > 0 && !this.props.showCollection) {
                         Preview.push(React.createElement(Console_1.default, {logs: this.props.logs, onClear: function () { return _this.props.clearConsole(); }}));
                     }
-                    MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeCollection(state_1.GistTemplates.HomeCollection, true); }}, "Home")));
+                    MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.urlChanged(state_1.GistTemplates.HomeCollection); }}, "Home")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(state_1.GistTemplates.NewGist); }}, "New Gist")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(state_1.GistTemplates.NewPrivateGist); }}, "New Private Gist")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.showDialog("shortcuts"); }}, "Shortcuts")));
@@ -542,14 +542,15 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         }
                     };
                     var showGistInput = !meta || !description || (this.txtUrl && this.txtUrl == document.activeElement);
-                    return (React.createElement("div", {id: "body", onClick: function (e) { return _this.handleBodyClick(e); }}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("a", {href: "https://servicestack.net", title: "servicestack.net", target: "_blank"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png"})), React.createElement("h3", null, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, meta
+                    var goHome = function () { return _this.props.urlChanged(state_1.GistTemplates.HomeCollection); };
+                    return (React.createElement("div", {id: "body", onClick: function (e) { return _this.handleBodyClick(e); }}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png", title: "Hello", onClick: goHome, style: { cursor: "pointer" }}), React.createElement("h3", {onClick: goHome, style: { cursor: "pointer" }}, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, meta
                         ? React.createElement("img", {src: meta.owner_avatar_url, title: meta.owner_login, style: { verticalAlign: "bottom", margin: "0 5px 2px 0" }})
-                        : React.createElement("span", {className: "octicon octicon-logo-gist", style: { verticalAlign: "bottom", margin: "0 6px 6px 0" }}), React.createElement("input", {ref: function (e) { return _this.txtUrl = e; }, type: "text", id: "txtGist", placeholder: "gist hash or url", style: { display: showGistInput ? "inline-block" : "none" }, onBlur: toggleEdit, value: this.props.url, onFocus: function (e) { return e.target.select(); }, onChange: function (e) { return _this.props.urlChanged(e.target.value); }}), React.createElement("div", {id: "desc-overlay", style: { display: showGistInput ? "none" : "inline-block" }, onClick: toggleEdit}, React.createElement("div", {className: "inner"}, React.createElement("h2", null, description), meta && !meta.public
+                        : React.createElement("span", {className: "octicon octicon-logo-gist", style: { verticalAlign: "bottom", margin: "0 6px 6px 0" }}), React.createElement("input", {ref: function (e) { return _this.txtUrl = e; }, type: "text", id: "txtUrl", placeholder: "gist hash or url", style: { display: showGistInput ? "inline-block" : "none" }, onBlur: toggleEdit, value: this.props.url, onFocus: function (e) { return e.target.select(); }, onChange: function (e) { return _this.props.urlChanged(e.target.value); }}), React.createElement("div", {id: "desc-overlay", style: { display: showGistInput ? "none" : "inline-block" }, onClick: toggleEdit}, React.createElement("div", {className: "inner"}, React.createElement("h2", null, description), meta && !meta.public
                         ? (React.createElement("span", {style: { position: "absolute", margin: "3px 0px 3px -40px", fontSize: 12, background: "#ffefc6", color: "#888", padding: "2px 4px", borderRadius: 3 }, title: "This gist is private"}, "secret"))
-                        : null, React.createElement("i", {className: "material-icons"}, "close"))), main != null
-                        ? React.createElement("i", {className: "material-icons", style: { color: "#0f9", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "check")
-                        : this.props.error
-                            ? React.createElement("i", {className: "material-icons", style: { color: "#CE93D8", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "error")
+                        : null, React.createElement("i", {className: "material-icons"}, "close"))), this.props.error
+                        ? React.createElement("i", {className: "material-icons", style: { color: "#FF5252", fontSize: 26, position: "absolute", margin: "2px 0 0 7px", background: "#f1f1f1", borderRadius: 14 }}, "error")
+                        : main != null
+                            ? React.createElement("i", {className: "material-icons", style: { color: "#0f9", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}, "check")
                             : null, React.createElement("i", {id: "btnCollections", style: { visibility: main ? "visible" : "hidden" }, onClick: function (e) { return _this.props.changeCollection((_this.props.collection && _this.props.collection.id) || state_1.GistTemplates.HomeCollection, !showCollection); }, className: "material-icons" + (showCollection ? " active" : "")}, "apps")), !authUsername
                         ? (React.createElement("div", {id: "sign-in", style: { position: "absolute", right: 5 }}, React.createElement("a", {href: "/auth/github", style: { color: "#fff", textDecoration: "none" }}, React.createElement("span", {style: { whiteSpace: "nowrap", fontSize: 14 }}, "sign-in"), React.createElement("span", {style: { verticalAlign: "sub", margin: "0 0 0 10px" }, className: "mega-octicon octicon-mark-github", title: "Sign in with GitHub"}))))
                         : ([
@@ -588,7 +589,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         ? React.createElement(ShortcutsDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }})
                         : null, meta && this.props.dialog === "add-ss-ref"
                         ? React.createElement(AddServiceStackReferenceDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }, onAddReference: function (baseUrl, fileName, content) { return _this.handleAddReference(baseUrl, fileName, content); }})
-                        : null));
+                        : null, React.createElement("div", {id: "sig"}, "made with ", React.createElement("span", null, String.fromCharCode(10084)), " by ", React.createElement("a", {target: "_blank", href: "https://servicestack.net"}, "ServiceStack"))));
                 };
                 App = __decorate([
                     utils_1.reduxify(function (state) { return ({
