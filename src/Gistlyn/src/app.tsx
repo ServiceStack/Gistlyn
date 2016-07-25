@@ -359,18 +359,35 @@ class App extends React.Component<any, any> {
 
         ReactGA.event({ category: 'gist', action: 'Save Gist', label: this.props.gist });
 
+        const complete = r => {
+            if (this.props.gist !== r.gist) {
+                this.props.changeGist(r.gist);
+            }
+            else {
+                this.props.updateDescription(document.title = request.description);
+            }
+            this.props.showDialog(null);
+            this.props.setDirty(false);
+            this.props.logConsole([{ msg: `[${timeFmt12()}] Gist was saved.`, cls: "success" }]);
+            done();
+        };
+
         client.post(request)
-            .then(r => {
-                if (this.props.gist !== r.gist) {
-                    this.props.changeGist(r.gist);
-                }
-                this.props.logConsole([{ msg: `[${timeFmt12()}] Gist was saved.`, cls: "success" }]);
-                this.props.setDirty(false);
-                done();
-            })
+            .then(complete)
             .catch(e => {
                 this.props.logConsoleError(e.responseStatus || e);
-                done();
+                if (e.responseStatus && (e.responseStatus.message || "").indexOf("404") >= 0) { //Was deleted outside Gistlyn
+                    request.ownerLogin = null;
+                    this.props.logConsole([{ msg: `[${timeFmt12()}] Gist no longer exists. Attempting to Save as new Gist...` }]);
+                    client.post(request)
+                        .then(complete)
+                        .catch(retryError => {
+                            this.props.logConsoleError(retryError.responseStatus || retryError);
+                            done();
+                        });
+                } else {
+                    done();
+                }
             });
     }
 
