@@ -2,7 +2,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var redux_1, utils_1, servicestack_client_1, react_ga_1, marked_1;
-    var Config, StateKey, GistCacheKey, GistTemplates, FileNames, updateHistory, collectionsCache, createGistRequest, createGistMeta, handleGistErrorResponse, parseMarkdownMeta, serializeGist, createCollection, stateSideEffects, defaults, preserveDefaults, store;
+    var updateHistory, collectionsCache, createGistRequest, createGistMeta, handleGistErrorResponse, parseMarkdownMeta, serializeGist, createCollection, stateSideEffects, defaults, preserveDefaults, store;
     return {
         setters:[
             function (redux_1_1) {
@@ -21,24 +21,6 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                 marked_1 = marked_1_1;
             }],
         execute: function() {
-            exports_1("Config", Config = {
-                LatestVersion: "4.0.60",
-            });
-            exports_1("StateKey", StateKey = "/v1/state");
-            exports_1("GistCacheKey", GistCacheKey = function (gist) { return ("/v1/gists/" + gist); });
-            exports_1("GistTemplates", GistTemplates = {
-                NewGist: "4fab2fa13aade23c81cabe83314c3cd0",
-                NewPrivateGist: "7eaa8f65869fa6682913e3517bec0f7e",
-                AddServiceStackReferenceGist: "eefea9cece5419f5d5dc24492d01c07c",
-                HomeCollection: "2cc6b5db6afd3ccb0d0149e55fdb3a6a",
-                Gists: ["4fab2fa13aade23c81cabe83314c3cd0", "7eaa8f65869fa6682913e3517bec0f7e",
-                    "eefea9cece5419f5d5dc24492d01c07c", "2cc6b5db6afd3ccb0d0149e55fdb3a6a"]
-            });
-            exports_1("FileNames", FileNames = {
-                GistMain: "main.cs",
-                GistPackages: "packages.config",
-                CollectionIndex: "index.md"
-            });
             updateHistory = function (id, description, key) {
                 if (!id)
                     return;
@@ -48,6 +30,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                     var url = servicestack_client_1.splitOnFirst(location.href, '?')[0];
                     qs[key] = id;
                     delete qs["s"]; //remove ?s=1 from /auth
+                    delete qs["expression"];
                     url = servicestack_client_1.appendQueryString(url, qs);
                     history.pushState({ id: id, description: description }, description, url);
                     react_ga_1.default.pageview(url);
@@ -81,7 +64,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                     return;
                 }
                 if (res.status === 404) {
-                    localStorage.removeItem(GistCacheKey(id));
+                    localStorage.removeItem(utils_1.GistCacheKey(id));
                     store.dispatch({ type: "GISTSTAT_REMOVE", gist: id });
                 }
                 store.dispatch({ type: 'ERROR_RAISE', error: { code: res.status, message: "Gist with hash '" + id + "' was " + res.statusText } });
@@ -111,7 +94,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
             serializeGist = function (meta, files) { return JSON.stringify({ files: files, meta: meta }); };
             createCollection = function (store, meta, indexFile) {
                 if (!indexFile) {
-                    store.dispatch({ type: 'ERROR_RAISE', error: { message: "Collection has no '" + FileNames.CollectionIndex + "'" } });
+                    store.dispatch({ type: 'ERROR_RAISE', error: { message: "Collection has no '" + utils_1.FileNames.CollectionIndex + "'" } });
                     return;
                 }
                 var md = parseMarkdownMeta(indexFile.content);
@@ -128,7 +111,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                 var result = next(action);
                 var state = store.getState();
                 if (action.type !== "LOAD") {
-                    localStorage.setItem(StateKey, JSON.stringify(state));
+                    localStorage.setItem(utils_1.StateKey, JSON.stringify(state));
                 }
                 else if (state.meta) {
                     updateHistory(state.meta.id, state.meta.description, "gist");
@@ -137,7 +120,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                     var parts = servicestack_client_1.splitOnLast(action.url, '/');
                     var id_1 = parts[parts.length - 1];
                     //If it's cached we already know what it is: 
-                    if (localStorage.getItem(GistCacheKey(id_1))) {
+                    if (localStorage.getItem(utils_1.GistCacheKey(id_1))) {
                         store.dispatch({ type: "GIST_CHANGE", gist: id_1 });
                     }
                     else if (collectionsCache[id_1]) {
@@ -153,16 +136,16 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                                 return res.json().then(function (r) {
                                     var meta = createGistMeta(r);
                                     //Populate cache and dispatch appropriate action:
-                                    if (r.files[FileNames.GistMain]) {
-                                        localStorage.setItem(GistCacheKey(id_1), serializeGist(meta, r.files));
+                                    if (r.files[utils_1.FileNames.GistMain]) {
+                                        localStorage.setItem(utils_1.GistCacheKey(id_1), serializeGist(meta, r.files));
                                         store.dispatch({ type: "GIST_CHANGE", gist: id_1 });
                                     }
-                                    else if (r.files[FileNames.CollectionIndex]) {
-                                        collectionsCache[meta.id] = createCollection(store, meta, r.files[FileNames.CollectionIndex]);
+                                    else if (r.files[utils_1.FileNames.CollectionIndex]) {
+                                        collectionsCache[meta.id] = createCollection(store, meta, r.files[utils_1.FileNames.CollectionIndex]);
                                         store.dispatch({ type: "COLLECTION_CHANGE", collection: { id: id_1 }, showCollection: true });
                                     }
                                     else {
-                                        store.dispatch({ type: 'ERROR_RAISE', error: { message: "Gist with hash '" + id_1 + "' has no " + FileNames.GistMain + " or " + FileNames.CollectionIndex } });
+                                        store.dispatch({ type: 'ERROR_RAISE', error: { message: "Gist with hash '" + id_1 + "' has no " + utils_1.FileNames.GistMain + " or " + utils_1.FileNames.CollectionIndex } });
                                     }
                                 });
                             }
@@ -172,7 +155,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                 }
                 var options = action.options || {};
                 if (action.type === 'GIST_CHANGE' && action.gist && (options.reload || oldGist !== action.gist || !state.files || !state.meta)) {
-                    var json = !options.reload ? localStorage.getItem(GistCacheKey(state.gist)) : null;
+                    var json = !options.reload ? localStorage.getItem(utils_1.GistCacheKey(state.gist)) : null;
                     if (json) {
                         var gist = JSON.parse(json);
                         var meta = gist.meta;
@@ -190,7 +173,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                                 return res.json().then(function (r) {
                                     var meta = createGistMeta(r);
                                     updateHistory(meta.id, meta.description, "gist");
-                                    localStorage.setItem(GistCacheKey(state.gist), serializeGist(meta, r.files));
+                                    localStorage.setItem(utils_1.GistCacheKey(state.gist), serializeGist(meta, r.files));
                                     store.dispatch({ type: 'GIST_LOAD', meta: meta, files: r.files, activeFileName: options.activeFileName || utils_1.getSortedFileNames(r.files)[0] });
                                 });
                             }
@@ -199,7 +182,9 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                     }
                 }
                 else if (action.type === "SOURCE_CHANGE") {
-                    localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: state.files, meta: state.meta }));
+                    if (state.gist !== utils_1.GistTemplates.AddServiceStackReferenceGist) {
+                        localStorage.setItem(utils_1.GistCacheKey(state.gist), JSON.stringify({ files: state.files, meta: state.meta }));
+                    }
                 }
                 else if (action.type === "GIST_LOAD") {
                     var meta = state.meta;
@@ -233,7 +218,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                                 return res.json().then(function (r) {
                                     var meta = createGistMeta(r);
                                     updateHistory(meta.id, meta.description, "collection");
-                                    collection = createCollection(store, meta, r.files[FileNames.CollectionIndex]);
+                                    collection = createCollection(store, meta, r.files[utils_1.FileNames.CollectionIndex]);
                                     collectionsCache[collection.id] = collection;
                                     store.dispatch({ type: 'COLLECTION_LOAD', collection: collection });
                                     store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, collection: true, description: meta.description, stat: "load", step: 1, owner_login: collection.owner_login });
@@ -305,10 +290,12 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                     case 'SOURCE_CHANGE':
                         var file = Object.assign({}, state.files[action.fileName], { content: action.content });
                         return Object.assign({}, state, { files: Object.assign({}, state.files, (_a = {}, _a[action.fileName] = file, _a)), dirty: true });
+                    case 'FILE_ADD':
+                        return Object.assign({}, state, { files: Object.assign({}, state.files, (_b = {}, _b[action.fileName] = action.file, _b)), dirty: true });
                     case 'VARS_LOAD':
                         return Object.assign({}, state, { variables: action.variables, inspectedVariables: {} });
                     case 'VARS_INSPECT':
-                        return Object.assign({}, state, { inspectedVariables: Object.assign({}, state.inspectedVariables, (_b = {}, _b[action.name] = action.variables, _b)) });
+                        return Object.assign({}, state, { inspectedVariables: Object.assign({}, state.inspectedVariables, (_c = {}, _c[action.name] = action.variables, _c)) });
                     case 'EXPRESSION_SET':
                         return Object.assign({}, state, { expression: action.expression });
                     case 'EXPRESSION_LOAD':
@@ -327,11 +314,11 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                         var step = state.step || 1;
                         return Object.assign({}, state, {
                             gistStats: existingStat
-                                ? Object.assign({}, gistStats, (_c = {},
-                                    _c[action.gist] = Object.assign({}, existingStat, (_d = {}, _d[action.stat] = (existingStat[action.stat] || 0) + step, _d.date = new Date().getTime(), _d)),
-                                    _c
+                                ? Object.assign({}, gistStats, (_d = {},
+                                    _d[action.gist] = Object.assign({}, existingStat, (_e = {}, _e[action.stat] = (existingStat[action.stat] || 0) + step, _e.date = new Date().getTime(), _e)),
+                                    _d
                                 ))
-                                : Object.assign({}, gistStats, (_e = {}, _e[action.gist] = (_f = { id: action.gist, description: action.description, collection: action.collection }, _f[action.stat] = step, _f.owner_login = action.owner_login, _f.date = new Date().getTime(), _f), _e))
+                                : Object.assign({}, gistStats, (_f = {}, _f[action.gist] = (_g = { id: action.gist, description: action.description, collection: action.collection }, _g[action.stat] = step, _g.owner_login = action.owner_login, _g.date = new Date().getTime(), _g), _f))
                         });
                     case 'GISTSTAT_REMOVE':
                         var clone = Object.assign({}, state.gistStats);
@@ -340,7 +327,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                     default:
                         return state;
                 }
-                var _a, _b, _c, _d, _e, _f;
+                var _a, _b, _c, _d, _e, _f, _g;
             }, defaults, redux_1.applyMiddleware(stateSideEffects)));
         }
     }

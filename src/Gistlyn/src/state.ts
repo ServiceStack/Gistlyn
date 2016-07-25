@@ -1,49 +1,8 @@
 ﻿import { createStore, applyMiddleware } from 'redux';
-import { getSortedFileNames } from './utils';
+import { getSortedFileNames, GistTemplates, StateKey, GistCacheKey, FileNames, IGistMeta, IGistFile, addClientPackages } from './utils';
 import { queryString, appendQueryString, splitOnFirst, splitOnLast } from './servicestack-client';
 import ReactGA from 'react-ga';
 import marked from 'marked';
-
-export const Config = {
-    LatestVersion: "4.0.60",
-};
-export const StateKey = "/v1/state";
-export const GistCacheKey = (gist) => `/v1/gists/${gist}`;
-
-export const GistTemplates = {
-    NewGist: "4fab2fa13aade23c81cabe83314c3cd0",
-    NewPrivateGist: "7eaa8f65869fa6682913e3517bec0f7e",
-    AddServiceStackReferenceGist: "eefea9cece5419f5d5dc24492d01c07c",
-    HomeCollection: "2cc6b5db6afd3ccb0d0149e55fdb3a6a",
-    Gists: ["4fab2fa13aade23c81cabe83314c3cd0", "7eaa8f65869fa6682913e3517bec0f7e",
-            "eefea9cece5419f5d5dc24492d01c07c", "2cc6b5db6afd3ccb0d0149e55fdb3a6a"]
-};
-
-export const FileNames = {
-    GistMain: "main.cs",
-    GistPackages: "packages.config",
-    CollectionIndex: "index.md"
-};
-
-export interface IGistMeta {
-    id: string;
-    description: string;
-    public: boolean;
-    created_at: string;
-    updated_at: string;
-    owner_login: string;
-    owner_id: string;
-    owner_avatar_url: string;
-}
-
-export interface IGistFile {
-    size: number;
-    raw_url: string;
-    type: string;
-    language: string;
-    truncated: boolean;
-    content: string;
-}
 
 const updateHistory = (id:string, description:string, key:string) => {
     if (!id) return;
@@ -54,6 +13,7 @@ const updateHistory = (id:string, description:string, key:string) => {
         var url = splitOnFirst(location.href, '?')[0];
         qs[key] = id;
         delete qs["s"]; //remove ?s=1 from /auth
+        delete qs["expression"];
         url = appendQueryString(url, qs);
         history.pushState({ id, description }, description, url);
         ReactGA.pageview(url);
@@ -213,7 +173,9 @@ const stateSideEffects = store => next => action => {
                 .catch(res => handleGistErrorResponse(res, store, action.gist));
         }
     } else if (action.type === "SOURCE_CHANGE") {
-        localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: state.files, meta: state.meta }));
+        if (state.gist !== GistTemplates.AddServiceStackReferenceGist) { //Don't save changes to Add SS Ref template
+            localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: state.files, meta: state.meta }));
+        }
     } else if (action.type === "GIST_LOAD") {
         const meta = state.meta as IGistMeta;
         if (meta)
@@ -321,6 +283,8 @@ export let store = createStore(
             case 'SOURCE_CHANGE':
                 const file = Object.assign({}, state.files[action.fileName], { content: action.content });
                 return Object.assign({}, state, { files: Object.assign({}, state.files, { [action.fileName]: file }), dirty: true });
+            case 'FILE_ADD':
+                return Object.assign({}, state, { files: Object.assign({}, state.files, { [action.fileName]: action.file }), dirty: true });
             case 'VARS_LOAD':
                 return Object.assign({}, state, { variables: action.variables, inspectedVariables: {} });
             case 'VARS_INSPECT':

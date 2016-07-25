@@ -203,7 +203,8 @@
             .pipe(msbuild({
                 targets: ['Clean', 'Rebuild'],
                 properties: {
-                    Configuration: 'Release'
+                    Configuration: 'Release',
+                    DefineConstants: 'WEB'
                 },
                 stdout: true,
                 verbosity: 'quiet'

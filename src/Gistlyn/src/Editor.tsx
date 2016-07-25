@@ -1,7 +1,6 @@
 ﻿import * as React from 'react';
 import { queryString } from './servicestack-client';
-import { getSortedFileNames } from './utils';
-import { IGistFile } from './state';
+import { getSortedFileNames, IGistFile } from './utils';
 
 import CodeMirror from 'react-codemirror';
 import "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js";

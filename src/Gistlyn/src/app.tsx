@@ -4,9 +4,9 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import ReactGA from 'react-ga';
 import { Provider, connect } from 'react-redux';
-import { reduxify, getSortedFileNames } from './utils';
-import { store, Config, StateKey, GistCacheKey, GistTemplates, FileNames, IGistMeta, IGistFile } from './state';
-import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnLast, humanize, dateFmt, timeFmt12 } from './servicestack-client';
+import { reduxify, getSortedFileNames, Config, StateKey, GistCacheKey, GistTemplates, FileNames, IGistMeta, IGistFile, addClientPackages } from './utils';
+import { store } from './state';
+import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnFirst, splitOnLast, humanize, dateFmt, timeFmt12 } from './servicestack-client';
 import { JsonViewer } from './json-viewer';
 
 import SaveAsDialog from './SaveAsDialog';
@@ -128,6 +128,7 @@ function evalExpression(gist: string, scriptId: string, expr: string) {
         urlChanged: (url: string) => dispatch({ type:'URL_CHANGE', url }),
         changeGist: (gist: string, options = {}) => dispatch({ type: 'GIST_CHANGE', gist, options }),
         updateSource: (fileName: string, content: string) => dispatch({ type: 'SOURCE_CHANGE', fileName, content }),
+        addFile: (fileName: string, content: string) => dispatch({ type: 'FILE_ADD', fileName, file: { fileName, content } }),
         selectFileName: (activeFileName: string) => dispatch({ type: 'FILE_SELECT', activeFileName }),
         editFileName: (fileName: string) => dispatch({ type: 'FILENAME_EDIT', fileName }),
         raiseError: (error: string) => dispatch({ type: 'ERROR_RAISE', error }),
@@ -172,11 +173,28 @@ class App extends React.Component<any, any> {
         return this.props.activeSub && this.props.activeSub.id;
     }
 
+    save() {
+        const meta = this.props.meta;
+        const authUsername = this.getAuthUsername();
+        if (!meta) {
+            this.props.logConsoleError({ message: "There is nothing to save." });
+        } else if (!authUsername) {
+            this.signIn();
+        } else if (meta.owner_login !== authUsername) {
+            this.saveGistAs();
+        } else {
+            this.saveGist();
+        }
+    }
+
     run = () => {
+        const main = this.getMainFile();
+        if (!main) return;
+
         this.props.clearError();
         var request = new RunScript();
         request.scriptId = this.scriptId;
-        request.mainSource = this.getMainFile().content;
+        request.mainSource = main.content;
         request.packagesConfig = this.getFileContents(FileNames.GistPackages);
         request.sources = [];
         for (var k in this.props.files || []) {
@@ -502,6 +520,11 @@ class App extends React.Component<any, any> {
                     ? keys.length - 1
                     : nextFileIndex % keys.length;
                 this.props.selectFileName(keys[nextFileIndex]);
+            } else if (e.keyCode == 13) {
+                this.run();
+            } else if (e.key === "s") {
+                this.save();
+                e.preventDefault();
             }
         }
 
@@ -513,36 +536,44 @@ class App extends React.Component<any, any> {
         }
     }
 
-    addPackages(packagesConfig: string, pkgs: any[]) {
-        var xml = "";
-        pkgs.forEach(pkg => {
-            if (!pkg.id || packagesConfig.indexOf(`"${pkg.id}"`) >= 0)
-                return;
+    handleAddReference(baseUrl, fileName, content, requestDto, autorun) {
+        var main = this.getMainFile();
+        if (!main) return;
+        if (main.content.indexOf("{BaseUrl}") >= 0) {
+            var updated = main.content.replace("{BaseUrl}", baseUrl)
+                .replace("{Domain}", splitOnFirst(baseUrl.split("://")[1], "/")[0])
+                .replace("RequestDto", requestDto);
+            this.props.updateSource(FileNames.GistMain, updated);
+        }
 
-            var attrs = Object.keys(pkg).map(k => `${k}="${pkg[k]}"`);
-            xml += "  <package " + attrs.join(" ") + " />\n";
-        });
-
-        return xml
-            ? packagesConfig.replace("</packages>", "") + xml + "</packages>"
-            : packagesConfig;
-    }
-
-    handleAddReference(baseUrl, fileName, content) {
         var authUsername = this.getAuthUsername();
         if (authUsername != null) {
             var packagesConfig = this.getFileContents(FileNames.GistPackages);
             if (packagesConfig) {
-                packagesConfig = this.addPackages(packagesConfig, [
-                    { id: "ServiceStack.Client", version: Config.LatestVersion, targetFramework: "net45" },
-                    { id: "ServiceStack.Text", version: Config.LatestVersion, targetFramework: "net45" },
-                    { id: "ServiceStack.Interfaces", version: Config.LatestVersion, targetFramework: "net45" },
-                ]);
-                this.props.updateSource(FileNames.GistPackages, packagesConfig);
-            } 
+                this.props.updateSource(FileNames.GistPackages, addClientPackages(packagesConfig));
+            }
+
+            const capture = this.props.expression;
+
             //props need to refresh before createFile
-            setTimeout(() => this.createFile(fileName, { content }), 0);
+            setTimeout(() => this.createFile(fileName, { content })
+                .then(_ => {
+                    if (capture) {
+                        this.props.setExpression(capture);
+                    }
+                    if (autorun) {
+                        setTimeout(() => this.run(), 1000);
+                    }
+                }), 0);
+        } else {
+            this.props.addFile(fileName, content);
+            if (autorun) {
+                this.props.selectFileName(FileNames.GistMain); // Show what's running
+                setTimeout(() => this.run(), 0);
+            }
         }
+
+        this.props.showDialog(null);
     }
 
     getAuthUsername() {
@@ -721,7 +752,7 @@ class App extends React.Component<any, any> {
                                     ? <i className="material-icons" style={{ color: "#0f9", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}>check</i>
                                     : null }
 
-                            <i id="btnCollections" style={{ visibility: main ? "visible" : "hidden" }}
+                            <i id="btnCollections" style={{ visibility: main ? "visible" : "hidden" }} title="Collections"
                                 onClick={e => this.props.changeCollection((this.props.collection && this.props.collection.id) || GistTemplates.HomeCollection, !showCollection) }
                                 className={"material-icons" + (showCollection ? " active" : "") }>apps</i>
 
@@ -769,17 +800,7 @@ class App extends React.Component<any, any> {
                             onRenameFile={(fileName, e) => this.handleRenameFile(fileName, e) }
                             onCreateFile={e => this.handleCreateFile(e) }
                             onRun={() => this.run() }
-                            onSave={() => {
-                                if (!meta) {
-                                    this.props.logConsoleError({ message: "There is nothing to save." });
-                                } else if (!authUsername) {
-                                    this.signIn();
-                                } else if (meta.owner_login !== authUsername) {
-                                    this.saveGistAs();
-                                } else {
-                                    this.saveGist();
-                                }
-                            }}/>
+                            onSave={() => { this.save() }}/>
                         <div id="preview">
                             {Preview}
                         </div>
@@ -838,7 +859,7 @@ class App extends React.Component<any, any> {
                     : null}
                 {meta && this.props.dialog === "add-ss-ref"
                     ? <AddServiceStackReferenceDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null) }
-                            onAddReference={(baseUrl, fileName, content) => this.handleAddReference(baseUrl, fileName, content) } />
+                        onAddReference={this.handleAddReference.bind(this)} />
                     : null}
 
                 <div id="sig">made with <span>{String.fromCharCode(10084)}</span> by <a target="_blank" href="https://servicestack.net">ServiceStack</a></div>
@@ -854,37 +875,49 @@ var state = null;
 if (stateJson) {
     try {
         state = JSON.parse(stateJson);
-        store.dispatch({ type: 'LOAD', state });
+        store.dispatch({ type: "LOAD", state });
 
         if (!qs["gist"] && state.gist != null && !(state.files || state.meta)) {
-            store.dispatch({ type: 'GIST_CHANGE', gist: state.gist });
+            store.dispatch({ type: "GIST_CHANGE", gist: state.gist });
         }
 
     } catch (e) {
-        console.log('ERROR loading state:', e, stateJson);
+        console.log("ERROR loading state:", e, stateJson);
         localStorage.removeItem(StateKey);
     }
 }
 
-var qsGist = qs["gist"] || GistTemplates.NewGist;
-if (qsGist != (state && state.gist) || (state && !state.meta)) {
-    store.dispatch({ type: 'GIST_CHANGE', gist: qsGist });
+var qsAddRef = qs["AddServiceStackReference"];
+if (qsAddRef) {
+    store.dispatch({ type: "GIST_CHANGE", gist: GistTemplates.AddServiceStackReferenceGist });
+    store.dispatch({ type: "DIALOG_SHOW", dialog: "add-ss-ref" });
+}
+else {
+    var qsGist = qs["gist"] || GistTemplates.NewGist;
+    if (qsGist != (state && state.gist) || (state && !state.meta)) {
+        store.dispatch({ type: "GIST_CHANGE", gist: qsGist });
+    }
 }
 
 const qsCollection = qs["collection"];
 if (qsCollection) {
     store.dispatch({
-        type: 'COLLECTION_CHANGE',
+        type: "COLLECTION_CHANGE",
         collection: { id: qsCollection },
         showCollection: (state && state.showCollection) || qsCollection != (state && state.collection && state.collection.id)
     });
 } else if (!state) {
-    store.dispatch({ type: 'COLLECTION_CHANGE', collection: { id: GistTemplates.HomeCollection }, showCollection: true });
+    store.dispatch({ type: "COLLECTION_CHANGE", collection: { id: GistTemplates.HomeCollection }, showCollection: true });
+}
+
+const qsExpression = qs["expression"];
+if (qsExpression) {
+    store.dispatch({ type: "EXPRESSION_SET", expression: qsExpression });
 }
 
 window.onpopstate = e => {
     if (!(e.state && e.state.id)) return;
-    store.dispatch({ type: 'URL_CHANGE', url: e.state.id });
+    store.dispatch({ type: "URL_CHANGE", url: e.state.id });
 };
 
 ReactDOM.render(

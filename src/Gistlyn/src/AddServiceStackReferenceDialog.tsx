@@ -1,5 +1,6 @@
 ﻿import * as React from 'react';
-import { splitOnFirst, combinePaths, appendQueryString } from './servicestack-client';
+import { splitOnFirst, splitOnLast, queryString, combinePaths, appendQueryString } from './servicestack-client';
+import { GistTemplates } from "./utils";
 
 export default class AddServiceStackReferenceDialog extends React.Component<any, any> {
     txtBaseUrl: HTMLInputElement;
@@ -8,7 +9,46 @@ export default class AddServiceStackReferenceDialog extends React.Component<any,
 
     constructor(props) {
         super(props);
-        this.state = { value: "", valid: false, baseUrl: null, fileName: null, content: null, loading:false };
+        const qs = queryString(location.href);
+        var value = qs["AddServiceStackReference"] || "";
+        var requestDto = qs["Request"];
+        var autorun = !!qs["autorun"];
+        this.state = { value, valid: false, baseUrl: null, fileName: null, content: null, loading: false, requestDto, autorun };
+
+        if (value) {
+            delete qs["AddServiceStackReference"];
+            delete qs["Request"];
+            delete qs["autorun"];
+            var description = value + " API";
+            history.replaceState({ id: GistTemplates.AddServiceStackReferenceGist, description },
+                description, appendQueryString(splitOnFirst(location.href, '?')[0], qs));
+
+            this.setValue(value);
+        }
+    }
+
+    getFirstRequestDto(dtos) {
+        var lines = dtos.split(/\r?\n/);
+        for (var i = 0, len = lines.length; i < len; i++) {
+            var line = lines[i];
+            var isGetOnlyRoute = line.indexOf("[Route(") >= 0 && line.indexOf('"GET"') >= 0;
+            if (isGetOnlyRoute)
+                return splitOnLast(lines[i + 1], " ")[1];
+
+            if (lines[i].indexOf(": IReturn<") >= 0) {
+                var requestDto = splitOnLast(lines[i - 1], " ")[1];
+                var name = requestDto.toLowerCase();
+                if (name.startsWith("get") || name.startsWith("find") || name.startsWith("search"))
+                    return requestDto;
+            }
+        }
+
+        //Fallback to Route DTO with no Verb limiters
+        for (var i = 0, len = lines.length; i < len; i++) {
+            if (lines[i].indexOf("[Route(") >= 0 && lines[i].split('"').length === 3)
+                return splitOnLast(lines[i + 1], " ")[1];
+        }
+        return null;
     }
 
     setValue(value: string) {
@@ -17,6 +57,7 @@ export default class AddServiceStackReferenceDialog extends React.Component<any,
         var validUrl = (splitOnFirst(value, ".")[1] || "").length >= 2;
         if (validUrl) {
             //Enable CORS
+            value = value.trim();
             var url = value.indexOf("://") >= 0 ? value : "http://" + value;
             url = url.indexOf("/types/csharp") >= 0 ? url : combinePaths(url, "types/csharp");
             var baseUrl = url.replace("/types/csharp", "");
@@ -32,7 +73,8 @@ export default class AddServiceStackReferenceDialog extends React.Component<any,
 
                     r.text().then(content => {
                         var valid = content.trim().startsWith("/* Options:");
-                        this.setState({ valid, baseUrl, content, loading:false });
+                        var requestDto = this.state.requestDto || this.getFirstRequestDto(content); 
+                        this.setState({ valid, baseUrl, content, loading: false, requestDto });
                         setTimeout(() => this.txtFileName.select(), 0);
                     });
                 })
@@ -45,6 +87,15 @@ export default class AddServiceStackReferenceDialog extends React.Component<any,
         }
     }
 
+    done() {
+        this.props.onAddReference(
+            this.state.baseUrl,
+            this.txtFileName.value || "dtos.cs",
+            this.state.content,
+            this.state.requestDto || "RequestDto",
+            this.state.autorun);
+    }
+
     render() {
         var value = this.state.value;
 
@@ -55,7 +106,7 @@ export default class AddServiceStackReferenceDialog extends React.Component<any,
                     Add ServiceStack Reference
                 </div>
                 <div className="dialog-body">
-                    <a href="https://github.com/ServiceStack/ServiceStack/wiki/CSharp-Add-ServiceStack-Reference" title="What's this?">
+                    <a href="https://github.com/ServiceStack/ServiceStack/wiki/CSharp-Add-ServiceStack-Reference" title="What is this?">
                         <i className="material-icons" style={{ float: "right" }}>help_outline</i>
                     </a>
 
@@ -68,7 +119,7 @@ export default class AddServiceStackReferenceDialog extends React.Component<any,
                         <label htmlFor="txtBaseUrl">Base Url</label>
                         <input ref={e => this.txtBaseUrl = e} type="text" id="txtBaseUrl" value={this.state.value}
                             onChange={ e => this.setValue((e.target as HTMLInputElement).value) }
-                            onKeyDown={e => e.keyCode == 13 && value ? this.props.onAddReference(value) : null }
+                            onKeyDown={e => e.keyCode == 13 ? this.setValue((e.target as HTMLInputElement).value) : null }
                             autoFocus placeholder="Url of remote ServiceStack Instance" />
 
                         <i className="material-icons"
@@ -85,6 +136,7 @@ export default class AddServiceStackReferenceDialog extends React.Component<any,
                     <div className="row" style={{ visibility: this.state.valid ? "visible" : "hidden" }}>
                         <label htmlFor="txtFileName">Filename</label>
                         <input ref={e => this.txtFileName = e} type="text" id="txtFileName"
+                            onKeyDown={e => e.keyCode == 13 && this.state.valid ? this.done() : null }
                             defaultValue="dtos.cs" style={{ width: "175px" }}
                             autoFocus placeholder="dtos.cs" />
                     </div>
@@ -93,7 +145,7 @@ export default class AddServiceStackReferenceDialog extends React.Component<any,
                 <div className="dialog-footer">
                     <img className="loading" src="/img/ajax-loader.gif" style={{ margin: "5px 10px 0 0" }} />
                     <span className={"btn" + (this.state.valid ? "" : " disabled") }
-                        onClick={e => this.state.valid ? this.props.onAddReference(this.state.baseUrl, this.txtFileName.value || "dtos.cs", this.state.content) : null }>
+                        onClick={e => this.state.valid ? this.done() : null }>
                         Add Reference
                     </span>
                 </div>
