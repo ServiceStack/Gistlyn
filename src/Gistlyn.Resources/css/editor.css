@@ -18,6 +18,7 @@
 #tabs #files-menu {
     color: #ddd;
     cursor: pointer;
+    width: 24px;
 }
 #tabs #files-menu:hover {
     color: #ffc;

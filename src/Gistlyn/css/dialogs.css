@@ -167,6 +167,15 @@
     font: 13px/18px monospace;
     color: #00FF00;
 }
+#dialog.console-viewer .dialog-header span,
+#dialog.console-viewer .dialog-footer span {
+    float: right;
+    color: #dd0;
+    font-size: 16px;
+    cursor: pointer;
+    padding-left: 10px;
+    font-weight: normal;
+}
 
 #nosse-dialog a {
     color: #428bca;

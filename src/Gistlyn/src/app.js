@@ -559,7 +559,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                             : null)));
                     }
                     else if (isScriptRunning) {
-                        Preview.push((React.createElement("div", {id: "status", className: "section"}, React.createElement("div", {style: { margin: '40px', color: "#444", width: "215px" }, title: "executing..."}, React.createElement("img", {src: "/img/ajax-loader.gif", style: { float: "right", margin: "5px 0 0 0" }}), React.createElement("i", {className: "material-icons", style: { position: "absolute" }}, "build"), React.createElement("p", {style: { padding: "0 0 0 30px", fontSize: "22px" }}, "Executing Script"), React.createElement("div", {id: "splash", style: { padding: 30 }}, React.createElement("img", {src: "/img/compiling.png"}))))));
+                        Preview.push((React.createElement("div", {id: "status", className: "section"}, React.createElement("div", {style: { margin: '40px', color: "#444", width: "215px" }, title: "executing..."}, React.createElement("img", {src: "/img/ajax-loader.gif", style: { float: "right", margin: "5px 0 0 0" }}), React.createElement("i", {className: "material-icons", style: { position: "absolute" }}, "build"), React.createElement("p", {style: { padding: "0 0 0 30px", fontSize: "22px" }}, "Executing Script"), React.createElement("div", {id: "splash", style: { padding: "20px 0 0 0" }}, React.createElement("img", {src: "/img/compiling.png"}))))));
                     }
                     else if (this.props.variables.length > 0) {
                         var vars = this.props.variables;
@@ -630,7 +630,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         : null, meta && this.props.dialog === "shortcuts"
                         ? React.createElement(ShortcutsDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }})
                         : null, meta && this.props.dialog === "console-viewer"
-                        ? React.createElement(ConsoleViewerDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }, logs: this.props.logs})
+                        ? React.createElement(ConsoleViewerDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }, logs: this.props.logs, onClear: function () { return _this.props.clearConsole() && _this.props.showDialog(null); }})
                         : null, meta && this.props.dialog === "add-ss-ref"
                         ? React.createElement(AddServiceStackReferenceDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }, onAddReference: this.handleAddReference.bind(this)})
                         : null, React.createElement("div", {id: "sig"}, "made with ", React.createElement("span", null, String.fromCharCode(10084)), " by ", React.createElement("a", {target: "_blank", href: "https://servicestack.net"}, "ServiceStack"))));

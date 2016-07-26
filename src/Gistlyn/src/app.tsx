@@ -14,6 +14,7 @@ import EditGistDialog from './EditGistDialog';
 import ShortcutsDialog from './ShortcutsDialog';
 import ConsoleViewerDialog from './ConsoleViewerDialog';
 import AddServiceStackReferenceDialog from './AddServiceStackReferenceDialog';
+import InadequateBrowserDialog from './InadequateBrowserDialog';
 import Console from './Console';
 import Collections from './Collections';
 import Editor from './Editor';
@@ -31,6 +32,16 @@ const ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
 const ScriptStatusError = ["Cancelled", "CompiledWithErrors", "ThrowedException"];
 
 ReactGA.initialize("UA-80898009-1");
+
+if (UA.nosse) {
+    ReactGA.event({ category: 'error', action: 'load', label: "nosse" });
+
+    ReactDOM.render(
+        <InadequateBrowserDialog />,
+        document.getElementById("app"));
+
+    throw "This browser does not support Server Sent Events";
+}
 
 const statusToError = status => ({ errorCode: status.errorCode, msg: status.message, cls: "error" });
 
@@ -642,7 +653,7 @@ class App extends React.Component<any, any> {
                         <img src="/img/ajax-loader.gif" style={{ float: "right", margin: "5px 0 0 0" }} />
                         <i className="material-icons" style={{ position: "absolute" }}>build</i>
                         <p style={{ padding: "0 0 0 30px", fontSize: "22px" }}>Executing Script</p>
-                        <div id="splash" style={{ padding: 30 }}>
+                        <div id="splash" style={{ padding: "20px 0 0 0" }}>
                             <img src="/img/compiling.png" />
                         </div>
                     </div>
@@ -877,7 +888,8 @@ class App extends React.Component<any, any> {
                     ? <ShortcutsDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null) } />
                     : null}
                 {meta && this.props.dialog === "console-viewer"
-                    ? <ConsoleViewerDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null) } logs={this.props.logs} />
+                    ? <ConsoleViewerDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null) } logs={this.props.logs}
+                        onClear={() => this.props.clearConsole() && this.props.showDialog(null)} />
                     : null}
                 {meta && this.props.dialog === "add-ss-ref"
                     ? <AddServiceStackReferenceDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null) }
