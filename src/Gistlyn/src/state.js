@@ -31,6 +31,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                     qs[key] = id;
                     delete qs["s"]; //remove ?s=1 from /auth
                     delete qs["expression"];
+                    delete qs["clear"];
                     url = servicestack_client_1.appendQueryString(url, qs);
                     history.pushState({ id: id, description: description }, description, url);
                     react_ga_1.default.pageview(url);

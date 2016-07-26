@@ -2,10 +2,10 @@
     position: absolute;
     top: 0;
     margin: 0px 0 0 45px;
-    padding: 5px;
+    padding: 5px 5px 0 5px;
     color: #6ab5e8;
     font-size: 30px;
-    height: 40px;
+    height: 37px;
     cursor: pointer;
 }
 #btnCollections:hover {
@@ -19,6 +19,22 @@
 
 #collection {
     background: #fff;
+}
+
+#collection-header {
+    background: #01215A;
+    text-align: left;
+    color: #fff;
+    padding: 4px 12px;
+    line-height: 24px;
+}
+#collection-body {
+    overflow-y: auto;
+    overflow-x: hidden; 
+    width: 50%;
+    position: absolute;
+    top: 74px;
+    bottom: 41px;
 }
 
 #livelist {
@@ -47,7 +63,7 @@
     line-height: 20px;
     font-size: 16px;
     color: #444;
-    padding: 15px 0 0 15px;
+    padding: 0 0 0 30px;
     max-width: 750px;
 }
 #markdown h1, #markdown h2, #markdown h3, #markdown h4, #markdown h5, #markdown h6 {

@@ -45,6 +45,18 @@ export function reduxify(mapStateToProps, mapDispatchToProps?, mergeProps?, opti
     return target => (connect(mapStateToProps, mapDispatchToProps, mergeProps, options)(target) as any);
 }
 
+const ua = navigator.userAgent;
+export const UA = {
+    ipad: ua.match(/iPad/i) != null,
+    nosse: !("EventSource" in window),
+
+    getClassList() {
+        var cls = Object.keys(this).filter(k => this[k] === true);
+        return cls.join(" ");
+    }
+};
+
+
 export function getSortedFileNames(files) {
     const fileNames = Object.keys(files);
     fileNames.sort((a, b) => {

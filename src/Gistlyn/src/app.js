@@ -1,5 +1,5 @@
 /// <reference path='../typings/index.d.ts'/>
-System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './state', './servicestack-client', './json-viewer', './SaveAsDialog', './EditGistDialog', './ShortcutsDialog', './AddServiceStackReferenceDialog', './Console', './Collections', './Editor', './Gistlyn.dtos'], function(exports_1, context_1) {
+System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './state', './servicestack-client', './json-viewer', './SaveAsDialog', './EditGistDialog', './ShortcutsDialog', './ConsoleViewerDialog', './AddServiceStackReferenceDialog', './InadequateBrowserDialog', './Console', './Collections', './Editor', './Gistlyn.dtos'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -13,8 +13,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
         else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
-    var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, SaveAsDialog_1, EditGistDialog_1, ShortcutsDialog_1, AddServiceStackReferenceDialog_1, Console_1, Collections_1, Editor_1, Gistlyn_dtos_1;
-    var ScriptStatusRunning, ScriptStatusError, statusToError, client, sse, App, qs, stateJson, state, e, qsAddRef, qsGist, qsCollection, qsExpression;
+    var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, SaveAsDialog_1, EditGistDialog_1, ShortcutsDialog_1, ConsoleViewerDialog_1, AddServiceStackReferenceDialog_1, InadequateBrowserDialog_1, Console_1, Collections_1, Editor_1, Gistlyn_dtos_1;
+    var ScriptStatusRunning, ScriptStatusError, statusToError, client, sse, App, qs, stateJson, state, e, qsAddRef, qsGist, qsCollection, qsExpression, qsClear;
     function evalExpression(gist, scriptId, expr) {
         if (!expr)
             return;
@@ -74,8 +74,14 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
             function (ShortcutsDialog_1_1) {
                 ShortcutsDialog_1 = ShortcutsDialog_1_1;
             },
+            function (ConsoleViewerDialog_1_1) {
+                ConsoleViewerDialog_1 = ConsoleViewerDialog_1_1;
+            },
             function (AddServiceStackReferenceDialog_1_1) {
                 AddServiceStackReferenceDialog_1 = AddServiceStackReferenceDialog_1_1;
+            },
+            function (InadequateBrowserDialog_1_1) {
+                InadequateBrowserDialog_1 = InadequateBrowserDialog_1_1;
             },
             function (Console_1_1) {
                 Console_1 = Console_1_1;
@@ -93,6 +99,11 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
             ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
             ScriptStatusError = ["Cancelled", "CompiledWithErrors", "ThrowedException"];
             react_ga_1.default.initialize("UA-80898009-1");
+            if (utils_1.UA.nosse) {
+                react_ga_1.default.event({ category: 'error', action: 'load', label: "nosse" });
+                ReactDOM.render(React.createElement(InadequateBrowserDialog_1.default, null), document.getElementById("app"));
+                throw "This browser does not support Server Sent Events";
+            }
             statusToError = function (status) { return ({ errorCode: status.errorCode, msg: status.message, cls: "error" }); };
             client = new servicestack_client_1.JsonServiceClient("/");
             sse = new servicestack_client_1.ServerEventsClient("/", ["gist"], {
@@ -248,12 +259,12 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                             ? (varProps
                                 ? React.createElement("span", {className: "octicon octicon-triangle-down", style: { margin: "0 10px 0 0" }, onClick: function (e) { return _this.props.inspectVariable(v.name, null); }})
                                 : React.createElement("span", {className: "octicon octicon-triangle-right", style: { margin: "0 10px 0 0" }, onClick: function (e) { return _this.inspectVariable(v); }}))
-                            : React.createElement("span", {className: "octicon octicon-triangle-right", style: { margin: "0 10px 0 0", color: "#f7f7f7" }}), React.createElement("a", {onClick: function (e) { return _this.setAndEvaluateExpression(v.name); }}, v.name)), React.createElement("td", {className: "value"}, v.value), React.createElement("td", {className: "type"}, v.type)))];
+                            : React.createElement("span", {className: "octicon octicon-triangle-right", style: { margin: "0 10px 0 0", color: "#f7f7f7" }}), React.createElement("a", {onClick: function (e) { return _this.setAndEvaluateExpression(v.name); }}, v.name)), React.createElement("td", {className: "value"}, React.createElement("span", {title: v.value}, v.value)), React.createElement("td", {className: "type"}, React.createElement("span", {title: v.type}, v.type))))];
                     if (varProps) {
                         varProps.forEach(function (p) {
                             rows.push((React.createElement("tr", null, React.createElement("td", {className: "name", style: { padding: "0 0 0 50px" }}, p.canInspect
                                 ? React.createElement("a", {onClick: function (e) { return _this.setAndEvaluateExpression(v.name + (p.name[0] != "[" ? "." : "") + p.name); }}, p.name)
-                                : React.createElement("span", {style: { color: "#999" }}, p.name)), React.createElement("td", {className: "value"}, p.value), React.createElement("td", {className: "type"}, p.type))));
+                                : React.createElement("span", {style: { color: "#999" }}, p.name)), React.createElement("td", {className: "value"}, React.createElement("span", {title: p.value}, p.value)), React.createElement("td", {className: "type"}, React.createElement("span", {title: p.type}, p.type)))));
                         });
                     }
                     return rows;
@@ -554,19 +565,20 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         var vars = this.props.variables;
                         var exprResult = this.props.expressionResult;
                         var exprVar = exprResult != null && exprResult.variables.length > 0 ? exprResult.variables[0] : null;
-                        Preview.push((React.createElement("div", {id: "vars", className: "section"}, React.createElement("table", {style: { width: "100%" }}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", {className: "name"}, "name"), React.createElement("th", {className: "value"}, "value"), React.createElement("th", {className: "type"}, "type "))), React.createElement("tbody", null, vars.map(function (v) { return _this.getVariableRows(v); }), React.createElement("tr", null, React.createElement("td", {id: "evaluate", colSpan: 3}, React.createElement("input", {type: "text", placeholder: "Evaluate Expression", value: this.props.expression, onChange: function (e) { return _this.props.setExpression(e.target.value); }, onKeyPress: function (e) { return e.which === 13 ? _this.evaluateExpression(_this.props.expression) : null; }, autoComplete: "off", autoCorrect: "off", autoCapitalize: "off", spellCheck: "false"}), React.createElement("i", {className: "material-icons", title: "run", onClick: function (e) { return _this.evaluateExpression(_this.props.expression); }}, "play_arrow"), exprVar
+                        Preview.push((React.createElement("div", {id: "vars", className: "section", style: { display: "flex", flexFlow: "column", overflow: "hidden" }}, React.createElement("table", {style: { width: "100%", flex: 1 }}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", {className: "name"}, "name"), React.createElement("th", {className: "value"}, "value"), React.createElement("th", {className: "type"}, "type "))), React.createElement("tbody", null, vars.map(function (v) { return _this.getVariableRows(v); }), React.createElement("tr", null, React.createElement("td", {colSpan: 3}, React.createElement("input", {id: "txtEval", type: "text", placeholder: "Evaluate Expression", value: this.props.expression, onChange: function (e) { return _this.props.setExpression(e.target.value); }, onKeyPress: function (e) { return e.which === 13 ? _this.evaluateExpression(_this.props.expression) : null; }, autoComplete: "off", autoCorrect: "off", autoCapitalize: "off", spellCheck: "false"}), React.createElement("i", {id: "btnEval", className: "material-icons", title: "run", onClick: function (e) { return _this.evaluateExpression(_this.props.expression); }}, "play_arrow"))))), React.createElement("div", {id: "evaluate", style: { overflow: "auto" }}, exprVar
                             ? (React.createElement("div", {id: "expression-result"}, React.createElement(json_viewer_1.JsonViewer, {json: exprVar.json})))
-                            : null)))))));
+                            : null))));
                     }
                     else {
                         Preview.push(React.createElement("div", {id: "placeholder"}));
                     }
                     if (this.props.logs.length > 0 && !this.props.showCollection) {
-                        Preview.push(React.createElement(Console_1.default, {logs: this.props.logs, onClear: function () { return _this.props.clearConsole(); }}));
+                        Preview.push(React.createElement(Console_1.default, {logs: this.props.logs, onClear: function () { return _this.props.clearConsole(); }, showDialog: this.props.showDialog}));
                     }
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.urlChanged(utils_1.GistTemplates.HomeCollection); }}, "Home")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(utils_1.GistTemplates.NewGist); }}, "New Gist")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(utils_1.GistTemplates.NewPrivateGist); }}, "New Private Gist")));
+                    MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.showDialog("console-viewer"); }}, "Console Viewer")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.showDialog("shortcuts"); }}, "Shortcuts")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return location.href = "https://github.com/ServiceStack/Gistlyn/issues"; }}, "Send Feedback")));
                     EditorPopup.push((React.createElement("div", {onClick: function (e) { return _this.props.showDialog("edit-gist"); }}, "Edit Gist")));
@@ -584,7 +596,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     };
                     var showGistInput = !meta || !description || (this.txtUrl && this.txtUrl == document.activeElement);
                     var goHome = function () { return _this.props.urlChanged(utils_1.GistTemplates.HomeCollection); };
-                    return (React.createElement("div", {id: "body", onClick: function (e) { return _this.handleBodyClick(e); }}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png", title: "Hello", onClick: goHome, style: { cursor: "pointer" }}), React.createElement("h3", {onClick: goHome, style: { cursor: "pointer" }}, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, meta
+                    return (React.createElement("div", {id: "body", onClick: function (e) { return _this.handleBodyClick(e); }, className: utils_1.UA.getClassList()}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png", title: "Hello", onClick: goHome, style: { cursor: "pointer" }}), React.createElement("h3", {onClick: goHome, style: { cursor: "pointer" }}, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, meta
                         ? React.createElement("img", {src: meta.owner_avatar_url, title: meta.owner_login, style: { verticalAlign: "bottom", margin: "0 5px 2px 0" }})
                         : React.createElement("span", {className: "octicon octicon-logo-gist", style: { verticalAlign: "bottom", margin: "0 6px 6px 0" }}), React.createElement("input", {ref: function (e) { return _this.txtUrl = e; }, type: "text", id: "txtUrl", placeholder: "gist hash or url", style: { display: showGistInput ? "inline-block" : "none" }, onBlur: toggleEdit, value: this.props.url, onFocus: function (e) { return e.target.select(); }, onChange: function (e) { return _this.props.urlChanged(e.target.value); }, autoComplete: "off", autoCorrect: "off", autoCapitalize: "off", spellCheck: "false"}), React.createElement("div", {id: "desc-overlay", style: { display: showGistInput ? "none" : "inline-block" }, onClick: toggleEdit}, React.createElement("div", {className: "inner"}, React.createElement("h2", null, description), meta && !meta.public
                         ? (React.createElement("span", {style: { position: "absolute", margin: "3px 0px 3px -40px", fontSize: 12, background: "#ffefc6", color: "#888", padding: "2px 4px", borderRadius: 3 }, title: "This gist is private"}, "secret"))
@@ -617,6 +629,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         ? React.createElement(EditGistDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, description: description, onSave: function (opt) { return _this.saveGist(opt); }, onHide: function () { return _this.props.showDialog(null); }})
                         : null, meta && this.props.dialog === "shortcuts"
                         ? React.createElement(ShortcutsDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }})
+                        : null, meta && this.props.dialog === "console-viewer"
+                        ? React.createElement(ConsoleViewerDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }, logs: this.props.logs})
                         : null, meta && this.props.dialog === "add-ss-ref"
                         ? React.createElement(AddServiceStackReferenceDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }, onAddReference: this.handleAddReference.bind(this)})
                         : null, React.createElement("div", {id: "sig"}, "made with ", React.createElement("span", null, String.fromCharCode(10084)), " by ", React.createElement("a", {target: "_blank", href: "https://servicestack.net"}, "ServiceStack"))));
@@ -712,6 +726,13 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
             qsExpression = qs["expression"];
             if (qsExpression) {
                 state_1.store.dispatch({ type: "EXPRESSION_SET", expression: qsExpression });
+            }
+            qsClear = qs["clear"];
+            if (qsClear === "state") {
+                localStorage.removeItem(utils_1.StateKey);
+            }
+            else if (qsClear === "all") {
+                localStorage.clear();
             }
             window.onpopstate = function (e) {
                 if (!(e.state && e.state.id))

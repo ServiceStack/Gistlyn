@@ -157,6 +157,7 @@
     <TypeScriptCompile Include="src\Editor.tsx" />
     <TypeScriptCompile Include="src\AddServiceStackReferenceDialog.tsx" />
     <TypeScriptCompile Include="src\EditGistDialog.tsx" />
+    <TypeScriptCompile Include="src\ConsoleViewerDialog.tsx" />
     <TypeScriptCompile Include="src\ShortcutsDialog.tsx" />
     <TypeScriptCompile Include="src\SaveAsDialog.tsx" />
     <TypeScriptCompile Include="src\deps.tsx" />

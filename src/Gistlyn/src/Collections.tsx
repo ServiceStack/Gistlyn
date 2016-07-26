@@ -18,7 +18,7 @@ export default class Collections extends React.Component<any, any> {
 
             if (recentGists.length > 0 || recentCollections.length > 0) {
                 LiveLists = (
-                    <div  style={{ float: "right", margin: "32px -8px 0px 0px", padding: "0 0 5px 10px" }}>
+                    <div  style={{ float: "right", margin: "4px 4px 0px 0px", padding: "0 0 5px 10px" }}>
                         <div id="livelist" style={{ boxShadow: "1px 2px 3px rgba(0, 0, 0, 0.3)" }}>
                             {recentCollections.length > 0
                                 ? (<div>
@@ -60,20 +60,14 @@ export default class Collections extends React.Component<any, any> {
                         }
                     }
                 } }>
-                <table style={{ width: "100%" }}>
-                    <thead>
-                        <tr style={{position:"fixed", width:"100%"}}><th>{this.props.collection.description || "Collections"}</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                {LiveLists}
-                                <div id="markdown"
-                                    dangerouslySetInnerHTML={{ __html: this.props.collection.html }} />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div id="collection-header">
+                    {this.props.collection.description || "Collections"}
+                </div>
+                <div id="collection-body">
+                    {LiveLists}
+                    <div id="markdown"
+                        dangerouslySetInnerHTML={{ __html: this.props.collection.html }} />
+                </div>
             </div>);
     }
 }

@@ -4,7 +4,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import ReactGA from 'react-ga';
 import { Provider, connect } from 'react-redux';
-import { reduxify, getSortedFileNames, Config, StateKey, GistCacheKey, GistTemplates, FileNames, IGistMeta, IGistFile, addClientPackages } from './utils';
+import { reduxify, UA, getSortedFileNames, Config, StateKey, GistCacheKey, GistTemplates, FileNames, IGistMeta, IGistFile, addClientPackages } from './utils';
 import { store } from './state';
 import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnFirst, splitOnLast, humanize, dateFmt, timeFmt12 } from './servicestack-client';
 import { JsonViewer } from './json-viewer';
@@ -34,6 +34,7 @@ ReactGA.initialize("UA-80898009-1");
 const statusToError = status => ({ errorCode: status.errorCode, msg: status.message, cls: "error" });
 
 var client = new JsonServiceClient("/");
+
 var sse = new ServerEventsClient("/", ["gist"], {
     handlers: {
         onConnect(activeSub: ISseConnect) {
@@ -268,8 +269,8 @@ class App extends React.Component<any, any> {
                         : <span className="octicon octicon-triangle-right" style={{ margin: "0 10px 0 0", color: "#f7f7f7" }}></span>}
                     <a onClick={e => this.setAndEvaluateExpression(v.name) }>{v.name}</a>
                 </td>
-                <td className="value">{v.value}</td>
-                <td className="type">{v.type}</td>
+                <td className="value"><span title={v.value}>{v.value}</span></td>
+                <td className="type"><span title={v.type}>{v.type}</span></td>
             </tr>
         )];
 
@@ -282,8 +283,8 @@ class App extends React.Component<any, any> {
                                 ? <a onClick={e => this.setAndEvaluateExpression(v.name + (p.name[0] != "[" ? "." : "") + p.name) }>{p.name}</a>
                                 : <span style={{ color: "#999" }}>{p.name}</span>}
                         </td>
-                        <td className="value">{p.value}</td>
-                        <td className="type">{p.type}</td>
+                        <td className="value"><span title={p.value}>{p.value}</span></td>
+                        <td className="type"><span title={p.type}>{p.type}</span></td>
                     </tr>
                 ));
             });
@@ -651,8 +652,8 @@ class App extends React.Component<any, any> {
             var exprResult = this.props.expressionResult as ScriptExecutionResult;
             var exprVar = exprResult != null && exprResult.variables.length > 0 ? exprResult.variables[0] : null;
             Preview.push((
-                <div id="vars" className="section">
-                    <table style={{ width: "100%" }}>
+                <div id="vars" className="section" style={{ display:"flex", flexFlow:"column", overflow:"hidden" }}>
+                    <table style={{ width: "100%", flex:1 }}>
                         <thead>
                             <tr>
                                 <th className="name">name</th>
@@ -663,23 +664,26 @@ class App extends React.Component<any, any> {
                         <tbody>
                             {vars.map(v => this.getVariableRows(v)) }
                             <tr>
-                                <td id="evaluate" colSpan={3}>
-                                    <input type="text" placeholder="Evaluate Expression" value={this.props.expression}
+                                <td colSpan={3}>
+                                    <input id="txtEval" type="text" placeholder="Evaluate Expression" value={this.props.expression}
                                         onChange={e => this.props.setExpression((e.target as HTMLInputElement).value) }
                                         onKeyPress={e => e.which === 13 ? this.evaluateExpression(this.props.expression) : null }
                                         autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck="false" />
-                                    <i className="material-icons" title="run" onClick={e => this.evaluateExpression(this.props.expression) }>play_arrow</i>
-                                    {exprVar
-                                        ? (
-                                            <div id="expression-result">
-                                                <JsonViewer json={exprVar.json} />
-                                            </div>
-                                        )
-                                        : null}
+                                    <i id="btnEval" className="material-icons" title="run" onClick={e => this.evaluateExpression(this.props.expression) }>play_arrow</i>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+                    <div id="evaluate" style={{ overflow: "auto" }}>
+                        {exprVar
+                            ? (
+                                <div id="expression-result">
+                                    <JsonViewer json={exprVar.json} />
+                                </div>
+                            )
+                            : null}
+                    </div>
+
                 </div>));
         } else {
             Preview.push(<div id="placeholder"></div>);
@@ -723,7 +727,7 @@ class App extends React.Component<any, any> {
         const goHome = () => this.props.urlChanged(GistTemplates.HomeCollection);
 
         return (
-            <div id="body" onClick={e => this.handleBodyClick(e) }>
+            <div id="body" onClick={e => this.handleBodyClick(e) } className={UA.getClassList()}>
                 <div className="titlebar">
                     <div className="container">
                         <img id="logo" src="img/logo-32-inverted.png" title="Hello" onClick={goHome} style={{ cursor: "pointer" }} />
@@ -869,9 +873,12 @@ class App extends React.Component<any, any> {
                 {meta && this.props.dialog === "shortcuts"
                     ? <ShortcutsDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null) } />
                     : null}
+                {meta && this.props.dialog === "console-viewer"
+                    ? <ConsoleViewerDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null) } logs={this.props.logs} />
+                    : null}
                 {meta && this.props.dialog === "add-ss-ref"
                     ? <AddServiceStackReferenceDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null) }
-                        onAddReference={this.handleAddReference.bind(this)} />
+                        onAddReference={this.handleAddReference.bind(this) } />
                     : null}
 
                 <div id="sig">made with <span>{String.fromCharCode(10084)}</span> by <a target="_blank" href="https://servicestack.net">ServiceStack</a></div>
@@ -925,6 +932,13 @@ if (qsCollection) {
 const qsExpression = qs["expression"];
 if (qsExpression) {
     store.dispatch({ type: "EXPRESSION_SET", expression: qsExpression });
+}
+
+const qsClear = qs["clear"];
+if (qsClear === "state") {
+    localStorage.removeItem(StateKey);
+} else if (qsClear === "all") {
+    localStorage.clear();
 }
 
 window.onpopstate = e => {

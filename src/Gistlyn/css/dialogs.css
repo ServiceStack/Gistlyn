@@ -162,3 +162,17 @@
 #dialog a:hover, #dialog .lnk:hover {
     color: #2a6496;
 }
+
+#dialog.console-viewer.dark .dialog-body td {
+    font: 13px/18px monospace;
+    color: #00FF00;
+}
+
+#nosse-dialog a {
+    color: #428bca;
+    text-decoration: none;
+    padding: 0 6px;
+}
+#nosse-dialog a:hover {
+    color: #2a6496;
+}

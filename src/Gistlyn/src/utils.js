@@ -2,7 +2,7 @@ System.register(['react-redux'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var react_redux_1;
-    var Config, StateKey, GistCacheKey, GistTemplates, FileNames;
+    var Config, StateKey, GistCacheKey, GistTemplates, FileNames, ua, UA;
     function reduxify(mapStateToProps, mapDispatchToProps, mergeProps, options) {
         return function (target) { return (react_redux_1.connect(mapStateToProps, mapDispatchToProps, mergeProps, options)(target)); };
     }
@@ -67,6 +67,16 @@ System.register(['react-redux'], function(exports_1, context_1) {
                 GistMain: "main.cs",
                 GistPackages: "packages.config",
                 CollectionIndex: "index.md"
+            });
+            ua = navigator.userAgent;
+            exports_1("UA", UA = {
+                ipad: ua.match(/iPad/i) != null,
+                nosse: !("EventSource" in window),
+                getClassList: function () {
+                    var _this = this;
+                    var cls = Object.keys(this).filter(function (k) { return _this[k] === true; });
+                    return cls.join(" ");
+                }
             });
             ;
         }

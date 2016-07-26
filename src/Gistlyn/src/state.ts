@@ -14,6 +14,7 @@ const updateHistory = (id:string, description:string, key:string) => {
         qs[key] = id;
         delete qs["s"]; //remove ?s=1 from /auth
         delete qs["expression"];
+        delete qs["clear"];
         url = appendQueryString(url, qs);
         history.pushState({ id, description }, description, url);
         ReactGA.pageview(url);
