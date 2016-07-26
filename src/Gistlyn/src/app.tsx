@@ -12,6 +12,7 @@ import { JsonViewer } from './json-viewer';
 import SaveAsDialog from './SaveAsDialog';
 import EditGistDialog from './EditGistDialog';
 import ShortcutsDialog from './ShortcutsDialog';
+import ConsoleViewerDialog from './ConsoleViewerDialog';
 import AddServiceStackReferenceDialog from './AddServiceStackReferenceDialog';
 import Console from './Console';
 import Collections from './Collections';
@@ -690,7 +691,7 @@ class App extends React.Component<any, any> {
         }
 
         if (this.props.logs.length > 0 && !this.props.showCollection) {
-            Preview.push(<Console logs={this.props.logs} onClear={() => this.props.clearConsole() } />);
+            Preview.push(<Console logs={this.props.logs} onClear={() => this.props.clearConsole() } showDialog={this.props.showDialog} />);
         }
 
         MorePopup.push((
@@ -699,6 +700,8 @@ class App extends React.Component<any, any> {
             <div onClick={e => this.props.changeGist(GistTemplates.NewGist) }>New Gist</div>));
         MorePopup.push((
             <div onClick={e => this.props.changeGist(GistTemplates.NewPrivateGist) }>New Private Gist</div>));
+        MorePopup.push((
+            <div onClick={e => this.props.showDialog("console-viewer") }>Console Viewer</div>));
         MorePopup.push((
             <div onClick={e => this.props.showDialog("shortcuts") }>Shortcuts</div>));
         MorePopup.push((
