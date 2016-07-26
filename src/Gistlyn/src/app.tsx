@@ -645,6 +645,8 @@ class App extends React.Component<any, any> {
                     { this.props.error.stackTrace != null
                         ? <pre style={{ color: "red", padding: "5px 30px" }}>{this.props.error.stackTrace}</pre>
                         : null}
+
+                    <span className="lnk" style={{ paddingLeft: 25 }} onClick={e => this.props.urlChanged(GistTemplates.HomeCollection)}>Home</span>
                 </div>));
         } else if (isScriptRunning) {
             Preview.push((

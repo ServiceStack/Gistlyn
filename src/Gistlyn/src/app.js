@@ -556,7 +556,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         var code = this.props.error.errorCode ? "(" + this.props.error.errorCode + ") " : "";
                         Preview.push((React.createElement("div", {id: "errors", className: "section"}, React.createElement("div", {style: { margin: "25px 25px 40px 25px", color: "#a94442" }}, code, this.props.error.message), this.props.error.stackTrace != null
                             ? React.createElement("pre", {style: { color: "red", padding: "5px 30px" }}, this.props.error.stackTrace)
-                            : null)));
+                            : null, React.createElement("span", {className: "lnk", style: { paddingLeft: 25 }, onClick: function (e) { return _this.props.urlChanged(utils_1.GistTemplates.HomeCollection); }}, "Home"))));
                     }
                     else if (isScriptRunning) {
                         Preview.push((React.createElement("div", {id: "status", className: "section"}, React.createElement("div", {style: { margin: '40px', color: "#444", width: "215px" }, title: "executing..."}, React.createElement("img", {src: "/img/ajax-loader.gif", style: { float: "right", margin: "5px 0 0 0" }}), React.createElement("i", {className: "material-icons", style: { position: "absolute" }}, "build"), React.createElement("p", {style: { padding: "0 0 0 30px", fontSize: "22px" }}, "Executing Script"), React.createElement("div", {id: "splash", style: { padding: "20px 0 0 0" }}, React.createElement("img", {src: "/img/compiling.png"}))))));

@@ -33,8 +33,12 @@ System.register(['react', './servicestack-client'], function(exports_1, context_
                             gists.sort(function (a, b) { return b.date - a.date; });
                             return gists;
                         };
-                        var recentGists = sortByRecent(allGists.filter(function (x) { return !x.collection; }));
-                        var recentCollections = sortByRecent(allGists.filter(function (x) { return x.collection; }));
+                        var removeDupes = function (xs) {
+                            var dupes = {};
+                            return xs.filter(function (x) { return dupes[x.description] ? false : !!(dupes[x.description] = x); });
+                        };
+                        var recentGists = removeDupes(sortByRecent(allGists.filter(function (x) { return !x.collection; })));
+                        var recentCollections = removeDupes(sortByRecent(allGists.filter(function (x) { return x.collection; })));
                         var myGists = recentGists.filter(function (x) { return x.owner_login === _this.props.authUsername; });
                         if (recentGists.length > 0 || recentCollections.length > 0) {
                             LiveLists = (React.createElement("div", {style: { float: "right", margin: "4px 4px 0px 0px", padding: "0 0 5px 10px" }}, React.createElement("div", {id: "livelist", style: { boxShadow: "1px 2px 3px rgba(0, 0, 0, 0.3)" }}, recentCollections.length > 0

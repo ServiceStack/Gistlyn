@@ -12,8 +12,13 @@ export default class Collections extends React.Component<any, any> {
                 gists.sort((a, b) => b.date - a.date);
                 return gists;
             };
-            var recentGists = sortByRecent(allGists.filter(x => !x.collection));
-            var recentCollections = sortByRecent(allGists.filter(x => x.collection));
+            const removeDupes = xs => {
+                var dupes = {};
+                return xs.filter(x => dupes[x.description] ? false : !!(dupes[x.description] = x));
+            };
+
+            var recentGists = removeDupes(sortByRecent(allGists.filter(x => !x.collection)));
+            var recentCollections = removeDupes(sortByRecent(allGists.filter(x => x.collection)));
             var myGists = recentGists.filter(x => x.owner_login === this.props.authUsername);
 
             if (recentGists.length > 0 || recentCollections.length > 0) {

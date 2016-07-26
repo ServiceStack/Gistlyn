@@ -154,12 +154,12 @@
     padding: 0 10px 0 3px;
 }
 
-#dialog a, #dialog .lnk {
+#dialog a, #dialog .lnk, .lnk {
     color: #428bca;
     text-decoration: none;
     cursor: pointer;
 }
-#dialog a:hover, #dialog .lnk:hover {
+#dialog a:hover, #dialog .lnk:hover, .lnk:hover {
     color: #2a6496;
 }
 
