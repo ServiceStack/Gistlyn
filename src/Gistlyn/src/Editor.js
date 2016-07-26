@@ -62,7 +62,8 @@ System.register(['react', './utils', 'react-codemirror', "jspm_packages/npm/code
                         var keys = utils_1.getSortedFileNames(files);
                         var sizeToFit_1 = function (e) {
                             var txt = e.target;
-                            txt.size = Math.max(txt.value.length - 2, 1); //Note: Spacing is different on OSX
+                            var modifier = utils_1.UA.mac || utils_1.UA.ipad ? 3 : -2; //Spacing is different on OSX, iPad
+                            txt.size = Math.max(txt.value.length + modifier, 1);
                         };
                         keys.forEach(function (fileName) {
                             var file = files[fileName];

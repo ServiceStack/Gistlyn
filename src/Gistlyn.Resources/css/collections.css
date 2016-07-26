@@ -136,3 +136,7 @@
     color: #777;
     border-left: 0.25em solid #ddd;
 }
+#markdown hr {
+    border: none;
+    border-bottom: 1px solid #eee;
+}

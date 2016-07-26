@@ -683,7 +683,7 @@ class App extends React.Component<any, any> {
                                         onChange={e => this.props.setExpression((e.target as HTMLInputElement).value) }
                                         onKeyPress={e => e.which === 13 ? this.evaluateExpression(this.props.expression) : null }
                                         autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck="false" />
-                                    <i id="btnEval" className="material-icons" title="run" onClick={e => this.evaluateExpression(this.props.expression) }>play_arrow</i>
+                                    <i id="btnEval" className="material-icons noselect" title="run" onClick={e => this.evaluateExpression(this.props.expression) }>play_arrow</i>
                                 </td>
                             </tr>
                         </tbody>

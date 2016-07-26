@@ -7,12 +7,12 @@ export const StateKey = "/v1/state";
 export const GistCacheKey = (gist) => `/v1/gists/${gist}`;
 
 export const GistTemplates = {
-    NewGist: "4fab2fa13aade23c81cabe83314c3cd0",
-    NewPrivateGist: "7eaa8f65869fa6682913e3517bec0f7e",
-    AddServiceStackReferenceGist: "eefea9cece5419f5d5dc24492d01c07c",
+    NewGist: "52c37e37b51a0ec92810477be34695ae",
+    NewPrivateGist: "492e199fa3ec5394ef0bc1aedd3240c7",
+    AddServiceStackReferenceGist: "2dbd4ccff70851ce8ae55678f4f15d0a",
     HomeCollection: "2cc6b5db6afd3ccb0d0149e55fdb3a6a",
-    Gists: ["4fab2fa13aade23c81cabe83314c3cd0", "7eaa8f65869fa6682913e3517bec0f7e",
-        "eefea9cece5419f5d5dc24492d01c07c", "2cc6b5db6afd3ccb0d0149e55fdb3a6a"]
+    Gists: ["52c37e37b51a0ec92810477be34695ae", "492e199fa3ec5394ef0bc1aedd3240c7",
+        "2dbd4ccff70851ce8ae55678f4f15d0a", "2cc6b5db6afd3ccb0d0149e55fdb3a6a"]
 };
 
 export const FileNames = {
@@ -46,9 +46,12 @@ export function reduxify(mapStateToProps, mapDispatchToProps?, mergeProps?, opti
 }
 
 const ua = navigator.userAgent;
+const platform = navigator.platform.toLowerCase();
 export const UA = {
     ipad: ua.match(/iPad/i) != null,
     nosse: !("EventSource" in window),
+    [platform]: true,
+    mac: platform.indexOf("mac") >= 0,
 
     getClassList() {
         var cls = Object.keys(this).filter(k => this[k] === true);

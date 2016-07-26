@@ -1,6 +1,6 @@
 ﻿import * as React from 'react';
 import { queryString } from './servicestack-client';
-import { getSortedFileNames, IGistFile } from './utils';
+import { UA, getSortedFileNames, IGistFile } from './utils';
 
 import CodeMirror from 'react-codemirror';
 import "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js";
@@ -46,7 +46,8 @@ export default class Editor extends React.Component<any, any> {
 
             const sizeToFit = (e: React.KeyboardEvent) => {
                 var txt = e.target as HTMLInputElement;
-                txt.size = Math.max(txt.value.length - 2, 1); //Note: Spacing is different on OSX
+                var modifier = UA.mac || UA.ipad ? 3 : -2; //Spacing is different on OSX, iPad
+                txt.size = Math.max(txt.value.length + modifier, 1);
             };
 
             keys.forEach(fileName => {
