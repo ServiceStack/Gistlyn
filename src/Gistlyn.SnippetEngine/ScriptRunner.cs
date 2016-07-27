@@ -284,7 +284,13 @@ namespace Gistlyn.SnippetEngine
                     {
                         result.Exception = state.Exception.InnerExceptions[0];
                     }
-                    notifier.SendScriptExecutionResults(result);
+
+                    state.ContinueWith(t =>
+                    {
+                        result.Status = GetScriptStateStatus();
+                        notifier.SendScriptExecutionResults(result);
+                        return t;
+                    }, cancellationToken);
                 }
                 catch (CompilationErrorException e)
                 {
