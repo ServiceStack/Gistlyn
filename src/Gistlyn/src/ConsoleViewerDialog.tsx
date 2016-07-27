@@ -4,7 +4,7 @@ export default class ConsoleViewerDialog extends React.Component<any, any> {
     dialog: HTMLDivElement;
 
     render() {
-        setTimeout(() => this.dialog.scrollTop = this.dialog.scrollHeight, 0);
+        setTimeout(() => this.dialog && (this.dialog.scrollTop = this.dialog.scrollHeight), 0);
 
         return (<div id="dialog" className="console-viewer dark console" onClick={e => this.props.onHide() } onKeyDown={e => e.keyCode === 27 ? this.props.onHide() : null }>
             <div className="dialog" ref={e => this.props.dialogRef(this.dialog = e) } onClick={e => e.stopPropagation() }

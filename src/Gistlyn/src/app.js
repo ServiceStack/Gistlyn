@@ -168,7 +168,9 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         react_ga_1.default.event({ category: 'gist', action: 'Run Gist', label: _this.props.gist });
                         client.post(request)
                             .then(function (r) {
-                            _this.props.logConsoleMsgs(r.references.map(function (ref) { return ("loaded " + ref.name); }));
+                            var msgs = r.references.map(function (ref) { return ("loaded " + ref.name); });
+                            msgs.push("\n");
+                            _this.props.logConsoleMsgs(msgs);
                         })
                             .catch(function (e) {
                             _this.props.raiseError(e.responseStatus || e);

@@ -41,12 +41,12 @@ System.register(['react', './servicestack-client'], function(exports_1, context_
                         var recentCollections = removeDupes(sortByRecent(allGists.filter(function (x) { return x.collection; })));
                         var myGists = recentGists.filter(function (x) { return x.owner_login === _this.props.authUsername; });
                         if (recentGists.length > 0 || recentCollections.length > 0) {
-                            LiveLists = (React.createElement("div", {style: { float: "right", margin: "4px 4px 0px 0px", padding: "0 0 5px 10px" }}, React.createElement("div", {id: "livelist", style: { boxShadow: "1px 2px 3px rgba(0, 0, 0, 0.3)" }}, recentCollections.length > 0
-                                ? (React.createElement("div", null, React.createElement("h3", null, "Recent Collections"), recentCollections.slice(0, 5).map(function (x) { return React.createElement("a", {href: "?collection=" + x.id}, x.description); })))
+                            LiveLists = (React.createElement("div", {style: { float: "right", margin: "4px 4px 0px 0px", padding: "0 0 5px 10px" }}, React.createElement("div", {id: "livelist"}, recentCollections.length > 0
+                                ? (React.createElement("div", null, React.createElement("h3", null, "Recent Collections"), recentCollections.slice(0, 5).map(function (x) { return React.createElement("a", {href: "?collection=" + x.id, title: x.description}, x.description); })))
                                 : null, recentGists.length > 0
-                                ? (React.createElement("div", null, React.createElement("h3", null, "Recent Gists"), recentGists.slice(0, 5).map(function (x) { return React.createElement("a", {href: "?gist=" + x.id}, x.description); })))
+                                ? (React.createElement("div", null, React.createElement("h3", null, "Recent Gists"), recentGists.slice(0, 5).map(function (x) { return React.createElement("a", {href: "?gist=" + x.id, title: x.description}, x.description); })))
                                 : null, myGists.length > 0
-                                ? (React.createElement("div", null, React.createElement("h3", null, "My Gists"), myGists.slice(0, 20).map(function (x) { return React.createElement("a", {href: "?gist=" + x.id}, x.description); })))
+                                ? (React.createElement("div", null, React.createElement("h3", null, "My Gists"), myGists.slice(0, 20).map(function (x) { return React.createElement("a", {href: "?gist=" + x.id, title: x.description}, x.description); })))
                                 : null)));
                         }
                     }

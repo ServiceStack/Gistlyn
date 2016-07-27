@@ -223,7 +223,9 @@ class App extends React.Component<any, any> {
 
         client.post(request)
             .then(r => {
-                this.props.logConsoleMsgs(r.references.map(ref => `loaded ${ref.name}`));
+                var msgs = r.references.map(ref => `loaded ${ref.name}`);
+                msgs.push("\n");
+                this.props.logConsoleMsgs(msgs);
             })
             .catch(e => {
                 this.props.raiseError(e.responseStatus || e);

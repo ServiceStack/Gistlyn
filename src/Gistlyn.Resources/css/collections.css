@@ -41,6 +41,7 @@
     font-size: 14px;
     line-height: 22px;
     background: #f7f7f7;
+    box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.3);
 }
 #livelist h3 {
     font-size: 14px;
@@ -54,6 +55,10 @@
     display: block;
     text-decoration: none;
     color: #444;
+    width: 240px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 #livelist a:hover {
     text-decoration: underline;

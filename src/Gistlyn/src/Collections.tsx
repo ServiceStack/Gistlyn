@@ -24,25 +24,25 @@ export default class Collections extends React.Component<any, any> {
             if (recentGists.length > 0 || recentCollections.length > 0) {
                 LiveLists = (
                     <div  style={{ float: "right", margin: "4px 4px 0px 0px", padding: "0 0 5px 10px" }}>
-                        <div id="livelist" style={{ boxShadow: "1px 2px 3px rgba(0, 0, 0, 0.3)" }}>
+                        <div id="livelist">
                             {recentCollections.length > 0
                                 ? (<div>
                                     <h3>Recent Collections</h3>
-                                    { recentCollections.slice(0, 5).map(x => <a href={`?collection=${x.id}`}>{x.description}</a>) }
+                                    { recentCollections.slice(0, 5).map(x => <a href={`?collection=${x.id}`} title={x.description}>{x.description}</a>) }
                                 </div>)
                                 : null}
 
                             {recentGists.length > 0
                                 ? (<div>
                                     <h3>Recent Gists</h3>
-                                    { recentGists.slice(0, 5).map(x => <a href={`?gist=${x.id}`}>{x.description}</a>) }
+                                    { recentGists.slice(0, 5).map(x => <a href={`?gist=${x.id}`} title={x.description}>{x.description}</a>) }
                                 </div>)
                                 : null}
 
                             {myGists.length > 0
                                 ? (<div>
                                     <h3>My Gists</h3>
-                                    { myGists.slice(0, 20).map(x => <a href={`?gist=${x.id}`}>{x.description}</a>) }
+                                    { myGists.slice(0, 20).map(x => <a href={`?gist=${x.id}`} title={x.description}>{x.description}</a>) }
                                 </div>)
                                 : null}
                         </div>
