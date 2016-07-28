@@ -637,6 +637,22 @@ class App extends React.Component<any, any> {
                 changeGist={id => this.props.changeGist(id) }
                 changeCollection={(id, reload) => this.props.changeCollection(id, reload) } />
             );
+        } else if (this.props.showCollection) { //Still loading
+            Preview.push((
+                <div id="collection" className="section">
+                    <div id="collection-header">
+                        Collection
+                    </div>
+                    <div id="collection-body">
+                        <div id="markdown">
+                            <div style={{ color:"#444", fontSize:20, position: "absolute", top:"50%", margin:"-55px 0 0 0", textAlign:"center", width:"100%" }}>
+                                <img src="/img/ajax-loader.gif" style={{ margin: "5px 10px 0 0" }} />
+                                loading...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ));
         } else if (this.props.error != null) {
             var code = this.props.error.errorCode ? `(${this.props.error.errorCode}) ` : "";
             Preview.push((

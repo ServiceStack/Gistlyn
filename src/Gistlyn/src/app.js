@@ -554,6 +554,9 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     if (showCollection) {
                         Preview.push(React.createElement(Collections_1.default, {gistStats: this.props.gistStats, excludeGists: utils_1.GistTemplates.Gists, collection: this.props.collection, showLiveLists: this.props.collection.id === utils_1.GistTemplates.HomeCollection, authUsername: authUsername, changeGist: function (id) { return _this.props.changeGist(id); }, changeCollection: function (id, reload) { return _this.props.changeCollection(id, reload); }}));
                     }
+                    else if (this.props.showCollection) {
+                        Preview.push((React.createElement("div", {id: "collection", className: "section"}, React.createElement("div", {id: "collection-header"}, "Collection"), React.createElement("div", {id: "collection-body"}, React.createElement("div", {id: "markdown"}, React.createElement("div", {style: { color: "#444", fontSize: 20, position: "absolute", top: "50%", margin: "-55px 0 0 0", textAlign: "center", width: "100%" }}, React.createElement("img", {src: "/img/ajax-loader.gif", style: { margin: "5px 10px 0 0" }}), "loading..."))))));
+                    }
                     else if (this.props.error != null) {
                         var code = this.props.error.errorCode ? "(" + this.props.error.errorCode + ") " : "";
                         Preview.push((React.createElement("div", {id: "errors", className: "section"}, React.createElement("div", {style: { margin: "25px 25px 40px 25px", color: "#a94442" }}, code, this.props.error.message), this.props.error.stackTrace != null
