@@ -1,6 +1,6 @@
 ﻿import { createStore, applyMiddleware } from 'redux';
 import { getSortedFileNames, GistTemplates, StateKey, GistCacheKey, FileNames, IGistMeta, IGistFile, addClientPackages } from './utils';
-import { queryString, appendQueryString, splitOnFirst, splitOnLast } from './servicestack-client';
+import { queryString, appendQueryString, splitOnFirst, splitOnLast } from 'servicestack-client';
 import ReactGA from 'react-ga';
 import marked from 'marked';
 
@@ -8,7 +8,7 @@ const updateHistory = (id:string, description:string, key:string) => {
     if (!id) return;
     document.title = description;
 
-    if (history.pushState && (!history.state || history.state.id != id)) {
+    if (history.pushState && (!history.state || history.state[key] != id)) {
         let qs = queryString(location.href);
         var url = splitOnFirst(location.href, '?')[0];
         qs[key] = id;
@@ -16,7 +16,7 @@ const updateHistory = (id:string, description:string, key:string) => {
         delete qs["expression"];
         delete qs["clear"];
         url = appendQueryString(url, qs);
-        history.pushState({ id, description }, description, url);
+        history.pushState({ gist: qs["gist"], collection: qs["collection"], description }, description, url);
         ReactGA.pageview(url);
     }
 };

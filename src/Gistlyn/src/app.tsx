@@ -977,8 +977,11 @@ if (qsClear === "state") {
 }
 
 window.onpopstate = e => {
-    if (!(e.state && e.state.id)) return;
-    store.dispatch({ type: "URL_CHANGE", url: e.state.id });
+    if (!e.state) return;
+    if (e.state.gist)
+        store.dispatch({ type: "URL_CHANGE", url: e.state.gist });
+    if (e.state.collection)
+        store.dispatch({ type: "URL_CHANGE", url: e.state.collection });
 };
 
 ReactDOM.render(

@@ -1,4 +1,4 @@
-System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marked'], function(exports_1, context_1) {
+System.register(['redux', './utils', 'servicestack-client', 'react-ga', 'marked'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var redux_1, utils_1, servicestack_client_1, react_ga_1, marked_1;
@@ -25,7 +25,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                 if (!id)
                     return;
                 document.title = description;
-                if (history.pushState && (!history.state || history.state.id != id)) {
+                if (history.pushState && (!history.state || history.state[key] != id)) {
                     var qs = servicestack_client_1.queryString(location.href);
                     var url = servicestack_client_1.splitOnFirst(location.href, '?')[0];
                     qs[key] = id;
@@ -33,7 +33,7 @@ System.register(['redux', './utils', './servicestack-client', 'react-ga', 'marke
                     delete qs["expression"];
                     delete qs["clear"];
                     url = servicestack_client_1.appendQueryString(url, qs);
-                    history.pushState({ id: id, description: description }, description, url);
+                    history.pushState({ gist: qs["gist"], collection: qs["collection"], description: description }, description, url);
                     react_ga_1.default.pageview(url);
                 }
             };

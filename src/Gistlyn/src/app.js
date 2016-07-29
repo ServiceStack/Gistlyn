@@ -740,9 +740,12 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                 localStorage.clear();
             }
             window.onpopstate = function (e) {
-                if (!(e.state && e.state.id))
+                if (!e.state)
                     return;
-                state_1.store.dispatch({ type: "URL_CHANGE", url: e.state.id });
+                if (e.state.gist)
+                    state_1.store.dispatch({ type: "URL_CHANGE", url: e.state.gist });
+                if (e.state.collection)
+                    state_1.store.dispatch({ type: "URL_CHANGE", url: e.state.collection });
             };
             ReactDOM.render(React.createElement(react_redux_1.Provider, {store: state_1.store}, React.createElement(App, null)), document.getElementById("app"));
         }
