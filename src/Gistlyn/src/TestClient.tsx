@@ -3,7 +3,7 @@
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
 
-import { JsonServiceClient, IReturn, nameOf } from './servicestack-client';
+import { JsonServiceClient, IReturn, nameOf } from 'servicestack-client';
 import { Hello, HelloResponse } from './Gistlyn.dtos';
 
 export class a implements IReturn<HelloResponse>

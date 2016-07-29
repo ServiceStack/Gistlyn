@@ -109,7 +109,7 @@ namespace Gistlyn.ServiceInterface
             JsConfig.EmitCamelCaseNames = true;
             appHost.Config.AddRedirectParamsToQueryString = true;
 
-            appHost.Plugins.Add(new ServerEventsFeature());
+            appHost.Plugins.Add(new ServerEventsFeature { ValidateUserAddress = false });
 
             appHost.Plugins.Add(new CorsFeature());
 

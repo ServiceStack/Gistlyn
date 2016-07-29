@@ -6,7 +6,7 @@ import ReactGA from 'react-ga';
 import { Provider, connect } from 'react-redux';
 import { reduxify, UA, getSortedFileNames, Config, StateKey, GistCacheKey, GistTemplates, FileNames, IGistMeta, IGistFile, addClientPackages } from './utils';
 import { store } from './state';
-import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnFirst, splitOnLast, humanize, dateFmt, timeFmt12 } from './servicestack-client';
+import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnFirst, splitOnLast, humanize, dateFmt, timeFmt12 } from 'servicestack-client';
 import { JsonViewer } from './json-viewer';
 
 import SaveAsDialog from './SaveAsDialog';

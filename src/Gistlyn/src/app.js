@@ -1,5 +1,5 @@
 /// <reference path='../typings/index.d.ts'/>
-System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './state', './servicestack-client', './json-viewer', './SaveAsDialog', './EditGistDialog', './ShortcutsDialog', './ConsoleViewerDialog', './AddServiceStackReferenceDialog', './InadequateBrowserDialog', './Console', './Collections', './Editor', './Gistlyn.dtos'], function(exports_1, context_1) {
+System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './state', 'servicestack-client', './json-viewer', './SaveAsDialog', './EditGistDialog', './ShortcutsDialog', './ConsoleViewerDialog', './AddServiceStackReferenceDialog', './InadequateBrowserDialog', './Console', './Collections', './Editor', './Gistlyn.dtos'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {

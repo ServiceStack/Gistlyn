@@ -1,5 +1,5 @@
 ﻿import * as React from 'react';
-import { queryString } from './servicestack-client';
+import { queryString } from 'servicestack-client';
 import { UA, getSortedFileNames, IGistFile } from './utils';
 
 import CodeMirror from 'react-codemirror';

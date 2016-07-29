@@ -1,5 +1,5 @@
 ﻿import * as React from 'react';
-import { splitOnFirst, splitOnLast, queryString, combinePaths, appendQueryString } from './servicestack-client';
+import { splitOnFirst, splitOnLast, queryString, combinePaths, appendQueryString } from 'servicestack-client';
 import { GistTemplates } from "./utils";
 
 export default class AddServiceStackReferenceDialog extends React.Component<any, any> {

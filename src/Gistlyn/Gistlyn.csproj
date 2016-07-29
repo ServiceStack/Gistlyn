@@ -165,7 +165,6 @@
     <TypeScriptCompile Include="platform.ts" />
     <TypeScriptCompile Include="src\Gistlyn.dtos.ts" />
     <TypeScriptCompile Include="src\json-viewer.tsx" />
-    <TypeScriptCompile Include="src\servicestack-client.ts" />
     <TypeScriptCompile Include="src\state.ts" />
     <TypeScriptCompile Include="src\TestClient.tsx" />
     <TypeScriptCompile Include="src\utils.ts" />
