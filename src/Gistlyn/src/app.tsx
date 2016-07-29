@@ -732,8 +732,6 @@ class App extends React.Component<any, any> {
         MorePopup.push((
             <div onClick={e => this.props.changeGist(GistTemplates.NewPrivateGist) }>New Private Gist</div>));
         MorePopup.push((
-            <div onClick={e => this.props.showDialog("console-viewer") }>Console Viewer</div>));
-        MorePopup.push((
             <div onClick={e => this.props.showDialog("shortcuts") }>Shortcuts</div>));
         MorePopup.push((
             <div onClick={e => location.href = "https://github.com/ServiceStack/Gistlyn/issues"}>Send Feedback</div>));
@@ -825,7 +823,7 @@ class App extends React.Component<any, any> {
                 <div id="content">
                     <div id="ide">
                         { authUsername
-                            ? (<div id="editor-menu" style={{ position: "absolute", top: 46, left: "50%", margin: "0 0 0 -23px", color: "#fff", cursor: "pointer", zIndex: 3 }}>
+                            ? (<div id="editor-menu">
                                 <i className="material-icons" onClick={e => this.showPopup(e, this.editorPopup) }>more_vert</i>
                                </div>)
                             : null }
@@ -880,6 +878,8 @@ class App extends React.Component<any, any> {
                             </div>)
                             : null }
                     </div>
+                    <span id="btnConsole" className="mega-octicon octicon-terminal" title="Console Viewer"
+                          onClick={e => this.props.showDialog("console-viewer") }></span>
                     <div id="more-menu" style={{ position: "absolute", right: 5, bottom: 5, color: "#fff", cursor: "pointer" }}>
                         <i className="material-icons" onClick={e => this.showPopup(e, this.morePopup) }>more_vert</i>
                     </div>
@@ -888,7 +888,7 @@ class App extends React.Component<any, any> {
                     </div>
                 </div>
 
-                <div id="run" className={main == null ? "disabled" : ""} onClick={e => !isScriptRunning ? this.run() : this.cancel() }>
+                <div id="run" className={"noselect" + (main == null ? " disabled" : "")} onClick={e => !isScriptRunning ? this.run() : this.cancel() }>
                     {main != null
                         ? (!isScriptRunning
                             ? <i className="material-icons" title="run">play_circle_outline</i>
@@ -923,16 +923,21 @@ class App extends React.Component<any, any> {
 }
 
 const qs = queryString(location.href);
+var activeFileName = qs["activeFileName"];
 
 var stateJson = localStorage.getItem(StateKey);
 var state = null;
 if (stateJson) {
     try {
         state = JSON.parse(stateJson);
+        if (activeFileName) {
+            state.activeFileName = activeFileName;
+        }
+
         store.dispatch({ type: "LOAD", state });
 
         if (!qs["gist"] && state.gist != null && !(state.files || state.meta)) {
-            store.dispatch({ type: "GIST_CHANGE", gist: state.gist });
+            store.dispatch({ type: "GIST_CHANGE", gist: state.gist, options: { activeFileName } });
         }
 
     } catch (e) {
@@ -949,7 +954,7 @@ if (qsAddRef) {
 else {
     var qsGist = qs["gist"] || GistTemplates.NewGist;
     if (qsGist != (state && state.gist) || (state && !state.meta)) {
-        store.dispatch({ type: "GIST_CHANGE", gist: qsGist });
+        store.dispatch({ type: "GIST_CHANGE", gist: qsGist, options: { activeFileName } });
     }
 }
 

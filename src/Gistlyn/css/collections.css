@@ -63,6 +63,9 @@
 #livelist a:hover {
     text-decoration: underline;
 }
+.ipad #livelist {
+    display: none;
+}
 
 #markdown {
     line-height: 20px;

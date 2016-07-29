@@ -147,6 +147,19 @@ html,body,#app,#body {
     height: 100%;
 }
 
+#ide #editor-menu {
+    position: absolute;
+    top: 46px;
+    left: 50%;
+    margin: 0 0 0 -23px;
+    color: #ffffff;
+    cursor: pointer;
+    z-index: 3;    
+}
+.ipad #ide #editor-menu {
+    top: 42px;
+}
+
 #preview {
     flex: 1;
     background: #F7F7F7;
@@ -186,6 +199,18 @@ html,body,#app,#body {
     cursor: pointer;
 }
 #more i:hover {
+    color: #ddd;
+}
+
+#btnConsole {
+    position: absolute;
+    color: #fff;
+    right: 45px;
+    bottom: 7px;
+    font-size: 24px;
+    cursor: pointer;
+}
+#btnConsole:hover {
     color: #ddd;
 }
 

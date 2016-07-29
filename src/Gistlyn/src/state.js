@@ -162,7 +162,7 @@ System.register(['redux', './utils', 'servicestack-client', 'react-ga', 'marked'
                         var meta = gist.meta;
                         var files = gist.files;
                         updateHistory(meta.id, meta.description, "gist");
-                        store.dispatch({ type: 'GIST_LOAD', meta: meta, files: files, activeFileName: utils_1.getSortedFileNames(files)[0] });
+                        store.dispatch({ type: 'GIST_LOAD', meta: meta, files: files, activeFileName: options.activeFileName || utils_1.getSortedFileNames(files)[0] });
                     }
                     else {
                         fetch(createGistRequest(state, action.gist))

@@ -156,7 +156,7 @@ const stateSideEffects = store => next => action => {
             const meta = gist.meta as IGistMeta;
             const files = gist.files;
             updateHistory(meta.id, meta.description, "gist");
-            store.dispatch({ type: 'GIST_LOAD', meta, files, activeFileName: getSortedFileNames(files)[0] });
+            store.dispatch({ type: 'GIST_LOAD', meta, files, activeFileName: options.activeFileName || getSortedFileNames(files)[0] });
         } else {
             fetch(createGistRequest(state, action.gist))
                 .then((res) => {
