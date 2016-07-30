@@ -147,6 +147,19 @@ html,body,#app,#body {
     height: 100%;
 }
 
+#ide #editor-menu {
+    position: absolute;
+    top: 46px;
+    left: 50%;
+    margin: 0 0 0 -23px;
+    color: #ffffff;
+    cursor: pointer;
+    z-index: 3;    
+}
+.ipad #ide #editor-menu {
+    top: 42px;
+}
+
 #preview {
     flex: 1;
     background: #F7F7F7;
@@ -189,20 +202,32 @@ html,body,#app,#body {
     color: #ddd;
 }
 
+#btnConsole {
+    position: absolute;
+    color: #fff;
+    right: 45px;
+    bottom: 7px;
+    font-size: 24px;
+    cursor: pointer;
+}
+#btnConsole:hover {
+    color: #ddd;
+}
+
 #run {
     z-index: 6; /* code-mirror */
     position: absolute;
     left: 50%;
     top: 50%;
     width: 64px;
-    margin: -60px 0 0 -30px;
+    margin: -60px 0 0 -25px;
     cursor: pointer;
 }
 #run.disabled {
     cursor: auto;
 }
 #run i {
-    font-size: 60px;
+    font-size: 50px;
     color: #01215A;
 }
 #run i:hover {
@@ -211,6 +236,14 @@ html,body,#app,#body {
 #run.disabled i, #run.disabled i:hover {
     color: #999;
 }
+
+.ipad #run i {
+    font-size: 40px;
+}
+.ipad #run {
+    margin: -45px 0 0 -20px;
+}
+
 
 .alert {
     padding: 15px;
@@ -319,7 +352,7 @@ html,body,#app,#body {
 
 /*jsonviewer*/
 #expression-result {
-    padding: 12px 0 12px 24px;
+    padding: 12px 0 12px 22px;
 }
 #expression-result table {
     width: auto;

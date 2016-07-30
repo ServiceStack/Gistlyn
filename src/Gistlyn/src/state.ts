@@ -15,6 +15,7 @@ const updateHistory = (id:string, description:string, key:string) => {
         delete qs["s"]; //remove ?s=1 from /auth
         delete qs["expression"];
         delete qs["clear"];
+        delete qs["activeFileName"];
         url = appendQueryString(url, qs);
         history.pushState({ gist: qs["gist"], collection: qs["collection"], description }, description, url);
         ReactGA.pageview(url);
@@ -225,6 +226,7 @@ const stateSideEffects = store => next => action => {
 };
 
 const defaults = {
+    version: 1,
     gist: null,
     activeSub: null,
     meta: null,

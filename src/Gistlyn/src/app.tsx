@@ -632,7 +632,8 @@ class App extends React.Component<any, any> {
 
         const showCollection = this.props.showCollection && this.props.collection && this.props.collection.html != null;
         if (showCollection) {
-            Preview.push(<Collections gistStats={this.props.gistStats} excludeGists={GistTemplates.Gists} collection={this.props.collection}
+            Preview.push(<Collections collection={this.props.collection}
+                gistStats={this.props.gistStats} excludeGists={GistTemplates.Gists}
                 showLiveLists={this.props.collection.id === GistTemplates.HomeCollection} authUsername={authUsername}
                 changeGist={id => this.props.changeGist(id) }
                 changeCollection={(id, reload) => this.props.changeCollection(id, reload) } />
@@ -802,7 +803,7 @@ class App extends React.Component<any, any> {
 
                         </div>
                         { !authUsername
-                            ? (<div id="sign-in" style={{ position: "absolute", right: 5 }}>
+                            ? (<div id="sign-in" style={{ position: "absolute", right: 5, top:4 }}>
                                    <a href="/auth/github" style={{ color: "#fff", textDecoration: "none" }}>
                                        <span style={{ whiteSpace: "nowrap", fontSize: 14 }}>sign-in</span>
                                        <span style={{ verticalAlign: "sub", margin: "0 0 0 10px" }} className="mega-octicon octicon-mark-github" title="Sign in with GitHub"></span>
@@ -878,8 +879,8 @@ class App extends React.Component<any, any> {
                             </div>)
                             : null }
                     </div>
-                    <span id="btnConsole" className="mega-octicon octicon-terminal" title="Console Viewer"
-                          onClick={e => this.props.showDialog("console-viewer") }></span>
+                    <span id="btnConsole" className="lnk mega-octicon octicon-terminal" title="Console Viewer"
+                        onClick={e => this.props.showDialog("console-viewer") }></span>
                     <div id="more-menu" style={{ position: "absolute", right: 5, bottom: 5, color: "#fff", cursor: "pointer" }}>
                         <i className="material-icons" onClick={e => this.showPopup(e, this.morePopup) }>more_vert</i>
                     </div>

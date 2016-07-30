@@ -368,6 +368,9 @@ span.CodeMirror-selectedtext { background: none; }
     color: black;
     height: 100%;
 }
+.ipad .CodeMirror {
+    font-size: 8pt;
+}
 
 .cm-s-default span.cm-punctuation { color: green; }
 .cm-s-default span.cm-operator { color: purple; }

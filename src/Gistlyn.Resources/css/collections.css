@@ -63,6 +63,9 @@
 #livelist a:hover {
     text-decoration: underline;
 }
+.ipad #livelist {
+    display: none;
+}
 
 #markdown {
     line-height: 20px;
@@ -71,11 +74,18 @@
     padding: 0 0 0 30px;
     max-width: 750px;
 }
+.ipad #markdown {
+    font-size: 90%;
+}
 #markdown h1, #markdown h2, #markdown h3, #markdown h4, #markdown h5, #markdown h6 {
     margin-top: 24px;
     margin-bottom: 16px;
     font-weight: 600;
     line-height: 1.25;
+}
+.ipad #markdown h1, .ipad #markdown h2, .ipad #markdown h3, .ipad #markdown h4, .ipad #markdown h5, .ipad #markdown h6 {
+    margin-top: 18px;
+    margin-bottom: 12px;
 }
 #markdown h1, #markdown h2 {
     padding-bottom: 0.3em;

@@ -32,6 +32,7 @@ System.register(['redux', './utils', 'servicestack-client', 'react-ga', 'marked'
                     delete qs["s"]; //remove ?s=1 from /auth
                     delete qs["expression"];
                     delete qs["clear"];
+                    delete qs["activeFileName"];
                     url = servicestack_client_1.appendQueryString(url, qs);
                     history.pushState({ gist: qs["gist"], collection: qs["collection"], description: description }, description, url);
                     react_ga_1.default.pageview(url);
@@ -235,6 +236,7 @@ System.register(['redux', './utils', 'servicestack-client', 'react-ga', 'marked'
                 return result;
             }; }; };
             defaults = {
+                version: 1,
                 gist: null,
                 activeSub: null,
                 meta: null,
