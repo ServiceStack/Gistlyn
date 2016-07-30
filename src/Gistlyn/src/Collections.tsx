@@ -59,13 +59,14 @@ export default class Collections extends React.Component<any, any> {
                         if (qs["gist"] || qs["collection"]) {
                             e.preventDefault();
                             if (qs["gist"])
-                                this.props.changeGist(qs["gist"]);
-                            else if (qs["collection"])
+                                this.props.changeGist(qs["gist"], { activeFileName: qs["activeFileName"] });
+                            if (qs["collection"])
                                 this.props.changeCollection(qs["collection"], true);
                         }
                     }
                 } }>
                 <div id="collection-header">
+                    <i id="btnHome" className="material-icons" onClick={e => this.props.onHome()} title="Home">home</i>
                     {this.props.collection.description || "Collections"}
                 </div>
                 <div id="collection-body">

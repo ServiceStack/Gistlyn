@@ -202,16 +202,22 @@ html,body,#app,#body {
     color: #ddd;
 }
 
-#btnConsole {
+#footer .lnk {
     position: absolute;
-    color: #fff;
-    right: 45px;
     bottom: 7px;
     font-size: 24px;
     cursor: pointer;
 }
-#btnConsole:hover {
+#footer .lnk:hover {
     color: #ddd;
+}
+#btnConsole {
+    color: #fff;
+    right: 45px;
+}
+#btnSnapshot {
+    color: #fff;
+    right: 90px;
 }
 
 #run {

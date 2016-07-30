@@ -635,7 +635,8 @@ class App extends React.Component<any, any> {
             Preview.push(<Collections collection={this.props.collection}
                 gistStats={this.props.gistStats} excludeGists={GistTemplates.Gists}
                 showLiveLists={this.props.collection.id === GistTemplates.HomeCollection} authUsername={authUsername}
-                changeGist={id => this.props.changeGist(id) }
+                onHome={e => this.props.urlChanged(GistTemplates.HomeCollection) }
+                changeGist={(id, options) => this.props.changeGist(id, options) }
                 changeCollection={(id, reload) => this.props.changeCollection(id, reload) } />
             );
         } else if (this.props.showCollection) { //Still loading
