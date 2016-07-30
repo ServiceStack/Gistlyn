@@ -13,8 +13,9 @@ const updateHistory = (id:string, description:string, key:string) => {
         var url = splitOnFirst(location.href, '?')[0];
         qs[key] = id;
         delete qs["s"]; //remove ?s=1 from /auth
-        delete qs["expression"];
         delete qs["clear"];
+        delete qs["snapshot"];
+        delete qs["expression"];
         delete qs["activeFileName"];
         url = appendQueryString(url, qs);
         history.pushState({ gist: qs["gist"], collection: qs["collection"], description }, description, url);
@@ -23,6 +24,7 @@ const updateHistory = (id:string, description:string, key:string) => {
 };
 
 var collectionsCache = {};
+var snapshotCache = {};
 
 const createGistRequest = (state, gist) => {
     const authUsername = state.activeSub && parseInt(state.activeSub.userId) > 0
@@ -124,6 +126,8 @@ const stateSideEffects = store => next => action => {
             store.dispatch({ type: "GIST_CHANGE", gist: id });
         } else if (collectionsCache[id]) {
             store.dispatch({ type: "COLLECTION_CHANGE", collection: { id }, showCollection:true });
+        } else if (snapshotCache[id]) {
+            store.dispatch({ type: "SNAPSHOT_LOAD", snapshot: snapshotCache[id] });
         } else {
             fetch(createGistRequest(state, id))
                 .then((res) => {
@@ -136,9 +140,18 @@ const stateSideEffects = store => next => action => {
                             if (r.files[FileNames.GistMain]) {
                                 localStorage.setItem(GistCacheKey(id), serializeGist(meta, r.files));
                                 store.dispatch({ type: "GIST_CHANGE", gist: id });
-                            } else if (r.files[FileNames.CollectionIndex]) {
-                                collectionsCache[meta.id] = createCollection(store, meta, r.files[FileNames.CollectionIndex]);
-                                store.dispatch({ type: "COLLECTION_CHANGE", collection: { id }, showCollection: true });
+                            } else if (r.files[FileNames.Snapshot]) {
+                                const file = r.files[FileNames.Snapshot];
+                                const json = file && file.content;
+                                try {
+                                    if (json) {
+                                        const snapshot = snapshotCache[meta.id] = JSON.parse(json);
+                                        store.dispatch({ type: "SNAPSHOT_LOAD", snapshot });
+                                    } else throw "Invalid Snapshot";
+                                } catch (e) {
+                                    console.log("ERROR loading snapshot:", e, json);
+                                    store.dispatch({ type: 'ERROR_RAISE', error: { message: `Gist with hash '${id}' is not a valid snapshot` } });
+                                }
                             } else {
                                 store.dispatch({ type: 'ERROR_RAISE', error: { message: `Gist with hash '${id}' has no ${FileNames.GistMain} or ${FileNames.CollectionIndex}` } });
                             }
@@ -245,6 +258,7 @@ const defaults = {
     gistStats: {},
     dirty: false,
     collection: null,
+    snapshot: null,
     showCollection: false
 };
 
@@ -306,6 +320,8 @@ export let store = createStore(
                 return Object.assign({}, state, { collection: action.collection, showCollection: action.showCollection, url: action.collection && action.collection.id });
             case 'COLLECTION_LOAD':
                 return Object.assign({}, state, { collection: action.collection, showCollection: true });
+            case 'SNAPSHOT_LOAD':
+                return Object.assign({}, state, action.snapshot, { activeSub: state.activeSub });
             case 'GISTSTAT_INCR':
                 const gistStats = state.gistStats;
                 const existingStat = gistStats[action.gist];

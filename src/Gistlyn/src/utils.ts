@@ -18,7 +18,8 @@ export const GistTemplates = {
 export const FileNames = {
     GistMain: "main.cs",
     GistPackages: "packages.config",
-    CollectionIndex: "index.md"
+    CollectionIndex: "index.md",
+    Snapshot: "snapshot.json"
 };
 
 export interface IGistMeta {

@@ -62,6 +62,28 @@ export default class ShortcutsDialog extends React.Component<any, any> {
                             </tr>
                             <tr>
                                 <th>
+                                    <b>&lt;Alt&gt;</b>
+                                    <span> + </span>
+                                    <b>&lt;S&gt;</b>
+                                    <i>:</i>
+                                </th>
+                                <td>
+                                    Take Snapshot
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <b>&lt;Alt&gt;</b>
+                                    <span> + </span>
+                                    <b>&lt;C&gt;</b>
+                                    <i>:</i>
+                                </th>
+                                <td>
+                                    Console Viewer
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
                                     <b>&lt;Ctrl&gt;</b>
                                     <span> + </span>
                                     <b>&lt;Left&gt;</b>

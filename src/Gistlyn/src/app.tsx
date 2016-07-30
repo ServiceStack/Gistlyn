@@ -12,9 +12,10 @@ import { JsonViewer } from './json-viewer';
 import SaveAsDialog from './SaveAsDialog';
 import EditGistDialog from './EditGistDialog';
 import ShortcutsDialog from './ShortcutsDialog';
+import TakeSnapshotDialog from './TakeSnapshotDialog';
 import ConsoleViewerDialog from './ConsoleViewerDialog';
-import AddServiceStackReferenceDialog from './AddServiceStackReferenceDialog';
 import InadequateBrowserDialog from './InadequateBrowserDialog';
+import AddServiceStackReferenceDialog from './AddServiceStackReferenceDialog';
 import Console from './Console';
 import Collections from './Collections';
 import Editor from './Editor';
@@ -30,6 +31,7 @@ import {
 
 const ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
 const ScriptStatusError = ["Cancelled", "CompiledWithErrors", "ThrowedException"];
+var capturedSnapshot = null;
 
 ReactGA.initialize("UA-80898009-1");
 
@@ -555,11 +557,15 @@ class App extends React.Component<any, any> {
                     : nextFileIndex % keys.length;
                 this.props.selectFileName(keys[nextFileIndex]);
             } else if (e.keyCode == 13) {
-                this.run();
-            } else if (e.key === "s") {
-                this.save();
+                this.onShortcut("Ctrl-Enter");
+            } else if (e.key) {
                 e.preventDefault();
+                this.onShortcut("Ctrl-" + e.key.toUpperCase());
             }
+        }
+        else if (e.altKey && e.key) {
+            e.preventDefault();
+            this.onShortcut("Alt-" + e.key.toUpperCase());
         }
 
         if (e.key === "?") {
@@ -567,6 +573,29 @@ class App extends React.Component<any, any> {
         }
         else if (e.keyCode == 27) { //ESC
             this.props.showDialog(null);
+        }
+    }
+
+    onShortcut(pattern: string) {
+        switch (pattern) {
+            case "Ctrl-Enter":
+                const scriptRunning = ScriptStatusRunning.indexOf(this.props.scriptStatus) >= 0;
+                if (!scriptRunning)
+                    this.run();
+                else
+                    this.cancel();
+                break;
+            case "Ctrl-S":
+                this.save();
+                break;
+            case "Alt-S":
+                capturedSnapshot = store.getState();
+                this.props.showDialog("take-snapshot");
+                break;
+            case "Alt-C":
+                capturedSnapshot = store.getState();
+                this.props.showDialog("console-viewer");
+                break;
         }
     }
 
@@ -845,8 +874,7 @@ class App extends React.Component<any, any> {
                             updateSource={(fileName, src) => this.props.updateSource(fileName, src) }
                             onRenameFile={(fileName, e) => this.handleRenameFile(fileName, e) }
                             onCreateFile={e => this.handleCreateFile(e) }
-                            onRun={() => this.run() }
-                            onSave={() => { this.save() }}/>
+                            onShortcut={keyPattern => this.onShortcut(keyPattern)} />
                         <div id="preview">
                             {Preview}
                         </div>
@@ -880,11 +908,19 @@ class App extends React.Component<any, any> {
                             </div>)
                             : null }
                     </div>
+
+                    { authUsername ? (
+                        <i id="btnSnapshot" className="lnk material-icons" title="Take Snapshot"
+                            onClick={e =>
+                                (capturedSnapshot = store.getState()) && this.props.showDialog("take-snapshot") }>camera_alt</i>) : null }
+
                     <span id="btnConsole" className="lnk mega-octicon octicon-terminal" title="Console Viewer"
                         onClick={e => this.props.showDialog("console-viewer") }></span>
+
                     <div id="more-menu" style={{ position: "absolute", right: 5, bottom: 5, color: "#fff", cursor: "pointer" }}>
                         <i className="material-icons" onClick={e => this.showPopup(e, this.morePopup) }>more_vert</i>
                     </div>
+
                     <div id="popup-more" className="popup" ref={e => this.morePopup = e } style={{ position: "absolute", bottom: 42, right: 0 }}>
                         {MorePopup}
                     </div>
@@ -917,6 +953,11 @@ class App extends React.Component<any, any> {
                     ? <AddServiceStackReferenceDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null) }
                         onAddReference={this.handleAddReference.bind(this) } />
                     : null}
+                { capturedSnapshot && this.props.dialog === "take-snapshot"
+                    ? <TakeSnapshotDialog dialogRef={e => this.dialog = e} description={`Snapshot ${timeFmt12()}`}
+                        snapshot={ Object.assign({}, capturedSnapshot, { activeSub: null }) }
+                        onHide={() => this.props.showDialog(null) && (capturedSnapshot = null) } />
+                    : null}
 
                 <div id="sig">made with <span>{String.fromCharCode(10084)}</span> by <a target="_blank" href="https://servicestack.net">ServiceStack</a></div>
             </div>
@@ -946,6 +987,11 @@ if (stateJson) {
         console.log("ERROR loading state:", e, stateJson);
         localStorage.removeItem(StateKey);
     }
+}
+
+var qsSnapshot = qs["snapshot"];
+if (qsSnapshot) {
+    store.dispatch({ type: "URL_CHANGE", url: qsSnapshot });
 }
 
 var qsAddRef = qs["AddServiceStackReference"];

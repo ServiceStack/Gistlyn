@@ -28,10 +28,16 @@ export default class Editor extends React.Component<any, any> {
                         cm.setOption("fullScreen", false);
                 },
                 "Ctrl-Enter": (cm) => {
-                    this.props.onRun();
+                    this.props.onShortcut("Ctrl-Enter");
                 },
                 "Ctrl-S": (cm) => {
-                    this.props.onSave();
+                    this.props.onShortcut("Ctrl-S");
+                },
+                "Alt-S": (cm) => {
+                    this.props.onShortcut("Alt-S");
+                },
+                "Alt-C": (cm) => {
+                    this.props.onShortcut("Alt-C");
                 }
             }
         };

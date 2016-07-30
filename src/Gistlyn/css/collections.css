@@ -35,9 +35,6 @@
     margin: -2px 6px 0 -5px;
     cursor: pointer;
 }
-#btnHome:hover {
-    color: #ddd;
-}
 
 #collection-body {
     overflow-y: auto;
@@ -66,7 +63,7 @@
     display: block;
     text-decoration: none;
     color: #444;
-    width: 240px;
+    width: 200px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;

@@ -1,5 +1,5 @@
 /// <reference path='../typings/index.d.ts'/>
-System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './state', 'servicestack-client', './json-viewer', './SaveAsDialog', './EditGistDialog', './ShortcutsDialog', './ConsoleViewerDialog', './AddServiceStackReferenceDialog', './InadequateBrowserDialog', './Console', './Collections', './Editor', './Gistlyn.dtos'], function(exports_1, context_1) {
+System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './state', 'servicestack-client', './json-viewer', './SaveAsDialog', './EditGistDialog', './ShortcutsDialog', './TakeSnapshotDialog', './ConsoleViewerDialog', './InadequateBrowserDialog', './AddServiceStackReferenceDialog', './Console', './Collections', './Editor', './Gistlyn.dtos'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -13,8 +13,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
         else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
-    var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, SaveAsDialog_1, EditGistDialog_1, ShortcutsDialog_1, ConsoleViewerDialog_1, AddServiceStackReferenceDialog_1, InadequateBrowserDialog_1, Console_1, Collections_1, Editor_1, Gistlyn_dtos_1;
-    var ScriptStatusRunning, ScriptStatusError, statusToError, client, sse, App, qs, activeFileName, stateJson, state, e, qsAddRef, qsGist, qsCollection, qsExpression, qsClear;
+    var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, SaveAsDialog_1, EditGistDialog_1, ShortcutsDialog_1, TakeSnapshotDialog_1, ConsoleViewerDialog_1, InadequateBrowserDialog_1, AddServiceStackReferenceDialog_1, Console_1, Collections_1, Editor_1, Gistlyn_dtos_1;
+    var ScriptStatusRunning, ScriptStatusError, capturedSnapshot, statusToError, client, sse, App, qs, activeFileName, stateJson, state, e, qsSnapshot, qsAddRef, qsGist, qsCollection, qsExpression, qsClear;
     function evalExpression(gist, scriptId, expr) {
         if (!expr)
             return;
@@ -74,14 +74,17 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
             function (ShortcutsDialog_1_1) {
                 ShortcutsDialog_1 = ShortcutsDialog_1_1;
             },
+            function (TakeSnapshotDialog_1_1) {
+                TakeSnapshotDialog_1 = TakeSnapshotDialog_1_1;
+            },
             function (ConsoleViewerDialog_1_1) {
                 ConsoleViewerDialog_1 = ConsoleViewerDialog_1_1;
             },
-            function (AddServiceStackReferenceDialog_1_1) {
-                AddServiceStackReferenceDialog_1 = AddServiceStackReferenceDialog_1_1;
-            },
             function (InadequateBrowserDialog_1_1) {
                 InadequateBrowserDialog_1 = InadequateBrowserDialog_1_1;
+            },
+            function (AddServiceStackReferenceDialog_1_1) {
+                AddServiceStackReferenceDialog_1 = AddServiceStackReferenceDialog_1_1;
             },
             function (Console_1_1) {
                 Console_1 = Console_1_1;
@@ -98,6 +101,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
         execute: function() {
             ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
             ScriptStatusError = ["Cancelled", "CompiledWithErrors", "ThrowedException"];
+            capturedSnapshot = null;
             react_ga_1.default.initialize("UA-80898009-1");
             if (utils_1.UA.nosse) {
                 react_ga_1.default.event({ category: 'error', action: 'load', label: "nosse" });
@@ -485,18 +489,44 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                             this.props.selectFileName(keys[nextFileIndex]);
                         }
                         else if (e.keyCode == 13) {
-                            this.run();
+                            this.onShortcut("Ctrl-Enter");
                         }
-                        else if (e.key === "s") {
-                            this.save();
+                        else if (e.key) {
                             e.preventDefault();
+                            this.onShortcut("Ctrl-" + e.key.toUpperCase());
                         }
+                    }
+                    else if (e.altKey && e.key) {
+                        e.preventDefault();
+                        this.onShortcut("Alt-" + e.key.toUpperCase());
                     }
                     if (e.key === "?") {
                         this.props.showDialog("shortcuts");
                     }
                     else if (e.keyCode == 27) {
                         this.props.showDialog(null);
+                    }
+                };
+                App.prototype.onShortcut = function (pattern) {
+                    switch (pattern) {
+                        case "Ctrl-Enter":
+                            var scriptRunning = ScriptStatusRunning.indexOf(this.props.scriptStatus) >= 0;
+                            if (!scriptRunning)
+                                this.run();
+                            else
+                                this.cancel();
+                            break;
+                        case "Ctrl-S":
+                            this.save();
+                            break;
+                        case "Alt-S":
+                            capturedSnapshot = state_1.store.getState();
+                            this.props.showDialog("take-snapshot");
+                            break;
+                        case "Alt-C":
+                            capturedSnapshot = state_1.store.getState();
+                            this.props.showDialog("console-viewer");
+                            break;
                     }
                 };
                 App.prototype.handleAddReference = function (baseUrl, fileName, content, requestDto, autorun) {
@@ -617,13 +647,15 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         ? (React.createElement("div", {id: "editor-menu"}, React.createElement("i", {className: "material-icons", onClick: function (e) { return _this.showPopup(e, _this.editorPopup); }}, "more_vert")))
                         : null, authUsername
                         ? (React.createElement("div", {id: "popup-editor", className: "popup", ref: function (e) { return _this.editorPopup = e; }, style: { position: "absolute", top: 76, left: "50%", margin: "0 0 0 -197px" }}, EditorPopup))
-                        : null, React.createElement(Editor_1.default, {files: files, isOwner: authUsername && meta && meta.owner_login === authUsername, activeFileName: this.props.activeFileName, editingFileName: this.props.editingFileName, selectFileName: function (fileName) { return _this.props.selectFileName(fileName); }, editFileName: function (fileName) { return _this.props.editFileName(fileName); }, showPopup: function (e, filesPopup) { return _this.showPopup(e, filesPopup); }, updateSource: function (fileName, src) { return _this.props.updateSource(fileName, src); }, onRenameFile: function (fileName, e) { return _this.handleRenameFile(fileName, e); }, onCreateFile: function (e) { return _this.handleCreateFile(e); }, onRun: function () { return _this.run(); }, onSave: function () { _this.save(); }}), React.createElement("div", {id: "preview"}, Preview))), React.createElement("div", {id: "footer-spacer"}), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "actions", style: { visibility: main ? "visible" : "hidden" }, className: "noselect"}, React.createElement("div", {id: "revert", onClick: function (e) { return _this.revertGist(e.shiftKey, e.ctrlKey); }}, React.createElement("i", {className: "material-icons"}, "undo"), React.createElement("p", null, "Revert Changes")), meta && meta.owner_login == authUsername
+                        : null, React.createElement(Editor_1.default, {files: files, isOwner: authUsername && meta && meta.owner_login === authUsername, activeFileName: this.props.activeFileName, editingFileName: this.props.editingFileName, selectFileName: function (fileName) { return _this.props.selectFileName(fileName); }, editFileName: function (fileName) { return _this.props.editFileName(fileName); }, showPopup: function (e, filesPopup) { return _this.showPopup(e, filesPopup); }, updateSource: function (fileName, src) { return _this.props.updateSource(fileName, src); }, onRenameFile: function (fileName, e) { return _this.handleRenameFile(fileName, e); }, onCreateFile: function (e) { return _this.handleCreateFile(e); }, onShortcut: function (keyPattern) { return _this.onShortcut(keyPattern); }}), React.createElement("div", {id: "preview"}, Preview))), React.createElement("div", {id: "footer-spacer"}), React.createElement("div", {id: "footer"}, React.createElement("div", {id: "actions", style: { visibility: main ? "visible" : "hidden" }, className: "noselect"}, React.createElement("div", {id: "revert", onClick: function (e) { return _this.revertGist(e.shiftKey, e.ctrlKey); }}, React.createElement("i", {className: "material-icons"}, "undo"), React.createElement("p", null, "Revert Changes")), meta && meta.owner_login == authUsername
                         ? (React.createElement("div", {id: "save", onClick: function (e) { return _this.saveGist(); }, className: this.props.dirty ? "" : "disabled"}, React.createElement("i", {className: "material-icons"}, "save"), React.createElement("p", null, "Save Gist")))
                         : (React.createElement("div", {id: "saveas", onClick: function (e) { return authUsername ? _this.saveGistAs() : _this.signIn(); }, title: !authUsername ? "Sign-in to save gists" : "Save a copy in your Github gists"}, React.createElement("span", {className: "octicon octicon-repo-forked", style: { margin: "3px 3px 0 0" }}), React.createElement("p", null, authUsername ? (shouldFork ? "Fork As" : "Save As") : "Sign-in to save"))), meta && meta.owner_login === authUsername && this.props.activeFileName &&
                         this.props.activeFileName !== utils_1.FileNames.GistMain &&
                         this.props.activeFileName !== utils_1.FileNames.GistPackages
                         ? (React.createElement("div", {id: "delete-file", onClick: function (e) { return confirm("Are you sure you want to delete '" + _this.props.activeFileName + "?") ? _this.deleteFile(_this.props.activeFileName) : null; }}, React.createElement("i", {className: "material-icons"}, "delete "), React.createElement("p", null, "Delete File")))
-                        : null), React.createElement("span", {id: "btnConsole", className: "lnk mega-octicon octicon-terminal", title: "Console Viewer", onClick: function (e) { return _this.props.showDialog("console-viewer"); }}), React.createElement("div", {id: "more-menu", style: { position: "absolute", right: 5, bottom: 5, color: "#fff", cursor: "pointer" }}, React.createElement("i", {className: "material-icons", onClick: function (e) { return _this.showPopup(e, _this.morePopup); }}, "more_vert")), React.createElement("div", {id: "popup-more", className: "popup", ref: function (e) { return _this.morePopup = e; }, style: { position: "absolute", bottom: 42, right: 0 }}, MorePopup)), React.createElement("div", {id: "run", className: "noselect" + (main == null ? " disabled" : ""), onClick: function (e) { return !isScriptRunning ? _this.run() : _this.cancel(); }}, main != null
+                        : null), authUsername ? (React.createElement("i", {id: "btnSnapshot", className: "lnk material-icons", title: "Take Snapshot", onClick: function (e) {
+                        return (capturedSnapshot = state_1.store.getState()) && _this.props.showDialog("take-snapshot");
+                    }}, "camera_alt")) : null, React.createElement("span", {id: "btnConsole", className: "lnk mega-octicon octicon-terminal", title: "Console Viewer", onClick: function (e) { return _this.props.showDialog("console-viewer"); }}), React.createElement("div", {id: "more-menu", style: { position: "absolute", right: 5, bottom: 5, color: "#fff", cursor: "pointer" }}, React.createElement("i", {className: "material-icons", onClick: function (e) { return _this.showPopup(e, _this.morePopup); }}, "more_vert")), React.createElement("div", {id: "popup-more", className: "popup", ref: function (e) { return _this.morePopup = e; }, style: { position: "absolute", bottom: 42, right: 0 }}, MorePopup)), React.createElement("div", {id: "run", className: "noselect" + (main == null ? " disabled" : ""), onClick: function (e) { return !isScriptRunning ? _this.run() : _this.cancel(); }}, main != null
                         ? (!isScriptRunning
                             ? React.createElement("i", {className: "material-icons", title: "run"}, "play_circle_outline")
                             : React.createElement("i", {className: "material-icons", title: "cancel script", style: { color: "#FF5252" }}, "cancel"))
@@ -637,6 +669,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         ? React.createElement(ConsoleViewerDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }, logs: this.props.logs, onClear: function () { return _this.props.clearConsole() && _this.props.showDialog(null); }})
                         : null, meta && this.props.dialog === "add-ss-ref"
                         ? React.createElement(AddServiceStackReferenceDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }, onAddReference: this.handleAddReference.bind(this)})
+                        : null, capturedSnapshot && this.props.dialog === "take-snapshot"
+                        ? React.createElement(TakeSnapshotDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, description: "Snapshot " + servicestack_client_1.timeFmt12(), snapshot: Object.assign({}, capturedSnapshot, { activeSub: null }), onHide: function () { return _this.props.showDialog(null) && (capturedSnapshot = null); }})
                         : null, React.createElement("div", {id: "sig"}, "made with ", React.createElement("span", null, String.fromCharCode(10084)), " by ", React.createElement("a", {target: "_blank", href: "https://servicestack.net"}, "ServiceStack"))));
                 };
                 App = __decorate([
@@ -708,6 +742,10 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     console.log("ERROR loading state:", e, stateJson);
                     localStorage.removeItem(utils_1.StateKey);
                 }
+            }
+            qsSnapshot = qs["snapshot"];
+            if (qsSnapshot) {
+                state_1.store.dispatch({ type: "URL_CHANGE", url: qsSnapshot });
             }
             qsAddRef = qs["AddServiceStackReference"];
             if (qsAddRef) {

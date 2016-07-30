@@ -154,6 +154,7 @@
     <TypeScriptCompile Include="src\app.tsx" />
     <TypeScriptCompile Include="src\Console.tsx" />
     <TypeScriptCompile Include="src\Collections.tsx" />
+    <TypeScriptCompile Include="src\TakeSnapshotDialog.tsx" />
     <TypeScriptCompile Include="src\InadequateBrowserDialog.tsx" />
     <TypeScriptCompile Include="src\Editor.tsx" />
     <TypeScriptCompile Include="src\AddServiceStackReferenceDialog.tsx" />

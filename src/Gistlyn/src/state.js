@@ -2,7 +2,7 @@ System.register(['redux', './utils', 'servicestack-client', 'react-ga', 'marked'
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var redux_1, utils_1, servicestack_client_1, react_ga_1, marked_1;
-    var updateHistory, collectionsCache, createGistRequest, createGistMeta, handleGistErrorResponse, parseMarkdownMeta, serializeGist, createCollection, stateSideEffects, defaults, preserveDefaults, store;
+    var updateHistory, collectionsCache, snapshotCache, createGistRequest, createGistMeta, handleGistErrorResponse, parseMarkdownMeta, serializeGist, createCollection, stateSideEffects, defaults, preserveDefaults, store;
     return {
         setters:[
             function (redux_1_1) {
@@ -30,8 +30,9 @@ System.register(['redux', './utils', 'servicestack-client', 'react-ga', 'marked'
                     var url = servicestack_client_1.splitOnFirst(location.href, '?')[0];
                     qs[key] = id;
                     delete qs["s"]; //remove ?s=1 from /auth
-                    delete qs["expression"];
                     delete qs["clear"];
+                    delete qs["snapshot"];
+                    delete qs["expression"];
                     delete qs["activeFileName"];
                     url = servicestack_client_1.appendQueryString(url, qs);
                     history.pushState({ gist: qs["gist"], collection: qs["collection"], description: description }, description, url);
@@ -39,6 +40,7 @@ System.register(['redux', './utils', 'servicestack-client', 'react-ga', 'marked'
                 }
             };
             collectionsCache = {};
+            snapshotCache = {};
             createGistRequest = function (state, gist) {
                 var authUsername = state.activeSub && parseInt(state.activeSub.userId) > 0
                     ? state.activeSub.displayName
@@ -128,6 +130,9 @@ System.register(['redux', './utils', 'servicestack-client', 'react-ga', 'marked'
                     else if (collectionsCache[id_1]) {
                         store.dispatch({ type: "COLLECTION_CHANGE", collection: { id: id_1 }, showCollection: true });
                     }
+                    else if (snapshotCache[id_1]) {
+                        store.dispatch({ type: "SNAPSHOT_LOAD", snapshot: snapshotCache[id_1] });
+                    }
                     else {
                         fetch(createGistRequest(state, id_1))
                             .then(function (res) {
@@ -142,9 +147,21 @@ System.register(['redux', './utils', 'servicestack-client', 'react-ga', 'marked'
                                         localStorage.setItem(utils_1.GistCacheKey(id_1), serializeGist(meta, r.files));
                                         store.dispatch({ type: "GIST_CHANGE", gist: id_1 });
                                     }
-                                    else if (r.files[utils_1.FileNames.CollectionIndex]) {
-                                        collectionsCache[meta.id] = createCollection(store, meta, r.files[utils_1.FileNames.CollectionIndex]);
-                                        store.dispatch({ type: "COLLECTION_CHANGE", collection: { id: id_1 }, showCollection: true });
+                                    else if (r.files[utils_1.FileNames.Snapshot]) {
+                                        var file = r.files[utils_1.FileNames.Snapshot];
+                                        var json = file && file.content;
+                                        try {
+                                            if (json) {
+                                                var snapshot = snapshotCache[meta.id] = JSON.parse(json);
+                                                store.dispatch({ type: "SNAPSHOT_LOAD", snapshot: snapshot });
+                                            }
+                                            else
+                                                throw "Invalid Snapshot";
+                                        }
+                                        catch (e) {
+                                            console.log("ERROR loading snapshot:", e, json);
+                                            store.dispatch({ type: 'ERROR_RAISE', error: { message: "Gist with hash '" + id_1 + "' is not a valid snapshot" } });
+                                        }
                                     }
                                     else {
                                         store.dispatch({ type: 'ERROR_RAISE', error: { message: "Gist with hash '" + id_1 + "' has no " + utils_1.FileNames.GistMain + " or " + utils_1.FileNames.CollectionIndex } });
@@ -255,6 +272,7 @@ System.register(['redux', './utils', 'servicestack-client', 'react-ga', 'marked'
                 gistStats: {},
                 dirty: false,
                 collection: null,
+                snapshot: null,
                 showCollection: false
             };
             preserveDefaults = function (state) { return ({
@@ -313,6 +331,8 @@ System.register(['redux', './utils', 'servicestack-client', 'react-ga', 'marked'
                         return Object.assign({}, state, { collection: action.collection, showCollection: action.showCollection, url: action.collection && action.collection.id });
                     case 'COLLECTION_LOAD':
                         return Object.assign({}, state, { collection: action.collection, showCollection: true });
+                    case 'SNAPSHOT_LOAD':
+                        return Object.assign({}, state, action.snapshot, { activeSub: state.activeSub });
                     case 'GISTSTAT_INCR':
                         var gistStats = state.gistStats;
                         var existingStat = gistStats[action.gist];

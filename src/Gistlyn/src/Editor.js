@@ -47,10 +47,16 @@ System.register(['react', './utils', 'react-codemirror', "jspm_packages/npm/code
                                     cm.setOption("fullScreen", false);
                             },
                             "Ctrl-Enter": function (cm) {
-                                _this.props.onRun();
+                                _this.props.onShortcut("Ctrl-Enter");
                             },
                             "Ctrl-S": function (cm) {
-                                _this.props.onSave();
+                                _this.props.onShortcut("Ctrl-S");
+                            },
+                            "Alt-S": function (cm) {
+                                _this.props.onShortcut("Alt-S");
+                            },
+                            "Alt-C": function (cm) {
+                                _this.props.onShortcut("Alt-C");
                             }
                         }
                     };

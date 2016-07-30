@@ -66,7 +66,8 @@ System.register(['react-redux'], function(exports_1, context_1) {
             exports_1("FileNames", FileNames = {
                 GistMain: "main.cs",
                 GistPackages: "packages.config",
-                CollectionIndex: "index.md"
+                CollectionIndex: "index.md",
+                Snapshot: "snapshot.json"
             });
             ua = navigator.userAgent;
             platform = navigator.platform.toLowerCase();
