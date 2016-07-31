@@ -20,7 +20,7 @@ namespace Gistlyn.AppMac
 		/// Base constructor requires a name and assembly to locate web service classes. 
 		/// </summary>
 		public AppHost()
-			: base("Gistlyn.AppMac", typeof(MyServices).Assembly) {}
+			: base("Gistlyn.AppMac", typeof(RunScriptService).Assembly) {}
 
 		/// <summary>
 		/// Application specific configuration
