@@ -46,8 +46,8 @@ MD apps\console\bin
 
 REM COPY /Y .\%STAGING%\%OUTPUTNAME% .\apps\
 COPY /Y .\%RELEASE%\*.* .\apps\console\bin\
-COPY .\Gistlyn.sh .\apps\console\
-COPY .\Gistlyn.bat .\apps\console\
-COPY .\Gistlyn.command .\apps\console\
+COPY .\Gistlyn-linux.sh .\apps\console\
+COPY .\Gistlyn-win.bat .\apps\console\
+COPY .\Gistlyn-osx.command .\apps\console\
 
 echo ------------- && echo  deployed to: .\wwwroot_build\apps\console && echo -------------

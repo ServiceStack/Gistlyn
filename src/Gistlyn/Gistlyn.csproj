@@ -224,9 +224,6 @@
     <None Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
-    <Content Include="wwwroot_build\Gistlyn.command" />
-    <Content Include="wwwroot_build\Gistlyn.sh" />
-    <None Include="wwwroot_build\Gistlyn.bat" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
