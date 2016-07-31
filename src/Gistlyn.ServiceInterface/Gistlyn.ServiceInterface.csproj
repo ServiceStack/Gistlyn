@@ -81,6 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppData.cs" />
+    <Compile Include="DebugService.cs" />
     <Compile Include="GitHubServices.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RunScriptService.Embed.cs" />
