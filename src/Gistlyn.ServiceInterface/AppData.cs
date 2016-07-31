@@ -108,6 +108,7 @@ namespace Gistlyn.ServiceInterface
             JsConfig.MaxDepth = 10;
             JsConfig.EmitCamelCaseNames = true;
             appHost.Config.AddRedirectParamsToQueryString = true;
+            appHost.Config.DebugMode = true;
 
             appHost.Plugins.Add(new ServerEventsFeature { ValidateUserAddress = false });
 

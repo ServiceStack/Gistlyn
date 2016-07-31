@@ -46,18 +46,10 @@ System.register(['react', './utils', 'react-codemirror', "jspm_packages/npm/code
                                 if (cm.getOption("fullScreen"))
                                     cm.setOption("fullScreen", false);
                             },
-                            "Ctrl-Enter": function (cm) {
-                                _this.props.onShortcut("Ctrl-Enter");
-                            },
-                            "Ctrl-S": function (cm) {
-                                _this.props.onShortcut("Ctrl-S");
-                            },
-                            "Alt-S": function (cm) {
-                                _this.props.onShortcut("Alt-S");
-                            },
-                            "Alt-C": function (cm) {
-                                _this.props.onShortcut("Alt-C");
-                            }
+                            "Ctrl-Enter": function (cm) { return _this.props.onShortcut("Ctrl-Enter"); },
+                            "Ctrl-S": function (cm) { return _this.props.onShortcut("Ctrl-S"); },
+                            "Alt-S": function (cm) { return _this.props.onShortcut("Alt-S"); },
+                            "Alt-C": function (cm) { return _this.props.onShortcut("Alt-C"); }
                         }
                     };
                     var source = "";

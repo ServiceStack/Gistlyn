@@ -147,6 +147,10 @@ System.register(['redux', './utils', 'servicestack-client', 'react-ga', 'marked'
                                         localStorage.setItem(utils_1.GistCacheKey(id_1), serializeGist(meta, r.files));
                                         store.dispatch({ type: "GIST_CHANGE", gist: id_1 });
                                     }
+                                    else if (r.files[utils_1.FileNames.CollectionIndex]) {
+                                        collectionsCache[meta.id] = createCollection(store, meta, r.files[utils_1.FileNames.CollectionIndex]);
+                                        store.dispatch({ type: "COLLECTION_CHANGE", collection: { id: id_1 }, showCollection: true });
+                                    }
                                     else if (r.files[utils_1.FileNames.Snapshot]) {
                                         var file = r.files[utils_1.FileNames.Snapshot];
                                         var json = file && file.content;

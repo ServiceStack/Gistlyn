@@ -54,12 +54,14 @@ System.register(['react', 'servicestack-client'], function(exports_1, context_1)
                         var a = e.target;
                         if (a && a.href) {
                             var qs = servicestack_client_1.queryString(a.href);
-                            if (qs["gist"] || qs["collection"]) {
+                            if (qs["gist"] || qs["collection"] || qs["snapshot"]) {
                                 e.preventDefault();
                                 if (qs["gist"])
                                     _this.props.changeGist(qs["gist"], { activeFileName: qs["activeFileName"] });
                                 if (qs["collection"])
                                     _this.props.changeCollection(qs["collection"], true);
+                                if (qs["snapshot"])
+                                    _this.props.viewSnapshot(qs["snapshot"]);
                             }
                         }
                     }}, React.createElement("div", {id: "collection-header"}, React.createElement("i", {id: "btnHome", className: "material-icons", onClick: function (e) { return _this.props.onHome(); }, title: "Home"}, "home"), this.props.collection.description || "Collections"), React.createElement("div", {id: "collection-body"}, LiveLists, React.createElement("div", {id: "markdown", dangerouslySetInnerHTML: { __html: this.props.collection.html }}))));

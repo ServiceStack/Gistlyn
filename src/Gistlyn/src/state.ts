@@ -140,6 +140,9 @@ const stateSideEffects = store => next => action => {
                             if (r.files[FileNames.GistMain]) {
                                 localStorage.setItem(GistCacheKey(id), serializeGist(meta, r.files));
                                 store.dispatch({ type: "GIST_CHANGE", gist: id });
+                            } else if (r.files[FileNames.CollectionIndex]) {
+                                collectionsCache[meta.id] = createCollection(store, meta, r.files[FileNames.CollectionIndex]);
+                                store.dispatch({ type: "COLLECTION_CHANGE", collection: { id }, showCollection: true });
                             } else if (r.files[FileNames.Snapshot]) {
                                 const file = r.files[FileNames.Snapshot];
                                 const json = file && file.content;

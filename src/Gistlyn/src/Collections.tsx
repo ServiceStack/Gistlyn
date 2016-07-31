@@ -56,12 +56,14 @@ export default class Collections extends React.Component<any, any> {
                     var a = e.target as HTMLAnchorElement;
                     if (a && a.href) {
                         const qs = queryString(a.href);
-                        if (qs["gist"] || qs["collection"]) {
+                        if (qs["gist"] || qs["collection"] || qs["snapshot"]) {
                             e.preventDefault();
                             if (qs["gist"])
                                 this.props.changeGist(qs["gist"], { activeFileName: qs["activeFileName"] });
                             if (qs["collection"])
                                 this.props.changeCollection(qs["collection"], true);
+                            if (qs["snapshot"])
+                                this.props.viewSnapshot(qs["snapshot"]);
                         }
                     }
                 } }>

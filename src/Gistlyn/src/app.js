@@ -491,12 +491,12 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         else if (e.keyCode == 13) {
                             this.onShortcut("Ctrl-Enter");
                         }
-                        else if (e.key) {
+                        else if (e.key && ["s"].indexOf(e.key) >= 0) {
                             e.preventDefault();
                             this.onShortcut("Ctrl-" + e.key.toUpperCase());
                         }
                     }
-                    else if (e.altKey && e.key) {
+                    else if (e.altKey && ["s", "c"].indexOf(e.key) >= 0) {
                         e.preventDefault();
                         this.onShortcut("Alt-" + e.key.toUpperCase());
                     }
@@ -582,7 +582,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     var Preview = [];
                     var showCollection = this.props.showCollection && this.props.collection && this.props.collection.html != null;
                     if (showCollection) {
-                        Preview.push(React.createElement(Collections_1.default, {collection: this.props.collection, gistStats: this.props.gistStats, excludeGists: utils_1.GistTemplates.Gists, showLiveLists: this.props.collection.id === utils_1.GistTemplates.HomeCollection, authUsername: authUsername, onHome: function (e) { return _this.props.urlChanged(utils_1.GistTemplates.HomeCollection); }, changeGist: function (id, options) { return _this.props.changeGist(id, options); }, changeCollection: function (id, reload) { return _this.props.changeCollection(id, reload); }}));
+                        Preview.push(React.createElement(Collections_1.default, {collection: this.props.collection, gistStats: this.props.gistStats, excludeGists: utils_1.GistTemplates.Gists, showLiveLists: this.props.collection.id === utils_1.GistTemplates.HomeCollection, authUsername: authUsername, onHome: function (e) { return _this.props.urlChanged(utils_1.GistTemplates.HomeCollection); }, changeGist: function (id, options) { return _this.props.changeGist(id, options); }, changeCollection: function (id, reload) { return _this.props.changeCollection(id, reload); }, viewSnapshot: function (id) { return _this.props.urlChanged(id); }}));
                     }
                     else if (this.props.showCollection) {
                         Preview.push((React.createElement("div", {id: "collection", className: "section"}, React.createElement("div", {id: "collection-header"}, "Collection"), React.createElement("div", {id: "collection-body"}, React.createElement("div", {id: "markdown"}, React.createElement("div", {style: { color: "#444", fontSize: 20, position: "absolute", top: "50%", margin: "-55px 0 0 0", textAlign: "center", width: "100%" }}, React.createElement("img", {src: "/img/ajax-loader.gif", style: { margin: "5px 10px 0 0" }}), "loading..."))))));
@@ -630,7 +630,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     };
                     var showGistInput = !meta || !description || (this.txtUrl && this.txtUrl == document.activeElement);
                     var goHome = function () { return _this.props.urlChanged(utils_1.GistTemplates.HomeCollection); };
-                    return (React.createElement("div", {id: "body", onClick: function (e) { return _this.handleBodyClick(e); }, className: utils_1.UA.getClassList()}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png", title: "Hello", onClick: goHome, style: { cursor: "pointer" }}), React.createElement("h3", {onClick: goHome, style: { cursor: "pointer" }}, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, meta
+                    return (React.createElement("div", {id: "body", onClick: function (e) { return _this.handleBodyClick(e); }, className: utils_1.UA.getClassList()}, React.createElement("div", {className: "titlebar"}, React.createElement("div", {className: "container"}, React.createElement("img", {id: "logo", src: "img/logo-32-inverted.png", alt: "ServiceStack logo", onClick: goHome, style: { cursor: "pointer" }}), React.createElement("h3", {title: "Home", onClick: goHome, style: { cursor: "pointer" }}, "Gistlyn"), " ", React.createElement("sup", {style: { padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}, "BETA"), React.createElement("div", {id: "gist"}, meta
                         ? React.createElement("img", {src: meta.owner_avatar_url, title: meta.owner_login, style: { verticalAlign: "bottom", margin: "0 5px 2px 0" }})
                         : React.createElement("span", {className: "octicon octicon-logo-gist", style: { verticalAlign: "bottom", margin: "0 6px 6px 0" }}), React.createElement("input", {ref: function (e) { return _this.txtUrl = e; }, type: "text", id: "txtUrl", placeholder: "gist hash or url", style: { display: showGistInput ? "inline-block" : "none" }, onBlur: toggleEdit, value: this.props.url, onFocus: function (e) { return e.target.select(); }, onChange: function (e) { return _this.props.urlChanged(e.target.value); }, autoComplete: "off", autoCorrect: "off", autoCapitalize: "off", spellCheck: "false"}), React.createElement("div", {id: "desc-overlay", style: { display: showGistInput ? "none" : "inline-block" }, onClick: toggleEdit}, React.createElement("div", {className: "inner"}, React.createElement("h2", null, description), meta && !meta.public
                         ? (React.createElement("span", {style: { position: "absolute", margin: "3px 0px 3px -40px", fontSize: 12, background: "#ffefc6", color: "#888", padding: "2px 4px", borderRadius: 3 }, title: "This gist is private"}, "secret"))

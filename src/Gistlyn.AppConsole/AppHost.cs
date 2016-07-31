@@ -31,7 +31,6 @@ namespace Gistlyn.AppConsole
         {
             SetConfig(new HostConfig
             {
-                DebugMode = true,
                 EmbeddedResourceBaseTypes = { typeof(AppHost), typeof(SharedEmbeddedResources) },
             });
 

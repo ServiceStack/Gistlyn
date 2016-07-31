@@ -42,3 +42,7 @@ body {
     bottom: 0;
     width: 100%;
 }
+
+.winforms #console {
+    height: 300px;
+}

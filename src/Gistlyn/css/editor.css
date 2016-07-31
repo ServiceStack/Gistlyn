@@ -13,7 +13,7 @@
     flex-flow: row;
     background: #01215A;
     padding: 8px 0 0 6px;
-    min-height: 22px;
+    min-height: 24px;
 }
 #tabs #files-menu {
     color: #ddd;

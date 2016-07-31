@@ -103,7 +103,6 @@ namespace Gistlyn.AppWinForms
         }
     }
 
-#if DEBUG
     public class KeyboardHandler : CefSharp.IKeyboardHandler
     {
         public bool OnPreKeyEvent(IWebBrowser browserControl, IBrowser browser, KeyType type, int windowsKeyCode, int nativeKeyCode,
@@ -122,5 +121,4 @@ namespace Gistlyn.AppWinForms
             return false;
         }
     }
-#endif
 }

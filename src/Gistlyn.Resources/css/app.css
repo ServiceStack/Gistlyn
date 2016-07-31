@@ -121,11 +121,12 @@ html,body,#app,#body {
 
 #footer {
     background: #0371BE;
-    /*background: #01215A;*/
     min-height: 40px;
+    z-index: 10; /*for winforms over codemirror*/
 }
 
 #sig {
+    z-index: 10;
     position: absolute;
     left: 50%;
     bottom: 2px;
@@ -202,16 +203,22 @@ html,body,#app,#body {
     color: #ddd;
 }
 
-#btnConsole {
+#footer .lnk {
     position: absolute;
-    color: #fff;
-    right: 45px;
     bottom: 7px;
     font-size: 24px;
     cursor: pointer;
 }
-#btnConsole:hover {
+#footer .lnk:hover {
     color: #ddd;
+}
+#btnConsole {
+    color: #fff;
+    right: 45px;
+}
+#btnSnapshot {
+    color: #fff;
+    right: 90px;
 }
 
 #run {

@@ -558,12 +558,12 @@ class App extends React.Component<any, any> {
                 this.props.selectFileName(keys[nextFileIndex]);
             } else if (e.keyCode == 13) {
                 this.onShortcut("Ctrl-Enter");
-            } else if (e.key) {
+            } else if (e.key && ["s"].indexOf(e.key) >= 0) {
                 e.preventDefault();
                 this.onShortcut("Ctrl-" + e.key.toUpperCase());
             }
         }
-        else if (e.altKey && e.key) {
+        else if (e.altKey && ["s", "c"].indexOf(e.key) >= 0) {
             e.preventDefault();
             this.onShortcut("Alt-" + e.key.toUpperCase());
         }
@@ -666,7 +666,8 @@ class App extends React.Component<any, any> {
                 showLiveLists={this.props.collection.id === GistTemplates.HomeCollection} authUsername={authUsername}
                 onHome={e => this.props.urlChanged(GistTemplates.HomeCollection) }
                 changeGist={(id, options) => this.props.changeGist(id, options) }
-                changeCollection={(id, reload) => this.props.changeCollection(id, reload) } />
+                changeCollection={(id, reload) => this.props.changeCollection(id, reload) }
+                viewSnapshot={(id) => this.props.urlChanged(id)} />
             );
         } else if (this.props.showCollection) { //Still loading
             Preview.push((
@@ -793,8 +794,8 @@ class App extends React.Component<any, any> {
             <div id="body" onClick={e => this.handleBodyClick(e) } className={UA.getClassList()}>
                 <div className="titlebar">
                     <div className="container">
-                        <img id="logo" src="img/logo-32-inverted.png" title="Hello" onClick={goHome} style={{ cursor: "pointer" }} />
-                        <h3 onClick={goHome} style={{ cursor:"pointer" }}>Gistlyn</h3> <sup style={{ padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}>BETA</sup>
+                        <img id="logo" src="img/logo-32-inverted.png" alt="ServiceStack logo" onClick={goHome} style={{ cursor: "pointer" }} />
+                        <h3 title="Home" onClick={goHome} style={{ cursor:"pointer" }}>Gistlyn</h3> <sup style={{ padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}>BETA</sup>
                         <div id="gist">
                             { meta
                                 ? <img src={ meta.owner_avatar_url } title={meta.owner_login} style={{ verticalAlign: "bottom", margin: "0 5px 2px 0" }} />

@@ -26,7 +26,6 @@ namespace Gistlyn.AppWinForms
         {
             SetConfig(new HostConfig
             {
-                DebugMode = true,
                 EmbeddedResourceBaseTypes = { typeof(AppHost), typeof(SharedEmbeddedResources) },
             });
 
