@@ -79,7 +79,9 @@ export default class TakeSnapshotDialog extends React.Component<any, any> {
                     Capture Snapshot
                 </div>
                 <div className="dialog-body">
-                    <i className="material-icons info-help" onClick={e => this.props.urlChanged(GistTemplates.SnapshotsCollection) } title="What is this?">help_outline</i>
+                    <div className="row" style={{ textAlign:"right" }}>
+                        <i className="material-icons info-help" onClick={e => this.props.urlChanged(GistTemplates.SnapshotsCollection) } title="What is this?">help_outline</i>
+                    </div>
 
                     {Body}
                 </div>

@@ -106,8 +106,10 @@ export default class AddServiceStackReferenceDialog extends React.Component<any,
                     Add ServiceStack Reference
                 </div>
                 <div className="dialog-body">
-                    <i className="material-icons info-help" onClick={e => this.props.urlChanged(GistTemplates.AddServiceStackReferenceCollection)} title="What is this?">help_outline</i>
-
+                    <div className="row" style={{ float: "right" }}>
+                        <i className="material-icons info-help" onClick={e => this.props.urlChanged(GistTemplates.AddServiceStackReferenceCollection) } title="What is this?">help_outline</i>
+                    </div>
+                    
                     <p style={{ margin: "0 0 20px 0", color: "#666", maxWidth: 500, lineHeight:"22px" }}>
                         Add the Base URL of a remote ServiceStack instance you want to generate the typed C# DTO's for, e.g: 
                         <span className="lnk" style={{ paddingLeft: 5 }} onClick={e => this.setValue("techstacks.io") }>techstacks.io</span>

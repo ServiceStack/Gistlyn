@@ -75,9 +75,9 @@
     visibility: visible;
 }
 .dialog .info-help {
-    float: right;
     cursor: pointer;
     color: #2a6496;
+    margin: -12px -12px 0 0;
 }
 
 .btn, .btn:focus {

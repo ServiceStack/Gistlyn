@@ -120,6 +120,9 @@
 #markdown ol {
     list-style-type: decimal;
 }
+#markdown li > a {
+    white-space: nowrap;
+}
 #markdown a {
     color: #428bca;
     text-decoration: none;
