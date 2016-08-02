@@ -59,9 +59,14 @@ System.register(['react-redux'], function(exports_1, context_1) {
                 NewGist: "52c37e37b51a0ec92810477be34695ae",
                 NewPrivateGist: "492e199fa3ec5394ef0bc1aedd3240c7",
                 AddServiceStackReferenceGist: "2dbd4ccff70851ce8ae55678f4f15d0a",
+                AddServiceStackReferenceCollection: "363605c3c121784ebababac4a03e8910",
+                CollectionsCollection: "457a7035675513ba1365195658a5d792",
+                SnapshotsCollection: "1576fda8eea87abbe94fa8051b4fed34",
                 HomeCollection: "2cc6b5db6afd3ccb0d0149e55fdb3a6a",
                 Gists: ["52c37e37b51a0ec92810477be34695ae", "492e199fa3ec5394ef0bc1aedd3240c7",
-                    "2dbd4ccff70851ce8ae55678f4f15d0a", "2cc6b5db6afd3ccb0d0149e55fdb3a6a"]
+                    "2dbd4ccff70851ce8ae55678f4f15d0a", "363605c3c121784ebababac4a03e8910",
+                    "457a7035675513ba1365195658a5d792", "1576fda8eea87abbe94fa8051b4fed34",
+                    "2cc6b5db6afd3ccb0d0149e55fdb3a6a"]
             });
             exports_1("FileNames", FileNames = {
                 GistMain: "main.cs",

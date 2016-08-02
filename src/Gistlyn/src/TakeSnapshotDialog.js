@@ -1,4 +1,4 @@
-System.register(['react', 'servicestack-client', './Gistlyn.dtos'], function(exports_1, context_1) {
+System.register(['react', 'servicestack-client', './Gistlyn.dtos', './utils'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -6,7 +6,7 @@ System.register(['react', 'servicestack-client', './Gistlyn.dtos'], function(exp
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
-    var React, servicestack_client_1, Gistlyn_dtos_1;
+    var React, servicestack_client_1, Gistlyn_dtos_1, utils_1;
     var TakeSnapshotDialog;
     return {
         setters:[
@@ -18,6 +18,9 @@ System.register(['react', 'servicestack-client', './Gistlyn.dtos'], function(exp
             },
             function (Gistlyn_dtos_1_1) {
                 Gistlyn_dtos_1 = Gistlyn_dtos_1_1;
+            },
+            function (utils_1_1) {
+                utils_1 = utils_1_1;
             }],
         execute: function() {
             TakeSnapshotDialog = (function (_super) {
@@ -69,7 +72,7 @@ System.register(['react', 'servicestack-client', './Gistlyn.dtos'], function(exp
                     if (this.state.error) {
                         Body.push(React.createElement("span", {style: { color: "#c00" }}, this.state.error));
                     }
-                    return (React.createElement("div", {id: "dialog", onClick: function (e) { return _this.props.onHide(); }, onKeyDown: function (e) { return e.keyCode === 27 ? _this.props.onHide() : null; }}, React.createElement("div", {className: "dialog", ref: function (e) { return _this.dialog = e; }, onClick: function (e) { return e.stopPropagation(); }}, React.createElement("div", {className: "dialog-header"}, React.createElement("i", {className: "material-icons close", onClick: function (e) { return _this.props.onHide(); }}, "close"), "Capture Snapshot"), React.createElement("div", {className: "dialog-body"}, Body), React.createElement("div", {className: "dialog-footer"}, React.createElement("span", {onClick: function (e) { return _this.props.onHide(); }, style: { cursor: "pointer" }}, "close")))));
+                    return (React.createElement("div", {id: "dialog", onClick: function (e) { return _this.props.onHide(); }, onKeyDown: function (e) { return e.keyCode === 27 ? _this.props.onHide() : null; }}, React.createElement("div", {className: "dialog", ref: function (e) { return _this.dialog = e; }, onClick: function (e) { return e.stopPropagation(); }}, React.createElement("div", {className: "dialog-header"}, React.createElement("i", {className: "material-icons close", onClick: function (e) { return _this.props.onHide(); }}, "close"), "Capture Snapshot"), React.createElement("div", {className: "dialog-body"}, React.createElement("i", {className: "material-icons info-help", onClick: function (e) { return _this.props.urlChanged(utils_1.GistTemplates.SnapshotsCollection); }, title: "What is this?"}, "help_outline"), Body), React.createElement("div", {className: "dialog-footer"}, React.createElement("span", {onClick: function (e) { return _this.props.onHide(); }, style: { cursor: "pointer" }}, "close")))));
                 };
                 return TakeSnapshotDialog;
             }(React.Component));

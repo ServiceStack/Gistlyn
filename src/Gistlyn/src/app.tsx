@@ -768,8 +768,10 @@ class App extends React.Component<any, any> {
         MorePopup.push((
             <div onClick={e => location.href = "https://github.com/ServiceStack/Gistlyn/issues"}>Send Feedback</div>));
 
-        EditorPopup.push((
-            <div onClick={e => this.props.showDialog("edit-gist") }>Edit Gist</div>));
+        if (authUsername) {
+            EditorPopup.push((
+                <div onClick={e => this.props.showDialog("edit-gist") }>Edit Gist</div>));
+        }
         EditorPopup.push((
             <div><a href={"https://gist.github.com/" + this.props.gist} target="_blank">View on Github</a></div>));
         EditorPopup.push((
@@ -854,17 +856,13 @@ class App extends React.Component<any, any> {
 
                 <div id="content">
                     <div id="ide">
-                        { authUsername
-                            ? (<div id="editor-menu">
-                                <i className="material-icons" onClick={e => this.showPopup(e, this.editorPopup) }>more_vert</i>
-                               </div>)
-                            : null }
-                        { authUsername
-                            ? (<div id="popup-editor" className="popup" ref={e => this.editorPopup = e } style={{ position: "absolute", top: 76, left: "50%", margin: "0 0 0 -197px" }}>
-                                    {EditorPopup}
-                                </div>)
-                            : null }
-                        
+                        <div id="editor-menu">
+                            <i className="material-icons" onClick={e => this.showPopup(e, this.editorPopup) }>more_vert</i>
+                        </div>
+                        <div id="popup-editor" className="popup" ref={e => this.editorPopup = e } style={{ position: "absolute", top: 76, left: "50%", margin: "0 0 0 -197px" }}>
+                            {EditorPopup}
+                        </div>
+
                         <Editor files={files}
                             isOwner={authUsername && meta && meta.owner_login === authUsername}
                             activeFileName={this.props.activeFileName}
@@ -952,12 +950,14 @@ class App extends React.Component<any, any> {
                     : null}
                 {meta && this.props.dialog === "add-ss-ref"
                     ? <AddServiceStackReferenceDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null) }
-                        onAddReference={this.handleAddReference.bind(this) } />
+                        onAddReference={this.handleAddReference.bind(this) }
+                        urlChanged={url => this.props.urlChanged(url) && this.props.showDialog(null) } />
                     : null}
                 { capturedSnapshot && this.props.dialog === "take-snapshot"
                     ? <TakeSnapshotDialog dialogRef={e => this.dialog = e} description={`Snapshot ${timeFmt12()}`}
                         snapshot={ Object.assign({}, capturedSnapshot, { activeSub: null }) }
-                        onHide={() => this.props.showDialog(null) && (capturedSnapshot = null) } />
+                        onHide={() => this.props.showDialog(null) && (capturedSnapshot = null) }
+                        urlChanged={url => this.props.urlChanged(url) && this.props.showDialog(null) } />
                     : null}
 
                 <div id="sig">made with <span>{String.fromCharCode(10084)}</span> by <a target="_blank" href="https://servicestack.net">ServiceStack</a></div>

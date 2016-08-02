@@ -117,7 +117,7 @@ namespace Gistlyn.ServiceInterface
             appHost.Container.Register(new AppData(
                 appHost.AppSettings.Get("NugetPackagesDirectory", defaultPackagesPath))
             {
-                IllegalTokens = (appHost.AppSettings.GetString("IllegalTokens") ?? "Exit").FromJsv<string[]>()
+                IllegalTokens = (appHost.AppSettings.GetString("IllegalTokens") ?? "Exit,DllImport,IntPtr,unsafe").FromJsv<string[]>()
             });
 
             appHost.Container.Register<IDataContext>(appHost.Container.Resolve<AppData>());

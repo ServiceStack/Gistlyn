@@ -74,11 +74,15 @@
 .dialog.disabled .loading {
     visibility: visible;
 }
+.dialog .info-help {
+    float: right;
+    cursor: pointer;
+    color: #2a6496;
+}
 
 .btn, .btn:focus {
     text-transform: uppercase;
     border-radius: 2px;
-    background: #03a9f4;
     background: #0488E4;
     transition: box-shadow .28s cubic-bezier(.4,0,.2,1);
     outline: none !important;
@@ -99,7 +103,6 @@
     user-select: none
 }
 .btn:hover {
-    background: #29B6F6;
     background: #03a9f4;
     box-shadow: 0 2px 6px rgba(0,0,0,0.26);
     color: #fff;
