@@ -100,6 +100,8 @@ namespace Gistlyn.ServiceInterface
                 {"oauth.github.Scopes", "user,gist"},
                 {"oauth.github.ClientId", "8e66a75de4e62dd97696"},
                 {"oauth.github.ClientSecret", "fbdd3b95497295fc0776527206c8e40159d1da6d"},
+                {"jwt.AuthKeyBase64", "+k5WFGc2qKS9NuwIM7OBOA7vT2AKXhCxRpCUgibVv8E="},
+                {"jwt.RequireSecureConnection", "False"},
             });
         }
 
@@ -125,6 +127,22 @@ namespace Gistlyn.ServiceInterface
             appHost.Plugins.Add(new AuthFeature(() => new AuthUserSession(),
                 new IAuthProvider[] {
                     new GithubAuthProvider(appHost.AppSettings),
+                    new JwtAuthProvider(appHost.AppSettings) //Use JWT so sessions survive across AppDomain restarts, redeployments, etc
+                    {
+                        CreatePayloadFilter = (payload, session) =>
+                        {
+                            var githubAuth = session.ProviderOAuthAccess.Safe().FirstOrDefault(x => x.Provider == "github");
+                            payload["ats"] = githubAuth != null ? githubAuth.AccessTokenSecret : null;
+                        },
+
+                        PopulateSessionFilter = (session, obj, req) => 
+                        {
+                            session.ProviderOAuthAccess = new List<IAuthTokens>
+                            {
+                                new AuthTokens { Provider = "github", AccessTokenSecret = obj["ats"] }
+                            };
+                        } 
+                    },
                 }));
         }
     }

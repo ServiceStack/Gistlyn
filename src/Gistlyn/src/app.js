@@ -115,6 +115,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     onConnect: function (activeSub) {
                         state_1.store.dispatch({ type: 'SSE_CONNECT', activeSub: activeSub });
                         react_ga_1.default.set({ userId: activeSub.userId });
+                        fetch("/session-to-token", { method: "POST", credentials: "include" });
                     },
                     ConsoleMessage: function (m, e) {
                         state_1.store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: m.message }] });

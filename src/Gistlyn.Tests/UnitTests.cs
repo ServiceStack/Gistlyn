@@ -123,5 +123,11 @@ namespace Gistlyn.Tests
 
             Assert.That(TypeSerializer.HasCircularReferences(root));
         }
+
+        [Test]
+        public void Generate_new_Key()
+        {
+            RsaUtils.CreatePrivateKeyParams().ToPrivateKeyXml().Replace("\"","\\\"").Print();
+        }
     }
 }

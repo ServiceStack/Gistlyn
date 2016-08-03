@@ -106,7 +106,7 @@ namespace Gistlyn.AppWinForms
 
     public class KeyboardHandler : CefSharp.IKeyboardHandler
     {
-        Stopwatch stopwatch = Stopwatch.StartNew();
+        readonly Stopwatch stopwatch = Stopwatch.StartNew();
 
         public bool OnPreKeyEvent(IWebBrowser browserControl, IBrowser browser, KeyType type, int key, int nativeKeyCode,
             CefEventFlags modifiers, bool isSystemKey, ref bool isKeyboardShortcut)

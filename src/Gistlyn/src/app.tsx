@@ -54,6 +54,7 @@ var sse = new ServerEventsClient("/", ["gist"], {
         onConnect(activeSub: ISseConnect) {
             store.dispatch({ type: 'SSE_CONNECT', activeSub });
             ReactGA.set({ userId: activeSub.userId });
+            fetch("/session-to-token", { method:"POST", credentials:"include" });
         },
         ConsoleMessage(m, e) {
             store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: m.message }] });
