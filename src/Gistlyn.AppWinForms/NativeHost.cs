@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Windows.Forms;
 using CefSharp;
 using CefSharp.WinForms.Internals;
@@ -105,6 +106,8 @@ namespace Gistlyn.AppWinForms
 
     public class KeyboardHandler : CefSharp.IKeyboardHandler
     {
+        Stopwatch stopwatch = Stopwatch.StartNew();
+
         public bool OnPreKeyEvent(IWebBrowser browserControl, IBrowser browser, KeyType type, int key, int nativeKeyCode,
             CefEventFlags modifiers, bool isSystemKey, ref bool isKeyboardShortcut)
         {
@@ -125,12 +128,20 @@ namespace Gistlyn.AppWinForms
                 //Implement Back/Forward
                 if (key == (int) Keys.Left || key == (int) Keys.Right)
                 {
-                    if (key == (int)Keys.Left && Program.Form.ChromiumBrowser.CanGoBack)
-                        Program.Form.ChromiumBrowser.Back();
+                    //Hack to prevent ALT + LEFT/RIGHT double firing on 1 key press navigate twice
+                    if (stopwatch.ElapsedMilliseconds > 100) 
+                    {
+                        if (key == (int)Keys.Left && Program.Form.ChromiumBrowser.CanGoBack)
+                            Program.Form.ChromiumBrowser.Back();
 
-                    if (key == (int)Keys.Right && Program.Form.ChromiumBrowser.CanGoForward)
-                        Program.Form.ChromiumBrowser.Forward();
+                        if (key == (int)Keys.Right && Program.Form.ChromiumBrowser.CanGoForward)
+                            Program.Form.ChromiumBrowser.Forward();
 
+                        Thread.Sleep(10);
+                    }
+
+                    stopwatch.Reset();
+                    stopwatch.Start();
                     return false;
                 }
 

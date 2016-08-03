@@ -6,13 +6,6 @@ document.write('<div class="alert alert-success alert-hide" id="alertUpdate" rol
   '<button class="btn btn-primary" type="button" onclick="updateNow();">Update Now!</button>' +
 '</div>');
 
-document.onkeydown =  function (e) {
-    if (e.altKey && e.which === 37) { //Left
-        history.back();
-    } else if (e.altKey && e.which === 39) { //right
-        history.forward();
-    }
-};
 window.updateAvailable = function () {
     setTimeout(function () {
         document.getElementById("alertUpdate").style.display = 'block';
