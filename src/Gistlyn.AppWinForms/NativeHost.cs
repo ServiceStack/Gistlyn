@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using CefSharp;
 using CefSharp.WinForms.Internals;
 using ServiceStack.Configuration;
+using ServiceStack.Text;
 using Squirrel;
 
 namespace Gistlyn.AppWinForms
@@ -16,10 +17,9 @@ namespace Gistlyn.AppWinForms
         public NativeHost(FormMain formMain)
         {
             this.formMain = formMain;
+
             //Enable Chrome Dev Tools when debugging WinForms
-#if DEBUG
             formMain.ChromiumBrowser.KeyboardHandler = new KeyboardHandler();
-#endif
         }
 
         public string Platform
@@ -105,14 +105,43 @@ namespace Gistlyn.AppWinForms
 
     public class KeyboardHandler : CefSharp.IKeyboardHandler
     {
-        public bool OnPreKeyEvent(IWebBrowser browserControl, IBrowser browser, KeyType type, int windowsKeyCode, int nativeKeyCode,
+        public bool OnPreKeyEvent(IWebBrowser browserControl, IBrowser browser, KeyType type, int key, int nativeKeyCode,
             CefEventFlags modifiers, bool isSystemKey, ref bool isKeyboardShortcut)
         {
-            if (windowsKeyCode == (int)Keys.F12)
+            if (key == (int)Keys.F12)
             {
                 Program.Form.ChromiumBrowser.ShowDevTools();
             }
-            return false;
+
+            //Mute beep for known keyboard shortcuts
+            if (modifiers == CefEventFlags.ControlDown)
+            {
+                if (key == (int)Keys.S || key == (int)Keys.Enter || key == (int)Keys.Left || key == (int)Keys.Right)
+                    return false;
+            }
+
+            if (modifiers == CefEventFlags.AltDown)
+            {
+                //Implement Back/Forward
+                if (key == (int) Keys.Left || key == (int) Keys.Right)
+                {
+                    if (key == (int)Keys.Left && Program.Form.ChromiumBrowser.CanGoBack)
+                        Program.Form.ChromiumBrowser.Back();
+
+                    if (key == (int)Keys.Right && Program.Form.ChromiumBrowser.CanGoForward)
+                        Program.Form.ChromiumBrowser.Forward();
+
+                    return false;
+                }
+
+                if (key == (int)Keys.S || key == (int)Keys.C)
+                    return false;
+            }
+
+            if (key == (int)Keys.Escape || key == (int)Keys.F11 || key == (int)Keys.OemQuestion)
+                return false;
+
+            return isSystemKey;
         }
 
         public bool OnKeyEvent(IWebBrowser browserControl, IBrowser browser, KeyType type, int windowsKeyCode, int nativeKeyCode,
