@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -30,7 +31,11 @@ namespace Gistlyn.AppWinForms
                 onFirstRun: OnFirstRun);
 
             Cef.EnableHighDPISupport();
-            Cef.Initialize(new CefSettings());
+
+            var cacheFolder = Path.Combine(Path.GetTempPath(), "gistlyn-cache");
+            Cef.Initialize(new CefSettings {
+                CachePath = cacheFolder //persist localStorage + Cookies
+            });
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
