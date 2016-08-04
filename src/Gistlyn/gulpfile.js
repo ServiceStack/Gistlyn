@@ -10,10 +10,10 @@
         { src: './bin/**/*', dest: 'bin/', host: WEB },
         { src: './img/**/*', dest: 'img/' },
         { src: './css/**/*', dest: 'css/' },
-        { src: './App_Data/**/*', dest: 'App_Data/', host: WEB },
+        //{ src: './App_Data/**/*', dest: 'App_Data/', host: WEB },
         { src: './Global.asax', host: WEB },
         { src: './jspm_packages/npm/bootstrap@3.2.0/dist/fonts/*.*', dest: 'lib/fonts/' },
-        { src: ['./config.js', './platform.js', './platform.css'], dest: '/', host: WEB },
+        { src: ['./config.js', './platform.js', './platform.css', './offline.html'], dest: '/', host: WEB },
         { src: webBuildDir + 'deploy/*.*', host: WEB },
         {
             src: './web.config',

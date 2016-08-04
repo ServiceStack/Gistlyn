@@ -184,6 +184,7 @@
     <Content Include="css\iconfont\material-icons.css" />
     <Content Include="css\iconfont\MaterialIcons-Regular.svg" />
     <Content Include="css\octicon\octicon.css" />
+    <Content Include="offline.html" />
     <Content Include="gulpfile.js" />
     <Content Include="config.js" />
     <Content Include="default.html" />
