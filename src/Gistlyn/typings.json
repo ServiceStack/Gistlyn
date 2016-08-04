@@ -10,5 +10,8 @@
     "react-ga": "registry:dt/react-ga#1.4.1+20160524135221",
     "react-redux": "registry:dt/react-redux#4.4.0+20160501125835",
     "redux": "registry:dt/redux#3.3.1+20160326112656"
+  },
+  "dependencies": {
+    "servicestack-client": "registry:npm/servicestack-client#0.0.10+20160803174707"
   }
 }
