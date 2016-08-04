@@ -251,6 +251,7 @@
   <ItemGroup>
     <Folder Include="wwwroot\" />
     <Folder Include="wwwroot_build\deploy\" />
+    <Folder Include="wwwroot_build\deploy_console\bin\" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll" />

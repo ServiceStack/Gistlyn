@@ -37,6 +37,7 @@ SET INPUT=%INPUT% %RELEASE%\System.Collections.Immutable.dll
 SET INPUT=%INPUT% %RELEASE%\System.IO.FileSystem.dll
 SET INPUT=%INPUT% %RELEASE%\System.IO.FileSystem.Primitives.dll
 SET INPUT=%INPUT% %RELEASE%\System.Reflection.Metadata.dll
+SET INPUT=%INPUT% %RELEASE%\System.Collections.Immutable.dll
 
 REM %ILMERGE% /target:exe /targetplatform:v4,"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6" /out:%STAGING%\%OUTPUTNAME% /ndebug /copyattrs %INPUT% /lib:%RELEASE%
 
@@ -46,8 +47,7 @@ MD apps\console\bin
 
 REM COPY /Y .\%STAGING%\%OUTPUTNAME% .\apps\
 COPY /Y .\%RELEASE%\*.* .\apps\console\bin\
-COPY .\Gistlyn-linux.sh .\apps\console\
-COPY .\Gistlyn-win.bat .\apps\console\
-COPY .\Gistlyn-osx.command .\apps\console\
+COPY .\deploy_console\*.* .\apps\console\
+COPY .\deploy_console\bin\*.* .\apps\console\bin\
 
 echo ------------- && echo  deployed to: .\wwwroot_build\apps\console && echo -------------
