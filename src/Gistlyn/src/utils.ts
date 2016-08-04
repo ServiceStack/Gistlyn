@@ -14,10 +14,11 @@ export const GistTemplates = {
     CollectionsCollection: "457a7035675513ba1365195658a5d792",
     SnapshotsCollection: "1576fda8eea87abbe94fa8051b4fed34",
     HomeCollection: "2cc6b5db6afd3ccb0d0149e55fdb3a6a",
+    DownloadCollection: "74d7b0467a197f678bb4220b2c301ac3",
     Gists: ["52c37e37b51a0ec92810477be34695ae", "492e199fa3ec5394ef0bc1aedd3240c7",
         "2dbd4ccff70851ce8ae55678f4f15d0a", "363605c3c121784ebababac4a03e8910",
         "457a7035675513ba1365195658a5d792", "1576fda8eea87abbe94fa8051b4fed34",
-        "2cc6b5db6afd3ccb0d0149e55fdb3a6a"]
+        "2cc6b5db6afd3ccb0d0149e55fdb3a6a", "74d7b0467a197f678bb4220b2c301ac3"]
 };
 
 export const FileNames = {

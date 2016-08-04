@@ -119,6 +119,12 @@ namespace Gistlyn.AppWinForms
             //Mute beep for known keyboard shortcuts
             if (modifiers == CefEventFlags.ControlDown)
             {
+                if (key == (int) Keys.R)
+                    Program.Form.ChromiumBrowser.Reload();
+
+                if (key == (int)Keys.W)
+                    Program.Form.Close();
+
                 if (key == (int)Keys.S || key == (int)Keys.Enter || key == (int)Keys.Left || key == (int)Keys.Right)
                     return false;
             }
@@ -128,7 +134,7 @@ namespace Gistlyn.AppWinForms
                 //Implement Back/Forward
                 if (key == (int) Keys.Left || key == (int) Keys.Right)
                 {
-                    //Hack to prevent ALT + LEFT/RIGHT double firing on 1 key press navigate twice
+                    //Hack to prevent ALT + LEFT/RIGHT double firing/navigating when it was only pressed once
                     if (stopwatch.ElapsedMilliseconds > 100) 
                     {
                         if (key == (int)Keys.Left && Program.Form.ChromiumBrowser.CanGoBack)
@@ -149,7 +155,7 @@ namespace Gistlyn.AppWinForms
                     return false;
             }
 
-            if (key == (int)Keys.Escape || key == (int)Keys.F11 || key == (int)Keys.OemQuestion)
+            if (key == (int)Keys.Escape || key == (int)Keys.OemQuestion || key == (int)Keys.F11 || key == (int)Keys.F4)
                 return false;
 
             return isSystemKey;

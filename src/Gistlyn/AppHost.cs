@@ -10,9 +10,9 @@ namespace Gistlyn
         public AppHost()
             : base("Gistlyn", typeof(RunScriptService).Assembly)
         {
-            var defaultSettings = SharedAppHostConfig.GetMemoryAppSettings();
-            OverrideAppSettings(defaultSettings);
-            AppSettings = defaultSettings;
+            var appSettings = SharedAppHostConfig.GetMemoryAppSettings();
+            OverrideAppSettings(appSettings);
+            AppSettings = appSettings;
         }
 
         public override void Configure(Container container)

@@ -767,7 +767,7 @@ class App extends React.Component<any, any> {
         MorePopup.push((
             <div onClick={e => this.props.showDialog("shortcuts") }>Shortcuts</div>));
         MorePopup.push((
-            <div onClick={e => location.href = "https://github.com/ServiceStack/Gistlyn/issues"}>Send Feedback</div>));
+            <div onClick={e => window.open("https://github.com/ServiceStack/Gistlyn/issues") }>Send Feedback</div>));
 
         if (authUsername) {
             EditorPopup.push((
