@@ -5,6 +5,7 @@ using System.Threading;
 using System.Windows.Forms;
 using CefSharp;
 using CefSharp.WinForms.Internals;
+using ServiceStack;
 using ServiceStack.Configuration;
 using ServiceStack.Text;
 using Squirrel;
@@ -38,7 +39,7 @@ namespace Gistlyn.AppWinForms
 
         public void ShowAbout()
         {
-            MessageBox.Show(@"ServiceStack Winforms with CefSharp + React", @"Gistlyn.AppWinForms", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(@"Gistlyn", @"Gistlyn by ServiceStack", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         public void ToggleFormBorder()
@@ -114,6 +115,12 @@ namespace Gistlyn.AppWinForms
             if (key == (int)Keys.F12)
             {
                 Program.Form.ChromiumBrowser.ShowDevTools();
+            }
+            if (key == (int) Keys.F2)
+            {
+                var assemblyName = typeof(AppHost).Assembly.GetName();
+                var title = "{0} v{1} powered by: \n\n{2}".Fmt(assemblyName.Name, assemblyName.Version, Env.ServerUserAgent);
+                MessageBox.Show(title, "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
             //Mute beep for known keyboard shortcuts
