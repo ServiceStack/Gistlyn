@@ -839,7 +839,7 @@ class App extends React.Component<any, any> {
                         { !authUsername
                             ? (<div id="sign-in" style={{ position: "absolute", right: 5, top:4 }}>
                                    <a href="/auth/github" style={{ color: "#fff", textDecoration: "none" }}>
-                                       <span style={{ whiteSpace: "nowrap", fontSize: 14 }}>sign-in</span>
+                                       <span style={{ whiteSpace: "nowrap", fontSize: 14 }}>Sign-in</span>
                                        <span style={{ verticalAlign: "sub", margin: "0 0 0 10px" }} className="mega-octicon octicon-mark-github" title="Sign in with GitHub"></span>
                                    </a>
                                </div>)
