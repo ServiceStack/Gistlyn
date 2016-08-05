@@ -111,6 +111,9 @@
     <EmbeddedResource Include="css\app.min.css" />
     <EmbeddedResource Include="img\compiling.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="favicon.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

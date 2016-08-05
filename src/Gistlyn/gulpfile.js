@@ -13,6 +13,7 @@
         //{ src: './App_Data/**/*', dest: 'App_Data/', host: WEB },
         { src: './Global.asax', host: WEB },
         { src: './jspm_packages/npm/bootstrap@3.2.0/dist/fonts/*.*', dest: 'lib/fonts/' },
+        { src: ['./favicon.ico'], dest: '/' },
         { src: ['./config.js', './platform.js', './platform.css', './offline.html'], dest: '/', host: WEB },
         { src: webBuildDir + 'deploy/*.*', host: WEB },
         {
@@ -103,7 +104,7 @@
         del([
             webRoot + '**/*.*',
             '!wwwroot/bin/**/*.*', //Don't delete dlls
-            '!wwwroot/App_Data/**/*.*', //Don't delete App_Data
+            //'!wwwroot/App_Data/**/*.*', //Don't delete App_Data
             '!wwwroot/**/*.asax', //Don't delete asax
             '!wwwroot/**/*.config', //Don't delete config
             '!wwwroot/appsettings.txt' //Don't delete deploy settings
