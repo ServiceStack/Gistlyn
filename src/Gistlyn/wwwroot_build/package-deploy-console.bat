@@ -50,4 +50,7 @@ COPY /Y .\%RELEASE%\*.* .\apps\console\bin\
 COPY .\deploy_console\*.* .\apps\console\
 COPY .\deploy_console\bin\*.* .\apps\console\bin\
 
+DEL .\apps\Gistlyn-console.zip
+%TOOLS%\7za a .\apps\Gistlyn-console.zip .\apps\console\*
+
 echo ------------- && echo  deployed to: .\wwwroot_build\apps\console && echo -------------
