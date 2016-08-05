@@ -95,6 +95,10 @@
     margin-top: 18px;
     margin-bottom: 12px;
 }
+.ipad #markdown img {
+    max-width: 450px;
+}
+
 #markdown h1, #markdown h2 {
     padding-bottom: 0.3em;
     font-size: 1.5em;
