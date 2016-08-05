@@ -44,7 +44,7 @@ namespace Gistlyn.AppWinForms
             if (!File.Exists("..\\Update.exe"))
             {
                 var squirrelExe = Directory.GetFiles(
-                    "..\\..\\..\\..\\..\\packages\\", "Squirrel.exe", SearchOption.AllDirectories)
+                    "..\\..\\..\\..\\packages\\", "Squirrel.exe", SearchOption.AllDirectories)
                     .ToList().FirstNonDefault();
                 if (squirrelExe != null)
                 {
