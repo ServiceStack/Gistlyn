@@ -2,7 +2,7 @@ System.register(['react-redux'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var react_redux_1;
-    var Config, StateKey, GistCacheKey, GistTemplates, FileNames, ua, platform, UA;
+    var Config, StateKey, GistCacheKey, GistTemplates, FileNames, ua, platform, UA, BatchItems;
     function reduxify(mapStateToProps, mapDispatchToProps, mergeProps, options) {
         return function (target) { return (react_redux_1.connect(mapStateToProps, mapDispatchToProps, mergeProps, options)(target)); };
     }
@@ -44,6 +44,9 @@ System.register(['react-redux'], function(exports_1, context_1) {
         ]);
     }
     exports_1("addClientPackages", addClientPackages);
+    function batch(o, timer, cb) {
+    }
+    exports_1("batch", batch);
     return {
         setters:[
             function (react_redux_1_1) {
@@ -91,6 +94,34 @@ System.register(['react-redux'], function(exports_1, context_1) {
                 _a
             ));
             ;
+            BatchItems = (function () {
+                function BatchItems(everyMs, callback) {
+                    this.everyMs = everyMs;
+                    this.callback = callback;
+                    this.results = [];
+                }
+                BatchItems.prototype.queue = function (result) {
+                    var _this = this;
+                    if (this.timeoutId == null) {
+                        this.results.push(result);
+                        this.callback(this.results); //return 1st result for instant feedback
+                        this.results = [];
+                        this.timeoutId = setTimeout(function () {
+                            var results = _this.results;
+                            _this.results = [];
+                            _this.timeoutId = null;
+                            if (results.length > 0) {
+                                _this.callback(results);
+                            }
+                        }, this.everyMs);
+                    }
+                    else {
+                        this.results.push(result); //buffer results if timer is active
+                    }
+                };
+                return BatchItems;
+            }());
+            exports_1("BatchItems", BatchItems);
         }
     }
     var _a;

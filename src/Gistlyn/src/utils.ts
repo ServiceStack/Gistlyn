@@ -106,3 +106,40 @@ export function addClientPackages(packagesConfig: string) {
     ]);
 }
 
+export class BatchItems {
+    everyMs: number;
+    callback: (results: any[]) => void;
+    results: any[];
+    timeoutId: number;
+
+    constructor(everyMs: number, callback: (results: any[]) => void) {
+        this.everyMs = everyMs;
+        this.callback = callback;
+        this.results = [];
+    }
+
+    queue(result: any) {
+        if (this.timeoutId == null) {
+            this.results.push(result);
+            this.callback(this.results); //return 1st result for instant feedback
+            this.results = [];
+
+            this.timeoutId = setTimeout(() => {
+                var results = this.results;
+                this.results = [];
+                this.timeoutId = null;
+
+                if (results.length > 0) {
+                    this.callback(results);
+                }
+
+            }, this.everyMs);
+        } else {
+            this.results.push(result); //buffer results if timer is active
+        }
+    }
+}
+
+export function batch(o, timer, cb) {
+}
+

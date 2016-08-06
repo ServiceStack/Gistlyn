@@ -14,7 +14,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
     var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, SaveAsDialog_1, EditGistDialog_1, ShortcutsDialog_1, TakeSnapshotDialog_1, ConsoleViewerDialog_1, InadequateBrowserDialog_1, AddServiceStackReferenceDialog_1, Console_1, Collections_1, Editor_1, Gistlyn_dtos_1;
-    var ScriptStatusRunning, ScriptStatusError, capturedSnapshot, statusToError, client, sse, App, qs, activeFileName, stateJson, state, e, qsSnapshot, qsAddRef, qsGist, qsCollection, qsExpression, qsClear;
+    var ScriptStatusRunning, ScriptStatusError, capturedSnapshot, statusToError, client, batchLogs, sse, App, qs, activeFileName, stateJson, state, e, qsSnapshot, qsAddRef, qsGist, qsCollection, qsExpression, qsClear;
     function evalExpression(gist, scriptId, expr) {
         if (!expr)
             return;
@@ -110,6 +110,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
             }
             statusToError = function (status) { return ({ errorCode: status.errorCode, msg: status.message, cls: "error" }); };
             client = new servicestack_client_1.JsonServiceClient("/");
+            batchLogs = new utils_1.BatchItems(30, function (logs) { return state_1.store.dispatch({ type: 'CONSOLE_LOG', logs: logs }); });
             sse = new servicestack_client_1.ServerEventsClient("/", ["gist"], {
                 handlers: {
                     onConnect: function (activeSub) {
@@ -118,7 +119,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         fetch("/session-to-token", { method: "POST", credentials: "include" });
                     },
                     ConsoleMessage: function (m, e) {
-                        state_1.store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: m.message }] });
+                        batchLogs.queue({ msg: m.message });
                     },
                     ScriptExecutionResult: function (m, e) {
                         if (m.status === state_1.store.getState().scriptStatus)

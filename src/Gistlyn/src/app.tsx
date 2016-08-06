@@ -4,7 +4,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import ReactGA from 'react-ga';
 import { Provider, connect } from 'react-redux';
-import { reduxify, UA, getSortedFileNames, Config, StateKey, GistCacheKey, GistTemplates, FileNames, IGistMeta, IGistFile, addClientPackages } from './utils';
+import { reduxify, UA, getSortedFileNames, Config, StateKey, GistCacheKey, GistTemplates, FileNames, IGistMeta, IGistFile, addClientPackages, BatchItems } from './utils';
 import { store } from './state';
 import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnFirst, splitOnLast, humanize, dateFmt, timeFmt12 } from 'servicestack-client';
 import { JsonViewer } from './json-viewer';
@@ -47,7 +47,9 @@ if (UA.nosse) {
 
 const statusToError = status => ({ errorCode: status.errorCode, msg: status.message, cls: "error" });
 
-var client = new JsonServiceClient("/");
+const client = new JsonServiceClient("/");
+
+const batchLogs = new BatchItems(30, logs => store.dispatch({ type: 'CONSOLE_LOG', logs }));
 
 var sse = new ServerEventsClient("/", ["gist"], {
     handlers: {
@@ -57,7 +59,7 @@ var sse = new ServerEventsClient("/", ["gist"], {
             fetch("/session-to-token", { method:"POST", credentials:"include" });
         },
         ConsoleMessage(m, e) {
-            store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: m.message }] });
+            batchLogs.queue({ msg: m.message });
         },
         ScriptExecutionResult(m: ScriptExecutionResult, e) {
             if (m.status === store.getState().scriptStatus) return;
