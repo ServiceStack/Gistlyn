@@ -26,6 +26,7 @@ export default class Editor extends React.Component<any, any> {
                 "Esc"(cm) {
                     if (cm.getOption("fullScreen"))
                         cm.setOption("fullScreen", false);
+                    this.props.onShortcut("Esc")
                 },
                 "Ctrl-Enter": cm => this.props.onShortcut("Ctrl-Enter"),
                 "Ctrl-S": cm => this.props.onShortcut("Ctrl-S"),

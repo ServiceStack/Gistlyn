@@ -14,7 +14,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
     var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, SaveAsDialog_1, EditGistDialog_1, ShortcutsDialog_1, TakeSnapshotDialog_1, ConsoleViewerDialog_1, InadequateBrowserDialog_1, AddServiceStackReferenceDialog_1, Console_1, Collections_1, Editor_1, Gistlyn_dtos_1;
-    var ScriptStatusRunning, ScriptStatusError, capturedSnapshot, statusToError, client, batchLogs, sse, App, qs, activeFileName, stateJson, state, e, qsSnapshot, qsAddRef, qsGist, qsCollection, qsExpression, qsClear;
+    var ScriptStatusRunning, ScriptStatusError, capturedSnapshot, statusToError, client, batchLogs, channels, sse, App, qs, activeFileName, stateJson, state, e, qsSnapshot, qsAddRef, qsGist, qsCollection, qsExpression, qsClear;
     function evalExpression(gist, scriptId, expr) {
         if (!expr)
             return;
@@ -111,7 +111,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
             statusToError = function (status) { return ({ errorCode: status.errorCode, msg: status.message, cls: "error" }); };
             client = new servicestack_client_1.JsonServiceClient("/");
             batchLogs = new utils_1.BatchItems(30, function (logs) { return state_1.store.dispatch({ type: 'CONSOLE_LOG', logs: logs }); });
-            sse = new servicestack_client_1.ServerEventsClient("/", ["gist"], {
+            channels = ["gist"];
+            sse = new servicestack_client_1.ServerEventsClient("/", channels, {
                 handlers: {
                     onConnect: function (activeSub) {
                         state_1.store.dispatch({ type: 'SSE_CONNECT', activeSub: activeSub });
@@ -125,15 +126,15 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         if (m.status === state_1.store.getState().scriptStatus)
                             return;
                         if (ScriptStatusError.indexOf(m.status) >= 0 && m.errorResponseStatus) {
-                            state_1.store.dispatch({ type: 'CONSOLE_LOG', logs: [statusToError(m.errorResponseStatus)] });
+                            batchLogs.queue(statusToError(m.errorResponseStatus));
                         }
                         else {
-                            state_1.store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: servicestack_client_1.humanize(m.status) }] });
+                            batchLogs.queue({ msg: servicestack_client_1.humanize(m.status) });
                         }
                         state_1.store.dispatch({ type: 'SCRIPT_STATUS', scriptStatus: m.status });
                         if (m.status === "CompiledWithErrors" && m.errors) {
                             var errorMsgs = m.errors.map(function (e) { return ({ msg: e.info, cls: "error" }); });
-                            state_1.store.dispatch({ type: 'CONSOLE_LOG', logs: errorMsgs });
+                            errorMsgs.forEach(function (m) { return batchLogs.queue(m); });
                         }
                         else if (m.status === "Completed") {
                             var request = new Gistlyn_dtos_1.GetScriptVariables();
@@ -506,11 +507,14 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         this.props.showDialog("shortcuts");
                     }
                     else if (e.keyCode == 27) {
-                        this.props.showDialog(null);
+                        this.onShortcut("Esc");
                     }
                 };
                 App.prototype.onShortcut = function (pattern) {
                     switch (pattern) {
+                        case "Esc":
+                            this.props.showDialog(null);
+                            break;
                         case "Ctrl-Enter":
                             var scriptRunning = ScriptStatusRunning.indexOf(this.props.scriptStatus) >= 0;
                             if (!scriptRunning)

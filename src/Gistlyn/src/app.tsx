@@ -51,7 +51,8 @@ const client = new JsonServiceClient("/");
 
 const batchLogs = new BatchItems(30, logs => store.dispatch({ type: 'CONSOLE_LOG', logs }));
 
-var sse = new ServerEventsClient("/", ["gist"], {
+const channels = ["gist"];
+const sse = new ServerEventsClient("/", channels, {
     handlers: {
         onConnect(activeSub: ISseConnect) {
             store.dispatch({ type: 'SSE_CONNECT', activeSub });
@@ -65,16 +66,16 @@ var sse = new ServerEventsClient("/", ["gist"], {
             if (m.status === store.getState().scriptStatus) return;
 
             if (ScriptStatusError.indexOf(m.status) >= 0 && m.errorResponseStatus) {
-                store.dispatch({ type: 'CONSOLE_LOG', logs: [statusToError(m.errorResponseStatus)] });
+                batchLogs.queue(statusToError(m.errorResponseStatus));
             } else {
-                store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: humanize(m.status) }] });
+                batchLogs.queue({ msg: humanize(m.status) });
             }
 
             store.dispatch({ type: 'SCRIPT_STATUS', scriptStatus: m.status });
 
             if (m.status === "CompiledWithErrors" && m.errors) {
                 const errorMsgs = m.errors.map(e => ({ msg: e.info, cls: "error" }));
-                store.dispatch({ type: 'CONSOLE_LOG', logs: errorMsgs });
+                errorMsgs.forEach(m =>  batchLogs.queue(m));
             } else if (m.status === "Completed") {
                 const request = new GetScriptVariables();
                 const state = store.getState();
@@ -574,13 +575,16 @@ class App extends React.Component<any, any> {
         if (e.key === "?") {
             this.props.showDialog("shortcuts");
         }
-        else if (e.keyCode == 27) { //ESC
-            this.props.showDialog(null);
+        else if (e.keyCode == 27) {
+            this.onShortcut("Esc");
         }
     }
 
     onShortcut(pattern: string) {
         switch (pattern) {
+            case "Esc":
+                this.props.showDialog(null);
+                break;
             case "Ctrl-Enter":
                 const scriptRunning = ScriptStatusRunning.indexOf(this.props.scriptStatus) >= 0;
                 if (!scriptRunning)

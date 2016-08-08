@@ -45,6 +45,7 @@ System.register(['react', './utils', 'react-codemirror', "jspm_packages/npm/code
                             "Esc": function (cm) {
                                 if (cm.getOption("fullScreen"))
                                     cm.setOption("fullScreen", false);
+                                this.props.onShortcut("Esc");
                             },
                             "Ctrl-Enter": function (cm) { return _this.props.onShortcut("Ctrl-Enter"); },
                             "Ctrl-S": function (cm) { return _this.props.onShortcut("Ctrl-S"); },
