@@ -97,7 +97,7 @@ namespace Gistlyn.ServiceInterface
             {
                 {"oauth.RedirectUrl", "http://localhost:4000/"},
                 {"oauth.CallbackUrl", "http://localhost:4000/auth/{0}"},
-                {"oauth.github.Scopes", "user,gist"},
+                {"oauth.github.Scopes", "user:email,gist"},
                 {"oauth.github.ClientId", "8e66a75de4e62dd97696"},
                 {"oauth.github.ClientSecret", "fbdd3b95497295fc0776527206c8e40159d1da6d"},
                 {"jwt.AuthKeyBase64", "+k5WFGc2qKS9NuwIM7OBOA7vT2AKXhCxRpCUgibVv8E="},
