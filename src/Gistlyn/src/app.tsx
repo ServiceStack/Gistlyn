@@ -823,7 +823,7 @@ class App extends React.Component<any, any> {
                                     </h2>
 
                                     { meta && !meta.public
-                                        ? (<span style={{ position: "absolute", margin: "3px 0px 3px -40px", fontSize: 12, background: "#ffefc6", color: "#888", padding: "2px 4px", borderRadius: 3 }}
+                                        ? (<span style={{ margin: "3px 0px 3px -40px", fontSize: 12, background: "#ffefc6", color: "#888", padding: "2px 4px", borderRadius: 3 }}
                                             title="This gist is private">secret</span>)
                                         : null }
 
