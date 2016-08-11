@@ -157,6 +157,9 @@ html,body,#app,#body {
     cursor: pointer;
     z-index: 3;    
 }
+.safari #ide #editor-menu {
+    top: 44px;
+}
 .ipad #ide #editor-menu {
     top: 42px;
 }
@@ -171,7 +174,7 @@ html,body,#app,#body {
     margin-left: -197px;
 }
 .safari #popup-editor {
-    top: 46px;
+    top: 72px;
     margin-left: -198px;
 }
 
