@@ -161,6 +161,20 @@ html,body,#app,#body {
     top: 42px;
 }
 
+.safari #editor-menu {
+    overflow: hidden;
+}
+#popup-editor {
+    position: absolute;
+    top: 76px;
+    left: 50%;
+    margin-left: -197px;
+}
+.safari #popup-editor {
+    top: 46px;
+    margin-left: -198px;
+}
+
 #preview {
     flex: 1;
     background: #F7F7F7;
@@ -229,6 +243,9 @@ html,body,#app,#body {
     width: 64px;
     margin: -60px 0 0 -25px;
     cursor: pointer;
+}
+.safari #run {
+    overflow: hidden;
 }
 #run.disabled {
     cursor: auto;

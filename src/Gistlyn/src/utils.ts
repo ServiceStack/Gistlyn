@@ -59,6 +59,7 @@ export const UA = {
     nosse: !("EventSource" in window),
     [platform]: true,
     mac: platform.indexOf("mac") >= 0,
+    safari: /Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor),
 
     getClassList() {
         var cls = Object.keys(this).filter(k => this[k] === true);

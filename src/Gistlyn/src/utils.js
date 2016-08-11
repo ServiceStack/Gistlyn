@@ -86,6 +86,7 @@ System.register(['react-redux'], function(exports_1, context_1) {
                 },
                 _a[platform] = true,
                 _a.mac = platform.indexOf("mac") >= 0,
+                _a.safari = /Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor),
                 _a.getClassList = function () {
                     var _this = this;
                     var cls = Object.keys(this).filter(function (k) { return _this[k] === true; });

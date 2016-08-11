@@ -866,7 +866,7 @@ class App extends React.Component<any, any> {
                         <div id="editor-menu">
                             <i className="material-icons" onClick={e => this.showPopup(e, this.editorPopup) }>more_vert</i>
                         </div>
-                        <div id="popup-editor" className="popup" ref={e => this.editorPopup = e } style={{ position: "absolute", top: 76, left: "50%", margin: "0 0 0 -197px" }}>
+                        <div id="popup-editor" className="popup" ref={e => this.editorPopup = e }>
                             {EditorPopup}
                         </div>
 
