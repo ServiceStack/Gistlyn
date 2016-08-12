@@ -854,7 +854,7 @@ class App extends React.Component<any, any> {
                                    <span style={{ whiteSpace: "nowrap", fontSize: 14 }}>{activeSub.displayName}</span>
                                    <img src={activeSub.profileUrl} style={{ verticalAlign: "middle", marginLeft: 5, borderRadius: "50%" }} />
                                </div>,
-                               <div id="popup-user" className="popup" ref={e => this.userPopup = e } style={{ position: "absolute", top: 42, right: 0 }}>
+                               <div id="popup-user" className="popup" ref={e => this.userPopup = e }>
                                    <div onClick={e => location.href = "/auth/logout" }>Sign out</div>
                                </div>
                             ])}
@@ -864,7 +864,7 @@ class App extends React.Component<any, any> {
                 <div id="content">
                     <div id="ide">
                         <div id="editor-menu">
-                            <i className="material-icons" onClick={e => this.showPopup(e, this.editorPopup) }>more_vert</i>
+                            <i className="material-icons noselect" onClick={e => this.showPopup(e, this.editorPopup) }>more_vert</i>
                         </div>
                         <div id="popup-editor" className="popup" ref={e => this.editorPopup = e }>
                             {EditorPopup}

@@ -157,25 +157,41 @@ html,body,#app,#body {
     cursor: pointer;
     z-index: 3;    
 }
+.safari #editor-menu {
+    overflow: hidden;
+}
+#popup-editor {
+    position: absolute;
+    top: 74px;
+    left: 50%;
+    margin-left: -197px;
+}
+.safari #popup-editor {
+    margin-left: -198px;
+}
+#popup-files {
+    top: 74px;
+}
+#popup-user {
+    position: absolute;
+    top: 42px;
+    right: 0;
+}
+
 .safari #ide #editor-menu {
     top: 44px;
 }
 .ipad #ide #editor-menu {
     top: 42px;
 }
-
-.safari #editor-menu {
-    overflow: hidden;
-}
-#popup-editor {
-    position: absolute;
-    top: 76px;
-    left: 50%;
-    margin-left: -197px;
-}
-.safari #popup-editor {
+.safari #popup-files, .safari #popup-editor {
     top: 72px;
-    margin-left: -198px;
+}
+.ipad #popup-files, .ipad #popup-editor {
+    top: 70px;
+}
+.safari #popup-user {
+    top: 40px;
 }
 
 #preview {
