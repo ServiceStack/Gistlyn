@@ -31,6 +31,14 @@ System.register(['react', './utils', 'react-codemirror', "jspm_packages/npm/code
                 function Editor() {
                     _super.apply(this, arguments);
                 }
+                Editor.prototype.componentDidMount = function () {
+                    if (utils_1.UA.safari) {
+                        var el = document.getElementsByClassName("CodeMirror-scroll")[0];
+                        if (el) {
+                            el.style.height = (document.getElementById("editor").clientHeight - 32) + "px";
+                        }
+                    }
+                };
                 Editor.prototype.render = function () {
                     var _this = this;
                     var options = {

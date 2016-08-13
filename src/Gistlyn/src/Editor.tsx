@@ -13,6 +13,15 @@ import "./codemirror.js";
 export default class Editor extends React.Component<any, any> {
     filesPopup: HTMLDivElement;
 
+    componentDidMount() {
+        if (UA.safari) { //Safari doesn't respect height:100%
+            const el = document.getElementsByClassName("CodeMirror-scroll")[0] as HTMLElement;
+            if (el) {
+                el.style.height = (document.getElementById("editor").clientHeight - 32) + "px"
+            }
+        }
+    }
+
     render() {
         var options = {
             lineNumbers: true,
