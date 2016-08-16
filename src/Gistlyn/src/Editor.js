@@ -1,4 +1,4 @@
-System.register(['react', './utils', 'react-codemirror', "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js", "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js", "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js", "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js", "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js", "./codemirror.js"], function(exports_1, context_1) {
+System.register(['react', 'servicestack-client', './utils', 'react-codemirror', "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js", "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js", "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js", "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js", "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js", "jspm_packages/npm/codemirror@5.16.0/mode/markdown/markdown.js", "jspm_packages/npm/codemirror@5.16.0/mode/gfm/gfm.js", "jspm_packages/npm/codemirror@5.16.0/mode/javascript/javascript.js", "jspm_packages/npm/codemirror@5.16.0/mode/css/css.js", "jspm_packages/npm/codemirror@5.16.0/mode/htmlmixed/htmlmixed.js", "./codemirror.js"], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -6,12 +6,15 @@ System.register(['react', './utils', 'react-codemirror', "jspm_packages/npm/code
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
-    var React, utils_1, react_codemirror_1;
-    var Editor;
+    var React, servicestack_client_1, utils_1, react_codemirror_1;
+    var extMimeTypes, Editor;
     return {
         setters:[
             function (React_1) {
                 React = React_1;
+            },
+            function (servicestack_client_1_1) {
+                servicestack_client_1 = servicestack_client_1_1;
             },
             function (utils_1_1) {
                 utils_1 = utils_1_1;
@@ -24,8 +27,22 @@ System.register(['react', './utils', 'react-codemirror', "jspm_packages/npm/code
             function (_3) {},
             function (_4) {},
             function (_5) {},
-            function (_6) {}],
+            function (_6) {},
+            function (_7) {},
+            function (_8) {},
+            function (_9) {},
+            function (_10) {},
+            function (_11) {}],
         execute: function() {
+            extMimeTypes = {
+                "cs": "text/x-csharp",
+                "xml": "application/xml",
+                "config": "application/xml",
+                "md": "text/x-markdown",
+                "css": "text/css",
+                "js": "text/javascript",
+                "json": "application/json"
+            };
             Editor = (function (_super) {
                 __extends(Editor, _super);
                 function Editor() {
@@ -81,10 +98,9 @@ System.register(['react', './utils', 'react-codemirror', "jspm_packages/npm/code
                                 : React.createElement("input", {type: "text", className: "txtFileName", onBlur: function (e) { return _this.props.onRenameFile(fileName, e); }, onKeyDown: function (e) { return e.keyCode === 13 ? e.target.blur() : null; }, defaultValue: fileName, onKeyUp: sizeToFit_1, size: Math.max(fileName.length - 3, 1), autoFocus: true}))));
                             FileList.push((React.createElement("div", {className: "file", onClick: function (e) { return _this.props.selectFileName(fileName); }}, fileName)));
                             if (active) {
+                                var ext = servicestack_client_1.splitOnLast(fileName, ".")[1];
                                 source = file.content;
-                                options["mode"] = fileName.endsWith('.config')
-                                    ? "application/xml"
-                                    : "text/x-csharp";
+                                options["mode"] = extMimeTypes[ext] || "text/x-csharp";
                             }
                         });
                         if (this.props.isOwner) {

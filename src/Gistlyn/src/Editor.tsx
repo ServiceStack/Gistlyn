@@ -1,5 +1,5 @@
 ﻿import * as React from 'react';
-import { queryString } from 'servicestack-client';
+import { queryString, splitOnLast } from 'servicestack-client';
 import { UA, getSortedFileNames, IGistFile } from './utils';
 
 import CodeMirror from 'react-codemirror';
@@ -8,7 +8,22 @@ import "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js";
 import "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js";
 import "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js";
 import "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js";
+import "jspm_packages/npm/codemirror@5.16.0/mode/markdown/markdown.js";
+import "jspm_packages/npm/codemirror@5.16.0/mode/gfm/gfm.js";
+import "jspm_packages/npm/codemirror@5.16.0/mode/javascript/javascript.js";
+import "jspm_packages/npm/codemirror@5.16.0/mode/css/css.js";
+import "jspm_packages/npm/codemirror@5.16.0/mode/htmlmixed/htmlmixed.js";
 import "./codemirror.js";
+
+const extMimeTypes = {
+    "cs": "text/x-csharp",
+    "xml": "application/xml",
+    "config": "application/xml",
+    "md": "text/x-markdown",
+    "css": "text/css",
+    "js": "text/javascript",
+    "json": "application/json"
+};
 
 export default class Editor extends React.Component<any, any> {
     filesPopup: HTMLDivElement;
@@ -84,10 +99,9 @@ export default class Editor extends React.Component<any, any> {
                 ));
 
                 if (active) {
+                    var ext = splitOnLast(fileName, ".")[1];
                     source = file.content;
-                    options["mode"] = fileName.endsWith('.config')
-                        ? "application/xml"
-                        : "text/x-csharp";
+                    options["mode"] = extMimeTypes[ext] || "text/x-csharp";
                 }
             });
 

@@ -658,10 +658,7 @@ class App extends React.Component<any, any> {
         let description = meta != null ? meta.description : null;
 
         const main = this.getMainFile();
-        if (this.props.hasLoaded && this.props.gist && this.props.files && main == null && this.props.error == null) {
-            this.props.error = { message: FileNames.GistMain + " is missing" };
-        }
-
+        const isScript = main != null;
         const isScriptRunning = ScriptStatusRunning.indexOf(this.props.scriptStatus) >= 0;
 
         var Preview = [];
@@ -837,7 +834,7 @@ class App extends React.Component<any, any> {
                                     ? <i className="material-icons" style={{ color: "#0f9", fontSize: "30px", position: "absolute", margin: "-2px 0 0 7px" }}>check</i>
                                     : null }
 
-                            <i id="btnCollections" style={{ visibility: main ? "visible" : "hidden" }} title="Collections"
+                            <i id="btnCollections" style={{ visibility: meta ? "visible" : "hidden" }} title="Collections"
                                 onClick={e => this.props.changeCollection((this.props.collection && this.props.collection.id) || GistTemplates.HomeCollection, !showCollection) }
                                 className={"material-icons" + (showCollection ? " active" : "") }>apps</i>
 
@@ -890,7 +887,7 @@ class App extends React.Component<any, any> {
                 <div id="footer-spacer"></div>
 
                 <div id="footer">
-                    <div id="actions" style={{ visibility: main ? "visible" : "hidden" }} className="noselect">
+                    <div id="actions" style={{ visibility: meta ? "visible" : "hidden" }} className="noselect">
                         <div id="revert" onClick={e => this.revertGist(e.shiftKey, e.ctrlKey) }>
                             <i className="material-icons">undo</i>
                             <p>Revert Changes</p>
