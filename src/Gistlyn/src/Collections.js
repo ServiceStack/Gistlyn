@@ -50,7 +50,7 @@ System.register(['react', 'servicestack-client'], function(exports_1, context_1)
                                 : null)));
                         }
                     }
-                    return (React.createElement("div", {id: "collection", className: "section", onClick: function (e) {
+                    return (React.createElement("div", {id: "collection", className: "section" + this.props.isOwner ? " owner" : "", onClick: function (e) {
                         var a = e.target;
                         if (a && a.href) {
                             var qs = servicestack_client_1.queryString(a.href);

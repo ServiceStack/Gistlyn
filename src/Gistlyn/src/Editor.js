@@ -109,7 +109,7 @@ System.register(['react', 'servicestack-client', './utils', 'react-codemirror', 
                                 : React.createElement("input", {type: "text", className: "txtFileName", onBlur: function (e) { return _this.props.onCreateFile(e); }, onKeyDown: function (e) { return e.keyCode === 13 ? e.target.blur() : null; }, onKeyUp: sizeToFit_1, size: "1", autoFocus: true}))));
                         }
                     }
-                    return (React.createElement("div", {id: "editor"}, React.createElement("div", {id: "tabs", style: { display: this.props.files ? 'flex' : 'none' }}, FileList.length > 0
+                    return (React.createElement("div", {id: "editor", className: this.props.isOwner ? "owner" : ""}, React.createElement("div", {id: "tabs", style: { display: this.props.files ? 'flex' : 'none' }}, FileList.length > 0
                         ? React.createElement("i", {id: "files-menu", className: "material-icons", onClick: function (e) { return _this.props.showPopup(e, _this.filesPopup); }}, "arrow_drop_down") : null, Tabs), React.createElement("div", {id: "popup-files", className: "popup", ref: function (e) { return _this.filesPopup = e; }}, FileList), React.createElement(react_codemirror_1.default, {value: source, options: options, onChange: function (src) { return _this.props.updateSource(_this.props.activeFileName, src); }})));
                 };
                 return Editor;

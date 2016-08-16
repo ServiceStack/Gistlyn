@@ -658,17 +658,20 @@ class App extends React.Component<any, any> {
         let description = meta != null ? meta.description : null;
 
         const main = this.getMainFile();
-        const isCollection = this.getFile(FileNames.CollectionIndex) != null;
+        const collection = this.props.collection;
+        const isGistCollection = this.getFile(FileNames.CollectionIndex) != null;
         const isScript = main != null;
         const isScriptRunning = ScriptStatusRunning.indexOf(this.props.scriptStatus) >= 0;
+        const isGistOwner = authUsername && meta && meta.owner_login === authUsername;
+        const isCollectionOwner = authUsername && collection && collection.owner_login === authUsername;
 
         var Preview = [];
 
-        const showCollection = this.props.showCollection && this.props.collection && this.props.collection.html != null;
+        const showCollection = this.props.showCollection && collection && collection.html != null;
         if (showCollection) {
-            Preview.push(<Collections collection={this.props.collection}
+            Preview.push(<Collections collection={collection} isOwner={isCollectionOwner}
                 gistStats={this.props.gistStats} excludeGists={GistTemplates.Gists}
-                showLiveLists={this.props.collection.id === GistTemplates.HomeCollection} authUsername={authUsername}
+                showLiveLists={collection.id === GistTemplates.HomeCollection} authUsername={authUsername}
                 onHome={e => this.props.urlChanged(GistTemplates.HomeCollection) }
                 changeGist={(id, options) => this.props.changeGist(id, options) }
                 changeCollection={(id, reload) => this.props.changeCollection(id, reload) }
@@ -836,7 +839,7 @@ class App extends React.Component<any, any> {
                                     : null }
 
                             <i id="btnCollections" style={{ visibility: meta ? "visible" : "hidden" }} title="Collections"
-                                onClick={e => this.props.changeCollection((this.props.collection && this.props.collection.id) || GistTemplates.HomeCollection, !showCollection) }
+                                onClick={e => this.props.changeCollection((collection && collection.id) || GistTemplates.HomeCollection, !showCollection) }
                                 className={"material-icons" + (showCollection ? " active" : "") }>apps</i>
 
                         </div>
@@ -869,7 +872,7 @@ class App extends React.Component<any, any> {
                         </div>
 
                         <Editor files={files}
-                            isOwner={authUsername && meta && meta.owner_login === authUsername}
+                            isOwner={isGistOwner}
                             activeFileName={this.props.activeFileName}
                             editingFileName={this.props.editingFileName}
                             selectFileName={fileName => this.props.selectFileName(fileName) }
@@ -879,6 +882,7 @@ class App extends React.Component<any, any> {
                             onRenameFile={(fileName, e) => this.handleRenameFile(fileName, e) }
                             onCreateFile={e => this.handleCreateFile(e) }
                             onShortcut={keyPattern => this.onShortcut(keyPattern)} />
+
                         <div id="preview">
                             {Preview}
                         </div>
@@ -937,12 +941,12 @@ class App extends React.Component<any, any> {
                             : <i onClick={e => this.cancel() } className="material-icons" title="cancel script" style={{ color: "#FF5252" }}>cancel</i>)
                         : null}
 
-                    {isCollection && this.props.gist != (this.props.collection && this.props.collection.id)
-                        ? (<i onClick={e => this.props.changeCollection(this.props.gist, true) } className="material-icons" title="View Collection">chevron_right</i>)
+                    {isGistCollection && isGistOwner && this.props.gist != (collection && collection.id)
+                        ? (<i onClick={e => this.props.changeCollection(this.props.gist, true) } className="material-icons owner" title="View Collection">chevron_right</i>)
                         : null}
 
-                    {showCollection && this.props.collection && this.props.collection.owner_login === authUsername &&this.props.gist != this.props.collection.id 
-                        ? (<i onClick={e => this.props.changeGist(this.props.collection.id) } className="material-icons" title="Edit Collection">chevron_left</i>)
+                    {showCollection && isCollectionOwner && this.props.gist != collection.id 
+                        ? (<i onClick={e => this.props.changeGist(collection.id) } className="material-icons owner" title="Edit Collection">chevron_left</i>)
                         : null}
                 </div>
 

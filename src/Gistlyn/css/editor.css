@@ -69,3 +69,13 @@
     border: none;
     padding: 0 2px;
 }
+
+.owner #tabs {
+    background: #4CAF50;
+}
+.owner #tabs div {
+    background: #388E3C;
+}
+.owner #tabs div.active {
+    background: #fff;
+}

@@ -122,7 +122,7 @@ export default class Editor extends React.Component<any, any> {
         }
 
         return (
-            <div id="editor">
+            <div id="editor" className={this.props.isOwner ? "owner" : ""}>
                 <div id="tabs" style={{ display: this.props.files ? 'flex' : 'none' }}>
                     {FileList.length > 0
                         ? <i id="files-menu" className="material-icons" onClick={e => this.props.showPopup(e, this.filesPopup) }>arrow_drop_down</i> : null }
