@@ -581,6 +581,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     var files = this.props.files;
                     var description = meta != null ? meta.description : null;
                     var main = this.getMainFile();
+                    var isCollection = this.getFile(utils_1.FileNames.CollectionIndex) != null;
                     var isScript = main != null;
                     var isScriptRunning = ScriptStatusRunning.indexOf(this.props.scriptStatus) >= 0;
                     var Preview = [];
@@ -657,11 +658,15 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         ? (React.createElement("div", {id: "delete-file", onClick: function (e) { return confirm("Are you sure you want to delete '" + _this.props.activeFileName + "?") ? _this.deleteFile(_this.props.activeFileName) : null; }}, React.createElement("i", {className: "material-icons"}, "delete "), React.createElement("p", null, "Delete File")))
                         : null), authUsername ? (React.createElement("i", {id: "btnSnapshot", className: "lnk material-icons", title: "Take Snapshot", onClick: function (e) {
                         return (capturedSnapshot = state_1.store.getState()) && _this.props.showDialog("take-snapshot");
-                    }}, "camera_alt")) : null, React.createElement("span", {id: "btnConsole", className: "lnk mega-octicon octicon-terminal", title: "Console Viewer", onClick: function (e) { return _this.props.showDialog("console-viewer"); }}), React.createElement("div", {id: "more-menu", style: { position: "absolute", right: 5, bottom: 5, color: "#fff", cursor: "pointer" }}, React.createElement("i", {className: "material-icons", onClick: function (e) { return _this.showPopup(e, _this.morePopup); }}, "more_vert")), React.createElement("div", {id: "popup-more", className: "popup", ref: function (e) { return _this.morePopup = e; }, style: { position: "absolute", bottom: 42, right: 0 }}, MorePopup)), React.createElement("div", {id: "run", className: "noselect" + (main == null ? " disabled" : ""), onClick: function (e) { return !isScriptRunning ? _this.run() : _this.cancel(); }}, main != null
+                    }}, "camera_alt")) : null, React.createElement("span", {id: "btnConsole", className: "lnk mega-octicon octicon-terminal", title: "Console Viewer", onClick: function (e) { return _this.props.showDialog("console-viewer"); }}), React.createElement("div", {id: "more-menu", style: { position: "absolute", right: 5, bottom: 5, color: "#fff", cursor: "pointer" }}, React.createElement("i", {className: "material-icons", onClick: function (e) { return _this.showPopup(e, _this.morePopup); }}, "more_vert")), React.createElement("div", {id: "popup-more", className: "popup", ref: function (e) { return _this.morePopup = e; }, style: { position: "absolute", bottom: 42, right: 0 }}, MorePopup)), React.createElement("div", {id: "run", className: "noselect"}, main != null
                         ? (!isScriptRunning
-                            ? React.createElement("i", {className: "material-icons", title: "run"}, "play_circle_outline")
-                            : React.createElement("i", {className: "material-icons", title: "cancel script", style: { color: "#FF5252" }}, "cancel"))
-                        : React.createElement("i", {className: "material-icons", title: "disabled"}, "play_circle_outline")), meta && this.props.dialog === "save-as"
+                            ? React.createElement("i", {onClick: function (e) { return _this.run(); }, className: "material-icons", title: "run"}, "play_circle_outline")
+                            : React.createElement("i", {onClick: function (e) { return _this.cancel(); }, className: "material-icons", title: "cancel script", style: { color: "#FF5252" }}, "cancel"))
+                        : null, isCollection && this.props.gist != (this.props.collection && this.props.collection.id)
+                        ? (React.createElement("i", {onClick: function (e) { return _this.props.changeCollection(_this.props.gist, true); }, className: "material-icons", title: "View Collection"}, "chevron_right"))
+                        : null, showCollection && this.props.collection && this.props.collection.owner_login === authUsername && this.props.gist != this.props.collection.id
+                        ? (React.createElement("i", {onClick: function (e) { return _this.props.changeGist(_this.props.collection.id); }, className: "material-icons", title: "Edit Collection"}, "chevron_left"))
+                        : null), meta && this.props.dialog === "save-as"
                         ? React.createElement(SaveAsDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, description: description, isPublic: meta.public, shouldFork: shouldFork, onSave: function (opt) { return _this.saveGist(opt); }, onHide: function () { return _this.props.showDialog(null); }})
                         : null, meta && this.props.dialog === "edit-gist"
                         ? React.createElement(EditGistDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, description: description, onSave: function (opt) { return _this.saveGist(opt); }, onHide: function () { return _this.props.showDialog(null); }})

@@ -658,6 +658,7 @@ class App extends React.Component<any, any> {
         let description = meta != null ? meta.description : null;
 
         const main = this.getMainFile();
+        const isCollection = this.getFile(FileNames.CollectionIndex) != null;
         const isScript = main != null;
         const isScriptRunning = ScriptStatusRunning.indexOf(this.props.scriptStatus) >= 0;
 
@@ -929,12 +930,20 @@ class App extends React.Component<any, any> {
                     </div>
                 </div>
 
-                <div id="run" className={"noselect" + (main == null ? " disabled" : "")} onClick={e => !isScriptRunning ? this.run() : this.cancel() }>
+                <div id="run" className="noselect">
                     {main != null
                         ? (!isScriptRunning
-                            ? <i className="material-icons" title="run">play_circle_outline</i>
-                            : <i className="material-icons" title="cancel script" style={{ color: "#FF5252" }}>cancel</i>)
-                        : <i className="material-icons" title="disabled">play_circle_outline</i>}
+                            ? <i onClick={e => this.run() } className="material-icons" title="run">play_circle_outline</i>
+                            : <i onClick={e => this.cancel() } className="material-icons" title="cancel script" style={{ color: "#FF5252" }}>cancel</i>)
+                        : null}
+
+                    {isCollection && this.props.gist != (this.props.collection && this.props.collection.id)
+                        ? (<i onClick={e => this.props.changeCollection(this.props.gist, true) } className="material-icons" title="View Collection">chevron_right</i>)
+                        : null}
+
+                    {showCollection && this.props.collection && this.props.collection.owner_login === authUsername &&this.props.gist != this.props.collection.id 
+                        ? (<i onClick={e => this.props.changeGist(this.props.collection.id) } className="material-icons" title="Edit Collection">chevron_left</i>)
+                        : null}
                 </div>
 
                 {meta && this.props.dialog === "save-as"

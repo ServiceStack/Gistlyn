@@ -122,8 +122,14 @@ const stateSideEffects = store => next => action => {
         const id = parts[parts.length - 1];
 
         //If it's cached we already know what it is: 
-        if (localStorage.getItem(GistCacheKey(id))) {
-            store.dispatch({ type: "GIST_CHANGE", gist: id });
+        const gistJson = localStorage.getItem(GistCacheKey(id));
+        if (gistJson) {
+            const gist = JSON.parse(gistJson);
+            if (gist.files[FileNames.CollectionIndex]) {
+                store.dispatch({ type: "COLLECTION_CHANGE", collection: { id }, showCollection: true });
+            } else {
+                store.dispatch({ type: "GIST_CHANGE", gist: id });
+            }
         } else if (collectionsCache[id]) {
             store.dispatch({ type: "COLLECTION_CHANGE", collection: { id }, showCollection:true });
         } else if (snapshotCache[id]) {
@@ -194,6 +200,11 @@ const stateSideEffects = store => next => action => {
         if (state.gist !== GistTemplates.AddServiceStackReferenceGist) { //Don't save changes to Add SS Ref template
             localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: state.files, meta: state.meta }));
         }
+        if (state.collection && state.collection.id === state.gist && action.fileName === FileNames.CollectionIndex) {
+            const collection = Object.assign({}, state.collection, { html: marked(action.content) });
+            collectionsCache[state.gist] = collection;
+            store.dispatch({ type: 'COLLECTION_LOAD', collection });
+        }
     } else if (action.type === "GIST_LOAD") {
         const meta = state.meta as IGistMeta;
         if (meta)
@@ -205,16 +216,23 @@ const stateSideEffects = store => next => action => {
     } else if (action.type === "GISTSTAT_INCR") {
         //console.log(state.gistStats);
     } else if (action.type === "COLLECTION_CHANGE" && action.collection && action.showCollection) {
-        var collection = collectionsCache[action.collection.id];
+        const id = action.collection.id;
+        const gistJson = localStorage.getItem(GistCacheKey(id));
+        if (gistJson) {
+            const gist = JSON.parse(gistJson);
+            collectionsCache[id] = createCollection(store, gist.meta, gist.files[FileNames.CollectionIndex]);
+        }
+
+        var collection = collectionsCache[id];
         if (collection) {
             updateHistory(collection.id, collection.description, "collection");
-            store.dispatch({ type: 'COLLECTION_LOAD', collection: collection });
-            store.dispatch({ type: "GISTSTAT_INCR", gist: collection.id, collection: true, description: collection.description, stat: "load", step: 1, owner_login: collection.owner_login });
+            store.dispatch({ type: 'COLLECTION_LOAD', collection });
+            store.dispatch({ type: "GISTSTAT_INCR", gist: id, collection: true, description: collection.description, stat: "load", step: 1, owner_login: collection.owner_login });
             if (collection.meta["gist"] && collection.meta["gist"] !== state.gist) {
                 store.dispatch({ type: "GIST_CHANGE", gist: collection.meta["gist"] });
             }
         } else {
-            fetch(createGistRequest(state, action.collection.id))
+            fetch(createGistRequest(state, id))
                 .then((res) => {
                     if (!res.ok) {
                         throw res;
@@ -224,10 +242,10 @@ const stateSideEffects = store => next => action => {
                             updateHistory(meta.id, meta.description, "collection");
 
                             collection = createCollection(store, meta, r.files[FileNames.CollectionIndex]);
-                            collectionsCache[collection.id] = collection;
+                            collectionsCache[id] = collection;
 
                             store.dispatch({ type: 'COLLECTION_LOAD', collection });
-                            store.dispatch({ type: "GISTSTAT_INCR", gist: meta.id, collection: true, description: meta.description, stat: "load", step: 1, owner_login: collection.owner_login });
+                            store.dispatch({ type: "GISTSTAT_INCR", gist: id, collection: true, description: meta.description, stat: "load", step: 1, owner_login: collection.owner_login });
                             if (collection.meta["gist"] && collection.meta["gist"] !== state.gist) {
                                 store.dispatch({ type: "GIST_CHANGE", gist: collection.meta["gist"] });
                             }
