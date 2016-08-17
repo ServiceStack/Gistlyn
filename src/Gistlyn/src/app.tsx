@@ -4,14 +4,24 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import ReactGA from 'react-ga';
 import { Provider, connect } from 'react-redux';
-import { reduxify, UA, getSortedFileNames, Config, StateKey, GistCacheKey, GistTemplates, FileNames, IGistMeta, IGistFile, addClientPackages, BatchItems } from './utils';
 import { store } from './state';
-import { queryString, JsonServiceClient, ServerEventsClient, ISseConnect, splitOnFirst, splitOnLast, humanize, dateFmt, timeFmt12 } from 'servicestack-client';
 import { JsonViewer } from './json-viewer';
+
+import { 
+    queryString, JsonServiceClient, ServerEventsClient, ISseConnect, 
+    splitOnFirst, splitOnLast, humanize, dateFmt, timeFmt12 
+} from 'servicestack-client';
+
+import { 
+    client, reduxify, UA, getSortedFileNames, Config, StateKey, 
+    GistCacheKey, GistTemplates, FileNames, IGistMeta, IGistFile, toGithubFiles, 
+    addClientPackages, BatchItems 
+} from './utils';
 
 import SaveAsDialog from './SaveAsDialog';
 import EditGistDialog from './EditGistDialog';
 import ShortcutsDialog from './ShortcutsDialog';
+import InsertLinkDialog from './InsertLinkDialog';
 import ImageUploadDialog from './ImageUploadDialog';
 import TakeSnapshotDialog from './TakeSnapshotDialog';
 import ConsoleViewerDialog from './ConsoleViewerDialog';
@@ -47,8 +57,6 @@ if (UA.nosse) {
 }
 
 const statusToError = status => ({ errorCode: status.errorCode, msg: status.message, cls: "error" });
-
-const client = new JsonServiceClient("/");
 
 const batchLogs = new BatchItems(30, logs => store.dispatch({ type: 'CONSOLE_LOG', logs }));
 
@@ -351,21 +359,13 @@ class App extends React.Component<any, any> {
         const files = this.props.files as { [index: string]: IGistFile };
         if (!meta || !files) return null;
 
-        var fileContents = {};
-        Object.keys(files).forEach(fileName => {
-            const file = new GithubFile();
-            file.filename = fileName;
-            file.content = files[fileName].content;
-            fileContents[fileName] = file;
-        });
-
         const request = new StoreGist();
         request.gist = this.props.gist;
         request.fork = opt.fork || this.shouldFork();
         request.ownerLogin = opt.ownerLogin || meta.owner_login;
         request.public = opt.public || meta.public;
         request.description = opt.description || meta.description;
-        request.files = opt.files || fileContents;
+        request.files = opt.files || toGithubFiles(files);
         return request;
     }
 
@@ -985,6 +985,12 @@ class App extends React.Component<any, any> {
                     ? <ImageUploadDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null)} 
                         id={this.props.gist}
                         onChange={url => this.props.showDialog(null) && this.editor.replaceSelection(`![{selection}](${url})`)} />
+                    : null}
+                {meta && this.props.dialog === "insert-link"
+                    ? <InsertLinkDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null)} 
+                        linkLabel={this.editor ? this.editor.getSelection() : ""}
+                        gistStats={this.props.gistStats} authUsername={authUsername}
+                        onChange={(url,label) => this.props.showDialog(null) && this.editor.replaceSelection(`[${label}](${url})`)} />
                     : null}
 
                 <div id="sig">made with <span>{String.fromCharCode(10084)}</span> by <a target="_blank" href="https://servicestack.net">ServiceStack</a></div>

@@ -38,9 +38,20 @@ export default class Editor extends React.Component<any, any> {
         }
     }
 
+    getDoc() {
+        return this.codeMirror && this.codeMirror.getDoc();
+    }
+
+    getSelection() : string {
+        const doc = this.getDoc();
+        return doc 
+            ? doc.getSelection()
+            : "";
+    }
+
     replaceSelection(text:string) {
-        if (!this.codeMirror) return;
-        const doc = this.codeMirror.getDoc();
+        const doc = this.getDoc();
+        if (!doc) return;
 
         const str = text.replace("{selection}", doc.getSelection());
         if (doc.getSelection() === "") {
@@ -49,6 +60,19 @@ export default class Editor extends React.Component<any, any> {
             doc.replaceSelection(str);
         }
         this.codeMirror.focus();
+    }
+
+    handleCodeFormat() {
+        const doc = this.getDoc();
+        const selection = this.getSelection();
+        if (selection === "") {
+            var cursor = doc.getCursor();
+            doc.replaceRange("\n```\n\n```\n", cursor, cursor);
+            doc.setCursor({line: cursor.line + 2, ch: cursor.ch});
+            this.codeMirror.focus();
+        } else {
+            this.replaceSelection("`{selection}`");
+        }
     }
 
     render() {
@@ -152,9 +176,9 @@ export default class Editor extends React.Component<any, any> {
                     <i className="material-icons" title="Strikethrough" onClick={e => this.replaceSelection("~~{selection}~~")}>strikethrough_s</i>
                     <i className="material-icons" title="Quote Text" onClick={e => this.replaceSelection("\n> {selection}")}>format_quote</i>
                     <i className="material-icons" title="Unordered List" onClick={e => this.replaceSelection("\n - {selection}")}>format_list_bulleted</i>
-                    <i className="material-icons" title="Ordered List" onClick={e => this.replaceSelection("\n 1. {selection}**")}>format_list_numbered</i>
-                    <i className="material-icons" title="Code" onClick={e => this.replaceSelection("\n```\n{selection}\n```\n")}>code</i>
-                    <i className="material-icons" title="Insert Link" onClick={e => this.replaceSelection("**{selection}**")}>insert_link</i>
+                    <i className="material-icons" title="Ordered List" onClick={e => this.replaceSelection("\n 1. {selection}")}>format_list_numbered</i>
+                    <i className="material-icons" title="Code" onClick={e => this.handleCodeFormat()}>code</i>
+                    <i className="material-icons" title="Insert Link" onClick={e => this.props.showDialog("insert-link")}>insert_link</i>
                     <i className="material-icons" title="Insert Image" onClick={e => this.props.showDialog("img-upload")}>insert_photo</i>
                 </div>
                 <CodeMirror ref={e => this.codeMirror = e && e.getCodeMirror()} value={source} options={options} onChange={src => this.props.updateSource(this.props.activeFileName, src) } />

@@ -48,7 +48,7 @@ export default class ImageUploadDialog extends React.Component<any, any> {
             <div className="dialog" ref={e => this.props.dialogRef(this.dialog = e) } onClick={e => e.stopPropagation() }>
                 <div className="dialog-header">
                     <i className="material-icons close" onClick={e => this.props.onHide() }>close</i>
-                    Add Image
+                    Insert Image
                 </div>
                 <div className="dialog-body">
                     <div className="row">

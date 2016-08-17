@@ -1,12 +1,23 @@
-System.register(['react-redux'], function(exports_1, context_1) {
+System.register(['react-redux', 'servicestack-client', './Gistlyn.dtos'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var react_redux_1;
-    var Config, StateKey, GistCacheKey, GistTemplates, FileNames, ua, platform, UA, BatchItems;
+    var react_redux_1, servicestack_client_1, Gistlyn_dtos_1;
+    var Config, StateKey, GistCacheKey, client, GistTemplates, FileNames, ua, platform, UA, BatchItems;
     function reduxify(mapStateToProps, mapDispatchToProps, mergeProps, options) {
         return function (target) { return (react_redux_1.connect(mapStateToProps, mapDispatchToProps, mergeProps, options)(target)); };
     }
     exports_1("reduxify", reduxify);
+    function toGithubFiles(files) {
+        var fileContents = {};
+        Object.keys(files).forEach(function (fileName) {
+            var file = new Gistlyn_dtos_1.GithubFile();
+            file.filename = fileName;
+            file.content = files[fileName].content;
+            fileContents[fileName] = file;
+        });
+        return fileContents;
+    }
+    exports_1("toGithubFiles", toGithubFiles);
     function getSortedFileNames(files) {
         var fileNames = Object.keys(files);
         fileNames.sort(function (a, b) {
@@ -44,13 +55,16 @@ System.register(['react-redux'], function(exports_1, context_1) {
         ]);
     }
     exports_1("addClientPackages", addClientPackages);
-    function batch(o, timer, cb) {
-    }
-    exports_1("batch", batch);
     return {
         setters:[
             function (react_redux_1_1) {
                 react_redux_1 = react_redux_1_1;
+            },
+            function (servicestack_client_1_1) {
+                servicestack_client_1 = servicestack_client_1_1;
+            },
+            function (Gistlyn_dtos_1_1) {
+                Gistlyn_dtos_1 = Gistlyn_dtos_1_1;
             }],
         execute: function() {
             exports_1("Config", Config = {
@@ -58,16 +72,18 @@ System.register(['react-redux'], function(exports_1, context_1) {
             });
             exports_1("StateKey", StateKey = "/v1/state");
             exports_1("GistCacheKey", GistCacheKey = function (gist) { return ("/v1/gists/" + gist); });
+            exports_1("client", client = new servicestack_client_1.JsonServiceClient("/"));
             exports_1("GistTemplates", GistTemplates = {
                 NewGist: "52c37e37b51a0ec92810477be34695ae",
                 NewPrivateGist: "492e199fa3ec5394ef0bc1aedd3240c7",
+                NewCollection: "854ec4df3502ecdfe9ca24d4745e484f",
                 AddServiceStackReferenceGist: "2dbd4ccff70851ce8ae55678f4f15d0a",
                 AddServiceStackReferenceCollection: "363605c3c121784ebababac4a03e8910",
                 CollectionsCollection: "457a7035675513ba1365195658a5d792",
                 SnapshotsCollection: "1576fda8eea87abbe94fa8051b4fed34",
                 HomeCollection: "2cc6b5db6afd3ccb0d0149e55fdb3a6a",
                 DownloadCollection: "74d7b0467a197f678bb4220b2c301ac3",
-                Gists: ["52c37e37b51a0ec92810477be34695ae", "492e199fa3ec5394ef0bc1aedd3240c7",
+                Gists: ["52c37e37b51a0ec92810477be34695ae", "492e199fa3ec5394ef0bc1aedd3240c7", "854ec4df3502ecdfe9ca24d4745e484f",
                     "2dbd4ccff70851ce8ae55678f4f15d0a", "363605c3c121784ebababac4a03e8910",
                     "457a7035675513ba1365195658a5d792", "1576fda8eea87abbe94fa8051b4fed34",
                     "2cc6b5db6afd3ccb0d0149e55fdb3a6a", "74d7b0467a197f678bb4220b2c301ac3"]

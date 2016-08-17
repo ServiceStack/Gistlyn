@@ -1,21 +1,25 @@
 ﻿import { connect } from 'react-redux';
+import { JsonServiceClient } from 'servicestack-client';
+import { GithubFile } from './Gistlyn.dtos';
 
 export const Config = {
     LatestVersion: "4.0.60",
 };
 export const StateKey = "/v1/state";
 export const GistCacheKey = (gist) => `/v1/gists/${gist}`;
+export const client = new JsonServiceClient("/");
 
 export const GistTemplates = {
     NewGist: "52c37e37b51a0ec92810477be34695ae",
     NewPrivateGist: "492e199fa3ec5394ef0bc1aedd3240c7",
+    NewCollection:"854ec4df3502ecdfe9ca24d4745e484f",
     AddServiceStackReferenceGist: "2dbd4ccff70851ce8ae55678f4f15d0a",
     AddServiceStackReferenceCollection: "363605c3c121784ebababac4a03e8910",
     CollectionsCollection: "457a7035675513ba1365195658a5d792",
     SnapshotsCollection: "1576fda8eea87abbe94fa8051b4fed34",
     HomeCollection: "2cc6b5db6afd3ccb0d0149e55fdb3a6a",
     DownloadCollection: "74d7b0467a197f678bb4220b2c301ac3",
-    Gists: ["52c37e37b51a0ec92810477be34695ae", "492e199fa3ec5394ef0bc1aedd3240c7",
+    Gists: ["52c37e37b51a0ec92810477be34695ae", "492e199fa3ec5394ef0bc1aedd3240c7", "854ec4df3502ecdfe9ca24d4745e484f",
         "2dbd4ccff70851ce8ae55678f4f15d0a", "363605c3c121784ebababac4a03e8910",
         "457a7035675513ba1365195658a5d792", "1576fda8eea87abbe94fa8051b4fed34",
         "2cc6b5db6afd3ccb0d0149e55fdb3a6a", "74d7b0467a197f678bb4220b2c301ac3"]
@@ -27,7 +31,15 @@ export const FileNames = {
     CollectionIndex: "index.md",
     Snapshot: "snapshot.json"
 };
-
+export interface IGistRef {
+    id: string;
+    description: string;
+    owner_login: string;
+}
+export interface IGistSaved {
+    meta: IGistMeta;
+    files: { [index: string]: IGistFile };
+}
 export interface IGistMeta {
     id: string;
     description: string;
@@ -67,6 +79,16 @@ export const UA = {
     }
 };
 
+export function toGithubFiles(files:{ [index: string]: IGistFile }): { [index:string]: GithubFile; } {
+    var fileContents = {} as { [index:string]: GithubFile; };
+    Object.keys(files).forEach(fileName => {
+        const file = new GithubFile();
+        file.filename = fileName;
+        file.content = files[fileName].content;
+        fileContents[fileName] = file;
+    });
+    return fileContents;
+}
 
 export function getSortedFileNames(files) {
     const fileNames = Object.keys(files);
@@ -141,6 +163,4 @@ export class BatchItems {
     }
 }
 
-export function batch(o, timer, cb) {
-}
 

@@ -1,5 +1,5 @@
 /// <reference path='../typings/index.d.ts'/>
-System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './state', 'servicestack-client', './json-viewer', './SaveAsDialog', './EditGistDialog', './ShortcutsDialog', './ImageUploadDialog', './TakeSnapshotDialog', './ConsoleViewerDialog', './InadequateBrowserDialog', './AddServiceStackReferenceDialog', './Console', './Collections', './Editor', './Gistlyn.dtos'], function(exports_1, context_1) {
+System.register(['react', 'react-dom', 'react-ga', 'react-redux', './state', './json-viewer', 'servicestack-client', './utils', './SaveAsDialog', './EditGistDialog', './ShortcutsDialog', './InsertLinkDialog', './ImageUploadDialog', './TakeSnapshotDialog', './ConsoleViewerDialog', './InadequateBrowserDialog', './AddServiceStackReferenceDialog', './Console', './Collections', './Editor', './Gistlyn.dtos'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -13,8 +13,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
         else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
-    var React, ReactDOM, react_ga_1, react_redux_1, utils_1, state_1, servicestack_client_1, json_viewer_1, SaveAsDialog_1, EditGistDialog_1, ShortcutsDialog_1, ImageUploadDialog_1, TakeSnapshotDialog_1, ConsoleViewerDialog_1, InadequateBrowserDialog_1, AddServiceStackReferenceDialog_1, Console_1, Collections_1, Editor_1, Gistlyn_dtos_1;
-    var ScriptStatusRunning, ScriptStatusError, capturedSnapshot, statusToError, client, batchLogs, channels, sse, App, qs, activeFileName, stateJson, state, e, qsSnapshot, qsAddRef, qsGist, qsCollection, qsExpression, qsClear;
+    var React, ReactDOM, react_ga_1, react_redux_1, state_1, json_viewer_1, servicestack_client_1, utils_1, SaveAsDialog_1, EditGistDialog_1, ShortcutsDialog_1, InsertLinkDialog_1, ImageUploadDialog_1, TakeSnapshotDialog_1, ConsoleViewerDialog_1, InadequateBrowserDialog_1, AddServiceStackReferenceDialog_1, Console_1, Collections_1, Editor_1, Gistlyn_dtos_1;
+    var ScriptStatusRunning, ScriptStatusError, capturedSnapshot, statusToError, batchLogs, channels, sse, App, qs, activeFileName, stateJson, state, e, qsSnapshot, qsAddRef, qsGist, qsCollection, qsExpression, qsClear;
     function evalExpression(gist, scriptId, expr) {
         if (!expr)
             return;
@@ -23,7 +23,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
         request.expression = expr;
         request.includeJson = true;
         react_ga_1.default.event({ category: 'preview', action: 'Evaluate Expression', label: gist + ": " + expr.substring(0, 50) });
-        client.post(request)
+        utils_1.client.post(request)
             .then(function (r) {
             if (r.result.errors && r.result.errors.length > 0) {
                 r.result.errors.forEach(function (x) {
@@ -53,17 +53,17 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
             function (react_redux_1_1) {
                 react_redux_1 = react_redux_1_1;
             },
-            function (utils_1_1) {
-                utils_1 = utils_1_1;
-            },
             function (state_1_1) {
                 state_1 = state_1_1;
+            },
+            function (json_viewer_1_1) {
+                json_viewer_1 = json_viewer_1_1;
             },
             function (servicestack_client_1_1) {
                 servicestack_client_1 = servicestack_client_1_1;
             },
-            function (json_viewer_1_1) {
-                json_viewer_1 = json_viewer_1_1;
+            function (utils_1_1) {
+                utils_1 = utils_1_1;
             },
             function (SaveAsDialog_1_1) {
                 SaveAsDialog_1 = SaveAsDialog_1_1;
@@ -73,6 +73,9 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
             },
             function (ShortcutsDialog_1_1) {
                 ShortcutsDialog_1 = ShortcutsDialog_1_1;
+            },
+            function (InsertLinkDialog_1_1) {
+                InsertLinkDialog_1 = InsertLinkDialog_1_1;
             },
             function (ImageUploadDialog_1_1) {
                 ImageUploadDialog_1 = ImageUploadDialog_1_1;
@@ -112,7 +115,6 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                 throw "This browser does not support Server Sent Events";
             }
             statusToError = function (status) { return ({ errorCode: status.errorCode, msg: status.message, cls: "error" }); };
-            client = new servicestack_client_1.JsonServiceClient("/");
             batchLogs = new utils_1.BatchItems(30, function (logs) { return state_1.store.dispatch({ type: 'CONSOLE_LOG', logs: logs }); });
             channels = ["gist"];
             sse = new servicestack_client_1.ServerEventsClient("/", channels, {
@@ -143,7 +145,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                             var request = new Gistlyn_dtos_1.GetScriptVariables();
                             var state_2 = state_1.store.getState();
                             request.scriptId = state_2.activeSub.id;
-                            client.get(request)
+                            utils_1.client.get(request)
                                 .then(function (r) {
                                 state_1.store.dispatch({ type: "VARS_LOAD", variables: r.variables });
                             });
@@ -176,7 +178,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         }
                         _this.props.setScriptStatus("Started");
                         react_ga_1.default.event({ category: 'gist', action: 'Run Gist', label: _this.props.gist });
-                        client.post(request)
+                        utils_1.client.post(request)
                             .then(function (r) {
                             var msgs = r.references.map(function (ref) { return ("loaded " + ref.name); });
                             msgs.push("\n");
@@ -192,7 +194,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         var request = new Gistlyn_dtos_1.CancelScript();
                         request.scriptId = _this.scriptId;
                         react_ga_1.default.event({ category: 'gist', action: 'Cancel Gist', label: _this.props.gist });
-                        client.post(request)
+                        utils_1.client.post(request)
                             .then(function (r) {
                             _this.props.setScriptStatus("Cancelled");
                             _this.props.logConsole([{ msg: "Cancelled by user", cls: "error" }]);
@@ -251,7 +253,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     request.scriptId = this.scriptId;
                     request.variableName = v.name;
                     react_ga_1.default.event({ category: 'preview', action: 'Inspect Variable', label: this.props.gist + ": " + v.name });
-                    client.get(request)
+                    utils_1.client.get(request)
                         .then(function (r) {
                         if (r.status !== "Completed") {
                             var msg = r.status === "Unknown"
@@ -317,20 +319,13 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     var files = this.props.files;
                     if (!meta || !files)
                         return null;
-                    var fileContents = {};
-                    Object.keys(files).forEach(function (fileName) {
-                        var file = new Gistlyn_dtos_1.GithubFile();
-                        file.filename = fileName;
-                        file.content = files[fileName].content;
-                        fileContents[fileName] = file;
-                    });
                     var request = new Gistlyn_dtos_1.StoreGist();
                     request.gist = this.props.gist;
                     request.fork = opt.fork || this.shouldFork();
                     request.ownerLogin = opt.ownerLogin || meta.owner_login;
                     request.public = opt.public || meta.public;
                     request.description = opt.description || meta.description;
-                    request.files = opt.files || fileContents;
+                    request.files = opt.files || utils_1.toGithubFiles(files);
                     return request;
                 };
                 App.prototype.saveGist = function (opt) {
@@ -355,14 +350,14 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         _this.props.logConsole([{ msg: "[" + servicestack_client_1.timeFmt12() + "] Gist was saved.", cls: "success" }]);
                         done();
                     };
-                    client.post(request)
+                    utils_1.client.post(request)
                         .then(complete)
                         .catch(function (e) {
                         _this.props.logConsoleError(e.responseStatus || e);
                         if (e.responseStatus && (e.responseStatus.message || "").indexOf("404") >= 0) {
                             request.ownerLogin = null;
                             _this.props.logConsole([{ msg: "[" + servicestack_client_1.timeFmt12() + "] Gist no longer exists. Attempting to Save as new Gist..." }]);
-                            client.post(request)
+                            utils_1.client.post(request)
                                 .then(complete)
                                 .catch(function (retryError) {
                                 _this.props.logConsoleError(retryError.responseStatus || retryError);
@@ -396,7 +391,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                     request.files[fileName] = new Gistlyn_dtos_1.GithubFile();
                     request.files[fileName].content = opt.content || "// " + fileName + "\n// Created by " + this.props.activeSub.displayName + " on " + servicestack_client_1.dateFmt() + "\n\n"; //Gist API requires non Whitespace content
                     react_ga_1.default.event({ category: 'file', action: 'Create File', label: fileName });
-                    return client.post(request)
+                    return utils_1.client.post(request)
                         .then(function (r) {
                         _this.props.changeGist(r.gist, { reload: true, activeFileName: fileName });
                     })
@@ -429,7 +424,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         newFileName += ".cs";
                     request.files[oldFileName].filename = newFileName;
                     react_ga_1.default.event({ category: 'file', action: 'Rename File', label: newFileName });
-                    return client.post(request)
+                    return utils_1.client.post(request)
                         .then(function (r) {
                         _this.props.changeGist(r.gist, { reload: true, activeFileName: newFileName });
                     })
@@ -686,6 +681,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './utils', './
                         ? React.createElement(TakeSnapshotDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, description: "Snapshot " + servicestack_client_1.timeFmt12(), snapshot: Object.assign({}, capturedSnapshot, { activeSub: null }), onHide: function () { return _this.props.showDialog(null) && (capturedSnapshot = null); }, urlChanged: function (url) { return _this.props.urlChanged(url) && _this.props.showDialog(null); }})
                         : null, meta && this.props.dialog === "img-upload"
                         ? React.createElement(ImageUploadDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }, id: this.props.gist, onChange: function (url) { return _this.props.showDialog(null) && _this.editor.replaceSelection("![{selection}](" + url + ")"); }})
+                        : null, meta && this.props.dialog === "insert-link"
+                        ? React.createElement(InsertLinkDialog_1.default, {dialogRef: function (e) { return _this.dialog = e; }, onHide: function () { return _this.props.showDialog(null); }, linkLabel: this.editor ? this.editor.getSelection() : "", gistStats: this.props.gistStats, authUsername: authUsername, onChange: function (url, label) { return _this.props.showDialog(null) && _this.editor.replaceSelection("[" + label + "](" + url + ")"); }})
                         : null, React.createElement("div", {id: "sig"}, "made with ", React.createElement("span", null, String.fromCharCode(10084)), " by ", React.createElement("a", {target: "_blank", href: "https://servicestack.net"}, "ServiceStack"))));
                 };
                 App = __decorate([

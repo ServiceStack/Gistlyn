@@ -180,6 +180,50 @@
     font-weight: normal;
 }
 
+.linktabs {
+    text-align: center;
+}
+.linktabs div {
+    display: inline-block;
+    cursor: pointer;
+    border-bottom: 2px solid #fff;
+    margin: 0 10px 20px 0;
+    padding: 2px 5px;
+}
+.linktabs div.active {
+    border-bottom: 2px solid #444;
+}
+.radiotabs div {
+    cursor: pointer;
+    display: inline-block;
+    margin: 0 10px 0 0;
+}
+.radiotabs i {
+    vertical-align: bottom;
+    margin-right: 5px;
+    font-size: 20px;
+}
+.gist-links-body {
+    max-height: 400px;
+    overflow: auto;
+}
+#insert-link-dialog dt {
+    font-weight: bold;
+    margin: 10px 0;
+}
+#insert-link-dialog dd {
+    font-size: 14px;
+    cursor: pointer;
+    color: #428bca;
+    line-height: 20px;
+    padding: 0 0 0 10px;
+}
+#insert-link-dialog dd:hover {
+    color: #2a6496;
+}
+.insert-link-new {
+    margin: 20px 0px 10px 0px;
+}
 #nosse-dialog a {
     color: #428bca;
     text-decoration: none;
