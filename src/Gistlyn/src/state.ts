@@ -1,5 +1,5 @@
 ﻿import { createStore, applyMiddleware } from 'redux';
-import { getSortedFileNames, GistTemplates, StateKey, GistCacheKey, FileNames, IGistMeta, IGistFile, addClientPackages } from './utils';
+import { getSortedFileNames, GistTemplates, StateKey, GistCacheKey, FileNames, IGistMeta, IGistFile, IGistSaved, addClientPackages } from './utils';
 import { queryString, appendQueryString, splitOnFirst, splitOnLast } from 'servicestack-client';
 import ReactGA from 'react-ga';
 import marked from 'marked';
@@ -48,6 +48,17 @@ export const createGistMeta = (r:any): IGistMeta => ({
         owner_avatar_url: r.owner && r.owner.avatar_url
 });
 
+export const getSavedGist = (id:string): IGistSaved => {
+    const json = localStorage.getItem(GistCacheKey(id));
+    return json
+        ? JSON.parse(json) as IGistSaved
+        : null;
+}
+
+export const saveGist = (id:string, gist:IGistSaved) => {
+    localStorage.setItem(id, JSON.stringify(gist));
+}
+
 const handleGistErrorResponse = (res: any, store: any, id: string) => {
     if (res.status === 403) {
         store.dispatch({ type: 'ERROR_RAISE', error: { message: `Github's public API quota has been exceeded, sign-in to continue for more.` } });
@@ -84,8 +95,6 @@ const parseMarkdownMeta = (markdown: string): any => {
     return { meta, markdown };
 }
 
-const serializeGist = (meta: IGistMeta, files) => JSON.stringify({ files, meta });
-
 const createCollection = (store, meta: IGistMeta, indexFile:IGistFile) => {
     if (!indexFile) {
         store.dispatch({ type: 'ERROR_RAISE', error: { message: `Collection has no '${FileNames.CollectionIndex}'` } });
@@ -121,9 +130,8 @@ const stateSideEffects = store => next => action => {
         const id = parts[parts.length - 1];
 
         //If it's cached we already know what it is: 
-        const gistJson = localStorage.getItem(GistCacheKey(id));
-        if (gistJson) {
-            const gist = JSON.parse(gistJson);
+        const gist = getSavedGist(id);
+        if (gist) {
             if (gist.files[FileNames.CollectionIndex]) {
                 store.dispatch({ type: "COLLECTION_CHANGE", collection: { id }, showCollection: true });
             } else {
@@ -143,7 +151,7 @@ const stateSideEffects = store => next => action => {
                             const meta = createGistMeta(r);
                             //Populate cache and dispatch appropriate action:
                             if (r.files[FileNames.GistMain]) {
-                                localStorage.setItem(GistCacheKey(id), serializeGist(meta, r.files));
+                                saveGist(id, { meta, files:r.files });
                                 store.dispatch({ type: "GIST_CHANGE", gist: id });
                             } else if (r.files[FileNames.CollectionIndex]) {
                                 collectionsCache[meta.id] = createCollection(store, meta, r.files[FileNames.CollectionIndex]);
@@ -172,10 +180,9 @@ const stateSideEffects = store => next => action => {
 
     const options = action.options || {};
     if (action.type === 'GIST_CHANGE' && action.gist && (options.reload || oldGist !== action.gist || !state.files || !state.meta)) {
-        const json = !options.reload ? localStorage.getItem(GistCacheKey(state.gist)) : null;
-        if (json) {
-            const gist = JSON.parse(json);
-            const meta = gist.meta as IGistMeta;
+        const gist = !options.reload ? getSavedGist(state.gist) : null;
+        if (gist) {
+            const meta = gist.meta;
             const files = gist.files;
             updateHistory(meta.id, meta.description, "gist");
             store.dispatch({ type: 'GIST_LOAD', meta, files, activeFileName: options.activeFileName || getSortedFileNames(files)[0] });
@@ -188,7 +195,7 @@ const stateSideEffects = store => next => action => {
                         return res.json().then((r) => {
                             const meta = createGistMeta(r);
                             updateHistory(meta.id, meta.description, "gist");
-                            localStorage.setItem(GistCacheKey(state.gist), serializeGist(meta, r.files));
+                            saveGist(state.gist, { meta, files:r.files });
                             store.dispatch({ type: 'GIST_LOAD', meta, files: r.files, activeFileName: options.activeFileName || getSortedFileNames(r.files)[0] });
                         });
                     }
@@ -197,7 +204,7 @@ const stateSideEffects = store => next => action => {
         }
     } else if (action.type === "SOURCE_CHANGE") {
         if (state.gist !== GistTemplates.AddServiceStackReferenceGist) { //Don't save changes to Add SS Ref template
-            localStorage.setItem(GistCacheKey(state.gist), JSON.stringify({ files: state.files, meta: state.meta }));
+            saveGist(state.gist, { files: state.files, meta: state.meta });
         }
         if (state.collection && state.collection.id === state.gist && action.fileName === FileNames.CollectionIndex) {
             const collection = Object.assign({}, state.collection, { html: marked(action.content) });
@@ -216,9 +223,8 @@ const stateSideEffects = store => next => action => {
         //console.log(state.gistStats);
     } else if (action.type === "COLLECTION_CHANGE" && action.collection && action.showCollection) {
         const id = action.collection.id;
-        const gistJson = localStorage.getItem(GistCacheKey(id));
-        if (gistJson) {
-            const gist = JSON.parse(gistJson);
+        const gist = getSavedGist(id);
+        if (gist) {
             collectionsCache[id] = createCollection(store, gist.meta, gist.files[FileNames.CollectionIndex]);
         }
 
