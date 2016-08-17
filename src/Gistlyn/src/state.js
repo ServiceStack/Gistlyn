@@ -41,18 +41,15 @@ System.register(['redux', './utils', 'servicestack-client', 'react-ga', 'marked'
             };
             collectionsCache = {};
             snapshotCache = {};
-            createGistRequest = function (state, gist) {
-                var authUsername = state.activeSub && parseInt(state.activeSub.userId) > 0
-                    ? state.activeSub.displayName
-                    : null;
+            exports_1("createGistRequest", createGistRequest = function (authUsername, gist) {
                 var disableCache = "?t=" + new Date().getTime();
                 var urlPrefix = authUsername //Auth requests gets bigger quota
                     ? "/github-proxy/"
                     : "https://api.github.com/";
                 var req = new Request(urlPrefix + "gists/" + gist + disableCache, authUsername ? { credentials: "include" } : null);
                 return req;
-            };
-            createGistMeta = function (r) { return ({
+            });
+            exports_1("createGistMeta", createGistMeta = function (r) { return ({
                 id: r.id,
                 description: r.description,
                 public: r.public,
@@ -61,7 +58,7 @@ System.register(['redux', './utils', 'servicestack-client', 'react-ga', 'marked'
                 owner_login: r.owner && r.owner.login,
                 owner_id: r.owner && r.owner.id,
                 owner_avatar_url: r.owner && r.owner.avatar_url
-            }); };
+            }); });
             handleGistErrorResponse = function (res, store, id) {
                 if (res.status === 403) {
                     store.dispatch({ type: 'ERROR_RAISE', error: { message: "Github's public API quota has been exceeded, sign-in to continue for more." } });
@@ -114,6 +111,9 @@ System.register(['redux', './utils', 'servicestack-client', 'react-ga', 'marked'
                 var oldGist = store.getState().gist;
                 var result = next(action);
                 var state = store.getState();
+                var authUsername = state.activeSub && parseInt(state.activeSub.userId) > 0
+                    ? state.activeSub.displayName
+                    : null;
                 if (action.type !== "LOAD") {
                     localStorage.setItem(utils_1.StateKey, JSON.stringify(state));
                 }
@@ -141,7 +141,7 @@ System.register(['redux', './utils', 'servicestack-client', 'react-ga', 'marked'
                         store.dispatch({ type: "SNAPSHOT_LOAD", snapshot: snapshotCache[id_1] });
                     }
                     else {
-                        fetch(createGistRequest(state, id_1))
+                        fetch(createGistRequest(authUsername, id_1))
                             .then(function (res) {
                             if (!res.ok) {
                                 throw res;
@@ -194,7 +194,7 @@ System.register(['redux', './utils', 'servicestack-client', 'react-ga', 'marked'
                         store.dispatch({ type: 'GIST_LOAD', meta: meta, files: files, activeFileName: options.activeFileName || utils_1.getSortedFileNames(files)[0] });
                     }
                     else {
-                        fetch(createGistRequest(state, action.gist))
+                        fetch(createGistRequest(authUsername, action.gist))
                             .then(function (res) {
                             if (!res.ok) {
                                 throw res;
@@ -250,7 +250,7 @@ System.register(['redux', './utils', 'servicestack-client', 'react-ga', 'marked'
                         }
                     }
                     else {
-                        fetch(createGistRequest(state, id_2))
+                        fetch(createGistRequest(authUsername, id_2))
                             .then(function (res) {
                             if (!res.ok) {
                                 throw res;

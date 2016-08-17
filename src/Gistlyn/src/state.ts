@@ -26,11 +26,7 @@ const updateHistory = (id:string, description:string, key:string) => {
 var collectionsCache = {};
 var snapshotCache = {};
 
-const createGistRequest = (state, gist) => {
-    const authUsername = state.activeSub && parseInt(state.activeSub.userId) > 0
-        ? state.activeSub.displayName
-        : null;
-
+export const createGistRequest = (authUsername:string, gist:string) => {
     const disableCache = "?t=" + new Date().getTime();
 
     var urlPrefix = authUsername //Auth requests gets bigger quota
@@ -41,7 +37,7 @@ const createGistRequest = (state, gist) => {
     return req;
 };
 
-const createGistMeta = (r:any): IGistMeta => ({
+export const createGistMeta = (r:any): IGistMeta => ({
         id: r.id,
         description: r.description,
         public: r.public,
@@ -107,9 +103,12 @@ const createCollection = (store, meta: IGistMeta, indexFile:IGistFile) => {
 };
 
 const stateSideEffects = store => next => action => {
-    var oldGist = store.getState().gist;
-    var result = next(action);
-    var state = store.getState();
+    const oldGist = store.getState().gist;
+    const result = next(action);
+    const state = store.getState();
+    const authUsername = state.activeSub && parseInt(state.activeSub.userId) > 0
+        ? state.activeSub.displayName
+        : null;
 
     if (action.type !== "LOAD") {
         localStorage.setItem(StateKey, JSON.stringify(state));
@@ -135,7 +134,7 @@ const stateSideEffects = store => next => action => {
         } else if (snapshotCache[id]) {
             store.dispatch({ type: "SNAPSHOT_LOAD", snapshot: snapshotCache[id] });
         } else {
-            fetch(createGistRequest(state, id))
+            fetch(createGistRequest(authUsername, id))
                 .then((res) => {
                     if (!res.ok) {
                         throw res;
@@ -181,7 +180,7 @@ const stateSideEffects = store => next => action => {
             updateHistory(meta.id, meta.description, "gist");
             store.dispatch({ type: 'GIST_LOAD', meta, files, activeFileName: options.activeFileName || getSortedFileNames(files)[0] });
         } else {
-            fetch(createGistRequest(state, action.gist))
+            fetch(createGistRequest(authUsername, action.gist))
                 .then((res) => {
                     if (!res.ok) {
                         throw res;
@@ -232,7 +231,7 @@ const stateSideEffects = store => next => action => {
                 store.dispatch({ type: "GIST_CHANGE", gist: collection.meta["gist"] });
             }
         } else {
-            fetch(createGistRequest(state, id))
+            fetch(createGistRequest(authUsername, id))
                 .then((res) => {
                     if (!res.ok) {
                         throw res;
