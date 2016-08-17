@@ -56,6 +56,19 @@ System.register(['react', 'servicestack-client', './utils', 'react-codemirror', 
                         }
                     }
                 };
+                Editor.prototype.replaceSelection = function (text) {
+                    if (!this.codeMirror)
+                        return;
+                    var doc = this.codeMirror.getDoc();
+                    var str = text.replace("{selection}", doc.getSelection());
+                    if (doc.getSelection() === "") {
+                        doc.replaceRange(str, doc.getCursor(), doc.getCursor());
+                    }
+                    else {
+                        doc.replaceSelection(str);
+                    }
+                    this.codeMirror.focus();
+                };
                 Editor.prototype.render = function () {
                     var _this = this;
                     var options = {
@@ -110,7 +123,7 @@ System.register(['react', 'servicestack-client', './utils', 'react-codemirror', 
                         }
                     }
                     return (React.createElement("div", {id: "editor", className: this.props.isOwner ? "owner" : ""}, React.createElement("div", {id: "tabs", style: { display: this.props.files ? 'flex' : 'none' }}, FileList.length > 0
-                        ? React.createElement("i", {id: "files-menu", className: "material-icons", onClick: function (e) { return _this.props.showPopup(e, _this.filesPopup); }}, "arrow_drop_down") : null, Tabs), React.createElement("div", {id: "popup-files", className: "popup", ref: function (e) { return _this.filesPopup = e; }}, FileList), React.createElement(react_codemirror_1.default, {value: source, options: options, onChange: function (src) { return _this.props.updateSource(_this.props.activeFileName, src); }})));
+                        ? React.createElement("i", {id: "files-menu", className: "material-icons", onClick: function (e) { return _this.props.showPopup(e, _this.filesPopup); }}, "arrow_drop_down") : null, Tabs), React.createElement("div", {id: "popup-files", className: "popup", ref: function (e) { return _this.filesPopup = e; }}, FileList), React.createElement("div", {id: "markdown-toolbar"}, React.createElement("i", {className: "material-icons", title: "Heading", onClick: function (e) { return _this.replaceSelection("## {selection}"); }}, "format_size"), React.createElement("i", {className: "material-icons", title: "Bold", onClick: function (e) { return _this.replaceSelection("**{selection}**"); }}, "format_bold"), React.createElement("i", {className: "material-icons", title: "Italics", onClick: function (e) { return _this.replaceSelection("_{selection}_"); }}, "format_italic"), React.createElement("i", {className: "material-icons", title: "Strikethrough", onClick: function (e) { return _this.replaceSelection("~~{selection}~~"); }}, "strikethrough_s"), React.createElement("i", {className: "material-icons", title: "Quote Text", onClick: function (e) { return _this.replaceSelection("\n> {selection}"); }}, "format_quote"), React.createElement("i", {className: "material-icons", title: "Unordered List", onClick: function (e) { return _this.replaceSelection("\n - {selection}"); }}, "format_list_bulleted"), React.createElement("i", {className: "material-icons", title: "Ordered List", onClick: function (e) { return _this.replaceSelection("\n 1. {selection}**"); }}, "format_list_numbered"), React.createElement("i", {className: "material-icons", title: "Code", onClick: function (e) { return _this.replaceSelection("\n```\n{selection}\n```\n"); }}, "code"), React.createElement("i", {className: "material-icons", title: "Insert Link", onClick: function (e) { return _this.replaceSelection("**{selection}**"); }}, "insert_link"), React.createElement("i", {className: "material-icons", title: "Insert Image", onClick: function (e) { return _this.props.showDialog("img-upload"); }}, "insert_photo")), React.createElement(react_codemirror_1.default, {ref: function (e) { return _this.codeMirror = e && e.getCodeMirror(); }, value: source, options: options, onChange: function (src) { return _this.props.updateSource(_this.props.activeFileName, src); }})));
                 };
                 return Editor;
             }(React.Component));

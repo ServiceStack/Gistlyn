@@ -117,6 +117,9 @@
 #markdown strong, #markdown b {
     font-weight: bold; 
 }
+#markdown em {
+    font-style: italic;
+}
 #markdown ul, #markdown ol {
     padding-left: 2em;
     margin: 0 0 16px 0; 

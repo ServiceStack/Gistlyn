@@ -12,6 +12,7 @@ import { JsonViewer } from './json-viewer';
 import SaveAsDialog from './SaveAsDialog';
 import EditGistDialog from './EditGistDialog';
 import ShortcutsDialog from './ShortcutsDialog';
+import ImageUploadDialog from './ImageUploadDialog';
 import TakeSnapshotDialog from './TakeSnapshotDialog';
 import ConsoleViewerDialog from './ConsoleViewerDialog';
 import InadequateBrowserDialog from './InadequateBrowserDialog';
@@ -516,6 +517,7 @@ class App extends React.Component<any, any> {
         location.href = '/auth/github';
     }
 
+    editor: Editor;
     morePopup: HTMLDivElement;
     editorPopup: HTMLDivElement;
     userPopup: HTMLDivElement;
@@ -871,13 +873,15 @@ class App extends React.Component<any, any> {
                             {EditorPopup}
                         </div>
 
-                        <Editor files={files}
+                        <Editor ref={e => this.editor = e}
+                            files={files}
                             isOwner={isGistOwner}
                             activeFileName={this.props.activeFileName}
                             editingFileName={this.props.editingFileName}
                             selectFileName={fileName => this.props.selectFileName(fileName) }
                             editFileName={fileName => this.props.editFileName(fileName) }
                             showPopup={(e, filesPopup) => this.showPopup(e, filesPopup) }
+                            showDialog={dialog => this.props.showDialog(dialog) }
                             updateSource={(fileName, src) => this.props.updateSource(fileName, src) }
                             onRenameFile={(fileName, e) => this.handleRenameFile(fileName, e) }
                             onCreateFile={e => this.handleCreateFile(e) }
@@ -975,6 +979,12 @@ class App extends React.Component<any, any> {
                         snapshot={ Object.assign({}, capturedSnapshot, { activeSub: null }) }
                         onHide={() => this.props.showDialog(null) && (capturedSnapshot = null) }
                         urlChanged={url => this.props.urlChanged(url) && this.props.showDialog(null) } />
+                    : null}
+
+                {meta && this.props.dialog === "img-upload"
+                    ? <ImageUploadDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null)} 
+                        id={this.props.gist}
+                        onChange={url => this.props.showDialog(null) && this.editor.replaceSelection(`![{selection}](${url})`)} />
                     : null}
 
                 <div id="sig">made with <span>{String.fromCharCode(10084)}</span> by <a target="_blank" href="https://servicestack.net">ServiceStack</a></div>

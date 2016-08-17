@@ -28,11 +28,6 @@ namespace Gistlyn.ServiceInterface
 
         public IServerEvents ServerEvents { get; set; }
 
-        public object Any(Hello request)
-        {
-            return new HelloResponse { Result = "Hello, {0}!".Fmt(request.Name) };
-        }
-
         public object Any(RunScript request)
         {
             if (request.ScriptId == null)
