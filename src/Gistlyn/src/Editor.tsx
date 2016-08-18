@@ -49,15 +49,33 @@ export default class Editor extends React.Component<any, any> {
             : "";
     }
 
-    replaceSelection(text:string) {
+    replaceSelection(text:string, opt:any={}) {
         const doc = this.getDoc();
         if (!doc) return;
 
         const str = text.replace("{selection}", doc.getSelection());
         if (doc.getSelection() === "") {
-            doc.replaceRange(str, doc.getCursor(), doc.getCursor());
+            const cursor = doc.getCursor();
+            doc.replaceRange(str, cursor, cursor);
+            if (opt.noselect && (opt.noselect.line != null || opt.noselect.ch != null)) {
+                doc.setCursor({line: cursor.line + (opt.noselect.line || 0), ch: cursor.ch + (opt.noselect.ch || 0) });
+            }
         } else {
             doc.replaceSelection(str);
+        }
+        this.codeMirror.focus();
+    }
+
+    toggleLine(text:string) {
+        const doc = this.getDoc();
+        if (!doc) return;
+
+        const cursor = doc.getCursor();
+        const line = doc.getRange({line:cursor.line,ch:0}, {line:cursor.line+1, ch:0});
+        if (line.startsWith(text)) {
+            doc.replaceRange("", {line:cursor.line,ch:0}, {line:cursor.line,ch:text.length});
+        } else {
+            doc.replaceRange(text, {line:cursor.line,ch:0}, {line:cursor.line,ch:0});
         }
         this.codeMirror.focus();
     }
@@ -172,13 +190,13 @@ export default class Editor extends React.Component<any, any> {
 
                 {options["mode"] == "text/x-markdown" 
                     ? (<div id="markdown-toolbar">
-                           <i className="material-icons" title="Heading" onClick={e => this.replaceSelection("## {selection}")}>format_size</i>
-                           <i className="material-icons" title="Bold" onClick={e => this.replaceSelection("**{selection}**")}>format_bold</i>
-                           <i className="material-icons" title="Italics" onClick={e => this.replaceSelection("_{selection}_")}>format_italic</i>
-                           <i className="material-icons" title="Strikethrough" onClick={e => this.replaceSelection("~~{selection}~~")}>strikethrough_s</i>
-                           <i className="material-icons" title="Quote Text" onClick={e => this.replaceSelection("\n> {selection}")}>format_quote</i>
-                           <i className="material-icons" title="Unordered List" onClick={e => this.replaceSelection("\n - {selection}")}>format_list_bulleted</i>
-                           <i className="material-icons" title="Ordered List" onClick={e => this.replaceSelection("\n 1. {selection}")}>format_list_numbered</i>
+                           <i className="material-icons" title="Heading" onClick={e => this.toggleLine("## ")}>format_size</i>
+                           <i className="material-icons" title="Bold" onClick={e => this.replaceSelection("**{selection}**", { noselect: { ch: 2 }}) }>format_bold</i>
+                           <i className="material-icons" title="Italics" onClick={e => this.replaceSelection("_{selection}_", { noselect: { ch: 1 }})}>format_italic</i>
+                           <i className="material-icons" title="Strikethrough" onClick={e => this.replaceSelection("~~{selection}~~", { noselect: { ch: 2 }})}>strikethrough_s</i>
+                           <i className="material-icons" title="Quote Text" onClick={e => this.toggleLine("> ")}>format_quote</i>
+                           <i className="material-icons" title="Unordered List" onClick={e => this.toggleLine(" - ")}>format_list_bulleted</i>
+                           <i className="material-icons" title="Ordered List" onClick={e => this.toggleLine(" 1. ")}>format_list_numbered</i>
                            <i className="material-icons" title="Code" onClick={e => this.handleCodeFormat()}>code</i>
                            <i className="material-icons" title="Insert Link" onClick={e => this.props.showDialog("insert-link")}>insert_link</i>
                            <i className="material-icons" title="Insert Image" onClick={e => this.props.showDialog("img-upload")}>insert_photo</i>

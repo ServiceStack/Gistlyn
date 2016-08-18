@@ -65,16 +65,35 @@ System.register(['react', 'servicestack-client', './utils', 'react-codemirror', 
                         ? doc.getSelection()
                         : "";
                 };
-                Editor.prototype.replaceSelection = function (text) {
+                Editor.prototype.replaceSelection = function (text, opt) {
+                    if (opt === void 0) { opt = {}; }
                     var doc = this.getDoc();
                     if (!doc)
                         return;
                     var str = text.replace("{selection}", doc.getSelection());
                     if (doc.getSelection() === "") {
-                        doc.replaceRange(str, doc.getCursor(), doc.getCursor());
+                        var cursor = doc.getCursor();
+                        doc.replaceRange(str, cursor, cursor);
+                        if (opt.noselect && (opt.noselect.line != null || opt.noselect.ch != null)) {
+                            doc.setCursor({ line: cursor.line + (opt.noselect.line || 0), ch: cursor.ch + (opt.noselect.ch || 0) });
+                        }
                     }
                     else {
                         doc.replaceSelection(str);
+                    }
+                    this.codeMirror.focus();
+                };
+                Editor.prototype.toggleLine = function (text) {
+                    var doc = this.getDoc();
+                    if (!doc)
+                        return;
+                    var cursor = doc.getCursor();
+                    var line = doc.getRange({ line: cursor.line, ch: 0 }, { line: cursor.line + 1, ch: 0 });
+                    if (line.startsWith(text)) {
+                        doc.replaceRange("", { line: cursor.line, ch: 0 }, { line: cursor.line, ch: text.length });
+                    }
+                    else {
+                        doc.replaceRange(text, { line: cursor.line, ch: 0 }, { line: cursor.line, ch: 0 });
                     }
                     this.codeMirror.focus();
                 };
@@ -146,7 +165,7 @@ System.register(['react', 'servicestack-client', './utils', 'react-codemirror', 
                     }
                     return (React.createElement("div", {id: "editor", className: this.props.isOwner ? "owner" : ""}, React.createElement("div", {id: "tabs", style: { display: this.props.files ? 'flex' : 'none' }}, FileList.length > 0
                         ? React.createElement("i", {id: "files-menu", className: "material-icons", onClick: function (e) { return _this.props.showPopup(e, _this.filesPopup); }}, "arrow_drop_down") : null, Tabs), React.createElement("div", {id: "popup-files", className: "popup", ref: function (e) { return _this.filesPopup = e; }}, FileList), options["mode"] == "text/x-markdown"
-                        ? (React.createElement("div", {id: "markdown-toolbar"}, React.createElement("i", {className: "material-icons", title: "Heading", onClick: function (e) { return _this.replaceSelection("## {selection}"); }}, "format_size"), React.createElement("i", {className: "material-icons", title: "Bold", onClick: function (e) { return _this.replaceSelection("**{selection}**"); }}, "format_bold"), React.createElement("i", {className: "material-icons", title: "Italics", onClick: function (e) { return _this.replaceSelection("_{selection}_"); }}, "format_italic"), React.createElement("i", {className: "material-icons", title: "Strikethrough", onClick: function (e) { return _this.replaceSelection("~~{selection}~~"); }}, "strikethrough_s"), React.createElement("i", {className: "material-icons", title: "Quote Text", onClick: function (e) { return _this.replaceSelection("\n> {selection}"); }}, "format_quote"), React.createElement("i", {className: "material-icons", title: "Unordered List", onClick: function (e) { return _this.replaceSelection("\n - {selection}"); }}, "format_list_bulleted"), React.createElement("i", {className: "material-icons", title: "Ordered List", onClick: function (e) { return _this.replaceSelection("\n 1. {selection}"); }}, "format_list_numbered"), React.createElement("i", {className: "material-icons", title: "Code", onClick: function (e) { return _this.handleCodeFormat(); }}, "code"), React.createElement("i", {className: "material-icons", title: "Insert Link", onClick: function (e) { return _this.props.showDialog("insert-link"); }}, "insert_link"), React.createElement("i", {className: "material-icons", title: "Insert Image", onClick: function (e) { return _this.props.showDialog("img-upload"); }}, "insert_photo")))
+                        ? (React.createElement("div", {id: "markdown-toolbar"}, React.createElement("i", {className: "material-icons", title: "Heading", onClick: function (e) { return _this.toggleLine("## "); }}, "format_size"), React.createElement("i", {className: "material-icons", title: "Bold", onClick: function (e) { return _this.replaceSelection("**{selection}**", { noselect: { ch: 2 } }); }}, "format_bold"), React.createElement("i", {className: "material-icons", title: "Italics", onClick: function (e) { return _this.replaceSelection("_{selection}_", { noselect: { ch: 1 } }); }}, "format_italic"), React.createElement("i", {className: "material-icons", title: "Strikethrough", onClick: function (e) { return _this.replaceSelection("~~{selection}~~", { noselect: { ch: 2 } }); }}, "strikethrough_s"), React.createElement("i", {className: "material-icons", title: "Quote Text", onClick: function (e) { return _this.toggleLine("> "); }}, "format_quote"), React.createElement("i", {className: "material-icons", title: "Unordered List", onClick: function (e) { return _this.toggleLine(" - "); }}, "format_list_bulleted"), React.createElement("i", {className: "material-icons", title: "Ordered List", onClick: function (e) { return _this.toggleLine(" 1. "); }}, "format_list_numbered"), React.createElement("i", {className: "material-icons", title: "Code", onClick: function (e) { return _this.handleCodeFormat(); }}, "code"), React.createElement("i", {className: "material-icons", title: "Insert Link", onClick: function (e) { return _this.props.showDialog("insert-link"); }}, "insert_link"), React.createElement("i", {className: "material-icons", title: "Insert Image", onClick: function (e) { return _this.props.showDialog("img-upload"); }}, "insert_photo")))
                         : null, React.createElement(react_codemirror_1.default, {ref: function (e) { return _this.codeMirror = e && e.getCodeMirror(); }, value: source, options: options, onChange: function (src) { return _this.props.updateSource(_this.props.activeFileName, src); }})));
                 };
                 return Editor;
