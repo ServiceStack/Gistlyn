@@ -774,6 +774,8 @@ class App extends React.Component<any, any> {
         MorePopup.push((
             <div onClick={e => this.props.changeGist(GistTemplates.NewPrivateGist) }>New Private Gist</div>));
         MorePopup.push((
+            <div onClick={e => this.props.changeGist(GistTemplates.NewCollection) }>New Collection</div>));
+        MorePopup.push((
             <div onClick={e => this.props.showDialog("shortcuts") }>Shortcuts</div>));
         MorePopup.push((
             <div onClick={e => window.open("https://github.com/ServiceStack/Gistlyn/issues") }>Send Feedback</div>));

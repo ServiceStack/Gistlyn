@@ -51,7 +51,7 @@ export default class Collections extends React.Component<any, any> {
         }
 
         return (
-            <div id="collection" className={"section" + this.props.isOwner ? " owner" : ""}
+            <div id="collection" className={"section" + (this.props.isOwner ? " owner" : "")}
                 onClick={e => {
                     var a = e.target as HTMLAnchorElement;
                     if (a && a.href) {

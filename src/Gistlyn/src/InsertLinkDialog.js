@@ -153,7 +153,7 @@ System.register(['react', './utils', './state', './Gistlyn.dtos'], function(expo
                         x.owner_login !== _this.props.authUsername && _this.props.filter(x); })));
                     return (React.createElement("div", {id: "gist-links"}, React.createElement("input", {type: "text", placeholder: "filter", onKeyUp: function (e) { return _this.setState({ filter: e.target.value }); }}), React.createElement("div", {className: "gist-links-body"}, myGists.length > 0
                         ? (React.createElement("div", {className: "my-gists"}, React.createElement("dl", null, React.createElement("dt", null, "My Gists"), myGists.map(function (x) { return React.createElement("dd", {onClick: function (e) { return _this.props.onChange(x); }}, x.description); }))))
-                        : null, recentGists.length > 0 && false
+                        : null, recentGists.length > 0
                         ? (React.createElement("div", {className: "recent-gists"}, React.createElement("dl", null, React.createElement("dt", null, "Recent Gists"), recentGists.map(function (x) { return React.createElement("dd", {onClick: function (e) { return _this.props.onChange(x); }}, x.description); }))))
                         : null)));
                 };

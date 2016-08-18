@@ -221,7 +221,7 @@ class GistLinks extends React.Component<any, any> {
                            </div>)
                         : null}
 
-                    {recentGists.length > 0 && false
+                    {recentGists.length > 0
                         ? (<div className="recent-gists">
                                 <dl>
                                     <dt>Recent Gists</dt>

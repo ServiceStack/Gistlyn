@@ -619,6 +619,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './state', './
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.urlChanged(utils_1.GistTemplates.HomeCollection); }}, "Home")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(utils_1.GistTemplates.NewGist); }}, "New Gist")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(utils_1.GistTemplates.NewPrivateGist); }}, "New Private Gist")));
+                    MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(utils_1.GistTemplates.NewCollection); }}, "New Collection")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.showDialog("shortcuts"); }}, "Shortcuts")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return window.open("https://github.com/ServiceStack/Gistlyn/issues"); }}, "Send Feedback")));
                     if (authUsername) {

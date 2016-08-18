@@ -82,6 +82,7 @@
     color: #666;
     cursor: pointer;
     border: solid 1px #fff;
+    font-size: 30px;
 }
 #markdown-toolbar i:hover {
     border: solid 1px #c6c6c6;
