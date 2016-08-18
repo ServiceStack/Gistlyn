@@ -1,42 +1,54 @@
 ﻿import * as React from 'react';
+import DropZone from 'react-dropzone';
 
 export default class ImageUploadDialog extends React.Component<any, any> {
     dialog: HTMLDivElement;
     fileImage: HTMLInputElement;
     txtImageUrl: HTMLInputElement;
 
-    handleImageUpload() {
+    handleImageUrl() {
         if (this.txtImageUrl && this.txtImageUrl.value.startsWith("http")) {
             this.props.onChange(this.txtImageUrl.value);
+            this.props.onHide();
             return;
         }
+    }
 
-        const file = this.fileImage.files[0];
+    handleDrop(files:File[]) {
+        this.dialog.classList.add("disabled");
+        if (this.txtImageUrl) this.txtImageUrl.disabled = true;
+
+        var uploadFiles = files.map(f => this.uploadFile(f));
+        Promise.all(uploadFiles)
+            .then(() => {
+                this.dialog.classList.remove("disabled");
+                this.props.onHide();
+            });
+    }
+
+    uploadFile(file: File) {
         var formData = new FormData();
-        formData.append('description', 'http://gistlyn.com?gist=' + this.props.id);
+        formData.append('description', file.name + ' on http://gistlyn.com?gist=' + this.props.id);
         formData.append('type', 'file');
         formData.append('image', file);
 
-        this.dialog.classList.add("disabled");
-
-        fetch('https://api.imgur.com/3/upload.json', {
-            method: 'POST',
-            headers: {
-              Accept: 'application/json',
-              Authorization: 'Client-ID c891e34185a353f'
-            },
-            body: formData
-          })
-        .then(r => {
-            this.dialog.classList.remove("disabled");
-            if (r.status == 200 || r.status == 0) {
-                r.json().then(o => {
-                    this.props.onChange(o.data.link);
-                });
-            } else {
-                alert("Error uploading Image: ");
-            }
-        });
+        return fetch('https://api.imgur.com/3/upload.json', {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    Authorization: 'Client-ID c891e34185a353f'
+                },
+                body: formData
+            })
+            .then(r => {
+                if (r.status == 200 || r.status == 0) {
+                    r.json().then(o => {
+                        this.props.onChange(o.data.link);
+                    });
+                } else {
+                    alert("Error uploading Image: " + file.name);
+                }
+            });
     }
 
     render() {
@@ -55,24 +67,27 @@ export default class ImageUploadDialog extends React.Component<any, any> {
                         <label htmlFor="txtImageUrl" style={hasSelectedImage ? disabledColor : null}>Image URL</label>
                         <input ref={e => this.txtImageUrl = e} type="text" id="txtImageUrl"
                             onKeyUp={e => this.forceUpdate() }
-                            placeholder="Enter the Image URL you want to use" 
-                            onKeyDown={e => e.keyCode == 13 && hasProvidedUrl ? e.preventDefault() || this.props.onChange((e.target as HTMLInputElement).value) : null }
+                            placeholder="Enter the url you want to use"
+                            onKeyDown={e => e.keyCode == 13 && hasProvidedUrl ? e.preventDefault() || this.handleImageUrl() : null }
                             disabled={hasSelectedImage} autoFocus />
+                        <span className={"btn" + (hasSelectedImage || hasProvidedUrl ? "" : " disabled") }
+                              style={{ padding: "6px 10px", marginLeft: 5, verticalAlign:"baseline" }}
+                              onClick={e => this.handleImageUrl() }>
+                            {hasSelectedImage ? "Upload to Imgur" : "Insert Image"}
+                        </span>
                     </div>
                     <div className="row">
-                        <label htmlFor="fileImage" style={hasProvidedUrl ? disabledColor : null}>Upload Image</label>
-                        <input ref={e => this.fileImage = e} type="file" id="fileImage" 
-                            onChange={e => this.handleImageUpload()}
-                            style={{fontSize:16}} 
-                            disabled={hasProvidedUrl} />
+                        <DropZone onDrop={files => this.handleDrop(files) }
+                            className="dropzone" activeClassName="dropzone-active" accept="image/*">
+                            <div className="droparea">
+                                <p>Click or drag Images to upload to Imgur</p>
+                                <div className="loading" style={{ marginTop: 15 }}>
+                                    <span style={{ display: "inline-block", color: "#888", marginRight: 10 }}>Uploading to Imgur...</span>
+                                    <img src="/img/ajax-loader.gif" style={{ margin: "5px 10px 0 0" }} />
+                                </div>
+                            </div>
+                        </DropZone>
                     </div>
-                </div>
-                <div className="dialog-footer">
-                    <img className="loading" src="/img/ajax-loader.gif" style={{ margin: "5px 10px 0 0" }} />
-                    <span className={"btn" + (hasSelectedImage || hasProvidedUrl ? "" : " disabled") }
-                        onClick={e => this.handleImageUpload() }>
-                        {hasSelectedImage ? "Upload to Imgur" : "Insert Image"}
-                    </span>
                 </div>
             </div>
         </div>);

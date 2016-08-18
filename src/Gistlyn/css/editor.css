@@ -98,3 +98,25 @@
 .owner #tabs div.active {
     background: #fff;
 }
+
+.dropzone {
+}
+.dropzone .droparea {
+    background: #f1f1f1;
+    border: 4px dashed #ccc;
+    text-align: center;
+    height: 250px;
+    color: #aaa;
+    cursor: pointer;
+}
+.dropzone-active .droparea {
+    background: #ddd;
+    border-color: #aaa;
+}
+.loading .dropzone .droparea {
+    color: #ccc;
+}
+.dropzone .droparea p {
+    font-size: 24px;
+    margin: 110px 0 0 0;
+}

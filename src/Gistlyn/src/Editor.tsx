@@ -180,7 +180,17 @@ export default class Editor extends React.Component<any, any> {
         }
 
         return (
-            <div id="editor" className={this.props.isOwner ? "owner" : ""}>
+            <div id="editor" className={this.props.isOwner ? "owner" : ""}
+                onDragOver={e => {
+                    console.log('editor onDragOver');
+                    e.stopPropagation();
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'copy';
+                } }
+                onDrop={e => console.log('editor onDrop') }
+                onDragStart={e => console.log('editor onDragStart') }
+                onDragEnter={e => console.log('editor onDragEnter') }
+                >
                 <div id="tabs" style={{ display: this.props.files ? 'flex' : 'none' }}>
                     {FileList.length > 0
                         ? <i id="files-menu" className="material-icons" onClick={e => this.props.showPopup(e, this.filesPopup) }>arrow_drop_down</i> : null }
@@ -206,7 +216,6 @@ export default class Editor extends React.Component<any, any> {
                     : null}
 
                 <CodeMirror ref={e => this.codeMirror = e && e.getCodeMirror()} value={source} options={options} onChange={src => this.props.updateSource(this.props.activeFileName, src) } />
-
             </div>);
     }
 }

@@ -984,7 +984,7 @@ class App extends React.Component<any, any> {
                 {meta && this.props.dialog === "img-upload"
                     ? <ImageUploadDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null)} 
                         id={this.props.gist}
-                        onChange={url => this.props.showDialog(null) && this.editor.replaceSelection(`![{selection}](${url})`)} />
+                        onChange={url => this.editor.replaceSelection(`![{selection}](${url})\n`)} />
                     : null}
                 {meta && this.props.dialog === "insert-link"
                     ? <InsertLinkDialog dialogRef={e => this.dialog = e} onHide={() => this.props.showDialog(null)} 
