@@ -56,7 +56,7 @@ export const getSavedGist = (id:string): IGistSaved => {
 }
 
 export const saveGist = (id:string, gist:IGistSaved) => {
-    localStorage.setItem(id, JSON.stringify(gist));
+    localStorage.setItem(GistCacheKey(id), JSON.stringify(gist));
 }
 
 const handleGistErrorResponse = (res: any, store: any, id: string) => {

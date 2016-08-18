@@ -66,7 +66,7 @@ System.register(['redux', './utils', 'servicestack-client', 'react-ga', 'marked'
                     : null;
             });
             exports_1("saveGist", saveGist = function (id, gist) {
-                localStorage.setItem(id, JSON.stringify(gist));
+                localStorage.setItem(utils_1.GistCacheKey(id), JSON.stringify(gist));
             });
             handleGistErrorResponse = function (res, store, id) {
                 if (res.status === 403) {

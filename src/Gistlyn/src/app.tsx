@@ -1066,9 +1066,9 @@ if (qsClear === "state") {
 window.onpopstate = e => {
     if (!e.state) return;
     if (e.state.gist)
-        store.dispatch({ type: "URL_CHANGE", url: e.state.gist });
+        store.dispatch({ type: "GIST_CHANGE", gist: e.state.gist });
     if (e.state.collection)
-        store.dispatch({ type: "URL_CHANGE", url: e.state.collection });
+        store.dispatch({ type: "COLLECTION_CHANGE", collection: { id: e.state.collection }, showCollection: true });
 };
 
 ReactDOM.render(

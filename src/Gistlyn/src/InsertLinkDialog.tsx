@@ -104,7 +104,7 @@ export default class InsertLinkDialog extends React.Component<any, any> {
                     </div>
                     {gistTab == "new"
                         ? (<dl className="insert-link-new">
-                            <dt>Based on Template:</dt>
+                            <dt>Select an existing Gist to use as Template</dt>
                             <dd onClick={e => this.handleGist(newGist, true)}>{newGist.description}</dd>
                            </dl>)
                         : null}
@@ -122,7 +122,7 @@ export default class InsertLinkDialog extends React.Component<any, any> {
                     </div>
                     {gistTab == "new"
                         ? (<dl className="insert-link-new">
-                            <dt>Based on Template:</dt>
+                            <dt>Select an existing Collection to use as Template</dt>
                             <dd onClick={e => this.handleCollection(newGist, true)}>{newGist.description}</dd>
                            </dl>)
                         : null}

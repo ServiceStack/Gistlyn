@@ -796,9 +796,9 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './state', './
                 if (!e.state)
                     return;
                 if (e.state.gist)
-                    state_1.store.dispatch({ type: "URL_CHANGE", url: e.state.gist });
+                    state_1.store.dispatch({ type: "GIST_CHANGE", gist: e.state.gist });
                 if (e.state.collection)
-                    state_1.store.dispatch({ type: "URL_CHANGE", url: e.state.collection });
+                    state_1.store.dispatch({ type: "COLLECTION_CHANGE", collection: { id: e.state.collection }, showCollection: true });
             };
             ReactDOM.render(React.createElement(react_redux_1.Provider, {store: state_1.store}, React.createElement(App, null)), document.getElementById("app"));
         }

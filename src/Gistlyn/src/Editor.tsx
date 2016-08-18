@@ -169,19 +169,24 @@ export default class Editor extends React.Component<any, any> {
                 <div id="popup-files" className="popup" ref={e => this.filesPopup = e }>
                     {FileList}
                 </div>
-                <div id="markdown-toolbar">
-                    <i className="material-icons" title="Heading" onClick={e => this.replaceSelection("## {selection}")}>format_size</i>
-                    <i className="material-icons" title="Bold" onClick={e => this.replaceSelection("**{selection}**")}>format_bold</i>
-                    <i className="material-icons" title="Italics" onClick={e => this.replaceSelection("_{selection}_")}>format_italic</i>
-                    <i className="material-icons" title="Strikethrough" onClick={e => this.replaceSelection("~~{selection}~~")}>strikethrough_s</i>
-                    <i className="material-icons" title="Quote Text" onClick={e => this.replaceSelection("\n> {selection}")}>format_quote</i>
-                    <i className="material-icons" title="Unordered List" onClick={e => this.replaceSelection("\n - {selection}")}>format_list_bulleted</i>
-                    <i className="material-icons" title="Ordered List" onClick={e => this.replaceSelection("\n 1. {selection}")}>format_list_numbered</i>
-                    <i className="material-icons" title="Code" onClick={e => this.handleCodeFormat()}>code</i>
-                    <i className="material-icons" title="Insert Link" onClick={e => this.props.showDialog("insert-link")}>insert_link</i>
-                    <i className="material-icons" title="Insert Image" onClick={e => this.props.showDialog("img-upload")}>insert_photo</i>
-                </div>
+
+                {options["mode"] == "text/x-markdown" 
+                    ? (<div id="markdown-toolbar">
+                           <i className="material-icons" title="Heading" onClick={e => this.replaceSelection("## {selection}")}>format_size</i>
+                           <i className="material-icons" title="Bold" onClick={e => this.replaceSelection("**{selection}**")}>format_bold</i>
+                           <i className="material-icons" title="Italics" onClick={e => this.replaceSelection("_{selection}_")}>format_italic</i>
+                           <i className="material-icons" title="Strikethrough" onClick={e => this.replaceSelection("~~{selection}~~")}>strikethrough_s</i>
+                           <i className="material-icons" title="Quote Text" onClick={e => this.replaceSelection("\n> {selection}")}>format_quote</i>
+                           <i className="material-icons" title="Unordered List" onClick={e => this.replaceSelection("\n - {selection}")}>format_list_bulleted</i>
+                           <i className="material-icons" title="Ordered List" onClick={e => this.replaceSelection("\n 1. {selection}")}>format_list_numbered</i>
+                           <i className="material-icons" title="Code" onClick={e => this.handleCodeFormat()}>code</i>
+                           <i className="material-icons" title="Insert Link" onClick={e => this.props.showDialog("insert-link")}>insert_link</i>
+                           <i className="material-icons" title="Insert Image" onClick={e => this.props.showDialog("img-upload")}>insert_photo</i>
+                       </div>)
+                    : null}
+
                 <CodeMirror ref={e => this.codeMirror = e && e.getCodeMirror()} value={source} options={options} onChange={src => this.props.updateSource(this.props.activeFileName, src) } />
+
             </div>);
     }
 }
