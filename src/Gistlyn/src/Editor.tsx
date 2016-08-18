@@ -111,7 +111,9 @@ export default class Editor extends React.Component<any, any> {
                 "Ctrl-Enter": cm => this.props.onShortcut("Ctrl-Enter"),
                 "Ctrl-S": cm => this.props.onShortcut("Ctrl-S"),
                 "Alt-S": cm => this.props.onShortcut("Alt-S"),
-                "Alt-C": cm => this.props.onShortcut("Alt-C")
+                "Alt-C": cm => this.props.onShortcut("Alt-C"),
+                "Ctrl-B": cm => this.replaceSelection("**{selection}**", { noselect: { ch: 2 }}),
+                "Ctrl-I": cm => this.replaceSelection("_{selection}_", { noselect: { ch: 1 }}),
             }
         };
 
@@ -192,7 +194,7 @@ export default class Editor extends React.Component<any, any> {
                     ? (<div id="markdown-toolbar">
                            <i className="material-icons" title="Heading" onClick={e => this.toggleLine("## ")}>format_size</i>
                            <i className="material-icons" title="Bold" onClick={e => this.replaceSelection("**{selection}**", { noselect: { ch: 2 }}) }>format_bold</i>
-                           <i className="material-icons" title="Italics" onClick={e => this.replaceSelection("_{selection}_", { noselect: { ch: 1 }})}>format_italic</i>
+                           <i className="material-icons" title="Italics" onClick={e => this.replaceSelection("_{selection}_", { noselect: { ch: 1 }}) }>format_italic</i>
                            <i className="material-icons" title="Strikethrough" onClick={e => this.replaceSelection("~~{selection}~~", { noselect: { ch: 2 }})}>strikethrough_s</i>
                            <i className="material-icons" title="Quote Text" onClick={e => this.toggleLine("> ")}>format_quote</i>
                            <i className="material-icons" title="Unordered List" onClick={e => this.toggleLine(" - ")}>format_list_bulleted</i>

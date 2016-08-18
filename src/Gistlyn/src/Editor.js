@@ -129,7 +129,9 @@ System.register(['react', 'servicestack-client', './utils', 'react-codemirror', 
                             "Ctrl-Enter": function (cm) { return _this.props.onShortcut("Ctrl-Enter"); },
                             "Ctrl-S": function (cm) { return _this.props.onShortcut("Ctrl-S"); },
                             "Alt-S": function (cm) { return _this.props.onShortcut("Alt-S"); },
-                            "Alt-C": function (cm) { return _this.props.onShortcut("Alt-C"); }
+                            "Alt-C": function (cm) { return _this.props.onShortcut("Alt-C"); },
+                            "Ctrl-B": function (cm) { return _this.replaceSelection("**{selection}**", { noselect: { ch: 2 } }); },
+                            "Ctrl-I": function (cm) { return _this.replaceSelection("_{selection}_", { noselect: { ch: 1 } }); },
                         }
                     };
                     var source = "";
