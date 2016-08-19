@@ -1,4 +1,4 @@
-## Gistlyn - a C# Gist IDE powered by Roslyn
+# Gistlyn - a C# Gist IDE powered by Roslyn
 
 Github project powering [gistlyn.com](http://gistlyn.com) - A C# Gist IDE for creating, running and sharing 
 stand-alone, executable C# snippets.
@@ -37,7 +37,7 @@ against the live server session:
 
 ![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/hello-expression.png)
 
-### [Gistlyn Collections](http://gistlyn.com/collections)
+## [Gistlyn Collections](http://gistlyn.com/collections)
 
 The best thing about Gistlyn collections is that they're just plain Github Gists with a single `index.md` 
 Markdown document. So if you've previously created documentation in Github or asked questions in 
@@ -61,7 +61,72 @@ each major feature being another collection with more in-depth docs and code-sam
 
 > OrmLite Tour: [gistlyn.com/ormlite](http://gistlyn.com/ormlite)
 
-### Instant Feedback
+## Creating Collections
+
+Creating a Gistlyn collection then just involves saving any existing Collection like this
+[Empty Collection](?gist=854ec4df3502ecdfe9ca24d4745e484f) to your account which you can also
+navigate to at anytime from Gistlyn's main menu on the bottom-left:
+
+![](http://i.imgur.com/UVbKOWn.png)
+
+This will open a new Markdown Document into the **Markdown Editor** which just like a normal 
+C# Gist, you can hit `Ctrl+S` to save it to your Github Gists. After saving, the top bar will 
+turn **Green** to indicate you're viewing or modifying one of your own Gists or Collections:
+
+![](http://i.imgur.com/PiMHll3.png)
+
+### Creating New Gists or Collections
+
+Once editing the document you can use the **Markdown Toolbar** to quickly access 
+Markdown formatting features like the **Insert Link** icon:
+
+![](http://i.imgur.com/XWCmjXl.png)
+
+Which opens the Insert Link dialog and quickly create and link to new Gist or Collection by 
+selecting the existing Gist or Collection you wish to use as a template:
+
+![](http://i.imgur.com/IRBGD4V.png)
+
+This lets you quickly create multiple C# Gists using the same `packages.config` and
+supporting `.cs` source files in your next C# example. 
+
+### Adding Images
+
+To add images to your document by click on the Insert Image icon below:
+
+![](http://i.imgur.com/oRe5UVV.png)
+
+This will open the **Insert Image** dialog where you can drag multiple images to upload them
+to imgur and embed them in your document:
+
+![](http://i.imgur.com/n8zYoqJ.png)
+
+Which after it's finished uploading to imgur will embed your uploaded images at your Cursors
+position using Markdown's Image Format below:
+
+```
+![](http://i.imgur.com/n8zYoqJ.png)
+```
+
+### Navigating, Browsing and Editing Collections
+
+As you're authoring your Markdown Document you may want to quickly jump between different
+Gists or Collections which you can do so freely as Gistlyn automatically saves as-you-type 
+so you can use the **Back** button to jump back to your new collection without missing a beat.
+
+Once navigating away from the page, the arrow icons below will appear to indicate what you're
+editing on the left no longer matches the same page on the right:
+
+![](http://i.imgur.com/JATmJJ8.png)
+
+You can use the top **right arrow** icon to load the page you're editing in the preview window
+on the right which will enable a real-time preview of how your Markdown document will look like.
+
+Use the bottom **left arrow** icon to load the Collection you're viewing on the right in the 
+Editor. With these icons you can quickly navigate to your different collections, modify them
+in the editor and view them in the preview page.
+
+## Instant Feedback
 
 Gistlyn shines at being able to quickly navigate, run code and preview results at a glance where you can 
 preview complex types with nested complex collections in a human-friendly format for instant feedback. 
@@ -84,7 +149,7 @@ executes it in the Expression Evaluator and displays the results below:
 > The `T.PrintDump()` and `T.Dump()` extension methods are ideal for dumping and quickly seeing the 
 results of any variable to the Console.
 
-### Snapshots
+## Snapshots
 
 Gistlyn gets a lot of natural benefits from being a 
 [React](https://facebook.github.io/react/) web-based IDE, from deep linking to being able to quickly 
@@ -103,7 +168,7 @@ the same place you're at.
 Like everything else in Gistlyn, a snapshot is just a `snapshot.json` document of your serialized State 
 saved to your User Account in a private [Github Gist](gist.github.com). 
 
-#### Capturing a Snapshot
+### Capturing a Snapshot
 
 As snapshots are saved to your gists, you'll need to first sign-in to be able take a snapshot. After you're 
 authenticated with Github you can click on the camera icon that appears in the footer to take a snapshot:
@@ -121,7 +186,7 @@ document in a new private gist. Gistlyn then just appends the **id** of the newl
 
 ![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/snapshots-created.png)
 
-#### Loading a Snapshot
+### Loading a Snapshot
 
 There are 2 ways to load a snapshot, either by clicking on the generated url to launch it in a browser:
 
@@ -138,7 +203,7 @@ The alternative is to paste the **id** of the Gist into Gistlyn's URL bar:
 
 > Incidentally you can paste the **id** of any C# Gist, Collection or Snapshot in the URL Bar
 
-### [Add ServiceStack Reference](http://gistlyn.com/add-servicestack-reference)
+## [Add ServiceStack Reference](http://gistlyn.com/add-servicestack-reference)
 
 Gistlyn's integrated support for [Add ServiceStack Reference](http://gistlyn.com/add-servicestack-reference) 
 feature generates a Typed API for remote [ServiceStack Services](https://servicestack.net) 
@@ -183,7 +248,7 @@ techstacks.io returns details of All Technologies it maintains in its database t
 Preview Inspector. Uncommenting `response.PrintDump();` will also dump the contents of the Web Services 
 `response` to the Console.
 
-### URL Customizations
+## URL Customizations
 
 One thing you'll likely want to do is change which **Request DTO** gets used by specifying it in the 
 `?Request` query string, e.g:
@@ -198,7 +263,7 @@ We then end up with a **live** link that anyone with a modern browser on their D
 click on to call [techstacks.io](http://techstacks.io)'s public API to find out what its Most popular 
 technology is, in seconds.
 
-### Adding ServiceStack References to existing Gists
+## Adding ServiceStack References to existing Gists
 
 Similar to how 
 [Add ServiceStack Reference](https://github.com/ServiceStack/ServiceStack/wiki/Add-ServiceStack-Reference)
@@ -209,12 +274,12 @@ works in most major IDE's, you can also add the reference to existing Gists usin
 Then after clicking **Add Reference** Gistlyn adds your remote Services Typed DTOs to your existing gist 
 using the **filename** specified.
 
-#### v4.0.62 required
+### v4.0.62 required
 
 If you're adding a Service reference to a version of ServiceStack before v4.0.62 you will need to manually 
 remove any C# namespaces as they're not supported in Roslyn Scripting.
 
-### Gistlyn's Stateless Architecture
+## Gistlyn's Stateless Architecture
 
 One surprising thing about Gistlyn is that it's entirely stateless where it runs without any kind of backend 
 db persistence. All state is either persisted to Github gists or in your browser's `localStorage`. 
@@ -223,7 +288,7 @@ Not even your Authenticated Github session is retained on the server as it's imm
 that is sent with every Ajax request, so redeployments (or even clean server rebuilds) won't lose any of your 
 work or force you to Sign In again until the JWT Token expires.
 
-### Downloads
+## Downloads
 
 Thanks to ServiceStack's 
 [React Desktop Apps](https://github.com/ServiceStackApps/ReactDesktopApps) VS.NET Template Gistlyn is 
@@ -247,7 +312,7 @@ Running Gistlyn on your Desktop lets you take advantage of the full resources of
 build and response times and as they're run locally they'll be able to access your RDBMS or 
 other Networked Servers and Services available from your local Intranet.
 
-### Source Code
+## Source Code
 
 This Github repo provides a good example of a modern medium-sized ServiceStack, React + TypeScript App 
 that takes advantage of a number of different ServiceStack Features:
