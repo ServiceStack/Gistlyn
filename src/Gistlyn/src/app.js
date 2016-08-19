@@ -295,6 +295,16 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './state', './
                         evalExpression(this.props.gist, this.scriptId, expr);
                     }
                 };
+                App.prototype.clearGistCache = function () {
+                    var removeKeys = [];
+                    for (var i = 0; i < localStorage.length; i++) {
+                        var key = localStorage.key(i);
+                        if (key.startsWith("/v1/gists/")) {
+                            removeKeys.push(key);
+                        }
+                    }
+                    removeKeys.forEach(function (key) { return localStorage.removeItem(key); });
+                };
                 App.prototype.revertGist = function (shiftKey, ctrlKey) {
                     if (shiftKey === void 0) { shiftKey = false; }
                     if (ctrlKey === void 0) { ctrlKey = false; }
@@ -621,6 +631,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './state', './
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(utils_1.GistTemplates.NewPrivateGist); }}, "New Private Gist")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.changeGist(utils_1.GistTemplates.NewCollection); }}, "New Collection")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.showDialog("shortcuts"); }}, "Shortcuts")));
+                    MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.clearGistCache(); }}, "Clear Gist Caches")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return window.open("https://github.com/ServiceStack/Gistlyn/issues"); }}, "Send Feedback")));
                     if (authUsername) {
                         EditorPopup.push((React.createElement("div", {onClick: function (e) { return _this.props.showDialog("edit-gist"); }}, "Edit Gist")));

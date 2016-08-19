@@ -335,6 +335,17 @@ class App extends React.Component<any, any> {
         }
     }
 
+    clearGistCache() {
+        var removeKeys = [];
+        for (var i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith("/v1/gists/")) {
+                removeKeys.push(key);
+            }
+        }
+        removeKeys.forEach(key => localStorage.removeItem(key));
+    }
+
     revertGist(shiftKey: boolean = false, ctrlKey:boolean = false) {
         localStorage.removeItem(GistCacheKey(this.props.gist));
 
@@ -777,6 +788,8 @@ class App extends React.Component<any, any> {
             <div onClick={e => this.props.changeGist(GistTemplates.NewCollection) }>New Collection</div>));
         MorePopup.push((
             <div onClick={e => this.props.showDialog("shortcuts") }>Shortcuts</div>));
+        MorePopup.push((
+            <div onClick={e => this.clearGistCache() }>Clear Gist Caches</div>));
         MorePopup.push((
             <div onClick={e => window.open("https://github.com/ServiceStack/Gistlyn/issues") }>Send Feedback</div>));
 
