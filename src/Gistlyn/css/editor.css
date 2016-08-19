@@ -7,6 +7,9 @@
     color: #000;
     background: url(../img/editor-bg.png); /* needed in CEF */
 }
+.safari #editor {
+    overflow: hidden; /* hide double scrollbars with Safari height fix*/
+}
 
 #tabs {
     display: flex;

@@ -48,13 +48,20 @@ System.register(['react', 'servicestack-client', './utils', 'react-codemirror', 
                 function Editor() {
                     _super.apply(this, arguments);
                 }
-                Editor.prototype.componentDidMount = function () {
+                Editor.prototype.resetSafariHeight = function () {
                     if (utils_1.UA.safari) {
                         var el = document.getElementsByClassName("CodeMirror-scroll")[0];
                         if (el) {
-                            el.style.height = (document.getElementById("editor").clientHeight - 32) + "px";
+                            var editorSection = document.getElementById("editor");
+                            var reactEditor = document.getElementsByClassName("ReactCodeMirror")[0];
+                            if (!editorSection || !reactEditor)
+                                return;
+                            el.style.height = (editorSection.clientHeight - (reactEditor.offsetTop - editorSection.offsetTop)) + "px";
                         }
                     }
+                };
+                Editor.prototype.componentDidMount = function () {
+                    this.resetSafariHeight();
                 };
                 Editor.prototype.getDoc = function () {
                     return this.codeMirror && this.codeMirror.getDoc();
@@ -138,6 +145,7 @@ System.register(['react', 'servicestack-client', './utils', 'react-codemirror', 
                     var files = this.props.files;
                     var Tabs = [];
                     var FileList = [];
+                    setTimeout(function () { return _this.resetSafariHeight(); }, 0);
                     if (files) {
                         var keys = utils_1.getSortedFileNames(files);
                         var sizeToFit_1 = function (e) {

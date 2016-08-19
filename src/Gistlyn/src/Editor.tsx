@@ -29,13 +29,20 @@ export default class Editor extends React.Component<any, any> {
     filesPopup: HTMLDivElement;
     codeMirror: CodeMirror.Editor;
 
-    componentDidMount() {
+    resetSafariHeight() {
         if (UA.safari) { //Safari doesn't respect height:100%
             const el = document.getElementsByClassName("CodeMirror-scroll")[0] as HTMLElement;
             if (el) {
-                el.style.height = (document.getElementById("editor").clientHeight - 32) + "px"
+                const editorSection = document.getElementById("editor");
+                const reactEditor = document.getElementsByClassName("ReactCodeMirror")[0] as HTMLElement;
+                if (!editorSection || !reactEditor) return;
+                el.style.height = (editorSection.clientHeight - (reactEditor.offsetTop - editorSection.offsetTop)) + "px"
             }
         }
+    }
+
+    componentDidMount() {
+        this.resetSafariHeight();
     }
 
     getDoc() {
@@ -121,6 +128,8 @@ export default class Editor extends React.Component<any, any> {
         const files = this.props.files as { [index: string]: IGistFile };
         const Tabs = [];
         const FileList = [];
+
+        setTimeout(() => this.resetSafariHeight(), 0);
 
         if (files) {
             var keys = getSortedFileNames(files);
