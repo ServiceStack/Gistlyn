@@ -7,6 +7,9 @@
     color: #000;
     background: url(../img/editor-bg.png); /* needed in CEF */
 }
+.safari #editor {
+    overflow: hidden; /* hide double scrollbars with Safari height fix*/
+}
 
 #tabs {
     display: flex;
@@ -68,4 +71,56 @@
 #tabs .txtFileName {
     border: none;
     padding: 0 2px;
+}
+
+#markdown-toolbar {
+    margin: 0 0 2px 30px;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    z-index: 1;
+}
+
+#markdown-toolbar i {
+    margin: 2px;
+    vertical-align: middle;
+    color: #666;
+    cursor: pointer;
+    border: solid 1px #fff;
+    font-size: 30px;
+}
+#markdown-toolbar i:hover {
+    border: solid 1px #c6c6c6;
+    border-radius: 2px;
+    background: #f8f8f8;
+}
+
+.owner #tabs {
+    background: #4CAF50;
+}
+.owner #tabs div {
+    background: #388E3C;
+}
+.owner #tabs div.active {
+    background: #fff;
+}
+
+.dropzone {
+}
+.dropzone .droparea {
+    background: #f1f1f1;
+    border: 4px dashed #ccc;
+    text-align: center;
+    height: 250px;
+    color: #aaa;
+    cursor: pointer;
+}
+.dropzone-active .droparea {
+    background: #ddd;
+    border-color: #aaa;
+}
+.loading .dropzone .droparea {
+    color: #ccc;
+}
+.dropzone .droparea p {
+    font-size: 24px;
+    margin: 110px 0 0 0;
 }

@@ -287,6 +287,12 @@ html,body,#app,#body {
     margin: -45px 0 0 -20px;
 }
 
+#run i.owner {
+    color: #388E3C;
+}
+#run i.owner:hover {
+    color: #4CAF50;
+}
 
 .alert {
     padding: 15px;

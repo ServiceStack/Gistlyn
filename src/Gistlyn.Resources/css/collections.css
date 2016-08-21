@@ -28,6 +28,9 @@
     padding: 4px 12px;
     line-height: 24px;
 }
+.owner #collection-header {
+    background: #4CAF50;
+}
 #btnHome {
     color: #fff;
     font-size: 17px;
@@ -113,6 +116,9 @@
 }
 #markdown strong, #markdown b {
     font-weight: bold; 
+}
+#markdown em {
+    font-style: italic;
 }
 #markdown ul, #markdown ol {
     padding-left: 2em;
