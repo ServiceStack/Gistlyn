@@ -10,29 +10,6 @@ development or on the go from the comfort of your iPad by going to [gistlyn.com]
 [![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/home-screenshot.png)](http://gistlyn.com)
 > Live Demo: [gistlyn.com](http://gistlyn.com)
 
-## Downloads
-
-Thanks to the [React Desktop Apps](https://github.com/ServiceStackApps/ReactDesktopApps) VS.NET Template 
-Gistlyn is available in a variety of different flavours:
-
-Deployed as an ASP.NET Web Application on both Windows / .NET and Linux / Mono servers at: 
-
- - [gistlyn.com](http://gistlyn.com) - Ubuntu / Vagrant / Windows 2012 Server VM / IIS / .NET 4.6
- - [mono.gistlyn.com](http://gistlyn.com) - Ubuntu / Docker / mono / nginx / HyperFastCGI
-
-Having both Windows and Linux versions of Gistlyn is useful when you want to test whether a feature has the 
-same behavior in both .NET and Mono. Where after saving you can add/remove the `mono` subdomain to run 
-your scripts on different Operating Systems.
-
-### [Run Gistlyn on your Desktop](http://gistlyn.com/downloads)
-
-In addition to a running as an ASP.NET Web App, Gistlyn is also available as a self-hosting 
-[Winforms Desktop or cross-platform OSX/Linux/Windows Console App](http://gistlyn.com/downloads). 
-
-Running Gistlyn on your Desktop lets you take advantage of the full resources of your CPU for faster 
-build and response times and as they're run locally they'll be able to access your RDBMS or 
-other Networked Servers and Services available from your local Intranet.
-
 ### Maintain C# snippets in your Github Gists
 
 Gistlyn is an **open platform** where all C# snippets and documentation are hosted entirely in Github gists 
@@ -59,6 +36,29 @@ The preview inspector also includes an Expression evaluator that can be used to 
 against the live server session:
 
 ![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/hello-expression.png)
+
+## Downloads
+
+Thanks to the [React Desktop Apps](https://github.com/ServiceStackApps/ReactDesktopApps) VS.NET Template 
+Gistlyn is available in a variety of different flavours:
+
+Deployed as an ASP.NET Web Application on both Windows / .NET and Linux / Mono servers at: 
+
+ - [gistlyn.com](http://gistlyn.com) - Ubuntu / Vagrant / Windows 2012 Server VM / IIS / .NET 4.6
+ - [mono.gistlyn.com](http://gistlyn.com) - Ubuntu / Docker / mono / nginx / HyperFastCGI
+
+Having both Windows and Linux versions of Gistlyn is useful when you want to test whether a feature has the 
+same behavior in both .NET and Mono. Where after saving you can add/remove the `mono` subdomain to run 
+your scripts on different Operating Systems.
+
+### [Run Gistlyn on your Desktop](http://gistlyn.com/downloads)
+
+In addition to a running as an ASP.NET Web App, Gistlyn is also available as a self-hosting 
+[Winforms Desktop or cross-platform OSX/Linux/Windows Console App](http://gistlyn.com/downloads). 
+
+Running Gistlyn on your Desktop lets you take advantage of the full resources of your CPU for faster 
+build and response times and as they're run locally they'll be able to access your RDBMS or 
+other Networked Servers and Services available from your local Intranet.
 
 ## Instant Feedback
 
