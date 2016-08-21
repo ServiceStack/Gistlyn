@@ -37,6 +37,83 @@ against the live server session:
 
 ![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/hello-expression.png)
 
+## Instant Feedback
+
+Gistlyn shines at being able to quickly navigate, run code and preview results at a glance where you can 
+preview complex types with nested complex collections in a human-friendly format for instant feedback. 
+
+To give you an example, here's what the preview inspector shows after running the
+[OrmLite Reference Test Data](http://gistlyn.com/?gist=84529771d447f7f64b3756bbf341923f&collection=991db51e44674ad01d3d318b24cf0934)
+sample C# code below:
+
+```csharp
+//SELECT all artists including their Track references
+var allArtists = db.LoadSelect<Artist>();
+allArtists.PrintDump(); // Dump to Console
+```
+
+After it's executed all the variables get shown in the preview inspector. Then clicking on `allArtists` 
+executes it in the Expression Evaluator and displays the results below:
+
+![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/inspector-screenshot.png)
+
+> The `T.PrintDump()` and `T.Dump()` extension methods are ideal for dumping and quickly seeing the 
+results of any variable to the Console.
+
+## Snapshots
+
+Gistlyn gets a lot of natural benefits from being a 
+[React](https://facebook.github.io/react/) web-based IDE, from deep linking to being able to quickly 
+navigate back/forward through your browser history. It also saves every change to your `localStorage` 
+that restores instantly, so you can close your browser at anytime and revisiting [gistlyn.com](http://gistlyn.com) 
+will bring you right back to the same state where you left it. Drafts of every Gist you visit are
+also saved, so you can happily be working on multiple gists without losing any changes. 
+
+Another feature Gistlyn naturally benefits from is Snapshots...
+
+Snapshots lets you save the **entire client state** of your current workspace (excluding your login info) 
+into a generated url which you can use to revert back in time from when the snapshot was taken or send to 
+someone else who can instantly see and run what you're working on, who'll be able to continue working from 
+the same place you're at.
+
+Like everything else in Gistlyn, a snapshot is just a `snapshot.json` document of your serialized State 
+saved to your User Account in a private [Github Gist](gist.github.com). 
+
+### Capturing a Snapshot
+
+As snapshots are saved to your gists, you'll need to first sign-in to be able take a snapshot. After you're 
+authenticated with Github you can click on the camera icon that appears in the footer to take a snapshot:
+
+![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/snapshots-icon.png)
+
+This will open the Snapshot Dialog where you can enter the name of the Snapshot which by default is 
+automatically populated with the timestamp of when the Snapshot was taken:
+
+![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/snapshots-dialog.png)
+
+Clicking **Save Snapshot** serializes your captured snapshot and saves it as a `snapshot.json`
+document in a new private gist. Gistlyn then just appends the **id** of the newly created Gist to the 
+`?snapshot` queryString to form the url for your new snapshot:
+
+![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/snapshots-created.png)
+
+### Loading a Snapshot
+
+There are 2 ways to load a snapshot, either by clicking on the generated url to launch it in a browser:
+
+ - [gistlyn.com/?snapshot=c0977cc2f74a7eedfb3232908357396b](http://gistlyn.com/?snapshot=c0977cc2f74a7eedfb3232908357396b)
+
+Which will load a new Gistlyn session initialized with the snapshot, complete with the contents of all 
+working files, the state of the preview window, any console logs, etc:
+
+![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/snapshots-load.png)
+
+The alternative is to paste the **id** of the Gist into Gistlyn's URL bar:
+
+![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/snapshots-url.png)
+
+> Incidentally you can paste the **id** of any C# Gist, Collection or Snapshot in the URL Bar
+
 ## [Gistlyn Collections](http://gistlyn.com/collections)
 
 The best thing about Gistlyn collections is that they're just plain Github Gists with a single `index.md` 
@@ -125,83 +202,6 @@ on the right which will enable a real-time preview of how your Markdown document
 Use the bottom **left arrow** icon to load the Collection you're viewing on the right in the 
 Editor. With these icons you can quickly navigate to your different collections, modify them
 in the editor and view them in the preview page.
-
-## Instant Feedback
-
-Gistlyn shines at being able to quickly navigate, run code and preview results at a glance where you can 
-preview complex types with nested complex collections in a human-friendly format for instant feedback. 
-
-To give you an example, here's what the preview inspector shows after running the
-[OrmLite Reference Test Data](http://gistlyn.com/?gist=84529771d447f7f64b3756bbf341923f&collection=991db51e44674ad01d3d318b24cf0934)
-sample C# code below:
-
-```csharp
-//SELECT all artists including their Track references
-var allArtists = db.LoadSelect<Artist>();
-allArtists.PrintDump(); // Dump to Console
-```
-
-After it's executed all the variables get shown in the preview inspector. Then clicking on `allArtists` 
-executes it in the Expression Evaluator and displays the results below:
-
-![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/inspector-screenshot.png)
-
-> The `T.PrintDump()` and `T.Dump()` extension methods are ideal for dumping and quickly seeing the 
-results of any variable to the Console.
-
-## Snapshots
-
-Gistlyn gets a lot of natural benefits from being a 
-[React](https://facebook.github.io/react/) web-based IDE, from deep linking to being able to quickly 
-navigate back/forward through your browser history. It also saves every change to your `localStorage` 
-that restores instantly, so you can close your browser at anytime and revisiting [gistlyn.com](http://gistlyn.com) 
-will bring you right back to the same state where you left it. Drafts of every Gist you visit are
-also saved, so you can happily be working on multiple gists without losing any changes. 
-
-Another feature Gistlyn naturally benefits from is Snapshots...
-
-Snapshots lets you save the **entire client state** of your current workspace (excluding your login info) 
-into a generated url which you can use to revert back in time from when the snapshot was taken or send to 
-someone else who can instantly see and run what you're working on, who'll be able to continue working from 
-the same place you're at.
-
-Like everything else in Gistlyn, a snapshot is just a `snapshot.json` document of your serialized State 
-saved to your User Account in a private [Github Gist](gist.github.com). 
-
-### Capturing a Snapshot
-
-As snapshots are saved to your gists, you'll need to first sign-in to be able take a snapshot. After you're 
-authenticated with Github you can click on the camera icon that appears in the footer to take a snapshot:
-
-![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/snapshots-icon.png)
-
-This will open the Snapshot Dialog where you can enter the name of the Snapshot which by default is 
-automatically populated with the timestamp of when the Snapshot was taken:
-
-![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/snapshots-dialog.png)
-
-Clicking **Save Snapshot** serializes your captured snapshot and saves it as a `snapshot.json`
-document in a new private gist. Gistlyn then just appends the **id** of the newly created Gist to the 
-`?snapshot` queryString to form the url for your new snapshot:
-
-![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/snapshots-created.png)
-
-### Loading a Snapshot
-
-There are 2 ways to load a snapshot, either by clicking on the generated url to launch it in a browser:
-
- - [gistlyn.com/?snapshot=c0977cc2f74a7eedfb3232908357396b](http://gistlyn.com/?snapshot=c0977cc2f74a7eedfb3232908357396b)
-
-Which will load a new Gistlyn session initialized with the snapshot, complete with the contents of all 
-working files, the state of the preview window, any console logs, etc:
-
-![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/snapshots-load.png)
-
-The alternative is to paste the **id** of the Gist into Gistlyn's URL bar:
-
-![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/snapshots-url.png)
-
-> Incidentally you can paste the **id** of any C# Gist, Collection or Snapshot in the URL Bar
 
 ## [Add ServiceStack Reference](http://gistlyn.com/add-servicestack-reference)
 
