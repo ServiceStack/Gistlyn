@@ -137,48 +137,58 @@ The alternative is to paste the **id** of the Gist into Gistlyn's URL bar:
 
 > Incidentally you can paste the **id** of any C# Gist, Collection or Snapshot in the URL Bar
 
-## [Gistlyn Collections](http://gistlyn.com/collections)
+## [Gistlyn Collections](gistlyn.com/collections)
 
-The best thing about Gistlyn collections is that they're just plain Github Gists with a single `index.md` 
-Markdown document. So if you've previously created documentation in Github or asked questions in 
-StackOverflow you already know how to [Create Gistlyn Collections](http://gistlyn.com/collections).
+In our mission to make Gistlyn an immensely useful and collaborative learning tool for exploring any .NET library, 
+Gistlyn includes a streamlined UX for editing Collections making it easier than ever to create "Live documentation" 
+which we believe is the best way to learn about a library, mixing documentation and providing a live development 
+experience letting developers try out and explore what they've just learned without losing context by switching 
+to their development environment and setting up new projects to match each code sample.
 
-Being able to mix step-by-step documentation and executable code enables a "live" learning experience where 
-after introducing and explaining a feature you can provide a focused code example that Users can open in 
-the code editor on the left which they can run to see it working, inspect its results and further modify 
-the C# sample to continue exploring it even further themselves. 
+Gistlyn makes it easy to share C# snippets with colleagues or reporting an issue to library maintainers with 
+just a URL or a saved Gist ID which anyone can view in a browser at [gistlyn.com](http://gistlyn.com) or on their 
+[Desktop version of Gistlyn](http://gistlyn.com/downloads). 
 
-### [OrmLite Interactive Tour](http://gistlyn.com/ormlite)
+Here's an example of the new Collection authoring features in action:
 
-The OrmLite collection is a good example of this which is the ideal place to learn about OrmLite,
-starting with how to install it and complete examples showing all the source code needed to run it in 
-Gistlyn and your C# programs. 
+[![](http://i.imgur.com/156wYPJ.png)](https://youtu.be/FkdzYsx2lYw)
 
-The OrmLite Collection page serves as a launch pad to quickly jump into different areas of OrmLite, 
-each major feature being another collection with more in-depth docs and code-samples: 
+### Plain-Old Markdown Document
 
-[![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/ormlite-screenshot.png)](http://gistlyn.com/ormlite)
+The best thing about Gistlyn collections are they're just plain Github Gist's with a single `index.md`
+Markdown document. So if you've previously created documentation in Github or asked questions in StackOverflow 
+you already know how to create Github collections.
 
-> OrmLite Tour: [gistlyn.com/ormlite](http://gistlyn.com/ormlite)
+All documentation within Gistlyn including this and the [Home page](?collection=2cc6b5db6afd3ccb0d0149e55fdb3a6a) 
+are Gistlyn Collections which can be viewed by clicking the **Collections** header icon:
 
-## Creating Collections
+![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/collections-icon.png)
 
-Creating a Gistlyn collection then just involves saving any existing Collection like this
-[Empty Collection](?gist=854ec4df3502ecdfe9ca24d4745e484f) to your account which you can also
-navigate to at anytime from Gistlyn's main menu on the bottom-left:
+The **Collections** icon opens the Home Collection by adding its Gist **id** to the `?collection` query string:
+
+  - [?collection=2cc6b5db6afd3ccb0d0149e55fdb3a6a](?collection=2cc6b5db6afd3ccb0d0149e55fdb3a6a)
+
+When adding links in your collection you should only include the `?querystring` portion and not the 
+absolute url, e.g `http://gistlyn.com?collection=...` so your links also work in 
+[Desktop versions of Gistlyn](?collection=74d7b0467a197f678bb4220b2c301ac3) 
+which are instead run from `localhost:4000`.
+
+### Creating Collections
+
+Creating a Collection can be done at anytime from Gistlyn's main menu:
 
 ![](http://i.imgur.com/UVbKOWn.png)
 
-This will open a new Markdown Document into the **Markdown Editor** which just like a normal 
-C# Gist, you can hit `Ctrl+S` to save it to your Github Gists. After saving, the top bar will 
+This will open an [Empty Markdown Document](?gist=854ec4df3502ecdfe9ca24d4745e484f) into the **Markdown Editor**.
+Hit `Ctrl+S` to save your modified copy to [your Github Gists](gist.github.com). After saving, the top bar will 
 turn **Green** to indicate you're viewing or modifying one of your own Gists or Collections:
 
 ![](http://i.imgur.com/PiMHll3.png)
 
 ### Creating New Gists or Collections
 
-Once editing the document you can use the **Markdown Toolbar** to quickly access 
-Markdown formatting features like the **Insert Link** icon:
+Once editing the document you can use the **Markdown Toolbar** to quickly access Markdown specific 
+formatting features like the **Insert Link** icon:
 
 ![](http://i.imgur.com/XWCmjXl.png)
 
@@ -187,12 +197,12 @@ selecting the existing Gist or Collection you wish to use as a template:
 
 ![](http://i.imgur.com/IRBGD4V.png)
 
-This lets you quickly create multiple C# Gists using the same `packages.config` and
-supporting `.cs` source files in your next C# example. 
+This lets you quickly create multiple C# Gists using a copy of an existing Gists `packages.config` and
+supporting `.cs` source files, significantly reducing the effort for creating multiple C# samples.
 
-### Adding Images
+### Uploading Images
 
-To add images to your document by click on the Insert Image icon below:
+You can add images to your document by click on the Insert Image icon below:
 
 ![](http://i.imgur.com/oRe5UVV.png)
 
@@ -201,8 +211,8 @@ to imgur and embed them in your document:
 
 ![](http://i.imgur.com/n8zYoqJ.png)
 
-Which after it's finished uploading to imgur will embed your uploaded images at your Cursors
-position using Markdown's Image Format below:
+After each image has finished uploading to Imgur, it will be embedded in your document from your 
+Cursors position using the Markdown Image Format below:
 
 ```
 ![](http://i.imgur.com/n8zYoqJ.png)
@@ -210,21 +220,68 @@ position using Markdown's Image Format below:
 
 ### Navigating, Browsing and Editing Collections
 
-As you're authoring your Markdown Document you may want to quickly jump between different
-Gists or Collections which you can do so freely as Gistlyn automatically saves as-you-type 
-so you can use the **Back** button to jump back to your new collection without missing a beat.
+As you're authoring your Markdown Document you can freely jump between different Gists or Collections 
+as Gistlyn automatically saves as-you-type so you can use the **Back** button to jump back 
+to your new collection as you left it without missing a beat.
 
-Once navigating away from the page, the arrow icons below will appear to indicate what you're
-editing on the left no longer matches the same page on the right:
+After navigating away from your page, the arrow icons shown below will appear in the middle to indicate 
+what you're editing on the left no longer matches the same page on the right:
 
 ![](http://i.imgur.com/JATmJJ8.png)
 
-You can use the top **right arrow** icon to load the page you're editing in the preview window
-on the right which will enable a real-time preview of how your Markdown document will look like.
+Use the top **right arrow** icon to load the page you're editing in the preview window on the right 
+to load the real-time preview of your Markdown document.
 
-Use the bottom **left arrow** icon to load the Collection you're viewing on the right in the 
-Editor. With these icons you can quickly navigate to your different collections, modify them
-in the editor and view them in the preview page.
+Use the bottom **left arrow** icon to load the Collection you're viewing on the right in the Editor. 
+
+### Manually adding links in Collections
+
+If manually linking to Gists, other Collections and Snapshots use the following formats below:
+
+  - Gists: `?gist={id}`
+  - Collections: `?collection={id}`
+  - Snapshots: `?snapshot={id}`
+
+When Gistlyn sees these links it loads them into your current Gistlyn session. All other links are 
+handled by the browser which navigates to the specified URL causing a full page load. If you're linking to an 
+external site outside of Gistlyn we recommend opening it in a new browser Window by using HTML instead of 
+Markdown links. e.g:
+
+    <a target="_blank" href="http://example.org">name</a>
+
+### Executable Documentation
+
+Collections are a great way to create learning resources and tutorials for C# letting you create 
+step-by-step walk-throughs explaining how something works on the right whilst providing links to 
+executable C# fragments which users can try out and explore live in the code editor on the left. 
+
+### Collection Examples
+
+You can find all of Gistlyn's Collections as Gists under the 
+<a target="_blank" href="https://gist.github.com/gistlyn">Gistlyn Github Account</a>. Looking through some of
+Gistlyn collections below and their Markdown sources should provide a good resource for learning how to create 
+Collections in Markdown:
+
+ - Gistlyn Collections (this page) ([source](https://gist.github.com/gistlyn/457a7035675513ba1365195658a5d792))
+ - [Home](?collection=2cc6b5db6afd3ccb0d0149e55fdb3a6a) ([source](https://gist.github.com/gistlyn/2cc6b5db6afd3ccb0d0149e55fdb3a6a))
+ - [OrmLite Interactive Tour](?collection=991db51e44674ad01d3d318b24cf0934) ([source](https://gist.github.com/gistlyn/991db51e44674ad01d3d318b24cf0934))
+   - [OrmLite SELECT Examples](?collection=cd381848f252be2a84f8c239ed0d241b)  ([source](https://gist.github.com/gistlyn/cd381848f252be2a84f8c239ed0d241b))
+   - [OrmLite UPDATE Examples](?collection=849680f095fb2721b2714d0bbcddc8d7)  ([source](https://gist.github.com/gistlyn/849680f095fb2721b2714d0bbcddc8d7))
+ - [Gistlyn Snapshots](?collection=1576fda8eea87abbe94fa8051b4fed34)  ([source](https://gist.github.com/gistlyn/1576fda8eea87abbe94fa8051b4fed34))
+ - [Add ServiceStack Reference](?collection=363605c3c121784ebababac4a03e8910)  ([source](https://gist.github.com/gistlyn/363605c3c121784ebababac4a03e8910))
+
+### Human Friendly short URLs
+
+Instead of sending links with unmemorable gist ids, you can also request to have easier to remember URLs for 
+links to any Gistlyn collection by leaving a comment on the 
+<a target="_blank" href="https://gist.github.com/gistlyn/59e45270e41c1bd550b53436707eec21">Friendly Names Gist</a>
+
+Where any link in the above Gist are available to Gistlyn, so instead of publishing links to a long 
+`?collection={id}` URL, you can use a shorter and easier to remember name instead, e.g:
+
+  - [/ormlite](/ormlite) 
+ 
+That like a URL shortener, redirects to the linked url: [?collection=991db51e44674ad01d3d318b24cf0934](?collection=991db51e44674ad01d3d318b24cf0934)
 
 ## [Add ServiceStack Reference](http://gistlyn.com/add-servicestack-reference)
 
