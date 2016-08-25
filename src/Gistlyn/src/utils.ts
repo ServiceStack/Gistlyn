@@ -33,7 +33,10 @@ export const FileNames = {
     GistMain: "main.cs",
     GistPackages: "packages.config",
     CollectionIndex: "index.md",
-    Snapshot: "snapshot.json"
+    Snapshot: "snapshot.json",
+    canDelete: (fileName: string) => fileName &&
+        fileName !== FileNames.GistMain && fileName !== FileNames.GistPackages &&
+        fileName != FileNames.CollectionIndex
 };
 export interface IGistRef {
     id: string;

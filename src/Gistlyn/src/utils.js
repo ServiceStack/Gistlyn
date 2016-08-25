@@ -96,7 +96,10 @@ System.register(['react-redux', 'servicestack-client', './Gistlyn.dtos'], functi
                 GistMain: "main.cs",
                 GistPackages: "packages.config",
                 CollectionIndex: "index.md",
-                Snapshot: "snapshot.json"
+                Snapshot: "snapshot.json",
+                canDelete: function (fileName) { return fileName &&
+                    fileName !== FileNames.GistMain && fileName !== FileNames.GistPackages &&
+                    fileName != FileNames.CollectionIndex; }
             });
             ua = navigator.userAgent;
             platform = navigator.platform.toLowerCase();

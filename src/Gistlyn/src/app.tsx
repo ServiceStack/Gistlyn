@@ -814,8 +814,6 @@ class App extends React.Component<any, any> {
         if (authUsername) {
             EditorPopup.push((
                 <div onClick={e => this.props.showDialog("edit-gist") }>Edit Gist</div>));
-            EditorPopup.push((
-                <div onClick={e => confirm(`Are you sure you want to delete this gist?`) ? this.deleteGist(this.props.gist) : null }>Delete Gist</div>));
         }
         EditorPopup.push((
             <div onClick={e => this.props.showDialog("add-ss-ref") }>Add ServiceStack Reference</div>));
@@ -918,6 +916,7 @@ class App extends React.Component<any, any> {
                             updateSource={(fileName, src) => this.props.updateSource(fileName, src) }
                             onRenameFile={(fileName, e) => this.handleRenameFile(fileName, e) }
                             onCreateFile={e => this.handleCreateFile(e) }
+                            onDeleteFile={fileName => this.deleteFile(fileName) }
                             onShortcut={keyPattern => this.onShortcut(keyPattern)} />
 
                         <div id="preview">
@@ -944,12 +943,10 @@ class App extends React.Component<any, any> {
                                 <span className="octicon octicon-repo-forked" style={{ margin: "3px 3px 0 0" }}></span>
                                 <p>{authUsername ? (shouldFork ? "Fork As" : "Save As") : "Sign-in to save"}</p>
                             </div>) }
-                        { meta && meta.owner_login === authUsername && this.props.activeFileName &&
-                            this.props.activeFileName !== FileNames.GistMain &&
-                            this.props.activeFileName !== FileNames.GistPackages
-                            ? (<div id="delete-file" onClick={e => confirm(`Are you sure you want to delete '${this.props.activeFileName}?`) ? this.deleteFile(this.props.activeFileName) : null }>
-                                <i className="material-icons">delete </i>
-                                <p>Delete File</p>
+                        { meta && meta.owner_login === authUsername
+                            ? (<div id="delete-file" onClick={e => confirm(`Are you sure you want to delete gist '${meta.description}'?`) ? this.deleteGist(this.props.gist) : null }>
+                                <i className="material-icons">delete_forever</i>
+                                <p>Delete Gist</p>
                             </div>)
                             : null }
                     </div>

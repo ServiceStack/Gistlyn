@@ -26,6 +26,15 @@
 #tabs #files-menu:hover {
     color: #ffc;
 }
+#tabs .delete {
+    font-size: 16px;
+    vertical-align: bottom;
+    padding: 0 0 0 5px;
+    cursor: pointer;
+}
+#tabs .delete:hover {
+    color: #f00;
+}
 .popup {
     display: none;
     position: absolute;

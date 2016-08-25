@@ -358,6 +358,9 @@ span.CodeMirror-selectedtext { background: none; }
     flex: 1;
     overflow: auto;
 }
+.macintel .ReactCodeMirror {
+    margin-left: -3px; 
+}
 
 .CodeMirror {
     margin: 0;

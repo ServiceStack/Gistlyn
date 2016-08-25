@@ -158,7 +158,9 @@ System.register(['react', 'servicestack-client', './utils', 'react-codemirror', 
                             var active = fileName === _this.props.activeFileName ||
                                 (_this.props.activeFileName == null && fileName.toLowerCase() === "main.cs");
                             Tabs.push((React.createElement("div", {className: active ? 'active' : null, onClick: function (e) { return !active ? _this.props.selectFileName(fileName) : _this.props.editFileName(fileName); }}, _this.props.editingFileName !== fileName
-                                ? React.createElement("b", null, fileName)
+                                ? React.createElement("b", null, fileName, _this.props.isOwner && active && utils_1.FileNames.canDelete(fileName)
+                                    ? React.createElement("i", {className: "material-icons delete", onClick: function (e) { return e.stopPropagation() || confirm("Are you sure you want to delete file '" + fileName + "'?") ? _this.props.onDeleteFile(fileName) : null; }, title: "delete file"}, "cancel")
+                                    : null)
                                 : React.createElement("input", {type: "text", className: "txtFileName", onBlur: function (e) { return _this.props.onRenameFile(fileName, e); }, onKeyDown: function (e) { return e.keyCode === 13 ? e.target.blur() : null; }, defaultValue: fileName, onKeyUp: sizeToFit_1, size: Math.max(fileName.length - 3, 1), autoFocus: true}))));
                             FileList.push((React.createElement("div", {className: "file", onClick: function (e) { return _this.props.selectFileName(fileName); }}, fileName)));
                             if (active) {

@@ -1,6 +1,6 @@
 ﻿import * as React from 'react';
 import { queryString, splitOnLast } from 'servicestack-client';
-import { UA, getSortedFileNames, IGistFile } from './utils';
+import { UA, getSortedFileNames, IGistFile, FileNames } from './utils';
 
 import CodeMirror from 'react-codemirror';
 import "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js";
@@ -149,7 +149,12 @@ export default class Editor extends React.Component<any, any> {
                     <div className={active ? 'active' : null}
                         onClick={e => !active ? this.props.selectFileName(fileName) : this.props.editFileName(fileName) }>
                         {this.props.editingFileName !== fileName
-                            ? <b>{fileName}</b>
+                            ? <b>
+                                {fileName}
+                                { this.props.isOwner && active && FileNames.canDelete(fileName)
+                                    ? <i className="material-icons delete" onClick={e => e.stopPropagation() || confirm(`Are you sure you want to delete file '${fileName}'?`) ? this.props.onDeleteFile(fileName) : null } title="delete file">cancel</i>
+                                    : null}
+                              </b>
                             : <input type="text" className="txtFileName"
                                 onBlur={e => this.props.onRenameFile(fileName, e) }
                                 onKeyDown={e => e.keyCode === 13 ? (e.target as HTMLElement).blur() : null }
