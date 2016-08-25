@@ -137,7 +137,7 @@ The alternative is to paste the **id** of the Gist into Gistlyn's URL bar:
 
 > Incidentally you can paste the **id** of any C# Gist, Collection or Snapshot in the URL Bar
 
-## [Gistlyn Collections](gistlyn.com/collections)
+## [Gistlyn Collections](http://gistlyn.com/collections)
 
 In our mission to make Gistlyn an immensely useful and collaborative learning tool for exploring any .NET library, 
 Gistlyn includes a streamlined UX for editing Collections making it easier than ever to create "Live documentation" 
@@ -159,18 +159,18 @@ The best thing about Gistlyn collections are they're just plain Github Gist's wi
 Markdown document. So if you've previously created documentation in Github or asked questions in StackOverflow 
 you already know how to create Github collections.
 
-All documentation within Gistlyn including this and the [Home page](?collection=2cc6b5db6afd3ccb0d0149e55fdb3a6a) 
+All documentation within Gistlyn including this and the [Home page](http://gistlyn.com?collection=2cc6b5db6afd3ccb0d0149e55fdb3a6a) 
 are Gistlyn Collections which can be viewed by clicking the **Collections** header icon:
 
 ![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/collections-icon.png)
 
 The **Collections** icon opens the Home Collection by adding its Gist **id** to the `?collection` query string:
 
-  - [?collection=2cc6b5db6afd3ccb0d0149e55fdb3a6a](?collection=2cc6b5db6afd3ccb0d0149e55fdb3a6a)
+  - [?collection=2cc6b5db6afd3ccb0d0149e55fdb3a6a](http://gistlyn.com?collection=2cc6b5db6afd3ccb0d0149e55fdb3a6a)
 
 When adding links in your collection you should only include the `?querystring` portion and not the 
 absolute url, e.g `http://gistlyn.com?collection=...` so your links also work in 
-[Desktop versions of Gistlyn](?collection=74d7b0467a197f678bb4220b2c301ac3) 
+[Desktop versions of Gistlyn](http://gistlyn.com?collection=74d7b0467a197f678bb4220b2c301ac3) 
 which are instead run from `localhost:4000`.
 
 ### Creating Collections
@@ -179,8 +179,8 @@ Creating a Collection can be done at anytime from Gistlyn's main menu:
 
 ![](http://i.imgur.com/UVbKOWn.png)
 
-This will open an [Empty Markdown Document](?gist=854ec4df3502ecdfe9ca24d4745e484f) into the **Markdown Editor**.
-Hit `Ctrl+S` to save your modified copy to [your Github Gists](gist.github.com). After saving, the top bar will 
+This will open an [Empty Markdown Document](http://gistlyn.com?gist=854ec4df3502ecdfe9ca24d4745e484f) into the **Markdown Editor**.
+Hit `Ctrl+S` to save your modified copy to [your Github Gists](http://gist.github.com). After saving, the top bar will 
 turn **Green** to indicate you're viewing or modifying one of your own Gists or Collections:
 
 ![](http://i.imgur.com/PiMHll3.png)
@@ -263,12 +263,12 @@ Gistlyn collections below and their Markdown sources should provide a good resou
 Collections in Markdown:
 
  - Gistlyn Collections (this page) ([source](https://gist.github.com/gistlyn/457a7035675513ba1365195658a5d792))
- - [Home](?collection=2cc6b5db6afd3ccb0d0149e55fdb3a6a) ([source](https://gist.github.com/gistlyn/2cc6b5db6afd3ccb0d0149e55fdb3a6a))
- - [OrmLite Interactive Tour](?collection=991db51e44674ad01d3d318b24cf0934) ([source](https://gist.github.com/gistlyn/991db51e44674ad01d3d318b24cf0934))
-   - [OrmLite SELECT Examples](?collection=cd381848f252be2a84f8c239ed0d241b)  ([source](https://gist.github.com/gistlyn/cd381848f252be2a84f8c239ed0d241b))
-   - [OrmLite UPDATE Examples](?collection=849680f095fb2721b2714d0bbcddc8d7)  ([source](https://gist.github.com/gistlyn/849680f095fb2721b2714d0bbcddc8d7))
- - [Gistlyn Snapshots](?collection=1576fda8eea87abbe94fa8051b4fed34)  ([source](https://gist.github.com/gistlyn/1576fda8eea87abbe94fa8051b4fed34))
- - [Add ServiceStack Reference](?collection=363605c3c121784ebababac4a03e8910)  ([source](https://gist.github.com/gistlyn/363605c3c121784ebababac4a03e8910))
+ - [Home](http://gistlyn.com?collection=2cc6b5db6afd3ccb0d0149e55fdb3a6a) ([source](https://gist.github.com/gistlyn/2cc6b5db6afd3ccb0d0149e55fdb3a6a))
+ - [OrmLite Interactive Tour](http://gistlyn.com?collection=991db51e44674ad01d3d318b24cf0934) ([source](https://gist.github.com/gistlyn/991db51e44674ad01d3d318b24cf0934))
+   - [OrmLite SELECT Examples](http://gistlyn.com?collection=cd381848f252be2a84f8c239ed0d241b)  ([source](https://gist.github.com/gistlyn/cd381848f252be2a84f8c239ed0d241b))
+   - [OrmLite UPDATE Examples](http://gistlyn.com?collection=849680f095fb2721b2714d0bbcddc8d7)  ([source](https://gist.github.com/gistlyn/849680f095fb2721b2714d0bbcddc8d7))
+ - [Gistlyn Snapshots](http://gistlyn.com?collection=1576fda8eea87abbe94fa8051b4fed34)  ([source](https://gist.github.com/gistlyn/1576fda8eea87abbe94fa8051b4fed34))
+ - [Add ServiceStack Reference](http://gistlyn.com?collection=363605c3c121784ebababac4a03e8910)  ([source](https://gist.github.com/gistlyn/363605c3c121784ebababac4a03e8910))
 
 ### Human Friendly short URLs
 
@@ -279,9 +279,9 @@ links to any Gistlyn collection by leaving a comment on the
 Where any link in the above Gist are available to Gistlyn, so instead of publishing links to a long 
 `?collection={id}` URL, you can use a shorter and easier to remember name instead, e.g:
 
-  - [/ormlite](/ormlite) 
+  - [/ormlite](http://gistlyn.com/ormlite) 
  
-That like a URL shortener, redirects to the linked url: [?collection=991db51e44674ad01d3d318b24cf0934](?collection=991db51e44674ad01d3d318b24cf0934)
+That like a URL shortener, redirects to the linked url: [http://gistlyn.com?collection=991db51e44674ad01d3d318b24cf0934](?collection=991db51e44674ad01d3d318b24cf0934)
 
 ## [Add ServiceStack Reference](http://gistlyn.com/add-servicestack-reference)
 
