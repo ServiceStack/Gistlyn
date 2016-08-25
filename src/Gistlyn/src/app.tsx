@@ -172,7 +172,8 @@ function evalExpression(gist: string, scriptId: string, expr: string) {
         setExpression: (expression: string) => dispatch({ type: 'EXPRESSION_SET', expression }),
         showDialog: (dialog: string) => dispatch({ type: 'DIALOG_SHOW', dialog }),
         setDirty: (dirty: boolean) => dispatch({ type: 'DIRTY_SET', dirty }),
-        changeCollection: (id: string, showCollection: boolean) => dispatch({ type: 'COLLECTION_CHANGE', collection: { id }, showCollection })
+        changeCollection: (id: string, showCollection: boolean) => dispatch({ type: 'COLLECTION_CHANGE', collection: { id }, showCollection }),
+        removeGistStat: (gist: string) => dispatch({ type: "GISTSTAT_REMOVE", gist })
     })
 )
 class App extends React.Component<any, any> {
@@ -516,6 +517,21 @@ class App extends React.Component<any, any> {
             });
     }
 
+    deleteGist(gist: string) {
+        if (!gist) return;
+
+        ReactGA.event({ category: 'gist', action: 'Delete Gist', label: gist });
+
+        fetch("/github-proxy/gists/" + this.props.gist, { method: "DELETE", credentials: "include" })
+            .then((res) => {
+                this.props.removeGistStat(gist);
+                this.props.changeGist(GistTemplates.NewGist, { reload: true });
+            })
+            .catch(e => {
+                this.props.logConsoleError(e.responseStatus || e);
+            });
+    }
+
     saveGistAs() {
         ReactGA.event({ category: 'gist', action: 'Save As', label: this.props.gist });
 
@@ -793,12 +809,14 @@ class App extends React.Component<any, any> {
         MorePopup.push((
             <div onClick={e => window.open("https://github.com/ServiceStack/Gistlyn/issues") }>Send Feedback</div>));
 
+        EditorPopup.push((
+            <div><a href={"https://gist.github.com/" + this.props.gist} target="_blank">View on Github</a></div>));
         if (authUsername) {
             EditorPopup.push((
                 <div onClick={e => this.props.showDialog("edit-gist") }>Edit Gist</div>));
+            EditorPopup.push((
+                <div onClick={e => confirm(`Are you sure you want to delete this gist?`) ? this.deleteGist(this.props.gist) : null }>Delete Gist</div>));
         }
-        EditorPopup.push((
-            <div><a href={"https://gist.github.com/" + this.props.gist} target="_blank">View on Github</a></div>));
         EditorPopup.push((
             <div onClick={e => this.props.showDialog("add-ss-ref") }>Add ServiceStack Reference</div>));
 
@@ -960,7 +978,7 @@ class App extends React.Component<any, any> {
                             : <i onClick={e => this.cancel() } className="material-icons" title="cancel script" style={{ color: "#FF5252" }}>cancel</i>)
                         : null}
 
-                    {isGistCollection && isGistOwner && this.props.gist != (collection && collection.id)
+                    {isGistCollection && isGistOwner && (this.props.gist != (collection && collection.id) || !showCollection)
                         ? (<i onClick={e => this.props.changeCollection(this.props.gist, true) } className="material-icons owner" title="View Collection">chevron_right</i>)
                         : null}
 

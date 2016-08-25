@@ -457,6 +457,20 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './state', './
                     });
                     var _a;
                 };
+                App.prototype.deleteGist = function (gist) {
+                    var _this = this;
+                    if (!gist)
+                        return;
+                    react_ga_1.default.event({ category: 'gist', action: 'Delete Gist', label: gist });
+                    fetch("/github-proxy/gists/" + this.props.gist, { method: "DELETE", credentials: "include" })
+                        .then(function (res) {
+                        _this.props.removeGistStat(gist);
+                        _this.props.changeGist(utils_1.GistTemplates.NewGist, { reload: true });
+                    })
+                        .catch(function (e) {
+                        _this.props.logConsoleError(e.responseStatus || e);
+                    });
+                };
                 App.prototype.saveGistAs = function () {
                     react_ga_1.default.event({ category: 'gist', action: 'Save As', label: this.props.gist });
                     this.props.showDialog("save-as");
@@ -633,10 +647,11 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './state', './
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.props.showDialog("shortcuts"); }}, "Shortcuts")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return _this.clearGistCache(); }}, "Clear Gist Caches")));
                     MorePopup.push((React.createElement("div", {onClick: function (e) { return window.open("https://github.com/ServiceStack/Gistlyn/issues"); }}, "Send Feedback")));
+                    EditorPopup.push((React.createElement("div", null, React.createElement("a", {href: "https://gist.github.com/" + this.props.gist, target: "_blank"}, "View on Github"))));
                     if (authUsername) {
                         EditorPopup.push((React.createElement("div", {onClick: function (e) { return _this.props.showDialog("edit-gist"); }}, "Edit Gist")));
+                        EditorPopup.push((React.createElement("div", {onClick: function (e) { return confirm("Are you sure you want to delete this gist?") ? _this.deleteGist(_this.props.gist) : null; }}, "Delete Gist")));
                     }
-                    EditorPopup.push((React.createElement("div", null, React.createElement("a", {href: "https://gist.github.com/" + this.props.gist, target: "_blank"}, "View on Github"))));
                     EditorPopup.push((React.createElement("div", {onClick: function (e) { return _this.props.showDialog("add-ss-ref"); }}, "Add ServiceStack Reference")));
                     var toggleEdit = function () {
                         var inputWasHidden = _this.txtUrl.style.display !== "inline-block";
@@ -675,7 +690,7 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './state', './
                         ? (!isScriptRunning
                             ? React.createElement("i", {onClick: function (e) { return _this.run(); }, className: "material-icons", title: "run"}, "play_circle_outline")
                             : React.createElement("i", {onClick: function (e) { return _this.cancel(); }, className: "material-icons", title: "cancel script", style: { color: "#FF5252" }}, "cancel"))
-                        : null, isGistCollection && isGistOwner && this.props.gist != (collection && collection.id)
+                        : null, isGistCollection && isGistOwner && (this.props.gist != (collection && collection.id) || !showCollection)
                         ? (React.createElement("i", {onClick: function (e) { return _this.props.changeCollection(_this.props.gist, true); }, className: "material-icons owner", title: "View Collection"}, "chevron_right"))
                         : null, showCollection && isCollectionOwner && this.props.gist != collection.id
                         ? (React.createElement("i", {onClick: function (e) { return _this.props.changeGist(collection.id); }, className: "material-icons owner", title: "Edit Collection"}, "chevron_left"))
@@ -742,7 +757,8 @@ System.register(['react', 'react-dom', 'react-ga', 'react-redux', './state', './
                         setExpression: function (expression) { return dispatch({ type: 'EXPRESSION_SET', expression: expression }); },
                         showDialog: function (dialog) { return dispatch({ type: 'DIALOG_SHOW', dialog: dialog }); },
                         setDirty: function (dirty) { return dispatch({ type: 'DIRTY_SET', dirty: dirty }); },
-                        changeCollection: function (id, showCollection) { return dispatch({ type: 'COLLECTION_CHANGE', collection: { id: id }, showCollection: showCollection }); }
+                        changeCollection: function (id, showCollection) { return dispatch({ type: 'COLLECTION_CHANGE', collection: { id: id }, showCollection: showCollection }); },
+                        removeGistStat: function (gist) { return dispatch({ type: "GISTSTAT_REMOVE", gist: gist }); }
                     }); })
                 ], App);
                 return App;
