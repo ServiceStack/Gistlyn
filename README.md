@@ -100,7 +100,7 @@ someone else who can instantly see and run what you're working on, who'll be abl
 the same place you're at.
 
 Like everything else in Gistlyn, a snapshot is just a `snapshot.json` document of your serialized State 
-saved to your User Account in a private [Github Gist](gist.github.com). 
+saved to your User Account in a private [Github Gist](https://gist.github.com). 
 
 ### Capturing a Snapshot
 
