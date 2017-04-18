@@ -3,7 +3,7 @@
     var argv = require('yargs').argv;
     var WEB = 'web';
     var NATIVE = 'native';
-
+    var msbuildToolsVersion = 15;
     var webBuildDir = argv.serviceStackSettingsDir || './wwwroot_build/';
 
     var COPY_FILES = [
@@ -226,6 +226,7 @@
     gulp.task('www-msbuild-web', function() {
         return gulp.src('./Gistlyn.csproj')
             .pipe(msbuild({
+                toolsVersion: msbuildToolsVersion,
                 targets: ['Clean', 'Rebuild'],
                 properties: {
                     Configuration: 'Release',
@@ -238,6 +239,7 @@
     gulp.task('www-msbuild-resources', function () {
         return gulp.src('../Gistlyn.Resources/Gistlyn.Resources.csproj')
             .pipe(msbuild({
+                toolsVersion: msbuildToolsVersion,
                 targets: ['Clean', 'Rebuild'],
                 properties: {
                     Configuration: 'Release'
@@ -249,6 +251,7 @@
     gulp.task('www-msbuild-console', function () {
         return gulp.src('../Gistlyn.AppConsole/Gistlyn.AppConsole.csproj')
             .pipe(msbuild({
+                toolsVersion: msbuildToolsVersion,
                 targets: ['Clean', 'Rebuild'],
                 properties: {
                     Configuration: 'Release'
@@ -260,6 +263,7 @@
     gulp.task('www-msbuild-winforms', function () {
         return gulp.src('../Gistlyn.AppWinforms/Gistlyn.AppWinforms.csproj')
             .pipe(msbuild({
+                toolsVersion: msbuildToolsVersion,
                 targets: ['Clean', 'Rebuild'],
                 properties: {
                     Configuration: 'Release'

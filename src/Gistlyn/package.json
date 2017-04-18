@@ -21,7 +21,7 @@
     "gulp-clean-css": "~2.0.6",
     "gulp-htmlbuild": "~0.4.1",
     "gulp-if": "~1.2.4",
-    "gulp-msbuild": "^0.2.21",
+    "gulp-msbuild": "^0.4.7",
     "gulp-msdeploy": "^0.0.4",
     "gulp-newer": "~1.1.0",
     "gulp-nuget-pack": "^0.0.7",
