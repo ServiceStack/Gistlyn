@@ -61,7 +61,7 @@ export default class InsertLinkDialog extends React.Component<any, any> {
         if (!gist) {
             return fetch(createGistRequest(authUsername, id))
                 .then(res => res.json())
-                .then(r => handleGistTemplate({ files: r.files, meta: createGistMeta(r) }));
+                .then((r:any) => handleGistTemplate({ files: r.files, meta: createGistMeta(r) }));
         } else {
             return handleGistTemplate(gist);
         }

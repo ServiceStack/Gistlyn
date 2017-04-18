@@ -6,13 +6,13 @@
     "removeComments": false,
     "sourceMap": true,
     "target": "es5",
-    "module": "system",
+    "module": "commonjs",
     "jsx": "react",
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "lib": ["es2015","dom"]
   },
   "exclude": [
-    "jspm_packages",
-    "typings",
+    "dist",
     "node_modules",
     "wwwroot"
   ]

@@ -1,5 +1,5 @@
 ﻿import * as React from 'react';
-import DropZone from 'react-dropzone';
+import * as DropZone from 'react-dropzone';
 
 export default class ImageUploadDialog extends React.Component<any, any> {
     dialog: HTMLDivElement;
@@ -52,7 +52,7 @@ export default class ImageUploadDialog extends React.Component<any, any> {
     }
 
     render() {
-        const hasSelectedImage = this.fileImage && this.fileImage.value;
+        const hasSelectedImage = !!(this.fileImage && this.fileImage.value);
         const hasProvidedUrl = this.txtImageUrl && this.txtImageUrl.value.startsWith("http");
         const disabledColor = {color:"#999"};
 

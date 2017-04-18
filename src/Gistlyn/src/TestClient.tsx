@@ -1,6 +1,4 @@
-﻿/// <reference path='../typings/index.d.ts'/>
-
-import * as ReactDOM from 'react-dom';
+﻿import * as ReactDOM from 'react-dom';
 import * as React from 'react';
 
 import { JsonServiceClient, IReturn, nameOf } from 'servicestack-client';

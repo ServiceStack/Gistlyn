@@ -1,14 +1,12 @@
-﻿/// <reference path='../typings/index.d.ts'/>
-
-import * as React from 'react';
+﻿import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import ReactGA from 'react-ga';
+import * as ReactGA from 'react-ga';
 import { Provider, connect } from 'react-redux';
 import { store } from './state';
 import { JsonViewer } from './json-viewer';
 
 import { 
-    queryString, JsonServiceClient, ServerEventsClient, ISseConnect, 
+    queryString, JsonServiceClient, ServerEventsClient, ServerEventConnect, 
     splitOnFirst, splitOnLast, humanize, dateFmt, timeFmt12 
 } from 'servicestack-client';
 
@@ -63,7 +61,7 @@ const batchLogs = new BatchItems(30, logs => store.dispatch({ type: 'CONSOLE_LOG
 const channels = ["gist"];
 const sse = new ServerEventsClient("/", channels, {
     handlers: {
-        onConnect(activeSub: ISseConnect) {
+        onConnect(activeSub: ServerEventConnect) {
             store.dispatch({ type: 'SSE_CONNECT', activeSub });
             ReactGA.set({ userId: activeSub.userId });
             fetch("/session-to-token", { method:"POST", credentials:"include" });
@@ -100,7 +98,7 @@ const sse = new ServerEventsClient("/", channels, {
             }
         }
     }
-});
+}).start();
 
 function evalExpression(gist: string, scriptId: string, expr: string) {
     if (!expr)
@@ -425,8 +423,8 @@ class App extends React.Component<any, any> {
             });
     }
 
-    handleCreateFile(e: React.SyntheticEvent) {
-        var txt = e.target as HTMLInputElement;
+    handleCreateFile(e: React.SyntheticEvent<HTMLInputElement>) {
+        var txt = e.currentTarget;
         if (txt == null)
             return;
 
@@ -461,8 +459,8 @@ class App extends React.Component<any, any> {
             });
     }
 
-    handleRenameFile(oldFileName: string, e: React.SyntheticEvent) {
-        var txt = e.target as HTMLInputElement;
+    handleRenameFile(oldFileName: string, e: React.SyntheticEvent<HTMLInputElement>) {
+        var txt = e.currentTarget;
         if (txt == null)
             return;
 
@@ -557,7 +555,7 @@ class App extends React.Component<any, any> {
         window.onkeydown = this.handleWindowKeyDown.bind(this);
     }
 
-    showPopup(e: React.MouseEvent, el: HTMLDivElement) {
+    showPopup(e: React.MouseEvent<HTMLElement>, el: HTMLDivElement) {
         if (el === this.lastPopup) return;
 
         ReactGA.event({ category: 'app', action: 'Show Popup', label: el.id });
@@ -567,7 +565,7 @@ class App extends React.Component<any, any> {
         el.style.display = "block";
     }
 
-    handleBodyClick(e: React.MouseEvent) {
+    handleBodyClick(e: React.MouseEvent<HTMLDivElement>) {
         if (this.lastPopup != null) {
             this.lastPopup.style.display = "none";
             this.lastPopup = null;
@@ -661,7 +659,7 @@ class App extends React.Component<any, any> {
     }
 
     getAuthUsername() {
-        var activeSub = this.props.activeSub as ISseConnect;
+        var activeSub = this.props.activeSub as ServerEventConnect;
         return activeSub && parseInt(activeSub.userId) > 0 ? activeSub.displayName : null;
     }
 
@@ -679,7 +677,7 @@ class App extends React.Component<any, any> {
 
         const MorePopup = [];
         const EditorPopup = [];
-        var activeSub = this.props.activeSub as ISseConnect;
+        var activeSub = this.props.activeSub as ServerEventConnect;
         var authUsername = this.getAuthUsername();
         const meta = this.props.meta as IGistMeta;
         const shouldFork = this.shouldFork();
@@ -708,7 +706,7 @@ class App extends React.Component<any, any> {
             );
         } else if (this.props.showCollection) { //Still loading
             Preview.push((
-                <div id="collection" className="section">
+                <div key="collection" id="collection" className="section">
                     <div id="collection-header">
                         Collection
                     </div>
@@ -725,7 +723,7 @@ class App extends React.Component<any, any> {
         } else if (this.props.error != null) {
             var code = this.props.error.errorCode ? `(${this.props.error.errorCode}) ` : "";
             Preview.push((
-                <div id="errors" className="section">
+                <div key="errors" id="errors" className="section">
                     <div style={{ margin: "25px 25px 40px 25px", color: "#a94442" }}>
                         {code}{this.props.error.message}
                     </div>
@@ -737,7 +735,7 @@ class App extends React.Component<any, any> {
                 </div>));
         } else if (isScriptRunning) {
             Preview.push((
-                <div id="status" className="section">
+                <div key="status" id="status" className="section">
                     <div style={{ margin: '40px', color: "#444", width: "215px" }} title="executing...">
                         <img src="/img/ajax-loader.gif" style={{ float: "right", margin: "5px 0 0 0" }} />
                         <i className="material-icons" style={{ position: "absolute" }}>build</i>
@@ -753,7 +751,7 @@ class App extends React.Component<any, any> {
             var exprResult = this.props.expressionResult as ScriptExecutionResult;
             var exprVar = exprResult != null && exprResult.variables.length > 0 ? exprResult.variables[0] : null;
             Preview.push((
-                <div id="vars" className="section" style={{ display:"flex", flexFlow:"column", overflow:"hidden" }}>
+                <div key="vars" id="vars" className="section" style={{ display:"flex", flexFlow:"column", overflow:"hidden" }}>
                     <table style={{ width: "100%", flex:1 }}>
                         <thead>
                             <tr>
@@ -769,7 +767,7 @@ class App extends React.Component<any, any> {
                                     <input id="txtEval" type="text" placeholder="Evaluate Expression" value={this.props.expression}
                                         onChange={e => this.props.setExpression((e.target as HTMLInputElement).value) }
                                         onKeyPress={e => e.which === 13 ? this.evaluateExpression(this.props.expression) : null }
-                                        autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck="false" />
+                                        autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} />
                                     <i id="btnEval" className="material-icons noselect" title="run" onClick={e => this.evaluateExpression(this.props.expression) }>play_arrow</i>
                                 </td>
                             </tr>
@@ -787,36 +785,36 @@ class App extends React.Component<any, any> {
 
                 </div>));
         } else {
-            Preview.push(<div id="placeholder"></div>);
+            Preview.push(<div key="placeholder" id="placeholder"></div>);
         }
 
         if (this.props.logs.length > 0 && !this.props.showCollection) {
-            Preview.push(<Console logs={this.props.logs} onClear={() => this.props.clearConsole() } showDialog={this.props.showDialog} />);
+            Preview.push(<Console key="console" logs={this.props.logs} onClear={() => this.props.clearConsole() } showDialog={this.props.showDialog} />);
         }
 
         MorePopup.push((
-            <div onClick={e => this.props.urlChanged(GistTemplates.HomeCollection) }>Home</div>));
+            <div key={1} onClick={e => this.props.urlChanged(GistTemplates.HomeCollection) }>Home</div>));
         MorePopup.push((
-            <div onClick={e => this.props.changeGist(GistTemplates.NewGist) }>New Gist</div>));
+            <div key={2} onClick={e => this.props.changeGist(GistTemplates.NewGist) }>New Gist</div>));
         MorePopup.push((
-            <div onClick={e => this.props.changeGist(GistTemplates.NewPrivateGist) }>New Private Gist</div>));
+            <div key={3} onClick={e => this.props.changeGist(GistTemplates.NewPrivateGist) }>New Private Gist</div>));
         MorePopup.push((
-            <div onClick={e => this.props.changeGist(GistTemplates.NewCollection) }>New Collection</div>));
+            <div key={4} onClick={e => this.props.changeGist(GistTemplates.NewCollection) }>New Collection</div>));
         MorePopup.push((
-            <div onClick={e => this.props.showDialog("shortcuts") }>Shortcuts</div>));
+            <div key={5} onClick={e => this.props.showDialog("shortcuts") }>Shortcuts</div>));
         MorePopup.push((
-            <div onClick={e => this.clearGistCache() }>Clear Gist Caches</div>));
+            <div key={6} onClick={e => this.clearGistCache() }>Clear Gist Caches</div>));
         MorePopup.push((
-            <div onClick={e => window.open("https://github.com/ServiceStack/Gistlyn/issues") }>Send Feedback</div>));
+            <div key={7} onClick={e => window.open("https://github.com/ServiceStack/Gistlyn/issues") }>Send Feedback</div>));
 
         EditorPopup.push((
-            <div><a href={"https://gist.github.com/" + this.props.gist} target="_blank">View on Github</a></div>));
+            <div key={1}><a href={"https://gist.github.com/" + this.props.gist} target="_blank">View on Github</a></div>));
         if (authUsername) {
             EditorPopup.push((
-                <div onClick={e => this.props.showDialog("edit-gist") }>Edit Gist</div>));
+                <div key={2} onClick={e => this.props.showDialog("edit-gist") }>Edit Gist</div>));
         }
         EditorPopup.push((
-            <div onClick={e => this.props.showDialog("add-ss-ref") }>Add ServiceStack Reference</div>));
+            <div key={3} onClick={e => this.props.showDialog("add-ss-ref") }>Add ServiceStack Reference</div>));
 
         const toggleEdit = () => {
             const inputWasHidden = this.txtUrl.style.display !== "inline-block";
@@ -848,7 +846,7 @@ class App extends React.Component<any, any> {
                                 style={{ display: showGistInput ? "inline-block" : "none" }} onBlur={toggleEdit}
                                 value={this.props.url} onFocus={e => (e.target as HTMLInputElement).select()}
                                 onChange={e => this.props.urlChanged((e.target as HTMLInputElement).value) }
-                                autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck="false" />
+                                autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} />
 
                             <div id="desc-overlay" style={{ display: showGistInput ? "none" : "inline-block" }}  onClick={toggleEdit}>
                                 <div className="inner">

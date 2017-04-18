@@ -4,56 +4,54 @@
   "scripts": {
     "postinstall": "cmd /c wwwroot_build\\build.bat"
   },
-  "jspm": {
-    "registry": "npm",
-    "dependencies": {
-      "bootstrap": "~3.2.0",
-      "codemirror": "^5.16.0",
-      "es6-promises": "^1.0.10",
-      "es6-shim": "github:es-shims/es6-shim@^0.35.0",
-      "isomorphic-fetch": "^2.2.1",
-      "marked": "^0.3.5",
-      "octicons": "^4.2.0",
-      "react": "^15.0.1",
-      "react-codemirror": "^0.2.6",
-      "react-dom": "^15.0.1",
-      "react-dropzone": "^3.5.3",
-      "react-ga": "^2.1.1",
-      "react-redux": "^4.4.5",
-      "redux": "^3.5.2",
-      "servicestack-client": "^0.0.10"
-    },
-    "devDependencies": {
-      "jspm": "^0.16.31"
-    }
-  },
   "devDependencies": {
+    "@types/codemirror": "0.0.38",
+    "@types/marked": "0.0.28",
+    "@types/react": "^15.0.21",
+    "@types/react-codemirror": "^0.2.6",
+    "@types/react-dom": "^0.14.23",
+    "@types/react-dropzone": "0.0.32",
+    "@types/react-ga": "^2.1.0",
+    "@types/react-redux": "^4.4.38",
+    "awesome-typescript-loader": "^3.1.2",
     "del": "~1.1.1",
     "event-stream": "~3.3.2",
     "globule": "~0.2.0",
     "gulp": "~3.9.1",
+    "gulp-clean-css": "~2.0.6",
     "gulp-htmlbuild": "~0.4.1",
     "gulp-if": "~1.2.4",
-    "gulp-jspm": "^0.5.8",
-    "gulp-clean-css": "~2.0.6",
     "gulp-msbuild": "^0.2.21",
     "gulp-msdeploy": "^0.0.4",
     "gulp-newer": "~1.1.0",
-    "gulp-nuget-restore": "^0.3.1",
     "gulp-nuget-pack": "^0.0.7",
+    "gulp-nuget-restore": "^0.3.1",
     "gulp-rename": "^1.2.2",
     "gulp-replace": "~0.4.0",
     "gulp-uglify": "~1.5.3",
     "gulp-useref": "~3.0.8",
     "gulp-util": "^3.0.7",
-    "jspm": "^0.16.31",
     "requirejs": "~2.1.15",
     "run-sequence": "^1.1.5",
+    "source-map-loader": "^0.2.1",
+    "typescript": "^2.2.2",
+    "webpack": "^2.4.1",
+    "webpack-stream": "^3.2.0",
     "yargs": "^4.2.0"
   },
   "dependencies": {
+    "@types/react-codemirror": "^0.2.6",
+    "bootstrap": "^3.3.7",
+    "codemirror": "^5.25.0",
+    "marked": "^0.3.6",
     "octicons": "^4.2.0",
     "react": "^15.2.1",
-    "react-ga": "^2.1.1"
+    "react-codemirror": "^0.3.0",
+    "react-dom": "^15.5.4",
+    "react-dropzone": "^3.12.4",
+    "react-ga": "^2.1.1",
+    "react-redux": "^5.0.4",
+    "redux": "^3.6.0",
+    "servicestack-client": "0.0.32"
   }
 }

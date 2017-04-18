@@ -2,17 +2,17 @@
 import { queryString, splitOnLast } from 'servicestack-client';
 import { UA, getSortedFileNames, IGistFile, FileNames } from './utils';
 
-import CodeMirror from 'react-codemirror';
-import "jspm_packages/npm/codemirror@5.16.0/addon/edit/matchbrackets.js";
-import "jspm_packages/npm/codemirror@5.16.0/addon/comment/continuecomment.js";
-import "jspm_packages/npm/codemirror@5.16.0/addon/display/fullscreen.js";
-import "jspm_packages/npm/codemirror@5.16.0/mode/clike/clike.js";
-import "jspm_packages/npm/codemirror@5.16.0/mode/xml/xml.js";
-import "jspm_packages/npm/codemirror@5.16.0/mode/markdown/markdown.js";
-import "jspm_packages/npm/codemirror@5.16.0/mode/gfm/gfm.js";
-import "jspm_packages/npm/codemirror@5.16.0/mode/javascript/javascript.js";
-import "jspm_packages/npm/codemirror@5.16.0/mode/css/css.js";
-import "jspm_packages/npm/codemirror@5.16.0/mode/htmlmixed/htmlmixed.js";
+import * as CodeMirror from 'react-codemirror';
+import "codemirror/addon/edit/matchbrackets.js";
+import "codemirror/addon/comment/continuecomment.js";
+import "codemirror/addon/display/fullscreen.js";
+import "codemirror/mode/clike/clike.js";
+import "codemirror/mode/xml/xml.js";
+import "codemirror/mode/markdown/markdown.js";
+import "codemirror/mode/gfm/gfm.js";
+import "codemirror/mode/javascript/javascript.js";
+import "codemirror/mode/css/css.js";
+import "codemirror/mode/htmlmixed/htmlmixed.js";
 import "./codemirror.js";
 
 const extMimeTypes = {
@@ -134,8 +134,8 @@ export default class Editor extends React.Component<any, any> {
         if (files) {
             var keys = getSortedFileNames(files);
 
-            const sizeToFit = (e: React.KeyboardEvent) => {
-                var txt = e.target as HTMLInputElement;
+            const sizeToFit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+                var txt = e.currentTarget;
                 var modifier = UA.mac || UA.ipad ? 3 : -2; //Spacing is different on OSX, iPad
                 txt.size = Math.max(txt.value.length + modifier, 1);
             };
@@ -146,7 +146,7 @@ export default class Editor extends React.Component<any, any> {
                     (this.props.activeFileName == null && fileName.toLowerCase() === "main.cs");
 
                 Tabs.push((
-                    <div className={active ? 'active' : null}
+                    <div key={fileName} className={active ? 'active' : null}
                         onClick={e => !active ? this.props.selectFileName(fileName) : this.props.editFileName(fileName) }>
                         {this.props.editingFileName !== fileName
                             ? <b>
@@ -165,7 +165,7 @@ export default class Editor extends React.Component<any, any> {
                 ));
 
                 FileList.push((
-                    <div className="file" onClick={e => this.props.selectFileName(fileName) }>
+                    <div key={fileName} className="file" onClick={e => this.props.selectFileName(fileName) }>
                         {fileName}
                     </div>
                 ));
@@ -179,15 +179,15 @@ export default class Editor extends React.Component<any, any> {
 
             if (this.props.isOwner) {
                 Tabs.push((
-                    <div title="Add new file" onClick={e => this.props.editFileName("+") }
+                    <div key="__add" title="Add new file" onClick={e => this.props.editFileName("+") }
                         className={this.props.editingFileName === "+" ? "active" : ""}
                         style={{ padding: "4px 6px" }}>
                         {this.props.editingFileName !== "+"
                             ? <i className="material-icons" style={{ fontSize: 13 }}>add</i>
-                            : <input type="text"className="txtFileName"
+                            : <input type="text" className="txtFileName"
                                 onBlur={e => this.props.onCreateFile(e) }
                                 onKeyDown={e => e.keyCode === 13 ? (e.target as HTMLElement).blur() : null }
-                                onKeyUp={sizeToFit} size="1" autoFocus /> }
+                                onKeyUp={sizeToFit} size={3} autoFocus /> }
                     </div>
                 ));
             }
@@ -207,7 +207,7 @@ export default class Editor extends React.Component<any, any> {
                 >
                 <div id="tabs" style={{ display: this.props.files ? 'flex' : 'none' }}>
                     {FileList.length > 0
-                        ? <i id="files-menu" className="material-icons" onClick={e => this.props.showPopup(e, this.filesPopup) }>arrow_drop_down</i> : null }
+                        ? <i key="files-menu" id="files-menu" className="material-icons" onClick={e => this.props.showPopup(e, this.filesPopup) }>arrow_drop_down</i> : null }
                     {Tabs}
                 </div>
                 <div id="popup-files" className="popup" ref={e => this.filesPopup = e }>

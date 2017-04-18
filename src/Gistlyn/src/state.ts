@@ -1,8 +1,8 @@
-﻿import { createStore, applyMiddleware } from 'redux';
+﻿import { Store, createStore, applyMiddleware } from 'redux';
 import { getSortedFileNames, GistTemplates, StateKey, GistCacheKey, FileNames, IGistMeta, IGistFile, IGistSaved, addClientPackages } from './utils';
 import { queryString, appendQueryString, splitOnFirst, splitOnLast } from 'servicestack-client';
-import ReactGA from 'react-ga';
-import marked from 'marked';
+import * as ReactGA from 'react-ga';
+import * as marked from 'marked';
 
 const updateHistory = (id:string, description:string, key:string) => {
     if (!id) return;
@@ -295,7 +295,7 @@ const preserveDefaults = (state) => ({
     showCollection: state.showCollection
 });
 
-export let store = createStore(
+export let store:Store<any> = createStore(
     (state, action) => {
         //console.log(action);
         switch (action.type) {
