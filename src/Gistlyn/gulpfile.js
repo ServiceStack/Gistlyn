@@ -367,6 +367,21 @@ gulp.task('www-nuget-pack-winforms', function (callback) {
         });
     });
 
+    gulp.task('webpack-build', function (callback) {
+        exec('npm run build', function (err, stdout, stderr) {
+            console.log(stdout);
+            console.log(stderr);
+            callback(err);
+        });
+    });
+
+    gulp.task('00-webpack-watch', function (callback) {
+        var proc = exec('npm run watch');
+        proc.stdout.pipe(process.stdout);
+        proc.stderr.pipe(process.stderr);
+        proc.on('exit', callback);
+    });
+
     gulp.task('01-bundle-all', function(callback) {
         runSequence(
             'www-clean-dlls',

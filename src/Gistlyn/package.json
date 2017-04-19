@@ -2,7 +2,9 @@
   "name": "gistlyn",
   "version": "0.0.1",
   "scripts": {
-    "postinstall": "cmd /c wwwroot_build\\build.bat"
+    "postinstall": "cmd /c wwwroot_build\\build.bat",
+    "build": "webpack --config webpack.config.js",
+    "watch": "webpack --config webpack.config.js --watch"
   },
   "devDependencies": {
     "@types/codemirror": "0.0.38",
@@ -36,7 +38,6 @@
     "source-map-loader": "^0.2.1",
     "typescript": "^2.2.2",
     "webpack": "^2.4.1",
-    "webpack-stream": "^3.2.0",
     "yargs": "^4.2.0"
   },
   "dependencies": {
