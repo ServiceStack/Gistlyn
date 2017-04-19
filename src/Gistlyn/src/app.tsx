@@ -875,18 +875,18 @@ class App extends React.Component<any, any> {
 
                         </div>
                         { !authUsername
-                            ? (<div id="sign-in" style={{ position: "absolute", right: 5, top:4 }}>
+                            ? (<div key="sign-in" id="sign-in" style={{ position: "absolute", right: 5, top:4 }}>
                                    <a href="/auth/github" style={{ color: "#fff", textDecoration: "none" }}>
                                        <span style={{ whiteSpace: "nowrap", fontSize: 14 }}>Sign-in</span>
                                        <span style={{ verticalAlign: "sub", margin: "0 0 0 10px" }} className="mega-octicon octicon-mark-github" title="Sign in with GitHub"></span>
                                    </a>
                                </div>)
                             : ([
-                               <div id="signed-in" style={{ position: "absolute", right: 5, cursor: "pointer" }} onClick={e => this.showPopup(e, this.userPopup) }>
+                               <div key="signed-in" id="signed-in" style={{ position: "absolute", right: 5, cursor: "pointer" }} onClick={e => this.showPopup(e, this.userPopup) }>
                                    <span style={{ whiteSpace: "nowrap", fontSize: 14 }}>{activeSub.displayName}</span>
                                    <img src={activeSub.profileUrl} style={{ verticalAlign: "middle", marginLeft: 5, borderRadius: "50%" }} />
                                </div>,
-                               <div id="popup-user" className="popup" ref={e => this.userPopup = e }>
+                               <div key="popup-user" id="popup-user" className="popup" ref={e => this.userPopup = e }>
                                    <div onClick={e => location.href = "/auth/logout" }>Sign out</div>
                                </div>
                             ])}
