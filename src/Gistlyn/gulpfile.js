@@ -12,7 +12,6 @@
         { src: './css/**/*', dest: 'css/' },
         //{ src: './App_Data/**/*', dest: 'App_Data/', host: WEB },
         { src: './Global.asax', host: WEB },
-        { src: './node_modules/bootstrap/dist/fonts/*.*', dest: 'lib/fonts/' },
         { src: './node_modules/react/dist/react.min.js', dest: 'dist/' },
         { src: './node_modules/react/dist-dom/react-dom.min.js', dest: 'dist/' },
         { src: ['./favicon.ico'], dest: '/' },
