@@ -3,11 +3,24 @@
   "version": "0.0.1",
   "scripts": {
     "postinstall": "cmd /c wwwroot_build\\build.bat",
+    "test": "jest",
     "build": "webpack --config webpack.config.js",
     "watch": "webpack --config webpack.config.js --watch"
   },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ]
+  },
   "devDependencies": {
     "@types/codemirror": "0.0.38",
+    "@types/jest": "^19.2.2",
     "@types/marked": "0.0.28",
     "@types/react": "^15.0.21",
     "@types/react-codemirror": "^0.2.6",
@@ -33,9 +46,11 @@
     "gulp-uglify": "~1.5.3",
     "gulp-useref": "~3.0.8",
     "gulp-util": "^3.0.7",
+    "jest": "^19.0.2",
     "requirejs": "~2.1.15",
     "run-sequence": "^1.1.5",
     "source-map-loader": "^0.2.1",
+    "ts-jest": "^19.0.10",
     "typescript": "^2.2.2",
     "webpack": "^2.4.1",
     "yargs": "^4.2.0"

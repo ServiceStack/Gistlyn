@@ -49,6 +49,7 @@
     var msbuild = require('gulp-msbuild');
     var msdeploy = require('gulp-msdeploy');
     var exec = require('child_process').exec;
+    var exec = require('child_process').exec;
     var nugetpack = require('gulp-nuget-pack');
     var webpack = require('webpack');
 
@@ -367,16 +368,33 @@ gulp.task('www-nuget-pack-winforms', function (callback) {
         });
     });
 
-    gulp.task('webpack-build', function (callback) {
-        exec('npm run build', function (err, stdout, stderr) {
-            console.log(stdout);
-            console.log(stderr);
-            callback(err);
-        });
+    gulp.task('webpack-build', callback => {
+        process.env.FORCE_COLOR = 1;
+        var proc = exec('npm run build');
+        proc.stdout.pipe(process.stdout);
+        proc.stderr.pipe(process.stderr);
+        proc.on('exit', callback);
     });
 
-    gulp.task('00-webpack-watch', function (callback) {
+    gulp.task('00-webpack-watch', callback => {
+        process.env.FORCE_COLOR = 1;
         var proc = exec('npm run watch');
+        proc.stdout.pipe(process.stdout);
+        proc.stderr.pipe(process.stderr);
+        proc.on('exit', callback);
+    });
+
+    gulp.task('tests-run', callback => {
+        process.env.FORCE_COLOR = 1;
+        var proc = exec('npm run test');
+        proc.stdout.pipe(process.stdout);
+        proc.stderr.pipe(process.stderr);
+        proc.on('exit', callback);
+    });
+
+    gulp.task('tests-watch', callback => {
+        process.env.FORCE_COLOR = 1;
+        var proc = exec('npm run test -- --watch');
         proc.stdout.pipe(process.stdout);
         proc.stderr.pipe(process.stderr);
         proc.on('exit', callback);
