@@ -152,6 +152,10 @@
     <TypeScriptCompile Include="src\state.ts" />
     <TypeScriptCompile Include="src\TestClient.tsx" />
     <TypeScriptCompile Include="src\utils.ts" />
+    <TypeScriptCompile Include="tests\add.test.ts" />
+    <TypeScriptCompile Include="tests\CheckboxWithLabel.test.tsx" />
+    <TypeScriptCompile Include="tests\CheckboxWithLabel.tsx" />
+    <TypeScriptCompile Include="tests\sum.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="css\reset.css" />
@@ -178,9 +182,6 @@
     </Content>
     <Content Include="src\codemirror.js" />
     <Content Include="testclient.html" />
-    <Content Include="tests\unit\hello-test.js" />
-    <Content Include="tests\preprocessor.js" />
-    <Content Include="tests\README.txt" />
     <Content Include="package.json" />
     <Content Include="tsconfig.json" />
     <Content Include="webpack.config.js" />
