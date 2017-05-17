@@ -166,7 +166,7 @@ export default class InsertLinkDialog extends React.Component<any, any> {
                     {TabBody}
                 </div>
                 <div className="dialog-footer">
-                    <img className="loading" src="/img/ajax-loader.gif" style={{ margin: "5px 10px 0 0" }} />
+                    <img className="loading" src={require('./assets/img/ajax-loader.gif')} style={{ margin: "5px 10px 0 0" }} />
 
                     {tab == "URL" 
                         ? (<span className={"btn" + (hasUrl ? "" : " disabled")} onClick={e => this.selectLink(e)}>

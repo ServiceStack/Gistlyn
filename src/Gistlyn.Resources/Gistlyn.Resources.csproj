@@ -59,53 +59,32 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="dist\bundle.js" />
-    <EmbeddedResource Include="lib\css\lib.min.css" />
-    <EmbeddedResource Include="lib\fonts\glyphicons-halflings-regular.svg" />
-    <EmbeddedResource Include="lib\js\lib.min.js" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="default.html" />
-    <EmbeddedResource Include="lib\fonts\glyphicons-halflings-regular.eot" />
-    <EmbeddedResource Include="lib\fonts\glyphicons-halflings-regular.ttf" />
-    <EmbeddedResource Include="lib\fonts\glyphicons-halflings-regular.woff" />
-    <EmbeddedResource Include="lib\fonts\glyphicons-halflings-regular.woff2" />
     <None Include="App.config" />
-    <EmbeddedResource Include="css\iconfont\codepoints" />
-    <EmbeddedResource Include="css\iconfont\MaterialIcons-Regular.eot" />
-    <EmbeddedResource Include="css\iconfont\MaterialIcons-Regular.ijmap" />
-    <EmbeddedResource Include="css\iconfont\MaterialIcons-Regular.ttf" />
-    <EmbeddedResource Include="css\iconfont\MaterialIcons-Regular.woff" />
-    <EmbeddedResource Include="css\iconfont\MaterialIcons-Regular.woff2" />
-    <EmbeddedResource Include="css\octicon\octicons.ttf" />
-    <EmbeddedResource Include="css\octicon\octicons.woff" />
-    <EmbeddedResource Include="css\roboto\Roboto-Regular.ttf" />
-    <EmbeddedResource Include="css\roboto\roboto-v15-latin-regular.woff" />
-    <EmbeddedResource Include="css\roboto\roboto-v15-latin-regular.woff2" />
+    <EmbeddedResource Include="dist\app.bundle.js.map" />
+    <EmbeddedResource Include="dist\app.css.map" />
+    <EmbeddedResource Include="dist\img\MaterialIcons-Regular.eot" />
+    <EmbeddedResource Include="dist\img\MaterialIcons-Regular.ttf" />
+    <EmbeddedResource Include="dist\img\MaterialIcons-Regular.woff" />
+    <EmbeddedResource Include="dist\img\MaterialIcons-Regular.woff2" />
+    <EmbeddedResource Include="dist\img\octicons.ttf" />
+    <EmbeddedResource Include="dist\img\octicons.woff" />
+    <EmbeddedResource Include="dist\img\roboto-v15-latin-regular.woff" />
+    <EmbeddedResource Include="dist\img\roboto-v15-latin-regular.woff2" />
+    <EmbeddedResource Include="dist\vendor.bundle.js.map" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="img\editor-bg.png" />
-    <EmbeddedResource Include="img\logo-32-inverted.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="css\iconfont\material-icons.css" />
-    <EmbeddedResource Include="css\iconfont\MaterialIcons-Regular.svg" />
-    <EmbeddedResource Include="css\octicon\octicon.css" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="img\ajax-loader.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="css\app.min.css" />
-    <EmbeddedResource Include="img\compiling.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="favicon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="dist\react-dom.min.js" />
-    <EmbeddedResource Include="dist\react.min.js" />
+    <EmbeddedResource Include="dist\app.bundle.js" />
+    <EmbeddedResource Include="dist\app.css" />
+    <EmbeddedResource Include="dist\img\ajax-loader.gif" />
+    <EmbeddedResource Include="dist\img\compiling.png" />
+    <EmbeddedResource Include="dist\img\editor-bg.png" />
+    <EmbeddedResource Include="dist\img\logo-32-inverted.png" />
+    <EmbeddedResource Include="dist\vendor.bundle.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -83,7 +83,7 @@ export default class ImageUploadDialog extends React.Component<any, any> {
                                 <p>Click or drag Images to upload to Imgur</p>
                                 <div className="loading" style={{ marginTop: 15 }}>
                                     <span style={{ display: "inline-block", color: "#888", marginRight: 10 }}>Uploading to Imgur...</span>
-                                    <img src="/img/ajax-loader.gif" style={{ margin: "5px 10px 0 0" }} />
+                                    <img src={require('./assets/img/ajax-loader.gif')} style={{ margin: "5px 10px 0 0" }} />
                                 </div>
                             </div>
                         </DropZone>

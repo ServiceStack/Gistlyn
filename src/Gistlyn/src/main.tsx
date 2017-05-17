@@ -1,4 +1,16 @@
-﻿import * as React from 'react';
+﻿import "./assets/css/iconfont/material-icons.css";
+import "./assets/css/octicon/octicon.css";
+
+import "./assets/css/reset.css";
+import "./assets/css/app.css";
+import "./assets/css/collections.css";
+import "./assets/css/dialogs.css";
+import "./assets/css/editor.css";
+import "./assets/css/codemirror.css";
+
+import "es6-shim";
+
+import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as ReactGA from 'react-ga';
 import { Provider, connect } from 'react-redux';

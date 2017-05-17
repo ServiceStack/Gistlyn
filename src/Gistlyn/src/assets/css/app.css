@@ -1,0 +1,433 @@
+﻿@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Roboto'), local('Roboto-Regular'), url('roboto/roboto-v15-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+ */
+    url('roboto/roboto-v15-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+@font-face {
+  font-family: 'octicons';
+  src: url('octicon/octicons.woff') format('woff'),
+       url('octicon/octicons.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body, html { /*iPad*/
+    position: fixed; 
+    width: 100%;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    overflow: hidden;
+}
+
+html,body,#app,#body {
+    height:100%;
+    margin:0;
+}
+
+#body {
+    display: flex;
+    flex-flow: column;
+}
+
+.titlebar {
+    background: #0371BE;
+    color: #fff;
+    height: 32px;
+    padding: 5px;
+}
+.titlebar .container {
+    display: flex;
+}
+.titlebar img {
+    height: 26px;
+}
+.titlebar h3 {
+    line-height: 32px;
+    padding: 0 0 0 5px;
+    font-size: 22px;
+}
+#gist {
+    width:100%;
+    text-align: center;
+    margin: 0 0 0 -145px;
+    padding: 0 0 0 0;
+}
+#txtUrl {
+    width: 320px;
+    padding: 4px 8px;
+    border: none;
+    font-size: 14px;
+    line-height: 22px;
+    color: #f7f7f7;
+    background: #0488E4;
+    vertical-align: top;
+    margin: 0 1px 0 0;
+}
+#txtUrl::-webkit-input-placeholder {
+    color: #cef !important;
+}
+#txtUrl::-moz-placeholder {  /* Firefox 19+ */
+    color: #cef !important;  
+}
+ #txtUrl:-ms-input-placeholder {  
+    color: #cef !important;  
+}
+
+#desc-overlay {
+    display: inline-block;
+    background: #0488E4;
+    padding: 2px 2px;
+    vertical-align: top;
+    border: solid 1px #0488E4;
+}
+#desc-overlay .inner {
+    display: flex;
+    background: #0898EF;
+    border-radius: 10px;
+    cursor: text;
+    border: solid 1px #39f;
+}
+#desc-overlay .inner:hover {
+    color: #fff;
+    background: #099EF4;
+}
+#desc-overlay h2 {
+    padding: 0 4px;
+    line-height: 22px;
+    font-weight: normal;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    min-width: 300px;
+    max-width: 400px;
+}
+#desc-overlay i {
+    cursor: pointer;
+    float: right;
+    margin: 5px;
+    font-size: 11px;
+}
+
+#content {
+    background: #fff;
+    height: 100%;
+    display: flex;
+    flex-flow: column;
+}
+
+#footer {
+    background: #0371BE;
+    min-height: 40px;
+    z-index: 10; /*for winforms over codemirror*/
+}
+
+#sig {
+    z-index: 10;
+    position: absolute;
+    left: 50%;
+    bottom: 2px;
+    font: 12px arial;
+    color: #ddd;
+    margin: 0 0 0 -65px;
+}
+#sig a, #sig span {
+    font-size: 13px;
+    color: #f7f7f7;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+
+#ide {
+    display: flex;
+    background: #008080;
+    height: 100%;
+}
+
+#ide #editor-menu {
+    position: absolute;
+    top: 46px;
+    left: 50%;
+    margin: 0 0 0 -23px;
+    color: #ffffff;
+    cursor: pointer;
+    z-index: 3;    
+}
+.safari #editor-menu {
+    overflow: hidden;
+}
+#popup-editor {
+    position: absolute;
+    top: 74px;
+    left: 50%;
+    margin-left: -197px;
+}
+.safari #popup-editor {
+    margin-left: -198px;
+}
+#popup-files {
+    top: 74px;
+}
+#popup-user {
+    position: absolute;
+    top: 42px;
+    right: 0;
+}
+
+.safari #ide #editor-menu {
+    top: 44px;
+}
+.ipad #ide #editor-menu {
+    top: 42px;
+}
+.safari #popup-files, .safari #popup-editor {
+    top: 72px;
+}
+.ipad #popup-files, .ipad #popup-editor {
+    top: 70px;
+}
+.safari #popup-user {
+    top: 40px;
+}
+
+#preview {
+    flex: 1;
+    background: #F7F7F7;
+    border-left: 1px solid #ddd;
+    overflow: auto;
+}
+
+#actions {
+    display: flex;
+    padding: 10px;
+    color: #f7f7f7;
+}
+#actions div {
+    display: flex;
+    cursor: pointer;
+    margin: 0 30px 0 0;
+}
+#actions div:hover {
+    color: #ddd;
+}
+#actions p {
+    padding: 4px 0 0 5px;
+}
+
+#actions .disabled, #actions .disabled p,
+#actions .disabled span, #actions .disabled:hover span, 
+#actions .disabled i, #actions .disabled:hover i
+ {
+    color: #ccc;
+}
+
+#more {
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+    color: #fff;
+    cursor: pointer;
+}
+#more i:hover {
+    color: #ddd;
+}
+
+#footer .lnk {
+    position: absolute;
+    bottom: 7px;
+    font-size: 24px;
+    cursor: pointer;
+}
+#footer .lnk:hover {
+    color: #ddd;
+}
+#btnConsole {
+    color: #fff;
+    right: 45px;
+}
+#btnSnapshot {
+    color: #fff;
+    right: 90px;
+}
+
+#run {
+    z-index: 6; /* code-mirror */
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 64px;
+    margin: -60px 0 0 -25px;
+    cursor: pointer;
+}
+.safari #run {
+    overflow: hidden;
+}
+#run.disabled {
+    cursor: auto;
+}
+#run i {
+    font-size: 50px;
+    color: #01215A;
+}
+#run i:hover {
+    color: #0371BE;
+}
+#run.disabled i, #run.disabled i:hover {
+    color: #999;
+}
+
+.ipad #run i {
+    font-size: 40px;
+}
+.ipad #run {
+    margin: -45px 0 0 -20px;
+}
+
+#run i.owner {
+    color: #388E3C;
+}
+#run i.owner:hover {
+    color: #4CAF50;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+.alert-error {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}
+.alert-info {
+    color: #31708f;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+}
+.alert-success {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+}
+.console pre.error {
+    color: red;
+}
+.console pre.success {
+    color: #3c763d;
+}
+
+#preview {
+    display: flex;
+    flex-flow: column;
+    overflow: hidden;
+}
+
+#status, #vars, #errors, #placeholder, #collection {
+    flex: 1;
+    overflow: auto;
+}
+
+.ipad #console {
+    display: none;
+}
+
+#console {
+    height: 25%;
+    font: 14px/20px arial;
+    border-top: solid 1px #ddd;
+    border-bottom: solid 1px #ddd;
+    overflow: auto;
+    height: 25%;
+}
+
+#console .clear-btn {
+    position: absolute;
+    right: 1px;
+    margin: 4px;
+    font-size: 18px;
+    color: #aaa;
+    cursor: pointer;
+}
+#console .clear-btn:hover {
+    color: #444;
+}
+
+#vars thead, #vars thead tr, 
+#collection thead, #collection thead tr {
+    background: #01215A;
+}
+#vars th, #collection th {
+    text-align: left;
+    color: #fff;
+    padding: 4px 12px;
+    line-height: 24px;
+}
+#vars td, #collection td {
+    padding: 4px 12px;
+    font-size: 14px;
+}
+#vars .octicon {
+    cursor: pointer;
+}
+#vars a {
+    cursor: pointer;
+}
+#vars a:hover {
+    text-decoration: underline;
+}
+#txtEval {
+    padding: 4px 8px;
+    width: 80%;
+    max-width: 500px;
+    margin: 10px 0 0 10px;
+    font-size: 16px;
+    border: solid 1px #A9A9A9;
+}
+#btnEval {
+    margin: 0 0 0 -3px;
+    font-size: 30px;
+    cursor: pointer;
+    vertical-align: bottom;
+}
+#btnEval:hover {
+    color: #0371BE;
+}
+
+/*jsonviewer*/
+#expression-result {
+    padding: 12px 0 12px 22px;
+}
+#expression-result table {
+    width: auto;
+}
+
+#expression-result, #expression-result TH {
+    color: #444;
+    font-size: 14px;
+} 
+#expression-result THEAD, #expression-result THEAD TR {
+    background: #f1f1f1;    
+    border-bottom: solid 1px #ddd;
+}
+
+.jsonviewer .ib { display: inline-block; }
+.jsonviewer TABLE { border-collapse:collapse; border: solid 1px #ccc; clear: left; }
+.jsonviewer TH { text-align: left; padding: 4px 8px; text-shadow: #fff 1px 1px -1px; background: #f1f1f1; white-space:nowrap; font-weight: bold; }
+.jsonviewer TD { padding: 8px 8px 0 8px; vertical-align: top; line-height: 18px; }
+.jsonviewer DL { margin: 0; clear: left; }
+.jsonviewer DT { font-weight: bold; width: 160px; clear: left; float: left; display:block; white-space:nowrap; line-height: 26px; }
+.jsonviewer DD { display: block; float: left; line-height: 26px; max-width: 600px; }
+.jsonviewer DL DL DT { font-weight: bold; }
+.jsonviewer HR { display:none; }
+.jsonviewer TD DL HR { display:block; padding: 0; clear: left; border: none; }
+.jsonviewer TD DL { padding: 4px; margin: 0; height:100%; max-width: 700px; }
+.jsonviewer DL TD DL DT { padding: 2px; margin: 0 10px 0 0; font-weight: bold; width: 120px; overflow: hidden; clear: left; float: left; display:block; }
+.jsonviewer DL TD DL DD { margin: 0; padding: 2px; display: block; float: left; }
+.jsonviewer TBODY>TR:last-child>TD { padding: 8px; }
+.jsonviewer H3 { margin: 0 0 10px 0; }

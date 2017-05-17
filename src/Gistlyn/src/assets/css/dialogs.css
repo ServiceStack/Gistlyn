@@ -1,0 +1,234 @@
+﻿#dialog {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background: rgba(0,0,0,.3);
+    z-index: 10;
+    top: 0;
+    text-align: center;
+}
+.dialog {
+    position: relative;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    transform: translateY(-50%);
+    text-align: left;
+    display: inline-block;
+    background: #fff;
+
+    -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding-box;
+    background-clip: padding-box;
+
+    /* vertical align */
+    -webkit-transform-style: preserve-3d;
+    -moz-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+}
+.dialog-header {
+    font-size: 18px;
+    background: #0371BE;
+    color: #fff;
+    padding: 12px;
+}
+.dialog-body {
+    padding: 24px;
+    min-height: 100px;
+    color: #444;
+}
+.dialog-footer {
+    text-align: right;
+    padding: 12px;
+}
+.dialog-header .close {
+    float: right;
+    font-size: 16px;
+    cursor: pointer;
+}
+.dialog-header .close:hover {
+    color: #ddd;
+}
+.dialog-body .row {
+    margin: 0 0 10px 0;
+}
+.dialog-body label {
+    display: inline-block;
+    padding: 0 20px 0 0;
+    width: 100px;
+}
+.dialog-body input[type=text] {
+    width: 350px;    
+    padding: 8px 12px;
+    font-size: 16px;
+    border: solid 1px #A9A9A9;
+}
+.dialog .loading {
+    visibility: hidden;
+}
+.dialog.disabled .loading {
+    visibility: visible;
+}
+.dialog .info-help {
+    cursor: pointer;
+    color: #2a6496;
+    margin: -12px -12px 0 0;
+}
+
+.btn, .btn:focus {
+    text-transform: uppercase;
+    border-radius: 2px;
+    background: #0488E4;
+    transition: box-shadow .28s cubic-bezier(.4,0,.2,1);
+    outline: none !important;
+    border: none;
+    color: rgba(255,255,255,.84);
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    padding: 8px 12px;
+    font-size: 16px;
+    line-height: 1.42857143;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none
+}
+.btn:hover {
+    background: #03a9f4;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.26);
+    color: #fff;
+}
+.disabled .btn, .btn.disabled, .btn[disabled], fieldset[disabled] .btn {
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: .65;
+    filter: alpha(opacity=65);
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+#dialog.dark {
+    background: none;
+}
+#dialog.dark .dialog {
+    background: rgba(0,0,0,.85);
+    border-radius: 20px;
+}
+#dialog.dark .dialog-header {
+    background: none;
+    margin: 0 0 0 10px;
+    font-weight: bold;
+}
+#dialog.dark .dialog-body {
+    color: #fff;
+    min-width: 400px;
+    line-height: 20px;
+}
+#dialog.dark .dialog-body>table {
+    margin: 0 0 20px 10px;
+}
+#dialog.dark .dialog-body h4 {
+    padding: 15px 0 5px 0;
+    color: #dd0;
+    font-weight: bold;
+}
+#dialog.dark .dialog-body th {
+    text-align: right;
+}
+#dialog.dark .dialog-body th b {
+    font-family: "Courier New";
+    font-size: 13px;
+    color: #dd0;
+    font-weight: bold;
+}
+#dialog.dark .dialog-body th i {
+    font-family: arial;
+    font-style: normal;
+    font-weight: bold;
+    padding: 0 10px 0 3px;
+}
+
+#dialog a, #dialog .lnk, .lnk {
+    color: #428bca;
+    text-decoration: none;
+    cursor: pointer;
+}
+#dialog a:hover, #dialog .lnk:hover, .lnk:hover {
+    color: #2a6496;
+}
+
+#dialog.console-viewer.dark .dialog-body td {
+    font: 13px/18px monospace;
+    color: #00FF00;
+}
+#dialog.console-viewer .dialog-header span,
+#dialog.console-viewer .dialog-footer span {
+    float: right;
+    color: #dd0;
+    font-size: 16px;
+    cursor: pointer;
+    padding-left: 10px;
+    font-weight: normal;
+}
+
+.linktabs {
+    text-align: center;
+}
+.linktabs div {
+    display: inline-block;
+    cursor: pointer;
+    border-bottom: 2px solid #fff;
+    margin: 0 10px 20px 0;
+    padding: 2px 5px;
+}
+.linktabs div.active {
+    border-bottom: 2px solid #444;
+}
+.radiotabs div {
+    cursor: pointer;
+    display: inline-block;
+    margin: 0 10px 0 0;
+}
+.radiotabs i {
+    vertical-align: bottom;
+    margin-right: 5px;
+    font-size: 20px;
+}
+.gist-links-body {
+    max-height: 400px;
+    overflow: auto;
+}
+#insert-link-dialog dt {
+    font-weight: bold;
+    margin: 10px 0;
+}
+#insert-link-dialog dd {
+    font-size: 14px;
+    cursor: pointer;
+    color: #428bca;
+    line-height: 20px;
+    padding: 0 0 0 10px;
+}
+#insert-link-dialog dd:hover {
+    color: #2a6496;
+}
+.insert-link-new {
+    margin: 20px 0px 10px 0px;
+}
+#nosse-dialog a {
+    color: #428bca;
+    text-decoration: none;
+    padding: 0 6px;
+}
+#nosse-dialog a:hover {
+    color: #2a6496;
+}

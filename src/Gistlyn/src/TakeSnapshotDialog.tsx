@@ -57,7 +57,7 @@ export default class TakeSnapshotDialog extends React.Component<any, any> {
                         onClick={e => description ? this.onSave({ description }) : null }>
                         Save Snapshot
                     </span>
-                    <img className="loading" src="/img/ajax-loader.gif" style={{ margin: "5px 0 0 10px" }} />
+                    <img className="loading" src={require('./assets/img/ajax-loader.gif')} style={{ margin: "5px 0 0 10px" }} />
                 </div>]);
         } else {
             setTimeout(() => this.txtDescription.select(), 0);

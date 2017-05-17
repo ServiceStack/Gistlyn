@@ -28,7 +28,7 @@ export default class EditGistDialog extends React.Component<any, any> {
                     </div>
                 </div>
                 <div className="dialog-footer">
-                    <img className="loading" src="/img/ajax-loader.gif" style={{ margin: "5px 10px 0 0" }} />
+                    <img className="loading" src={require('./assets/img/ajax-loader.gif')} style={{ margin: "5px 10px 0 0" }} />
                     <span className={"btn" + (description ? "" : " disabled") }
                         onClick={e => description ? this.props.onSave({ description }) : null }>
                         Save

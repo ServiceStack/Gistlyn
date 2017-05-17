@@ -623,7 +623,7 @@ export class App extends React.Component<any, any> {
                     <div id="collection-body">
                         <div id="markdown">
                             <div style={{ color:"#444", fontSize:20, position: "absolute", top:"50%", margin:"-55px 0 0 0", textAlign:"center", width:"100%" }}>
-                                <img src="/img/ajax-loader.gif" style={{ margin: "5px 10px 0 0" }} />
+                                <img src={require('./assets/img/ajax-loader.gif')} style={{ margin: "5px 10px 0 0" }} />
                                 loading...
                             </div>
                         </div>
@@ -647,11 +647,11 @@ export class App extends React.Component<any, any> {
             Preview.push((
                 <div key="status" id="status" className="section">
                     <div style={{ margin: '40px', color: "#444", width: "215px" }} title="executing...">
-                        <img src="/img/ajax-loader.gif" style={{ float: "right", margin: "5px 0 0 0" }} />
+                        <img src={require('./assets/img/ajax-loader.gif')} style={{ float: "right", margin: "5px 0 0 0" }} />
                         <i className="material-icons" style={{ position: "absolute" }}>build</i>
                         <p style={{ padding: "0 0 0 30px", fontSize: "22px" }}>Executing Script</p>
                         <div id="splash" style={{ padding: "20px 0 0 0" }}>
-                            <img src="/img/compiling.png" />
+                            <img src={require('./assets/img/compiling.png')} />
                         </div>
                     </div>
                 </div>));
@@ -745,7 +745,7 @@ export class App extends React.Component<any, any> {
             <div id="body" onClick={e => this.handleBodyClick(e) } className={UA.getClassList()}>
                 <div className="titlebar">
                     <div className="container">
-                        <img id="logo" src="img/logo-32-inverted.png" alt="ServiceStack logo" onClick={goHome} style={{ cursor: "pointer" }} />
+                        <img id="logo" src={require('./assets/img/logo-32-inverted.png')} alt="ServiceStack logo" onClick={goHome} style={{ cursor: "pointer" }} />
                         <h3 title="Home" onClick={goHome} style={{ cursor:"pointer" }}>Gistlyn</h3> <sup style={{ padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}>BETA</sup>
                         <div id="gist">
                             { meta

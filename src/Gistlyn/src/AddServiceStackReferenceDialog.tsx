@@ -130,7 +130,7 @@ export default class AddServiceStackReferenceDialog extends React.Component<any,
                             style={{ visibility: this.state.valid && !this.state.loading ? "visible" : "hidden", color: "#4CAF50", fontSize: 32, verticalAlign: "middle", margin: "0 0 0 5px" }}
                             title="Valid ServiceStack instance">check</i>
 
-                        <img src="/img/ajax-loader.gif" style={{ display: this.state.loading ? "inline-block" : "none", margin: "0 0 0 -20px" }} />
+                        <img src={require('./assets/img/ajax-loader.gif')} style={{ display: this.state.loading ? "inline-block" : "none", margin: "0 0 0 -20px" }} />
                     </div>
 
                     <div className="row" style={{ visibility: this.state.valid ? "visible" : "hidden" }}>
@@ -143,7 +143,7 @@ export default class AddServiceStackReferenceDialog extends React.Component<any,
 
                 </div>
                 <div className="dialog-footer">
-                    <img className="loading" src="/img/ajax-loader.gif" style={{ margin: "5px 10px 0 0" }} />
+                    <img className="loading" src={require('./assets/img/ajax-loader.gif')} style={{ margin: "5px 10px 0 0" }} />
                     <span className={"btn" + (this.state.valid ? "" : " disabled") }
                         onClick={e => this.state.valid ? this.done() : null }>
                         Add Reference

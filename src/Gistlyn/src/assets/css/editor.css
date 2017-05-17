@@ -1,0 +1,135 @@
+﻿
+#editor {
+    display: flex;
+    flex-flow: column;
+    flex: 1;
+    overflow: auto;
+    color: #000;
+    background: url(../img/editor-bg.png); /* needed in CEF */
+}
+.safari #editor {
+    overflow: hidden; /* hide double scrollbars with Safari height fix*/
+}
+
+#tabs {
+    display: flex;
+    flex-flow: row;
+    background: #01215A;
+    padding: 8px 0 0 6px;
+    min-height: 24px;
+}
+#tabs #files-menu {
+    color: #ddd;
+    cursor: pointer;
+    width: 24px;
+}
+#tabs #files-menu:hover {
+    color: #ffc;
+}
+#tabs .delete {
+    font-size: 16px;
+    vertical-align: bottom;
+    padding: 0 0 0 5px;
+    cursor: pointer;
+}
+#tabs .delete:hover {
+    color: #f00;
+}
+.popup {
+    display: none;
+    position: absolute;
+    z-index: 100;
+    background: #0371BE;
+    color: #f7f7f7;
+    margin: 2px 2px;
+    font-size: 14px;
+
+    -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding-box;
+    background-clip: padding-box;
+}
+.popup div {
+    padding: 8px 10px;
+}
+.popup div:hover {
+    background: #0488E4;
+    cursor: pointer;
+}
+.popup a {
+    display: block;
+    color: #f7f7f7;
+    text-decoration: none;
+}
+#tabs div {
+    padding: 5px 8px;
+    margin: 0 4px 0 0;
+    background: #0371BE;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+}
+#tabs div.active {
+    background: #fff;
+    color: #444;
+    margin-bottom: -1px;
+    cursor: auto;
+}
+#tabs .txtFileName {
+    border: none;
+    padding: 0 2px;
+}
+
+#markdown-toolbar {
+    margin: 0 0 2px 30px;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    z-index: 1;
+}
+
+#markdown-toolbar i {
+    margin: 2px;
+    vertical-align: middle;
+    color: #666;
+    cursor: pointer;
+    border: solid 1px #fff;
+    font-size: 30px;
+}
+#markdown-toolbar i:hover {
+    border: solid 1px #c6c6c6;
+    border-radius: 2px;
+    background: #f8f8f8;
+}
+
+.owner #tabs {
+    background: #4CAF50;
+}
+.owner #tabs div {
+    background: #388E3C;
+}
+.owner #tabs div.active {
+    background: #fff;
+}
+
+.dropzone {
+}
+.dropzone .droparea {
+    background: #f1f1f1;
+    border: 4px dashed #ccc;
+    text-align: center;
+    height: 250px;
+    color: #aaa;
+    cursor: pointer;
+}
+.dropzone-active .droparea {
+    background: #ddd;
+    border-color: #aaa;
+}
+.loading .dropzone .droparea {
+    color: #ccc;
+}
+.dropzone .droparea p {
+    font-size: 24px;
+    margin: 110px 0 0 0;
+}
