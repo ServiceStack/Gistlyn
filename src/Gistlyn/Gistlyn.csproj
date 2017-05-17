@@ -25,7 +25,7 @@
     <RestorePackages>true</RestorePackages>
     <UseGlobalApplicationHostFile />
     <TargetFrameworkProfile />
-    <TypeScriptToolsVersion>2.1</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>2.3</TypeScriptToolsVersion>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
