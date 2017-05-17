@@ -139,6 +139,7 @@
     <TypeScriptCompile Include="src\Collections.tsx" />
     <TypeScriptCompile Include="src\InsertLinkDialog.tsx" />
     <TypeScriptCompile Include="src\ImageUploadDialog.tsx" />
+    <TypeScriptCompile Include="src\main.tsx" />
     <TypeScriptCompile Include="src\TakeSnapshotDialog.tsx" />
     <TypeScriptCompile Include="src\InadequateBrowserDialog.tsx" />
     <TypeScriptCompile Include="src\Editor.tsx" />
@@ -152,10 +153,8 @@
     <TypeScriptCompile Include="src\state.ts" />
     <TypeScriptCompile Include="src\TestClient.tsx" />
     <TypeScriptCompile Include="src\utils.ts" />
-    <TypeScriptCompile Include="tests\add.test.ts" />
-    <TypeScriptCompile Include="tests\CheckboxWithLabel.test.tsx" />
-    <TypeScriptCompile Include="tests\CheckboxWithLabel.tsx" />
-    <TypeScriptCompile Include="tests\sum.ts" />
+    <TypeScriptCompile Include="src\sum.test.ts" />
+    <TypeScriptCompile Include="src\sum.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="css\reset.css" />
@@ -167,6 +166,7 @@
     <Content Include="css\iconfont\material-icons.css" />
     <Content Include="css\iconfont\MaterialIcons-Regular.svg" />
     <Content Include="css\octicon\octicon.css" />
+    <None Include="default.template.ejs" />
     <Content Include="favicon.ico" />
     <Content Include="offline.html" />
     <Content Include="gulpfile.js" />

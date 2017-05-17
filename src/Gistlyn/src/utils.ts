@@ -1,6 +1,8 @@
-﻿import { connect } from 'react-redux';
+﻿import * as ReactGA from 'react-ga';
+import { connect } from 'react-redux';
+import { store } from './state';
 import { JsonServiceClient } from 'servicestack-client';
-import { GithubFile } from './Gistlyn.dtos';
+import { GithubFile, EvaluateExpression } from './Gistlyn.dtos';
 
 export const Config = {
     LatestVersion: "4.0.60",
@@ -8,6 +10,7 @@ export const Config = {
 export const StateKey = "/v1/state";
 export const GistCacheKey = (gist) => `/v1/gists/${gist}`;
 export const client = new JsonServiceClient("/");
+export const statusToError = status => ({ errorCode: status.errorCode, msg: status.message, cls: "error" });
 
 export const GistTemplates = {
     NewGist: "52c37e37b51a0ec92810477be34695ae",
@@ -140,7 +143,7 @@ export class BatchItems {
     everyMs: number;
     callback: (results: any[]) => void;
     results: any[];
-    timeoutId: number;
+    timeoutId: number | NodeJS.Timer;
 
     constructor(everyMs: number, callback: (results: any[]) => void) {
         this.everyMs = everyMs;
@@ -170,4 +173,30 @@ export class BatchItems {
     }
 }
 
+export function evalExpression(gist: string, scriptId: string, expr: string) {
+    if (!expr)
+        return;
+
+    const request = new EvaluateExpression();
+    request.scriptId = scriptId;
+    request.expression = expr;
+    request.includeJson = true;
+
+    ReactGA.event({ category: 'preview', action: 'Evaluate Expression', label: gist + ": " + expr.substring(0, 50) });
+
+    client.post(request)
+        .then(r => {
+            if (r.result.errors && r.result.errors.length > 0) {
+                r.result.errors.forEach(x => {
+                    store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: x.info, cls: "error" }] });
+                });
+            } else {
+                store.dispatch({ type: 'EXPRESSION_LOAD', expressionResult: r.result });
+            }
+        })
+        .catch(e => {
+            var status = e.responseStatus || e; //both have schema `{ message }`
+            store.dispatch({ type: 'CONSOLE_LOG', logs: [statusToError(status)] });
+        });
+};
 

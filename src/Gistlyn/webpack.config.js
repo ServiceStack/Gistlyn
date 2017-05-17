@@ -2,7 +2,7 @@
 "use strict";
 
 module.exports = {
-    entry: "./src/app.tsx",
+    entry: "./src/main.tsx",
     output: {
         filename: "bundle.js",
         path: __dirname + "/dist"

@@ -1,19 +1,17 @@
 ﻿import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as ReactGA from 'react-ga';
-import { Provider, connect } from 'react-redux';
 import { store } from './state';
 import { JsonViewer } from './json-viewer';
 
 import { 
-    queryString, JsonServiceClient, ServerEventsClient, ServerEventConnect, 
-    splitOnFirst, splitOnLast, humanize, dateFmt, timeFmt12 
+    queryString, ServerEventConnect, splitOnFirst, humanize, dateFmt, timeFmt12 
 } from 'servicestack-client';
 
 import { 
-    client, reduxify, UA, getSortedFileNames, Config, StateKey, 
+    client, statusToError, reduxify, UA, getSortedFileNames, Config, StateKey, 
     GistCacheKey, GistTemplates, FileNames, IGistMeta, IGistFile, toGithubFiles, 
-    addClientPackages, BatchItems 
+    addClientPackages, BatchItems, evalExpression
 } from './utils';
 
 import SaveAsDialog from './SaveAsDialog';
@@ -23,7 +21,6 @@ import InsertLinkDialog from './InsertLinkDialog';
 import ImageUploadDialog from './ImageUploadDialog';
 import TakeSnapshotDialog from './TakeSnapshotDialog';
 import ConsoleViewerDialog from './ConsoleViewerDialog';
-import InadequateBrowserDialog from './InadequateBrowserDialog';
 import AddServiceStackReferenceDialog from './AddServiceStackReferenceDialog';
 import Console from './Console';
 import Collections from './Collections';
@@ -33,99 +30,12 @@ import {
     RunScript,
     GetScriptVariables, VariableInfo,
     CancelScript,
-    EvaluateExpression,
     ScriptExecutionResult, ScriptStatus,
     StoreGist, GithubFile
 } from './Gistlyn.dtos';
 
 const ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
-const ScriptStatusError = ["Cancelled", "CompiledWithErrors", "ThrowedException"];
 var capturedSnapshot = null;
-
-ReactGA.initialize("UA-80898009-1");
-
-if (UA.nosse) {
-    ReactGA.event({ category: 'error', action: 'load', label: "nosse" });
-
-    ReactDOM.render(
-        <InadequateBrowserDialog />,
-        document.getElementById("app"));
-
-    throw "This browser does not support Server Sent Events";
-}
-
-const statusToError = status => ({ errorCode: status.errorCode, msg: status.message, cls: "error" });
-
-const batchLogs = new BatchItems(30, logs => store.dispatch({ type: 'CONSOLE_LOG', logs }));
-
-const channels = ["gist"];
-const sse = new ServerEventsClient("/", channels, {
-    handlers: {
-        onConnect(activeSub: ServerEventConnect) {
-            store.dispatch({ type: 'SSE_CONNECT', activeSub });
-            ReactGA.set({ userId: activeSub.userId });
-            fetch("/session-to-token", { method:"POST", credentials:"include" });
-        },
-        ConsoleMessage(m, e) {
-            batchLogs.queue({ msg: m.message });
-        },
-        ScriptExecutionResult(m: ScriptExecutionResult, e) {
-            if (m.status === store.getState().scriptStatus) return;
-
-            if (ScriptStatusError.indexOf(m.status) >= 0 && m.errorResponseStatus) {
-                batchLogs.queue(statusToError(m.errorResponseStatus));
-            } else {
-                batchLogs.queue({ msg: humanize(m.status) });
-            }
-
-            store.dispatch({ type: 'SCRIPT_STATUS', scriptStatus: m.status });
-
-            if (m.status === "CompiledWithErrors" && m.errors) {
-                const errorMsgs = m.errors.map(e => ({ msg: e.info, cls: "error" }));
-                errorMsgs.forEach(m =>  batchLogs.queue(m));
-            } else if (m.status === "Completed") {
-                const request = new GetScriptVariables();
-                const state = store.getState();
-                request.scriptId = state.activeSub.id;
-                client.get(request)
-                    .then(r => {
-                        store.dispatch({ type: "VARS_LOAD", variables: r.variables });
-                    });
-
-                if (state.expression) {
-                    evalExpression(state.gist, state.activeSub.id, state.expression);
-                }
-            }
-        }
-    }
-}).start();
-
-function evalExpression(gist: string, scriptId: string, expr: string) {
-    if (!expr)
-        return;
-
-    const request = new EvaluateExpression();
-    request.scriptId = scriptId;
-    request.expression = expr;
-    request.includeJson = true;
-
-    ReactGA.event({ category: 'preview', action: 'Evaluate Expression', label: gist + ": " + expr.substring(0, 50) });
-
-    client.post(request)
-        .then(r => {
-            if (r.result.errors && r.result.errors.length > 0) {
-                r.result.errors.forEach(x => {
-                    store.dispatch({ type: 'CONSOLE_LOG', logs: [{ msg: x.info, cls: "error" }] });
-                });
-            } else {
-                store.dispatch({ type: 'EXPRESSION_LOAD', expressionResult: r.result });
-            }
-        })
-        .catch(e => {
-            var status = e.responseStatus || e; //both have schema `{ message }`
-            store.dispatch({ type: 'CONSOLE_LOG', logs: [statusToError(status)] });
-        });
-};
 
 @reduxify(
     (state) => ({
@@ -174,7 +84,7 @@ function evalExpression(gist: string, scriptId: string, expr: string) {
         removeGistStat: (gist: string) => dispatch({ type: "GISTSTAT_REMOVE", gist })
     })
 )
-class App extends React.Component<any, any> {
+export class App extends React.Component<any, any> {
 
     getFile(fileName: string): any {
         if (this.props.files == null)
@@ -1099,8 +1009,3 @@ window.onpopstate = e => {
         store.dispatch({ type: "COLLECTION_CHANGE", collection: { id: e.state.collection }, showCollection: true });
 };
 
-ReactDOM.render(
-    <Provider store={store}>
-        <App/>
-    </Provider>,
-    document.getElementById("app"));
