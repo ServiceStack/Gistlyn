@@ -33,7 +33,10 @@ export const createGistRequest = (authUsername:string, gist:string) => {
         ? "/github-proxy/"
         : "https://api.github.com/";
 
-    const req = new Request(urlPrefix + "gists/" + gist + disableCache, authUsername ? { credentials: "include" } : null);
+    const req = new Request(urlPrefix + "gists/" + gist + disableCache, {
+        credentials: authUsername ? "include" : "omit"
+    }); 
+
     return req;
 };
 

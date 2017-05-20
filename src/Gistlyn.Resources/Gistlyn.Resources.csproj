@@ -59,7 +59,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="default.html" />
+    <EmbeddedResource Include="index.html" />
     <None Include="App.config" />
     <EmbeddedResource Include="dist\app.bundle.js.map" />
     <EmbeddedResource Include="dist\app.css.map" />
