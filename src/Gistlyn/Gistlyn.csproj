@@ -15,7 +15,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Gistlyn</RootNamespace>
     <AssemblyName>Gistlyn</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
@@ -172,11 +172,11 @@
     <Content Include="src\assets\css\iconfont\material-icons.css" />
     <Content Include="src\assets\css\iconfont\MaterialIcons-Regular.svg" />
     <Content Include="src\assets\css\octicon\octicon.css" />
-    <None Include="default.template.ejs" />
+    <None Include="index.template.ejs" />
     <Content Include="favicon.ico" />
     <Content Include="offline.html" />
     <Content Include="gulpfile.js" />
-    <Content Include="default.html" />
+    <Content Include="index.html" />
     <Content Include="src\assets\img\ajax-loader.gif" />
     <Content Include="src\assets\img\compiling.png" />
     <Content Include="src\assets\img\editor-bg.png" />
@@ -210,6 +210,7 @@
     <Content Include="packages.config" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
+      <SubType>Designer</SubType>
     </None>
     <None Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
