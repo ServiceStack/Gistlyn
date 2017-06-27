@@ -745,7 +745,7 @@ export class App extends React.Component<any, any> {
             <div id="body" onClick={e => this.handleBodyClick(e) } className={UA.getClassList()}>
                 <div className="titlebar">
                     <div className="container">
-                        <img id="logo" src={require('./assets/img/logo-32-inverted.png')} alt="ServiceStack logo" onClick={goHome} style={{ cursor: "pointer" }} />
+                        <img id="logo" src={require('./assets/img/logo-32-inverted.png')} alt="ServiceStack logo" onClick={goHome} style={{ cursor: "pointer" }} title={activeSub ? `Gistlyn v${activeSub.GistlynVersion}` : ''} />
                         <h3 title="Home" onClick={goHome} style={{ cursor:"pointer" }}>Gistlyn</h3> <sup style={{ padding: "0 0 0 5px", fontSize: "12px", fontStyle: "italic" }}>BETA</sup>
                         <div id="gist">
                             { meta
@@ -931,7 +931,7 @@ export class App extends React.Component<any, any> {
                         onChange={(url,label) => this.props.showDialog(null) && this.editor.replaceSelection(`[${label}](${url})`)} />
                     : null}
 
-                <div id="sig">made with <span>{String.fromCharCode(10084)}</span> by <a target="_blank" href="https://servicestack.net">ServiceStack</a></div>
+                <div id="sig">made with <span>{String.fromCharCode(10084)}</span> by <a target="_blank" href="https://servicestack.net" title={activeSub ? `ServiceStack v${activeSub.ServiceStackVersion}` : ''}>ServiceStack</a></div>
             </div>
         );
     }
