@@ -4,8 +4,10 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Gistlyn.ServiceModel.Types;
 using ServiceStack;
 using ServiceStack.Auth;
@@ -112,7 +114,15 @@ namespace Gistlyn.ServiceInterface
             appHost.Config.AddRedirectParamsToQueryString = true;
             appHost.Config.DebugMode = true;
 
-            appHost.Plugins.Add(new ServerEventsFeature { ValidateUserAddress = false });
+            appHost.Plugins.Add(new ServerEventsFeature
+            {
+                ValidateUserAddress = false,
+                OnCreated = (sub, req) =>
+                {
+                    sub.ConnectArgs["GistlynVersion"] = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                    sub.ConnectArgs["ServiceStackVersion"] = Env.ServiceStackVersion.ToString(CultureInfo.InvariantCulture);
+                }
+            });
 
             appHost.Plugins.Add(new CorsFeature());
 
