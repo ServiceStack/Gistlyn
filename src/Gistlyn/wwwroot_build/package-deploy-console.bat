@@ -11,42 +11,23 @@ REM MD %STAGING%
 
 SET TOOLS=.\tools
 SET OUTPUTNAME=Gistlyn-console.exe
-SET ILMERGE=%TOOLS%\ILMerge.exe
-SET ILMERGE=%TOOLS%\ILRepack.exe
 
 SET RELEASE=..\..\Gistlyn.AppConsole\bin\Release
-SET INPUT=%RELEASE%\Gistlyn.AppConsole.exe
-SET INPUT=%INPUT% %RELEASE%\Gistlyn.Resources.dll
-SET INPUT=%INPUT% %RELEASE%\Gistlyn.ServiceInterface.dll
-SET INPUT=%INPUT% %RELEASE%\Gistlyn.ServiceModel.dll
-SET INPUT=%INPUT% %RELEASE%\Gistlyn.SnippetEngine.dll
-SET INPUT=%INPUT% %RELEASE%\ServiceStack.dll
-SET INPUT=%INPUT% %RELEASE%\ServiceStack.Text.dll
-SET INPUT=%INPUT% %RELEASE%\ServiceStack.Client.dll
-SET INPUT=%INPUT% %RELEASE%\ServiceStack.Common.dll
-SET INPUT=%INPUT% %RELEASE%\ServiceStack.Interfaces.dll
-SET INPUT=%INPUT% %RELEASE%\ServiceStack.Server.dll
-SET INPUT=%INPUT% %RELEASE%\ServiceStack.OrmLite.dll
-SET INPUT=%INPUT% %RELEASE%\ServiceStack.Redis.dll
-SET INPUT=%INPUT% %RELEASE%\Microsoft.CodeAnalysis.CSharp.dll
-SET INPUT=%INPUT% %RELEASE%\Microsoft.CodeAnalysis.CSharp.Scripting.dll
-SET INPUT=%INPUT% %RELEASE%\Microsoft.CodeAnalysis.dll
-SET INPUT=%INPUT% %RELEASE%\Microsoft.CodeAnalysis.Scripting.dll
-SET INPUT=%INPUT% %RELEASE%\NuGet.Core.dll
-SET INPUT=%INPUT% %RELEASE%\System.Collections.Immutable.dll
-SET INPUT=%INPUT% %RELEASE%\System.IO.FileSystem.dll
-SET INPUT=%INPUT% %RELEASE%\System.IO.FileSystem.Primitives.dll
-SET INPUT=%INPUT% %RELEASE%\System.Reflection.Metadata.dll
-SET INPUT=%INPUT% %RELEASE%\System.Collections.Immutable.dll
-
-REM %ILMERGE% /target:exe /targetplatform:v4,"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6" /out:%STAGING%\%OUTPUTNAME% /ndebug /copyattrs %INPUT% /lib:%RELEASE%
 
 IF NOT EXIST apps\console\bin (
-MD apps\console\bin
+	MD apps\console\bin
+)
+IF NOT EXIST apps\console\bin\x86 (
+	MD apps\console\bin\x86
+)
+IF NOT EXIST apps\console\bin\x64 (
+	MD apps\console\bin\x64
 )
 
 REM COPY /Y .\%STAGING%\%OUTPUTNAME% .\apps\
 COPY /Y .\%RELEASE%\*.* .\apps\console\bin\
+COPY /Y .\%RELEASE%\x86\*.* .\apps\console\bin\x86\
+COPY /Y .\%RELEASE%\x64\*.* .\apps\console\bin\x64\
 COPY .\deploy_console\*.* .\apps\console\
 COPY .\deploy_console\bin\*.* .\apps\console\bin\
 

@@ -209,8 +209,12 @@
             '../Gistlyn.AppWinForms/bin/x86/Release/*.vshost.*'
         ]);
         var includes = [
-        { src: '../Gistlyn.AppWinForms/bin/x86/Release/*.*', dest: '/lib/net45/' },
-        { src: '../Gistlyn.AppWinForms/bin/x86/Release/locales/*.*', dest: '/lib/net45/locales/' }];
+            { src: '../Gistlyn.AppWinForms/bin/x86/Release/*.*', dest: '/lib/net45/' },
+            { src: '../Gistlyn.AppWinForms/bin/x86/Release/locales/*.*', dest: '/lib/net45/locales/' },
+            { src: '../Gistlyn.AppWinForms/bin/x86/Release/x86/*.*', dest: '/lib/net45/x86/' },
+            { src: '../Gistlyn.AppWinForms/bin/x86/Release/x64/*.*', dest: '/lib/net45/x64/' }
+        ];
+
         return nugetpack({
             id: title,
             title: title,
@@ -227,7 +231,7 @@
 
     gulp.task('www-exec-package-winforms', done => {
         initWinformsReleaseDirectory();
-        var squirrelPath = path.resolve('../../packages/squirrel.windows.1.3.0/tools/');
+        var squirrelPath = path.resolve('../packages/squirrel.windows.1.3.0/tools/');
         var appName = extractAssemblyAttribute(winFormsAssemblyInfoPath, 'AssemblyTitle');
         var version = extractAssemblyAttribute(winFormsAssemblyInfoPath, 'AssemblyVersion');
         var rootDir = 'wwwroot_build\\apps\\winforms-installer\\';
