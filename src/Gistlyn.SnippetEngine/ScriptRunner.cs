@@ -164,12 +164,10 @@ namespace Gistlyn.SnippetEngine
                     Type varType;
                     object var = GetVariableValue(parentVariable, out varType);
 
-                    variables.ParentVariable.Type = var != null ? var.GetType().ToString() : null;
-                    variables.ParentVariable.Value = var != null ? var.ToString() : null;
+                    variables.ParentVariable.Type = var?.GetType().ToString();
+                    variables.ParentVariable.Value = var?.ToString();
 
-                    var varProps = var != null
-                        ? var.GetType().GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                        : new PropertyInfo[] { };
+                    var varProps = var?.GetType().GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public) ?? new PropertyInfo[] { };
                     var typeProps = varType != null
                         ? varType.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
                         : new PropertyInfo[] { };
@@ -184,9 +182,9 @@ namespace Gistlyn.SnippetEngine
                         {
                             variables.Variables.Add(new VariableInfo
                             {
-                                Name = "[{0}]".Fmt(i),
-                                Value = val != null ? val.ToString() : null,
-                                Type = val != null ? val.GetType().ToString() : "null",
+                                Name = $"[{i}]",
+                                Value = val?.ToString(),
+                                Type = val?.GetType().ToString() ?? "null",
                                 IsBrowseable = IsObjectBrowseable(val),
                                 CanInspect = true,
                             });
@@ -207,8 +205,8 @@ namespace Gistlyn.SnippetEngine
                             var info = new VariableInfo
                             {
                                 Name = prop.Name.LastRightPart('.'),
-                                Value = val != null ? val.ToString() : null,
-                                Type = val != null ? val.GetType().ToString() : prop.PropertyType.ToString(),
+                                Value = val?.ToString(),
+                                Type = val?.GetType().ToString() ?? prop.PropertyType.ToString(),
                                 IsBrowseable = IsObjectBrowseable(val),
                                 CanInspect = prop.GetGetMethod() != null && typePropNames.Contains(prop.Name),
                             };
@@ -272,8 +270,7 @@ namespace Gistlyn.SnippetEngine
 
             status = ScriptStatus.PrepareToRun;
 
-            //new Thread(() =>
-            ThreadPool.QueueUserWorkItem(_ =>
+            Task.Factory.StartNew(() =>
             {
                 try
                 {
@@ -297,7 +294,7 @@ namespace Gistlyn.SnippetEngine
                     status = ScriptStatus.CompiledWithErrors;
                     result.Status = status;
                     foreach (var err in e.Diagnostics)
-                        result.Errors.Add(new ErrorInfo { Info = err.ToString() });
+                        result.Errors.Add(new ErrorInfo {Info = err.ToString()});
 
                     notifier.SendScriptExecutionResults(result);
                 }
@@ -307,7 +304,7 @@ namespace Gistlyn.SnippetEngine
                     result.Exception = e;
                     notifier.SendScriptExecutionResults(result);
                 }
-            });//.Start();
+            }, cancellationToken);
 
             result.Status = status;
             notifier.SendScriptExecutionResults(result);

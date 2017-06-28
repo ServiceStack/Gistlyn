@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using ServiceStack;
+﻿using ServiceStack;
 
 namespace Gistlyn.SnippetEngine
 {

@@ -14,12 +14,9 @@ namespace Gistlyn.SnippetEngine
         public string baseDirectory;
         private readonly ImmutableArray<string> searchPaths;
         private readonly ImmutableArray<KeyValuePair<string, string>> pathMap;
-        private Dictionary<string, string> scripts = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> scripts = new Dictionary<string, string>();
 
-        public Dictionary<string, string> Scripts
-        {
-            get { return scripts; }
-        }
+        public Dictionary<string, string> Scripts => scripts;
 
         public GistSourceResolver(List<string> scripts)
         {
@@ -38,10 +35,8 @@ namespace Gistlyn.SnippetEngine
 
         public override Stream OpenRead(string resolvedPath)
         {
-            string code = scripts[resolvedPath];
-
-            MemoryStream stream = new MemoryStream(System.Text.Encoding.ASCII.GetBytes(code));
-
+            var code = scripts[resolvedPath];
+            var stream = new MemoryStream(System.Text.Encoding.ASCII.GetBytes(code));
             return stream;
         }
 
@@ -54,9 +49,7 @@ namespace Gistlyn.SnippetEngine
         {
             // Explicitly check that we're not comparing against a derived type
             if (obj == null || GetType() != obj.GetType())
-            {
                 return false;
-            }
 
             return Equals((GistSourceResolver)obj);
         }
@@ -72,7 +65,6 @@ namespace Gistlyn.SnippetEngine
         {
             return baseDirectory.GetHashCode() ^ scripts.GetHashCode();
         }
-
     }
 }
 

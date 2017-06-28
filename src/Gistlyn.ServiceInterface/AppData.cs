@@ -142,16 +142,16 @@ namespace Gistlyn.ServiceInterface
                         CreatePayloadFilter = (payload, session) =>
                         {
                             var githubAuth = session.ProviderOAuthAccess.Safe().FirstOrDefault(x => x.Provider == "github");
-                            payload["ats"] = githubAuth != null ? githubAuth.AccessTokenSecret : null;
+                            payload["ats"] = githubAuth?.AccessTokenSecret;
                         },
 
-                        PopulateSessionFilter = (session, obj, req) => 
+                        PopulateSessionFilter = (session, obj, req) =>
                         {
                             session.ProviderOAuthAccess = new List<IAuthTokens>
                             {
                                 new AuthTokens { Provider = "github", AccessTokenSecret = obj["ats"] }
                             };
-                        } 
+                        }
                     },
                 }));
         }

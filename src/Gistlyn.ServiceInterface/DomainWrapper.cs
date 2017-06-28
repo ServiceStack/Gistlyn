@@ -19,11 +19,11 @@ namespace Gistlyn.ServiceInterface
 
         public string ScriptId { get; set; }
 
-        public string MainScript { get { return mainScript; } }
+        public string MainScript => mainScript;
 
-        public List<string> Scripts { get { return scripts; } }
+        public List<string> Scripts => scripts;
 
-        public List<string> References { get { return references; } }
+        public List<string> References => references;
 
         public override object InitializeLifetimeService()
         {
@@ -32,10 +32,7 @@ namespace Gistlyn.ServiceInterface
 
         public void Cancel()
         {
-            if (tokenSource != null)
-            {
-                tokenSource.Cancel(true);
-            }
+            tokenSource?.Cancel(true);
         }
 
         public ScriptExecutionResult EvaluateExpression(string expr, bool includeJson)

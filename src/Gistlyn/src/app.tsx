@@ -34,6 +34,12 @@ import {
     StoreGist, GithubFile
 } from './Gistlyn.dtos';
 
+interface GistlynServerEventsConnect extends ServerEventConnect
+{
+    GistlynVersion : string;
+    ServiceStackVersion : string;
+}
+
 const ScriptStatusRunning = ["Started", "PrepareToRun", "Running"];
 var capturedSnapshot = null;
 
@@ -569,7 +575,7 @@ export class App extends React.Component<any, any> {
     }
 
     getAuthUsername() {
-        var activeSub = this.props.activeSub as ServerEventConnect;
+        var activeSub = this.props.activeSub as GistlynServerEventsConnect;
         return activeSub && parseInt(activeSub.userId) > 0 ? activeSub.displayName : null;
     }
 
@@ -587,7 +593,7 @@ export class App extends React.Component<any, any> {
 
         const MorePopup = [];
         const EditorPopup = [];
-        var activeSub = this.props.activeSub as ServerEventConnect;
+        var activeSub = this.props.activeSub as GistlynServerEventsConnect;
         var authUsername = this.getAuthUsername();
         const meta = this.props.meta as IGistMeta;
         const shouldFork = this.shouldFork();

@@ -19,8 +19,7 @@ namespace Gistlyn.ServiceInterface
 
         public void Dispose()
         {
-            if (DomainWrapper != null)
-                DomainWrapper.Cancel();
+            DomainWrapper?.Cancel();
 
             if (ScriptDomain != null)
                 AppDomain.Unload(ScriptDomain);

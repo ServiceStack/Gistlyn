@@ -1,12 +1,7 @@
-﻿using ServiceStack;
-using ServiceStack.Text;
+﻿using ServiceStack.Text;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Gistlyn.AppConsole
 {
@@ -21,7 +16,7 @@ namespace Gistlyn.AppConsole
         static void Main(string[] args)
         {
             new AppHost().Init().Start("http://*:4000/");
-            "ServiceStack SelfHost listening at {0}".Fmt(HostUrl).Print();
+            $"ServiceStack SelfHost listening at {HostUrl}".Print();
             Process.Start(HostUrl);
 
             Thread.Sleep(Timeout.Infinite);

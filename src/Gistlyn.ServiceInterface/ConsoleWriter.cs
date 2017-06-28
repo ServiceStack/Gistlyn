@@ -6,20 +6,14 @@ namespace Gistlyn.ServiceInterface
     public class ConsoleWriter : TextWriter
     {
         readonly NotifierProxy proxy;
-        StringBuilder sb = new StringBuilder();
+        readonly StringBuilder sb = new StringBuilder();
 
         public ConsoleWriter(NotifierProxy proxy)
         {
             this.proxy = proxy;
         }
 
-        public override Encoding Encoding
-        {
-            get
-            {
-                return Encoding.UTF8;
-            }
-        }
+        public override Encoding Encoding => Encoding.UTF8;
 
         public override void Write(char value)
         {
