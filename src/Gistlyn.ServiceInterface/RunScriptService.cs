@@ -41,14 +41,15 @@ namespace Gistlyn.ServiceInterface
             var existingUserScripts = GetExistingActiveUserScripts();
 
             var runnerInfo = LocalCache.GetScriptRunnerInfo(request.ScriptId);
+
             //stop script if run
-            if (runnerInfo != null && runnerInfo.ScriptDomain != null)
+            if (runnerInfo?.ScriptDomain != null)
             {
                 var scriptStatus = runnerInfo.DomainWrapper.GetScriptStatus();
 
-                if (request.ForceRun || (scriptStatus != ScriptStatus.PrepareToRun && scriptStatus != ScriptStatus.Running))
+                if (request.ForceRun || scriptStatus != ScriptStatus.PrepareToRun && scriptStatus != ScriptStatus.Running)
                 {
-                    AppDomain.Unload(runnerInfo.ScriptDomain);
+                    Cancel(runnerInfo);
                 }
                 else
                 {
@@ -107,7 +108,7 @@ namespace Gistlyn.ServiceInterface
         {
             var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
 
-            var wrapper = runner != null ? runner.DomainWrapper : null;
+            var wrapper = runner?.DomainWrapper;
 
             var variables = wrapper != null
                 ? wrapper.GetVariables(request.VariableName)
@@ -153,7 +154,7 @@ namespace Gistlyn.ServiceInterface
         private DomainWrapper GetDomainWrapper(EvaluateExpression request)
         {
             var runner = LocalCache.GetScriptRunnerInfo(request.ScriptId);
-            var wrapper = runner != null ? runner.DomainWrapper : null;
+            var wrapper = runner?.DomainWrapper;
             if (wrapper == null)
                 throw HttpError.NotFound("Script no longer exists on server");
             return wrapper;
@@ -161,8 +162,9 @@ namespace Gistlyn.ServiceInterface
 
         private bool Cancel(ScriptRunnerInfo runner)
         {
-            if (runner != null && runner.ScriptDomain != null)
+            if (runner?.ScriptDomain != null)
             {
+                runner.DomainWrapper.Cancel();
                 var domain = runner.ScriptDomain;
                 runner.ScriptDomain = null;
                 LocalCache.RemoveScriptRunnerInfo(runner.ScriptId);
