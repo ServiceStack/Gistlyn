@@ -12,7 +12,7 @@ namespace Gistlyn.AppConsole
         /// <summary>
         /// The main entry point for the application
         /// </summary>
-        [STAThread]
+        //[STAThread] Makes unloading the script AppDomain hang
         static void Main(string[] args)
         {
             new AppHost().Init().Start("http://*:4000/");
