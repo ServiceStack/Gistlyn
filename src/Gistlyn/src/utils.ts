@@ -1,7 +1,7 @@
 ﻿import * as ReactGA from 'react-ga';
 import { connect } from 'react-redux';
 import { store } from './state';
-import { JsonServiceClient } from 'servicestack-client';
+import { JsonServiceClient } from '@servicestack/client';
 import { GithubFile, EvaluateExpression } from './Gistlyn.dtos';
 
 export const Config = {

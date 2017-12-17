@@ -13,7 +13,6 @@ using Gistlyn.ServiceModel.Types;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using ServiceStack;
-using ServiceStack.Text;
 
 namespace Gistlyn.SnippetEngine
 {
@@ -174,8 +173,7 @@ namespace Gistlyn.SnippetEngine
 
                     var typePropNames = typeProps.Select(x => x.Name).ToArray();
 
-                    var curValEnumerable = var as IEnumerable;
-                    if (curValEnumerable != null)
+                    if (var is IEnumerable curValEnumerable)
                     {
                         var i = 0;
                         foreach (var val in curValEnumerable)
@@ -256,10 +254,7 @@ namespace Gistlyn.SnippetEngine
 
         public ScriptExecutionResult ExecuteAsync(string mainScript, List<string> scripts, List<string> references, INotifier notifier, CancellationToken cancellationToken = default(CancellationToken))
         {
-            string script;
-            ScriptOptions opt;
-
-            PrepareScript(mainScript, scripts, references, out script, out opt);
+            PrepareScript(mainScript, scripts, references, out var script, out var opt);
 
             return ExecuteAsync(script, opt, notifier, cancellationToken);
         }
@@ -323,7 +318,7 @@ namespace Gistlyn.SnippetEngine
                 //var scriptState = state.Result;
 
                 foreach (var variable in scriptState.Variables)
-                    result.Variables.Add(new VariableInfo { Name = variable.Name, Value = variable.Value != null ? variable.Value.ToString() : null, Type = variable.Type.ToString() });
+                    result.Variables.Add(new VariableInfo { Name = variable.Name, Value = variable.Value?.ToString(), Type = variable.Type.ToString() });
             }
             catch (CompilationErrorException e)
             {
@@ -345,10 +340,7 @@ namespace Gistlyn.SnippetEngine
 
         public Task<ScriptExecutionResult> Execute(string mainScript, List<string> scripts, List<string> references)
         {
-            string script;
-            ScriptOptions opt;
-
-            PrepareScript(mainScript, scripts, references, out script, out opt);
+            PrepareScript(mainScript, scripts, references, out var script, out var opt);
 
             return Execute(script, opt);
         }

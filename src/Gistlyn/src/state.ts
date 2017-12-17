@@ -1,6 +1,6 @@
 ﻿import { Store, createStore, applyMiddleware } from 'redux';
 import { getSortedFileNames, GistTemplates, StateKey, GistCacheKey, FileNames, IGistMeta, IGistFile, IGistSaved, addClientPackages } from './utils';
-import { queryString, appendQueryString, splitOnFirst, splitOnLast } from 'servicestack-client';
+import { queryString, appendQueryString, splitOnFirst, splitOnLast } from '@servicestack/client';
 import * as ReactGA from 'react-ga';
 import * as marked from 'marked';
 
@@ -288,7 +288,8 @@ const defaults = {
     dirty: false,
     collection: null,
     snapshot: null,
-    showCollection: false
+    showCollection: false,
+    step: null
 };
 
 const preserveDefaults = (state) => ({

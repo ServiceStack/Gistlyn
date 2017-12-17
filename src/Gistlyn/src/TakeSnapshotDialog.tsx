@@ -1,5 +1,5 @@
 ﻿import * as React from 'react';
-import { JsonServiceClient } from 'servicestack-client';
+import { JsonServiceClient } from '@servicestack/client';
 import { StoreGist } from './Gistlyn.dtos';
 import { GistTemplates } from './utils';
 

@@ -6,12 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0, maximum-scale=1, minimum-scale=1">
     <title>Gistlyn - Your C# Gist IDE in the Sky!</title>
     <meta name="description" content="Gistlyn lets you create, run and share your executable C# Github Gists. Powered by Roslyn C# Scripting, bring a Gist with a main.cs and Gistlyn will run it for you!" />
-<link href="/dist/app.css" rel="stylesheet"></head>
+	{{ ifDebug | select: <script>{ '/js/hot-fileloader.js' | includeFile }</script> }}
+<link href="/dist/vendor.dll.css" rel="stylesheet"><link href="/dist/app.css" rel="stylesheet"></head>
 <body>
     <link rel="stylesheet" href="/platform.css" />
 
     <div id="app"></div>
 
     <script src="/platform.js"></script>
-<script type="text/javascript" src="/dist/vendor.bundle.js"></script><script type="text/javascript" src="/dist/app.bundle.js"></script></body>
+<script type="text/javascript" src="/dist/vendor.dll.js"></script><script type="text/javascript" src="/dist/app.bundle.js"></script></body>
 </html>

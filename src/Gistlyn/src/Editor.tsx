@@ -1,5 +1,5 @@
 ﻿import * as React from 'react';
-import { queryString, splitOnLast } from 'servicestack-client';
+import { queryString, splitOnLast } from '@servicestack/client';
 import { UA, getSortedFileNames, IGistFile, FileNames } from './utils';
 
 import * as CodeMirror from 'react-codemirror';
@@ -191,6 +191,13 @@ export default class Editor extends React.Component<any, any> {
                     </div>
                 ));
             }
+        }
+
+        if (this.codeMirror) {
+            var cursor = this.getDoc().getCursor();
+            //https://github.com/JedWatson/react-codemirror/issues/121#issuecomment-316307312
+            this.codeMirror.setValue(source); 
+            this.getDoc().setCursor({ line: cursor.line, ch: cursor.ch });
         }
 
         return (

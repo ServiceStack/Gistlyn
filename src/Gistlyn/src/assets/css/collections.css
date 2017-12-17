@@ -2,11 +2,11 @@
     position: absolute;
     top: 0;
     margin: 0px 0 0 45px;
-    padding: 5px 5px 0 5px;
-    color: #6ab5e8;
+    padding: 6px 0 0 2px;
     font-size: 30px;
-    height: 37px;
+    height: 42px;
     cursor: pointer;
+    width: 40px;
 }
 #btnCollections:hover {
     color: #cef;

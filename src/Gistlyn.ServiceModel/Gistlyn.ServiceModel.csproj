@@ -1,16 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A949B1C2-9897-4215-A48C-D6B408E49F6B}</ProjectGuid>
+    <ProjectGuid>{B0A7EABE-8C51-4EFF-A116-2B56EF8BA11E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Gistlyn.ServiceModel</RootNamespace>
     <AssemblyName>Gistlyn.ServiceModel</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -31,41 +33,38 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ServiceStack.Interfaces, Version=4.0.0.0, Culture=neutral, PublicKeyToken=e06fbc6124f57c43, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.Interfaces.4.5.13\lib\portable-wp80+sl5+net45+win8+wpa81+monotouch+monoandroid+xamarin.ios10\ServiceStack.Interfaces.dll</HintPath>
+    <Reference Include="ServiceStack.Interfaces, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587, processorArchitecture=MSIL">
+      <HintPath>..\packages\ServiceStack.Interfaces.5.0.1\lib\net45\ServiceStack.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Gistlyn.AppWinForms\Properties\AssemblyInfo.cs">
-      <Link>Properties\AssemblyInfo.cs</Link>
-    </Compile>
+    <Compile Include="AddPackageAsReference.cs" />
+    <Compile Include="CancelScript.cs" />
+    <Compile Include="EvaluateExpression.cs" />
+    <Compile Include="EvaluateSource.cs" />
+    <Compile Include="GetEmbedScript.cs" />
+    <Compile Include="GetScriptStatus.cs" />
+    <Compile Include="GetScriptVariables.cs" />
+    <Compile Include="InstallNugetPackage.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RunEmbedScript.cs" />
+    <Compile Include="RunScript.cs" />
+    <Compile Include="SearchInstalledPackages.cs" />
+    <Compile Include="SearchNugetPackages.cs" />
     <Compile Include="StoreGist.cs" />
     <Compile Include="TestServerEvents.cs" />
-    <Compile Include="EvaluateSource.cs" />
-    <Compile Include="RunScript.cs" />
-    <Compile Include="SearchNugetPackages.cs" />
-    <Compile Include="InstallNugetPackage.cs" />
-    <Compile Include="AddPackageAsReference.cs" />
-    <Compile Include="SearchInstalledPackages.cs" />
-    <Compile Include="GetScriptVariables.cs" />
-    <Compile Include="CancelScript.cs" />
-    <Compile Include="GetScriptStatus.cs" />
-    <Compile Include="EvaluateExpression.cs" />
-    <Compile Include="GetEmbedScript.cs" />
-    <Compile Include="RunEmbedScript.cs" />
     <Compile Include="Types\AssemblyReference.cs" />
     <Compile Include="Types\ConsoleMessage.cs" />
-    <Compile Include="Types\ErrorInfo.cs" />
     <Compile Include="Types\EmbedScriptExecutionResult.cs" />
+    <Compile Include="Types\ErrorInfo.cs" />
     <Compile Include="Types\MemoizedResult.cs" />
     <Compile Include="Types\NugetPackageInfo.cs" />
     <Compile Include="Types\PackageCollection.cs" />
@@ -79,6 +78,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

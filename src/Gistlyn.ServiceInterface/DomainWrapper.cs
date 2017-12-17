@@ -47,8 +47,7 @@ namespace Gistlyn.ServiceInterface
 
         public object GetVariableValue(string varName)
         {
-            Type type;
-            return runner.GetVariableValue(varName, out type);
+            return runner.GetVariableValue(varName, out _);
         }
 
         public ScriptStateVariables GetVariables(string parentVariable)

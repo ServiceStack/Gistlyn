@@ -1,1 +1,0 @@
-.\bin\Gistlyn.AppConsole.exe

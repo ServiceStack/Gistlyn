@@ -166,7 +166,8 @@
     color: #2a6496;
 }
 
-#dialog.console-viewer.dark .dialog-body td {
+#dialog.console-viewer.dark .dialog-body td,
+#dialog.console-viewer.dark .dialog-body pre {
     font: 13px/18px monospace;
     color: #00FF00;
 }

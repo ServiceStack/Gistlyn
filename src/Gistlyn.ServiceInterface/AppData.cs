@@ -73,8 +73,7 @@ namespace Gistlyn.ServiceInterface
 
         public MemoizedResult GetMemoizedResult(string codeHash)
         {
-            MemoizedResult value;
-            memoizedResults.TryGetValue(codeHash, out value);
+            memoizedResults.TryGetValue(codeHash, out var value);
             return value;
         }
 
@@ -82,10 +81,7 @@ namespace Gistlyn.ServiceInterface
         {
             foreach (var source in sources)
             {
-                if (source == null)
-                    continue;
-
-                if (source.IndexOfAny(IllegalTokens) > 0)
+                if (source?.IndexOfAny(IllegalTokens) > 0)
                     throw new ArgumentException("Illegal token detected");
             }
         }
@@ -112,7 +108,9 @@ namespace Gistlyn.ServiceInterface
             JsConfig.MaxDepth = 10;
             JsConfig.EmitCamelCaseNames = true;
             appHost.Config.AddRedirectParamsToQueryString = true;
-            appHost.Config.DebugMode = true;
+            appHost.Config.DebugMode = false;
+
+            appHost.Plugins.Add(new TemplatePagesFeature());
 
             appHost.Plugins.Add(new ServerEventsFeature
             {
@@ -154,6 +152,13 @@ namespace Gistlyn.ServiceInterface
                         }
                     },
                 }));
+
+            //AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+            //{
+            //    Console.WriteLine(args);
+
+            //    return null;
+            //};
         }
     }
 }

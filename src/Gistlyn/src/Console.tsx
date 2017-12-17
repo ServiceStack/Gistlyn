@@ -11,7 +11,7 @@ export default class Console extends React.Component<any, any> {
     render() {
         return (
             <div id="console" className="section" ref={(el) => this.consoleScroll = el}>
-                <b className="noselect" style={{ background: "#444", color: "#fff", padding: "1px 0px 1px 8px", position: "absolute", right: "3px", margin: "-22px 0" }}>
+                <b className="noselect" style={{ background: "#444", color: "#fff", padding: "1px 10px 1px 8px", position: "absolute", right: "3px", margin: "-22px 0" }}>
                     console
                     <i className="material-icons noselect" style={{ fontSize: 16, padding: "0 4px 0 4px", verticalAlign: "sub", cursor: "pointer" }}
                         onClick={e => this.props.showDialog("console-viewer")}>open_in_new</i>

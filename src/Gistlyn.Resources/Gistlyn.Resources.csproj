@@ -4,14 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A8DD08DD-1553-4284-8F21-D3E2975F0B40}</ProjectGuid>
+    <ProjectGuid>{17453614-A944-4797-B9BD-2A528EEB47D8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Gistlyn.Resources</RootNamespace>
     <AssemblyName>Gistlyn.Resources</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <NuGetPackageImportStamp>6ec54f66</NuGetPackageImportStamp>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -32,20 +31,23 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ServiceStack, Version=4.5.13.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.4.5.13\lib\net45\ServiceStack.dll</HintPath>
+    <Reference Include="ServiceStack, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587, processorArchitecture=MSIL">
+      <HintPath>..\packages\ServiceStack.5.0.1\lib\net45\ServiceStack.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.Client, Version=4.5.13.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.Client.4.5.13\lib\net45\ServiceStack.Client.dll</HintPath>
+    <Reference Include="ServiceStack.Client, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587, processorArchitecture=MSIL">
+      <HintPath>..\packages\ServiceStack.Client.5.0.1\lib\net45\ServiceStack.Client.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.Common, Version=4.5.13.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.Common.4.5.13\lib\net45\ServiceStack.Common.dll</HintPath>
+    <Reference Include="ServiceStack.Common, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587, processorArchitecture=MSIL">
+      <HintPath>..\packages\ServiceStack.Common.5.0.1\lib\net45\ServiceStack.Common.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.Interfaces, Version=4.0.0.0, Culture=neutral, PublicKeyToken=e06fbc6124f57c43, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.Interfaces.4.5.13\lib\portable-wp80+sl5+net45+win8+wpa81+monotouch+monoandroid+xamarin.ios10\ServiceStack.Interfaces.dll</HintPath>
+    <Reference Include="ServiceStack.Interfaces, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587, processorArchitecture=MSIL">
+      <HintPath>..\packages\ServiceStack.Interfaces.5.0.1\lib\net45\ServiceStack.Interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.Text, Version=4.5.13.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.Text.4.5.13\lib\net45\ServiceStack.Text.dll</HintPath>
+    <Reference Include="ServiceStack.OrmLite, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587, processorArchitecture=MSIL">
+      <HintPath>..\packages\ServiceStack.OrmLite.5.0.1\lib\net45\ServiceStack.OrmLite.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceStack.Text, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587, processorArchitecture=MSIL">
+      <HintPath>..\packages\ServiceStack.Text.5.0.1\lib\net45\ServiceStack.Text.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -55,16 +57,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Gistlyn.AppWinForms\Properties\AssemblyInfo.cs">
-      <Link>Properties\AssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="SharedEmbeddedResources.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="index.html" />
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+    <EmbeddedResource Include="dist\674f50d287a8c48dc19ba404d20fe713.eot" />
     <EmbeddedResource Include="dist\app.bundle.js.map" />
     <EmbeddedResource Include="dist\app.css.map" />
+    <EmbeddedResource Include="dist\b06871f281fee6b241d60582ae9369b9.ttf" />
     <EmbeddedResource Include="dist\img\MaterialIcons-Regular.eot" />
     <EmbeddedResource Include="dist\img\MaterialIcons-Regular.ttf" />
     <EmbeddedResource Include="dist\img\MaterialIcons-Regular.woff" />
@@ -73,20 +76,26 @@
     <EmbeddedResource Include="dist\img\octicons.woff" />
     <EmbeddedResource Include="dist\img\roboto-v15-latin-regular.woff" />
     <EmbeddedResource Include="dist\img\roboto-v15-latin-regular.woff2" />
-    <EmbeddedResource Include="dist\vendor.bundle.js.map" />
+    <EmbeddedResource Include="dist\vendor-manifest.json" />
+    <EmbeddedResource Include="dist\vendor.dll.css.map" />
+    <EmbeddedResource Include="dist\vendor.dll.js.map" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="favicon.ico" />
+    <EmbeddedResource Include="index.html" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="dist\912ec66d7572ff821749319396470bde.svg" />
     <EmbeddedResource Include="dist\app.bundle.js" />
     <EmbeddedResource Include="dist\app.css" />
     <EmbeddedResource Include="dist\img\ajax-loader.gif" />
     <EmbeddedResource Include="dist\img\compiling.png" />
     <EmbeddedResource Include="dist\img\editor-bg.png" />
     <EmbeddedResource Include="dist\img\logo-32-inverted.png" />
-    <EmbeddedResource Include="dist\vendor.bundle.js" />
+    <EmbeddedResource Include="dist\vendor.dll.css" />
+    <EmbeddedResource Include="dist\vendor.dll.js" />
+    <Content Include="favicon.ico" />
+    <Content Include="offline.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

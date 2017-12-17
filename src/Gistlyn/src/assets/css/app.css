@@ -36,11 +36,11 @@ html,body,#app,#body {
 .titlebar {
     background: #0371BE;
     color: #fff;
-    height: 32px;
-    padding: 5px;
+    padding: 5px 0;
 }
 .titlebar .container {
     display: flex;
+    max-width: unset;
 }
 .titlebar img {
     height: 26px;
@@ -57,7 +57,7 @@ html,body,#app,#body {
     padding: 0 0 0 0;
 }
 #txtUrl {
-    width: 320px;
+    width: 328px;
     padding: 4px 8px;
     border: none;
     font-size: 14px;

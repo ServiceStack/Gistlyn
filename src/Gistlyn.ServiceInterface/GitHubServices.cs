@@ -83,7 +83,7 @@ namespace Gistlyn.ServiceInterface
 
             var apiUrl = GithubApiBaseUrl.CombineWith(request.PathInfo);
 
-            var hasRequestBody = base.Request.Verb.HasRequestBody();
+            var hasRequestBody = HttpUtils.HasRequestBody(base.Request.Verb);
             try
             {
                 var bytes = apiUrl.SendBytesToUrl(

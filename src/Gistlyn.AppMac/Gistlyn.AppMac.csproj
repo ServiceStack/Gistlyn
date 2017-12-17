@@ -4,12 +4,12 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectTypeGuids>{A3F8F2AB-B479-4A4A-A458-A89E7DC349F1};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <ProjectGuid>{eedf6126-ba8a-47e9-9f86-107e927c5c8f}</ProjectGuid>
+    <ProjectGuid>{6ecae23f-bb02-4eba-9fd5-b90c88792f79}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Gistlyn.AppMac</RootNamespace>
     <MonoMacResourcePrefix>Resources</MonoMacResourcePrefix>
     <AssemblyName>Gistlyn.AppMac</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -53,31 +53,32 @@
     <Reference Include="Gistlyn.Resources">
       <HintPath>..\..\lib\Gistlyn.Resources.dll</HintPath>
     </Reference>
-	<Reference Include="Xamarin.Mac" />
-	<Reference Include="ServiceStack.Interfaces">
-	  <HintPath>..\packages\ServiceStack.Interfaces.4.0.62\lib\portable-wp80+sl5+net40+win8+wpa81+monotouch+monoandroid+xamarin.ios10\ServiceStack.Interfaces.dll</HintPath>
-	</Reference>
-	<Reference Include="ServiceStack.Text">
-	  <HintPath>..\packages\ServiceStack.Text.4.0.62\lib\net40\ServiceStack.Text.dll</HintPath>
-	</Reference>
-	<Reference Include="ServiceStack.Client">
-	  <HintPath>..\packages\ServiceStack.Client.4.0.62\lib\net40\ServiceStack.Client.dll</HintPath>
-	</Reference>
-	<Reference Include="ServiceStack.Common">
-	  <HintPath>..\packages\ServiceStack.Common.4.0.62\lib\net40\ServiceStack.Common.dll</HintPath>
-	</Reference>
-	<Reference Include="ServiceStack">
-	  <HintPath>..\packages\ServiceStack.4.0.62\lib\net40\ServiceStack.dll</HintPath>
-	</Reference>
-	<Reference Include="ServiceStack.OrmLite">
-	  <HintPath>..\packages\ServiceStack.OrmLite.4.0.62\lib\net45\ServiceStack.OrmLite.dll</HintPath>
-	</Reference>
-	<Reference Include="ServiceStack.Redis">
-	  <HintPath>..\packages\ServiceStack.Redis.4.0.62\lib\net40\ServiceStack.Redis.dll</HintPath>
-	</Reference>
-	<Reference Include="ServiceStack.Server">
-	  <HintPath>..\packages\ServiceStack.Server.4.0.62\lib\net45\ServiceStack.Server.dll</HintPath>
-	</Reference>
+    <Reference Include="ServiceStack.Interfaces">
+      <HintPath>..\..\packages\ServiceStack.Interfaces.4.5.14\lib\portable-wp80+sl5+net45+win8+wpa81+monotouch+monoandroid+xamarin.ios10\ServiceStack.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceStack.Text">
+      <HintPath>..\..\packages\ServiceStack.Text.4.5.14\lib\net45\ServiceStack.Text.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceStack.Common">
+      <HintPath>..\..\packages\ServiceStack.Common.4.5.14\lib\net45\ServiceStack.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceStack.Client">
+      <HintPath>..\..\packages\ServiceStack.Client.4.5.14\lib\net45\ServiceStack.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceStack">
+      <HintPath>..\..\packages\ServiceStack.4.5.14\lib\net45\ServiceStack.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceStack.OrmLite">
+      <HintPath>..\..\packages\ServiceStack.OrmLite.4.5.14\lib\net45\ServiceStack.OrmLite.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceStack.Redis">
+      <HintPath>..\..\packages\ServiceStack.Redis.4.5.14\lib\net45\ServiceStack.Redis.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceStack.Server">
+      <HintPath>..\..\packages\ServiceStack.Server.4.5.14\lib\net45\ServiceStack.Server.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Mac" />
+    <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppHost.cs" />
@@ -94,8 +95,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
-	<None Include="platform.js" />
-	<None Include="packages.config" />
+    <None Include="packages.config" />
+    <None Include="platform.js" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="MainMenu.xib" />
@@ -103,11 +104,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Gistlyn.ServiceInterface\Gistlyn.ServiceInterface.csproj">
-      <Project>{B7EC572F-2F1C-47ED-B5FD-F34DA73F28E2}</Project>
+      <Project>{582DFB0F-F84D-4E43-9BCA-2A5A86600B7A}</Project>
       <Name>Gistlyn.ServiceInterface</Name>
     </ProjectReference>
     <ProjectReference Include="..\Gistlyn.ServiceModel\Gistlyn.ServiceModel.csproj">
-      <Project>{A949B1C2-9897-4215-A48C-D6B408E49F6B}</Project>
+      <Project>{08BEF328-AB7D-48D3-800D-48ACC75C7914}</Project>
       <Name>Gistlyn.ServiceModel</Name>
     </ProjectReference>
   </ItemGroup>

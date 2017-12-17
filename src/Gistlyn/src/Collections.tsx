@@ -1,5 +1,5 @@
 ﻿import * as React from 'react';
-import { queryString } from 'servicestack-client';
+import { queryString } from '@servicestack/client';
 
 export default class Collections extends React.Component<any, any> {
     render() {
@@ -28,21 +28,21 @@ export default class Collections extends React.Component<any, any> {
                             {recentCollections.length > 0
                                 ? (<div>
                                     <h3>Recent Collections</h3>
-                                    { recentCollections.slice(0, 5).map(x => <a href={`?collection=${x.id}`} title={x.description}>{x.description}</a>) }
+                                    { recentCollections.slice(0, 5).map(x => <a key={x.id} href={`?collection=${x.id}`} title={x.description}>{x.description}</a>) }
                                 </div>)
                                 : null}
 
                             {recentGists.length > 0
                                 ? (<div>
                                     <h3>Recent Gists</h3>
-                                    { recentGists.slice(0, 5).map(x => <a href={`?gist=${x.id}`} title={x.description}>{x.description}</a>) }
+                                    { recentGists.slice(0, 5).map(x => <a key={x.id} href={`?gist=${x.id}`} title={x.description}>{x.description}</a>) }
                                 </div>)
                                 : null}
 
                             {myGists.length > 0
                                 ? (<div>
                                     <h3>My Gists</h3>
-                                    { myGists.slice(0, 20).map(x => <a href={`?gist=${x.id}`} title={x.description}>{x.description}</a>) }
+                                    { myGists.slice(0, 20).map(x => <a key={x.id} href={`?gist=${x.id}`} title={x.description}>{x.description}</a>) }
                                 </div>)
                                 : null}
                         </div>

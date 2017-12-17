@@ -8,6 +8,7 @@ using ServiceStack;
 using Gistlyn.ServiceModel;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Security.Policy;
 using System.Text;
@@ -61,22 +62,27 @@ namespace Gistlyn.ServiceInterface
                 }
             }
 
-            List<AssemblyReference> normalizedReferences;
-            var addedReferences = AddReferencesFromPackages(request.References, request.PackagesConfig, out normalizedReferences);
+            var addedReferences = AddReferencesFromPackages(request.References, request.PackagesConfig, out var normalizedReferences);
 
             var evidence = new Evidence(AppDomain.CurrentDomain.Evidence);
+            var binPath = VirtualFiles.RootDirectory.RealPath.Contains("\\bin\\")
+                ? VirtualFiles.RootDirectory.RealPath                              //Winforms
+                : Path.Combine(VirtualFiles.RootDirectory.RealPath, "bin");        //ASP.NET
+
             var setup = new AppDomainSetup
             {
-                PrivateBinPath = Path.Combine(VirtualFiles.RootDirectory.RealPath, "bin"),
+                PrivateBinPath = binPath,
                 ApplicationBase = VirtualFiles.RootDirectory.RealPath
             };
 
             var domain = AppDomain.CreateDomain(Guid.NewGuid().ToString(), evidence, setup);
+            domain.AssemblyResolve += new AssemblyResolverSerializable { ResolvePath = binPath }.Resolve;
 
             var asm = typeof(DomainWrapper).Assembly.FullName;
             var type = typeof(DomainWrapper).FullName;
 
             var wrapper = (DomainWrapper)domain.CreateInstanceAndUnwrap(asm, type);
+            //var wrapper = (DomainWrapper)domain.CreateInstanceFromAndUnwrap(asm, type);
             wrapper.ScriptId = request.ScriptId;
             var writerProxy = new NotifierProxy(ServerEvents, request.ScriptId);
 
@@ -102,6 +108,28 @@ namespace Gistlyn.ServiceInterface
                 References = normalizedReferences,
                 ScriptsRemoved = scriptsRemoved,
             };
+        }
+
+
+        // System.Collections.Immutable dll hell, everything references NuGet 1.4.0 (.NET 1.2.2) but Roslyn still wantsfor NuGet 1.3.1 (.NET 1.2.1) at runtime
+        // Assembly redirect bindings don't work.
+        [Serializable]
+        public class AssemblyResolverSerializable
+        {
+            public string ResolvePath { get; set; }
+
+            public Assembly Resolve(object sender, ResolveEventArgs args)
+            {
+                var dllName = args.Name.LeftPart(',');
+                var dllPath = Path.Combine(ResolvePath, dllName + ".dll");
+                if (File.Exists(dllPath))
+                {
+                    var dll = Assembly.LoadFile(dllPath);
+                    return dll;
+                }
+
+                return null;
+            }
         }
 
         public object Any(GetScriptVariables request)
@@ -293,8 +321,7 @@ namespace Gistlyn.ServiceInterface
                 var response = gistUrl.GetJsonFromUrl(req => req.UserAgent = "Gistlyn")
                     .FromJson<GithubGist>();
 
-                GithubGistFileRef linksFile;
-                if (!response.Files.TryGetValue("links.md", out linksFile))
+                if (!response.Files.TryGetValue("links.md", out var linksFile))
                     throw new Exception("links.md is missing");
 
                 var md = linksFile.Content ?? "";
@@ -324,9 +351,13 @@ namespace Gistlyn.ServiceInterface
                 }
             }
 
-            string url = null;
-            if (string.IsNullOrEmpty(request.Name) || !slugsMap.TryGetValue(request.Name, out url))
-                throw HttpError.NotFound(request.Name + " does not exist");
+            if (string.IsNullOrEmpty(request.Name) || !slugsMap.TryGetValue(request.Name, out var url))
+            {
+                Response.StatusCode = (int) HttpStatusCode.NotFound;
+                Response.StatusDescription = request.Name + " does not exist";
+                Response.EndRequest();
+                return null;
+            }
 
             var absoluteUrl = base.Request.ResolveAbsoluteUrl("~/" + url);
             return HttpResult.Redirect(absoluteUrl);
@@ -337,7 +368,7 @@ namespace Gistlyn.ServiceInterface
             if (string.IsNullOrEmpty(request.Url))
                 throw new ArgumentNullException("Url");
 
-            var hasRequestBody = base.Request.Verb.HasRequestBody();
+            var hasRequestBody = HttpUtils.HasRequestBody(base.Request.Verb);
             try
             {
                 var bytes = request.Url.SendBytesToUrl(
@@ -361,7 +392,7 @@ namespace Gistlyn.ServiceInterface
         }
     }
 
-    [FallbackRoute("/{Name}")]
+    [FallbackRoute("/{Name}", Matches = "AcceptsHtml")]
     public class FriendlyLinks
     {
         public string Name { get; set; }
