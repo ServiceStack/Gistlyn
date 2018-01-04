@@ -42,44 +42,42 @@ export default class InsertLinkDialog extends React.Component<any, any> {
         this.props.onChange(url, this.txtLinkLabel.value);
     }
 
-    handleCreateNewGist(id:string, authUsername:string) : Promise<string> {
+    async handleCreateNewGist(id:string, authUsername:string) : Promise<string> {
         this.dialog.classList.add("disabled");
 
-        const handleGistTemplate = (gist:IGistSaved) => {
+        const handleGistTemplate = async (gist:IGistSaved) => {
             const request = new StoreGist();
             request.public = true;
             request.description = this.props.linkLabel || gist.meta.description;
             request.files = toGithubFiles(gist.files);
 
-            return client.post(request)
-                .then(r => {
-                    this.dialog.classList.remove("disabled");
-                    return r.gist;
-                });
+            var response = await client.post(request);
+            this.dialog.classList.remove("disabled");
+            return response.gist;
         };
         const gist = getSavedGist(id);
         if (!gist) {
-            return fetch(createGistRequest(authUsername, id))
-                .then(res => res.json())
-                .then((r:any) => handleGistTemplate({ files: r.files, meta: createGistMeta(r) }));
+            var res = await fetch(createGistRequest(authUsername, id));
+            var r = await res.json();
+            return handleGistTemplate({ files: r.files, meta: createGistMeta(r) });
         } else {
             return handleGistTemplate(gist);
         }
     }
 
-    handleGist(gistRef:IGistRef, createNew:boolean) {
+    async handleGist(gistRef:IGistRef, createNew:boolean) {
         if (createNew) {
-            this.handleCreateNewGist(gistRef.id, this.props.authUsername)
-                .then(id => this.props.onChange("?gist=" + id, this.props.linkLabel || gistRef.description));
+            var id = await this.handleCreateNewGist(gistRef.id, this.props.authUsername);
+            this.props.onChange("?gist=" + id, this.props.linkLabel || gistRef.description);
         } else {
             this.props.onChange("?gist=" + gistRef.id, this.props.linkLabel || gistRef.description);
         }
     }
 
-    handleCollection(gistRef:IGistRef, createNew:boolean) {
+    async handleCollection(gistRef:IGistRef, createNew:boolean) {
         if (createNew) {
-            this.handleCreateNewGist(gistRef.id, this.props.authUsername)
-                .then(id => this.props.onChange("?collection=" + id, this.props.linkLabel || gistRef.description));
+            var id = await this.handleCreateNewGist(gistRef.id, this.props.authUsername);
+            this.props.onChange("?collection=" + id, this.props.linkLabel || gistRef.description);
         } else {
             const url = "?collection=" + gistRef.id;
             this.props.onChange(url, this.props.linkLabel || gistRef.description);
