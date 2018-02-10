@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using Gistlyn.ServiceModel.Types;
 using ServiceStack;
@@ -105,6 +106,10 @@ namespace Gistlyn.ServiceInterface
 
         public static void Configure(ServiceStackHost appHost, string defaultPackagesPath)
         {
+            //https://githubengineering.com/crypto-removal-notice/
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
             JsConfig.MaxDepth = 10;
             JsConfig.EmitCamelCaseNames = true;
             appHost.Config.AddRedirectParamsToQueryString = true;
