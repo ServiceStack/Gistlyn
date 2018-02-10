@@ -2,7 +2,8 @@
 import { queryString, splitOnLast } from '@servicestack/client';
 import { UA, getSortedFileNames, IGistFile, FileNames } from './utils';
 
-import * as CodeMirror from 'react-codemirror';
+const CodeMirror = require("./Codemirror");
+
 import "codemirror/addon/edit/matchbrackets.js";
 import "codemirror/addon/comment/continuecomment.js";
 import "codemirror/addon/display/fullscreen.js";
@@ -13,7 +14,7 @@ import "codemirror/mode/gfm/gfm.js";
 import "codemirror/mode/javascript/javascript.js";
 import "codemirror/mode/css/css.js";
 import "codemirror/mode/htmlmixed/htmlmixed.js";
-import "./codemirror.js";
+import "./codemirror.ext.js";
 
 const extMimeTypes = {
     "cs": "text/x-csharp",
@@ -191,13 +192,6 @@ export default class Editor extends React.Component<any, any> {
                     </div>
                 ));
             }
-        }
-
-        if (this.codeMirror) {
-            var cursor = this.getDoc().getCursor();
-            //https://github.com/JedWatson/react-codemirror/issues/121#issuecomment-316307312
-            this.codeMirror.setValue(source); 
-            this.getDoc().setCursor({ line: cursor.line, ch: cursor.ch });
         }
 
         return (

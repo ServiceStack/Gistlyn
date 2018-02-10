@@ -191,6 +191,7 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Content Include="npm-shrinkwrap.json" />
+    <Content Include="src\Codemirror.js" />
     <Content Include="wwwroot\offline.html" />
     <Content Include="wwwroot\testclient.html" />
     <None Include="packages.config">
@@ -223,7 +224,7 @@
     <Content Include="src\assets\img\compiling.png" />
     <Content Include="src\assets\img\editor-bg.png" />
     <Content Include="src\assets\img\logo-32-inverted.png" />
-    <Content Include="src\codemirror.js" />
+    <Content Include="src\codemirror.ext.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
