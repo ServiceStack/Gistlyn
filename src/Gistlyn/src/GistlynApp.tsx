@@ -689,7 +689,7 @@ export class GistlynApp extends React.Component<any, any> {
                             </tr>
                         </tbody>
                     </table>
-                    <div id="evaluate" style={{ overflow: "auto", flex: 1 }}>
+                    <div id="evaluate" style={{ flex: 1 }}>
                         {exprVar
                             ? (
                                 <div id="expression-result">

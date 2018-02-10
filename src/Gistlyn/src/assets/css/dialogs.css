@@ -233,3 +233,7 @@
 #nosse-dialog a:hover {
     color: #2a6496;
 }
+.material-icons.close {
+    color: #fff;
+    text-shadow: none;
+}

@@ -1,5 +1,5 @@
 ﻿import * as React from 'react';
-import * as DropZone from 'react-dropzone';
+import DropZone from 'react-dropzone';
 
 export default class ImageUploadDialog extends React.Component<any, any> {
     dialog: HTMLDivElement;

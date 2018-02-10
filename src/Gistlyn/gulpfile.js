@@ -8,7 +8,7 @@
         'tests-run': 'npm run test',
         'tests-watch': 'npm run test-watch',
         'tests-coverage': 'npm run test-coverage',
-        'dtos-update': 'npm run dtos-update'
+        'dtos': 'npm run dtos'
     };
 
     var fs = require('fs');
