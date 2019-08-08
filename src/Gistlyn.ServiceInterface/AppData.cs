@@ -111,11 +111,12 @@ namespace Gistlyn.ServiceInterface
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
             JsConfig.MaxDepth = 10;
-            JsConfig.EmitCamelCaseNames = true;
+
+            appHost.Config.UseCamelCase = true;
             appHost.Config.AddRedirectParamsToQueryString = true;
             appHost.Config.DebugMode = false;
 
-            appHost.Plugins.Add(new TemplatePagesFeature());
+            appHost.Plugins.Add(new SharpPagesFeature());
 
             appHost.Plugins.Add(new ServerEventsFeature
             {
