@@ -89,32 +89,41 @@
       <HintPath>..\packages\Microsoft.CodeAnalysis.Scripting.Common.3.2.0\lib\netstandard2.0\Microsoft.CodeAnalysis.Scripting.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="ServiceStack, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.5.9.2\lib\net45\ServiceStack.dll</HintPath>
+    <Reference Include="ServiceStack, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587">
+      <HintPath>..\packages\ServiceStack.5.10.0\lib\net45\ServiceStack.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="ServiceStack.Client, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.Client.5.9.2\lib\net45\ServiceStack.Client.dll</HintPath>
+    <Reference Include="ServiceStack.Client, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587">
+      <HintPath>..\packages\ServiceStack.Client.5.10.0\lib\net45\ServiceStack.Client.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="ServiceStack.Common, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.Common.5.9.2\lib\net45\ServiceStack.Common.dll</HintPath>
+    <Reference Include="ServiceStack.Common, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587">
+      <HintPath>..\packages\ServiceStack.Common.5.10.0\lib\net45\ServiceStack.Common.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="ServiceStack.Interfaces, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.Interfaces.5.9.2\lib\net45\ServiceStack.Interfaces.dll</HintPath>
+    <Reference Include="ServiceStack.Interfaces, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587">
+      <HintPath>..\packages\ServiceStack.Interfaces.5.10.0\lib\net45\ServiceStack.Interfaces.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="ServiceStack.OrmLite, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.OrmLite.5.9.2\lib\net45\ServiceStack.OrmLite.dll</HintPath>
+    <Reference Include="ServiceStack.OrmLite, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587">
+      <HintPath>..\packages\ServiceStack.OrmLite.5.10.0\lib\net45\ServiceStack.OrmLite.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="ServiceStack.OrmLite.Sqlite.Windows, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.OrmLite.Sqlite.Windows.5.9.2\lib\net45\ServiceStack.OrmLite.Sqlite.Windows.dll</HintPath>
+    <Reference Include="ServiceStack.OrmLite.Sqlite.Windows, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587">
+      <HintPath>..\packages\ServiceStack.OrmLite.Sqlite.Windows.5.10.0\lib\net45\ServiceStack.OrmLite.Sqlite.Windows.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="ServiceStack.Redis, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.Redis.5.9.2\lib\net45\ServiceStack.Redis.dll</HintPath>
+    <Reference Include="ServiceStack.Redis, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587">
+      <HintPath>..\packages\ServiceStack.Redis.5.10.0\lib\net45\ServiceStack.Redis.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="ServiceStack.Server, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.Server.5.9.2\lib\net45\ServiceStack.Server.dll</HintPath>
+    <Reference Include="ServiceStack.Server, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587">
+      <HintPath>..\packages\ServiceStack.Server.5.10.0\lib\net45\ServiceStack.Server.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="ServiceStack.Text, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.Text.5.9.2\lib\net45\ServiceStack.Text.dll</HintPath>
+    <Reference Include="ServiceStack.Text, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587">
+      <HintPath>..\packages\ServiceStack.Text.5.10.0\lib\net45\ServiceStack.Text.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.AppContext, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -136,8 +145,9 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Data" />
-    <Reference Include="System.Data.SQLite, Version=1.0.113.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Data.SQLite.Core.1.0.113.1\lib\net46\System.Data.SQLite.dll</HintPath>
+    <Reference Include="System.Data.SQLite, Version=1.0.113.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139">
+      <HintPath>..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.113.3\lib\net46\System.Data.SQLite.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Diagnostics.FileVersionInfo, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Diagnostics.FileVersionInfo.4.3.0\lib\net46\System.Diagnostics.FileVersionInfo.dll</HintPath>
@@ -246,9 +256,9 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\ILRepack.2.0.16\build\ILRepack.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILRepack.2.0.16\build\ILRepack.props'))" />
     <Error Condition="!Exists('..\packages\Microsoft.CodeAnalysis.Analyzers.2.9.4\build\Microsoft.CodeAnalysis.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeAnalysis.Analyzers.2.9.4\build\Microsoft.CodeAnalysis.Analyzers.props'))" />
-    <Error Condition="!Exists('..\packages\System.Data.SQLite.Core.1.0.113.1\build\net46\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Data.SQLite.Core.1.0.113.1\build\net46\System.Data.SQLite.Core.targets'))" />
+    <Error Condition="!Exists('..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.113.3\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.113.3\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets'))" />
   </Target>
-  <Import Project="..\packages\System.Data.SQLite.Core.1.0.113.1\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.113.1\build\net46\System.Data.SQLite.Core.targets')" />
+  <Import Project="..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.113.3\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.113.3\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
