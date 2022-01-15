@@ -44,7 +44,7 @@
     "codemirror": "^5.34.0",
     "es6-shim": "^0.35.3",
     "font-awesome": "^4.7.0",
-    "marked": "^0.3.12",
+    "marked": "^4.0.10",
     "octicons": "^7.1.0",
     "react": "^16.0.0",
     "react-codemirror": "^1.0.0",
